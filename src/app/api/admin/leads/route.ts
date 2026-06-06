@@ -1,0 +1,63 @@
+import { NextResponse } from 'next/server'
+import { createAdminSupabase } from '@/lib/supabase-server'
+
+export async function GET() {
+  try {
+    const supabase = await createAdminSupabase()
+    const { data, error } = await supabase
+      .from('leads')
+      .select('*')
+      .order('posted_date', { ascending: false })
+      .limit(50)
+
+    if (error) throw error
+    return NextResponse.json(data || [])
+  } catch (error) {
+    console.error('Admin leads fetch error:', error)
+    return NextResponse.json({ error: 'Failed to fetch leads' }, { status: 500 })
+  }
+}
+
+export async function POST(req: Request) {
+  try {
+    const body = await req.json()
+
+    const supabase = await createAdminSupabase()
+    const { data, error } = await supabase
+      .from('leads')
+      .insert({
+        title: body.title,
+        description: body.description,
+        budget_min: body.budget_min || null,
+        budget_max: body.budget_max || null,
+        project_type: body.project_type || null,
+        skills_required: body.skills_required || [],
+        client_location: body.client_location || null,
+        source_url: body.source_url || null,
+        status: 'active',
+      })
+      .select()
+      .single()
+
+    if (error) throw error
+    return NextResponse.json(data)
+  } catch (error) {
+    console.error('Admin lead insert error:', error)
+    return NextResponse.json({ error: 'Failed to add lead' }, { status: 500 })
+  }
+}
+
+export async function DELETE(req: Request) {
+  try {
+    const { id } = await req.json()
+
+    const supabase = await createAdminSupabase()
+    const { error } = await supabase.from('leads').delete().eq('id', id)
+
+    if (error) throw error
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error('Admin lead delete error:', error)
+    return NextResponse.json({ error: 'Failed to delete lead' }, { status: 500 })
+  }
+}

@@ -44,12 +44,13 @@ export default function AdminPage() {
 
       setIsAdmin(true)
 
-      const [leadsResult, usersResult] = await Promise.all([
-        supabase.from('leads').select('*').order('posted_date', { ascending: false }).limit(50),
+      const [leadsRes, usersResult] = await Promise.all([
+        fetch('/api/admin/leads'),
         supabase.from('profiles').select('*').order('created_at', { ascending: false }).limit(50),
       ])
 
-      setLeads(leadsResult.data || [])
+      const leadsData = await leadsRes.json()
+      setLeads(Array.isArray(leadsData) ? leadsData : [])
       setUsers(usersResult.data || [])
     }
 
@@ -59,46 +60,66 @@ export default function AdminPage() {
   const handleAddLead = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    const { error } = await supabase.from('leads').insert({
-      title,
-      description,
-      budget_min: budgetMin ? parseInt(budgetMin) : null,
-      budget_max: budgetMax ? parseInt(budgetMax) : null,
-      project_type: projectType || null,
-      skills_required: skillsRequired.split(',').map((s) => s.trim()).filter(Boolean),
-      client_location: clientLocation || null,
-      source_url: sourceUrl || null,
-      status: 'active',
-    })
+    try {
+      const res = await fetch('/api/admin/leads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title,
+          description,
+          budget_min: budgetMin ? parseInt(budgetMin) : null,
+          budget_max: budgetMax ? parseInt(budgetMax) : null,
+          project_type: projectType || null,
+          skills_required: skillsRequired.split(',').map((s) => s.trim()).filter(Boolean),
+          client_location: clientLocation || null,
+          source_url: sourceUrl || null,
+        }),
+      })
 
-    if (error) {
-      toast.error(error.message)
-      return
+      if (!res.ok) {
+        const err = await res.json()
+        toast.error(err.error || 'Failed to add lead')
+        return
+      }
+
+      toast.success('Lead added!')
+      setTitle('')
+      setDescription('')
+      setBudgetMin('')
+      setBudgetMax('')
+      setProjectType('')
+      setSkillsRequired('')
+      setClientLocation('')
+      setSourceUrl('')
+      setShowForm(false)
+
+      const leadsRes = await fetch('/api/admin/leads')
+      const updatedLeads = await leadsRes.json()
+      setLeads(updatedLeads)
+    } catch {
+      toast.error('Failed to add lead')
     }
-
-    toast.success('Lead added!')
-    setTitle('')
-    setDescription('')
-    setBudgetMin('')
-    setBudgetMax('')
-    setProjectType('')
-    setSkillsRequired('')
-    setClientLocation('')
-    setSourceUrl('')
-    setShowForm(false)
-
-    const { data } = await supabase.from('leads').select('*').order('posted_date', { ascending: false }).limit(50)
-    setLeads(data || [])
   }
 
   const handleDeleteLead = async (id: string) => {
-    const { error } = await supabase.from('leads').delete().eq('id', id)
-    if (error) {
-      toast.error(error.message)
-      return
+    try {
+      const res = await fetch('/api/admin/leads', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      })
+
+      if (!res.ok) {
+        const err = await res.json()
+        toast.error(err.error || 'Failed to delete lead')
+        return
+      }
+
+      toast.success('Lead deleted')
+      setLeads(leads.filter((l) => l.id !== id))
+    } catch {
+      toast.error('Failed to delete lead')
     }
-    toast.success('Lead deleted')
-    setLeads(leads.filter((l) => l.id !== id))
   }
 
   if (!isAdmin) {
