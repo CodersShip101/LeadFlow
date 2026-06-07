@@ -4,20 +4,21 @@ Return only valid JSON with these exact fields:
 {
   "title": "clean job title",
   "description": "cleaned 2-3 sentence description",
-  "budget_min": 500,
-  "budget_max": 1000,
+  "budget_min": null,
+  "budget_max": null,
   "skills_required": ["skill1", "skill2"],
   "project_type": "contract or ongoing",
   "client_location": "Remote or country",
-  "quality_score": 7
+  "quality_score": 5
 }
 
 Quality score rules (1-10):
-- Has clear budget: +3 points
+- Base score: 5 points
+- Has clear budget or rate: +2 points
 - Has clear project scope: +2 points
-- Has real company behind it: +2 points
-- Remote friendly: +1 point
-- Posted recently: +2 points
+- Has real company behind it: +1 point
+- Remote friendly or location specified: +1 point
+- Vague or too short posting: -1 point
 
 Return ONLY raw JSON. No markdown. No explanation.
 
