@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/scrape-leads",
+      "schedule": "0 */6 * * *"
+    }
+  ]
+}

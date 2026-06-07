@@ -50,7 +50,7 @@ export default function AdminPage() {
       const [leadsRes, usersResult, scrapeRes] = await Promise.all([
         fetch('/api/admin/leads'),
         supabase.from('profiles').select('*').order('created_at', { ascending: false }).limit(50),
-        fetch('/api/scrape'),
+        fetch('/api/scrape-leads'),
       ])
 
       const leadsData = await leadsRes.json()
@@ -136,7 +136,7 @@ export default function AdminPage() {
     setScrapeResult(null)
 
     try {
-      const res = await fetch('/api/scrape', { method: 'POST' })
+      const res = await fetch('/api/scrape-leads', { method: 'POST' })
       const data = await res.json()
 
       if (!res.ok) {
@@ -196,19 +196,15 @@ export default function AdminPage() {
         </div>
       </div>
 
-      {/* AI Scraper */}
+      {/* AI Lead Scraper */}
       <div className="bg-white rounded-xl border border-gray-200 p-6 mb-8">
         <div className="flex items-center justify-between mb-4">
           <div>
             <h2 className="text-lg font-semibold text-gray-900">AI Lead Scraper</h2>
             <p className="text-sm text-gray-500 mt-1">
-              {scrapeStatus?.openRouterConfigured
-                ? 'DeepSeek AI filtering active'
-                : 'Add OPENROUTER_API_KEY to enable AI filtering'}
+              {scrapeStatus?.zenConfigured ? 'DeepSeek V4 Flash Free active' : 'Add ZEN_API_KEY to .env.local'}
               {' · '}
-              {scrapeStatus?.lastScrape
-                ? `Last scrape: ${new Date(scrapeStatus.lastScrape.created_at).toLocaleString()}`
-                : 'No scrapes yet'}
+              Scrapes Reddit, We Work Remotely &amp; Remotive
             </p>
           </div>
           <button
@@ -230,32 +226,40 @@ export default function AdminPage() {
 
         {scrapeResult && (
           <div className="grid grid-cols-4 gap-3 mb-4">
+            <div className="bg-blue-50 rounded-lg p-3 text-center">
+              <p className="text-lg font-bold text-blue-700">{scrapeResult.found}</p>
+              <p className="text-xs text-blue-600">Found</p>
+            </div>
+            <div className="bg-green-50 rounded-lg p-3 text-center">
+              <p className="text-lg font-bold text-green-700">{scrapeResult.passed_filter}</p>
+              <p className="text-xs text-green-600">Passed AI Filter</p>
+            </div>
             <div className="bg-green-50 rounded-lg p-3 text-center">
               <p className="text-lg font-bold text-green-700">{scrapeResult.inserted}</p>
               <p className="text-xs text-green-600">Inserted</p>
             </div>
-            <div className="bg-blue-50 rounded-lg p-3 text-center">
-              <p className="text-lg font-bold text-blue-700">{scrapeResult.accepted || 0}</p>
-              <p className="text-xs text-blue-600">Accepted</p>
-            </div>
-            <div className="bg-red-50 rounded-lg p-3 text-center">
-              <p className="text-lg font-bold text-red-700">{scrapeResult.rejected || 0}</p>
-              <p className="text-xs text-red-600">Rejected</p>
-            </div>
             <div className="bg-gray-50 rounded-lg p-3 text-center">
-              <p className="text-lg font-bold text-gray-700">{scrapeResult.duration ? `${(scrapeResult.duration / 1000).toFixed(1)}s` : '-'}</p>
-              <p className="text-xs text-gray-600">Duration</p>
+              <p className="text-lg font-bold text-gray-700">{scrapeResult.skipped_duplicates}</p>
+              <p className="text-xs text-gray-600">Duplicates Skipped</p>
             </div>
           </div>
         )}
 
+        {scrapeResult?.errors?.length > 0 && (
+          <div className="bg-red-50 rounded-lg p-3 mb-2">
+            <p className="text-xs text-red-600 font-medium">Errors: {scrapeResult.errors.length}</p>
+            <ul className="mt-1 text-xs text-red-500 list-disc list-inside">
+              {scrapeResult.errors.slice(0, 3).map((e: string, i: number) => (
+                <li key={i}>{e}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
         <div className="flex gap-4 text-xs text-gray-500">
-          <span>Sources: {scrapeStatus?.redditConfigured ? 'Reddit ✅' : 'Reddit ❌'} · WWR · Remotive</span>
-          {scrapeStatus?.lastScrape && (
-            <span>
-              Last run: {scrapeStatus.lastScrape.reddit || 0}R / {scrapeStatus.lastScrape.wwr || 0}W / {scrapeStatus.lastScrape.remotive || 0}Rem
-              · Avg score: {scrapeStatus.lastScrape.avg_score || '-'}
-            </span>
+          <span>Sources: Reddit · WWR · Remotive</span>
+          {scrapeResult?.duration_ms && (
+            <span>Duration: {(scrapeResult.duration_ms / 1000).toFixed(1)}s</span>
           )}
         </div>
       </div>

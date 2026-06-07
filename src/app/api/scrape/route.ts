@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { createAdminSupabase } from '@/lib/supabase-server'
 
+export const maxDuration = 300
+
 export async function POST() {
   try {
     const { scrapeAll } = await import('../../../../scripts/ai-scrape.mjs')

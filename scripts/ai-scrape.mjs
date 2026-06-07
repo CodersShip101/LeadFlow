@@ -98,7 +98,7 @@ async function scrapeWWR() {
 
 async function scrapeRemotive() {
   try {
-    const res = await fetch('https://remotive.com/api/remote-jobs?limit=15')
+    const res = await fetch('https://remotive.com/api/remote-jobs?limit=5')
     const data = await res.json()
     return (data.jobs || []).map((job) => ({
       title: job.title,
@@ -216,8 +216,8 @@ export async function scrapeAll() {
   results.wwr = wwrPosts.length
   results.remotive = remotivePosts.length
 
-  // Process in batches of 5 for AI rate limits
-  const batchSize = 5
+  // Process in batches — sequential for free models to avoid rate limits
+  const batchSize = 1
   const allFiltered = []
 
   for (let i = 0; i < allPosts.length; i += batchSize) {
@@ -231,7 +231,7 @@ export async function scrapeAll() {
       allFiltered.push(...r.filter((x) => !x.error))
     }
     if (i + batchSize < allPosts.length) {
-      await new Promise((r) => setTimeout(r, 1000))
+      await new Promise((r) => setTimeout(r, 3000))
     }
   }
 
