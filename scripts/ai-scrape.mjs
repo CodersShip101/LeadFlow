@@ -16,7 +16,7 @@ const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY
 const REDDIT_CLIENT_ID = process.env.REDDIT_CLIENT_ID
 const REDDIT_CLIENT_SECRET = process.env.REDDIT_CLIENT_SECRET
 
-const AI_MODEL = 'deepseek/deepseek-chat'
+const AI_MODEL = process.env.AI_MODEL || 'deepseek/deepseek-v4-flash'
 
 const QUALITY_PROMPT = `You are a lead quality analyst for a freelance platform. Analyze the given job post and return JSON:
 
@@ -147,8 +147,9 @@ async function aiFilter(post) {
 
     if (!res.ok) {
       const err = await res.text()
-      console.error(`AI filter error for "${post.title.substring(0, 50)}":`, err.substring(0, 200))
-      return []
+      const msg = `AI ${res.status} for "${post.title.substring(0, 50)}": ${err.substring(0, 150)}`
+      console.error(msg)
+      return [{ error: msg }]
     }
 
     const data = await res.json()
@@ -223,7 +224,11 @@ export async function scrapeAll() {
     const batch = allPosts.slice(i, i + batchSize)
     const batchResults = await Promise.all(batch.map(aiFilter))
     for (const r of batchResults) {
-      allFiltered.push(...r)
+      const errors = r.filter((x) => x.error)
+      if (errors.length > 0) {
+        results.errors.push(...errors.map((e) => e.error))
+      }
+      allFiltered.push(...r.filter((x) => !x.error))
     }
     if (i + batchSize < allPosts.length) {
       await new Promise((r) => setTimeout(r, 1000))
