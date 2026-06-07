@@ -10,15 +10,41 @@ import type { Profile } from '@/types'
 export default function BillingPage() {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
+  const [processing, setProcessing] = useState(false)
   const router = useRouter()
   const supabase = createClient()
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const justPaid = params.get('success') === 'true'
+
     const load = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         router.push('/auth/login')
         return
+      }
+
+      if (justPaid) {
+        setProcessing(true)
+        let tries = 0
+        while (tries < 15) {
+          await new Promise(r => setTimeout(r, 2000))
+          const { data } = await supabase
+            .from('profiles')
+            .select('subscription_status')
+            .eq('id', user.id)
+            .single()
+          if (data?.subscription_status === 'pro') {
+            setProcessing(false)
+            toast.success('Welcome to Pro!')
+            router.replace('/dashboard/billing')
+            return
+          }
+          tries++
+        }
+        setProcessing(false)
+        toast.error('Subscription update is taking longer than expected. Refresh the page.')
       }
 
       const { data } = await supabase
@@ -56,6 +82,15 @@ export default function BillingPage() {
     return (
       <div className="max-w-3xl mx-auto px-4 py-8">
         <div className="animate-pulse h-8 bg-gray-200 rounded w-48" />
+      </div>
+    )
+  }
+
+  if (processing) {
+    return (
+      <div className="max-w-3xl mx-auto px-4 py-8 text-center">
+        <div className="animate-spin h-8 w-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto" />
+        <p className="mt-4 text-gray-600">Processing your payment...</p>
       </div>
     )
   }
