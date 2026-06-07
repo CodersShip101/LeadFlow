@@ -36,10 +36,13 @@ async function fetchWWRPosts() {
     if (!res.ok) return []
     const text = await res.text()
     const items = text.match(/<item>[\s\S]*?<\/item>/g) || []
-    return items.slice(0, 15).map((item: string) => ({
-      rawText: `Title: ${(item.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/)?.[1] || '').replace(/<[^>]*>/g, '')}\n\n${(item.match(/<description><!\[CDATA\[(.*?)\]\]><\/description>/)?.[1] || '').replace(/<[^>]*>/g, '').substring(0, 3000)}`,
-      source_url: item.match(/<link>(.*?)<\/link>/)?.[1] || '',
-    }))
+    return items.slice(0, 15).map((item: string) => {
+      const decode = (s: string) => s.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#x27;/g, "'").replace(/&#39;/g, "'")
+      return {
+        rawText: `Title: ${decode(item.match(/<title>(.*?)<\/title>/)?.[1] || '').replace(/<[^>]*>/g, '')}\n\n${decode(item.match(/<description>([\s\S]*?)<\/description>/)?.[1] || '').replace(/<[^>]*>/g, '').substring(0, 3000)}`,
+        source_url: item.match(/<link>(.*?)<\/link>/)?.[1] || '',
+      }
+    })
   } catch { return [] }
 }
 
