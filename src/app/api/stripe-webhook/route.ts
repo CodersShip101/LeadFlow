@@ -29,6 +29,19 @@ export async function POST(req: Request) {
         break
       }
 
+      case 'customer.subscription.created': {
+        const sub = event.data.object
+        const uid = sub.metadata?.userId
+
+        if (uid) {
+          await supabase
+            .from('profiles')
+            .update({ subscription_status: 'pro' })
+            .eq('id', uid)
+        }
+        break
+      }
+
       case 'customer.subscription.deleted':
       case 'customer.subscription.updated': {
         const subscription = event.data.object

@@ -43,6 +43,11 @@ export async function POST() {
       metadata: {
         userId: user.id,
       },
+      subscription_data: {
+        metadata: {
+          userId: user.id,
+        },
+      },
       success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard/billing?success=true`,
       cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard/billing?canceled=true`,
     })
