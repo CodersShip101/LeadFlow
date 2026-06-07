@@ -19,6 +19,9 @@ export default function AdminPage() {
   const [sourceUrl, setSourceUrl] = useState('')
   const [isAdmin, setIsAdmin] = useState(false)
   const [showForm, setShowForm] = useState(false)
+  const [scraping, setScraping] = useState(false)
+  const [scrapeStatus, setScrapeStatus] = useState<any>(null)
+  const [scrapeResult, setScrapeResult] = useState<any>(null)
   const router = useRouter()
   const supabase = createClient()
 
@@ -44,14 +47,20 @@ export default function AdminPage() {
 
       setIsAdmin(true)
 
-      const [leadsRes, usersResult] = await Promise.all([
+      const [leadsRes, usersResult, scrapeRes] = await Promise.all([
         fetch('/api/admin/leads'),
         supabase.from('profiles').select('*').order('created_at', { ascending: false }).limit(50),
+        fetch('/api/scrape'),
       ])
 
       const leadsData = await leadsRes.json()
       setLeads(Array.isArray(leadsData) ? leadsData : [])
       setUsers(usersResult.data || [])
+
+      if (scrapeRes.ok) {
+        const statusData = await scrapeRes.json()
+        setScrapeStatus(statusData)
+      }
     }
 
     load()
@@ -122,6 +131,33 @@ export default function AdminPage() {
     }
   }
 
+  const handleScrape = async () => {
+    setScraping(true)
+    setScrapeResult(null)
+
+    try {
+      const res = await fetch('/api/scrape', { method: 'POST' })
+      const data = await res.json()
+
+      if (!res.ok) {
+        toast.error(data.error || 'Scrape failed')
+        setScraping(false)
+        return
+      }
+
+      setScrapeResult(data)
+      toast.success(`Scrape done! ${data.inserted} new leads`)
+
+      const leadsRes = await fetch('/api/admin/leads')
+      const updatedLeads = await leadsRes.json()
+      setLeads(Array.isArray(updatedLeads) ? updatedLeads : [])
+    } catch {
+      toast.error('Scrape failed')
+    }
+
+    setScraping(false)
+  }
+
   if (!isAdmin) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-8">
@@ -157,6 +193,70 @@ export default function AdminPage() {
             {users.filter((u) => u.subscription_status === 'pro').length}
           </p>
           <p className="text-sm text-gray-500">Pro Users</p>
+        </div>
+      </div>
+
+      {/* AI Scraper */}
+      <div className="bg-white rounded-xl border border-gray-200 p-6 mb-8">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900">AI Lead Scraper</h2>
+            <p className="text-sm text-gray-500 mt-1">
+              {scrapeStatus?.openRouterConfigured
+                ? 'DeepSeek AI filtering active'
+                : 'Add OPENROUTER_API_KEY to enable AI filtering'}
+              {' · '}
+              {scrapeStatus?.lastScrape
+                ? `Last scrape: ${new Date(scrapeStatus.lastScrape.created_at).toLocaleString()}`
+                : 'No scrapes yet'}
+            </p>
+          </div>
+          <button
+            onClick={handleScrape}
+            disabled={scraping}
+            className="bg-green-600 text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-green-700 disabled:opacity-50 flex items-center gap-2"
+          >
+            {scraping ? (
+              <>
+                <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+                Scraping...
+              </>
+            ) : 'Scrape Now'}
+          </button>
+        </div>
+
+        {scrapeResult && (
+          <div className="grid grid-cols-4 gap-3 mb-4">
+            <div className="bg-green-50 rounded-lg p-3 text-center">
+              <p className="text-lg font-bold text-green-700">{scrapeResult.inserted}</p>
+              <p className="text-xs text-green-600">Inserted</p>
+            </div>
+            <div className="bg-blue-50 rounded-lg p-3 text-center">
+              <p className="text-lg font-bold text-blue-700">{scrapeResult.accepted || 0}</p>
+              <p className="text-xs text-blue-600">Accepted</p>
+            </div>
+            <div className="bg-red-50 rounded-lg p-3 text-center">
+              <p className="text-lg font-bold text-red-700">{scrapeResult.rejected || 0}</p>
+              <p className="text-xs text-red-600">Rejected</p>
+            </div>
+            <div className="bg-gray-50 rounded-lg p-3 text-center">
+              <p className="text-lg font-bold text-gray-700">{scrapeResult.duration ? `${(scrapeResult.duration / 1000).toFixed(1)}s` : '-'}</p>
+              <p className="text-xs text-gray-600">Duration</p>
+            </div>
+          </div>
+        )}
+
+        <div className="flex gap-4 text-xs text-gray-500">
+          <span>Sources: {scrapeStatus?.redditConfigured ? 'Reddit ✅' : 'Reddit ❌'} · WWR · Remotive</span>
+          {scrapeStatus?.lastScrape && (
+            <span>
+              Last run: {scrapeStatus.lastScrape.reddit || 0}R / {scrapeStatus.lastScrape.wwr || 0}W / {scrapeStatus.lastScrape.remotive || 0}Rem
+              · Avg score: {scrapeStatus.lastScrape.avg_score || '-'}
+            </span>
+          )}
         </div>
       </div>
 
