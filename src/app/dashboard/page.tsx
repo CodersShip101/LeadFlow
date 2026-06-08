@@ -41,6 +41,8 @@ export default function DashboardPage() {
   const [lastRefresh, setLastRefresh] = useState<number>(() => typeof window !== 'undefined' ? parseInt(localStorage.getItem('lr') || '0') : 0)
   const [upgradeModal, setUpgradeModal] = useState(false)
   const [limitModal, setLimitModal] = useState(false)
+  const [showFilters, setShowFilters] = useState(false)
+  const [showMoreSkills, setShowMoreSkills] = useState(false)
   const router = useRouter()
   const supabase = createClient()
   const cal = useMemo(() => getCalendarDays(), [])
@@ -290,9 +292,14 @@ export default function DashboardPage() {
         ))}
       </div>
 
+      {/* ── Section divider ── */}
+      <div className="section-divider mx-4 md:mx-8 mt-5">
+        <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: '#AAB0BB' }}>Filters & sorting</span>
+      </div>
+
       {/* ── FILTER ROW ── */}
-      <div className="flex items-center gap-2 px-4 md:px-8 mt-4 flex-wrap">
-        <div className="relative flex-1 max-w-[180px]">
+      <div className="flex items-center gap-2 px-4 md:px-8 mt-3 flex-wrap">
+        <div className="relative flex-1 max-w-[160px]">
           <i className="ti ti-search absolute left-2.5 top-1/2 -translate-y-1/2" style={{ fontSize: '14px', color: '#AAB0BB', pointerEvents: 'none' }} />
           <input
             value={searchQuery}
@@ -302,18 +309,15 @@ export default function DashboardPage() {
             style={{ borderColor: '#ECEEF2', background: '#F5F5F7', color: '#1A1D23' }}
           />
         </div>
-        <div className="w-px h-4" style={{ background: '#ECEEF2' }} />
-        {allSkills.slice(0, 4).map(s => (
-          <button key={s} onClick={() => setFilterSkill(filterSkill === s ? '' : s)}
-            className={`fpill ${filterSkill === s ? 'on' : ''}`}>{s}</button>
-        ))}
-        <div className="w-px h-4" style={{ background: '#ECEEF2' }} />
-        <button className={`fpill ${filterType === 'contract' ? 'on' : ''}`} onClick={() => setFilterType(filterType === 'contract' ? '' : 'contract')}>
-          Contract
+        <button
+          onClick={() => setShowFilters(!showFilters)}
+          className={`fpill flex items-center gap-1 ${showFilters || filterSkill || filterType || budgetFilter ? 'on' : ''}`}
+        >
+          <i className="ti ti-adjustments-horizontal" style={{ fontSize: '12px' }} />
+          Filters
+          {(filterSkill || filterType || budgetFilter) && <span className="text-[9px] font-bold ml-0.5">·</span>}
         </button>
-        <button className={`fpill ${budgetFilter === '500' ? 'on' : ''}`} onClick={() => setBudgetFilter(budgetFilter === '500' ? '' : '500')}>
-          £500+
-        </button>
+        <div className="w-px h-4" style={{ background: '#ECEEF2' }} />
         <select value={sortBy} onChange={e => setSortBy(e.target.value as typeof sortBy)}
           className="ml-auto rounded-full border px-3 py-1.5 text-xs outline-none cursor-pointer"
           style={{ borderColor: '#ECEEF2', background: '#F5F5F7', color: '#6B7280' }}>
@@ -322,6 +326,30 @@ export default function DashboardPage() {
           <option value="budget">Highest budget</option>
         </select>
       </div>
+      {showFilters && (
+        <div className="flex items-center gap-2 px-4 md:px-8 mt-2 flex-wrap animate-fade-in">
+          {allSkills.slice(0, 4).map(s => (
+            <button key={s} onClick={() => setFilterSkill(filterSkill === s ? '' : s)}
+              className={`fpill ${filterSkill === s ? 'on' : ''}`}>{s}</button>
+          ))}
+          <div className="w-px h-4" style={{ background: '#ECEEF2' }} />
+          <button className={`fpill ${filterType === 'contract' ? 'on' : ''}`} onClick={() => setFilterType(filterType === 'contract' ? '' : 'contract')}>
+            Contract
+          </button>
+          <button className={`fpill ${budgetFilter === '500' ? 'on' : ''}`} onClick={() => setBudgetFilter(budgetFilter === '500' ? '' : '500')}>
+            £500+
+          </button>
+        </div>
+      )}
+
+      {/* ── Section divider ── */}
+      {filteredLeads.length > 0 && (
+        <div className="section-divider mx-4 md:mx-8 mt-5">
+          <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: '#AAB0BB' }}>
+            {filteredLeads.length} lead{filteredLeads.length !== 1 ? 's' : ''}
+          </span>
+        </div>
+      )}
 
       {/* ── LEAD CARDS + RIGHT PANEL ── */}
       <div className="flex-1 flex min-h-0">
@@ -377,8 +405,7 @@ export default function DashboardPage() {
                     </div>
                   </div>
                   <button onClick={() => router.push('/dashboard/billing')}
-                    className="px-4 py-2 rounded-lg text-xs font-semibold text-white shrink-0 transition-all duration-150 hover:opacity-90 active:scale-[0.97]"
-                    style={{ background: '#1B6B4A' }}>Unlock Pro →</button>
+                    className="btn-int on text-xs px-4 py-2 shrink-0">Unlock Pro →</button>
                 </div>
               )}
             </>
@@ -412,16 +439,26 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Skills cloud */}
+          {/* Skills cloud — progressive disclosure: show top 6, then "Show all" */}
           <div className="p-4 bg-white mx-3 mb-0 rounded-xl" style={{ border: '1px solid #ECEEF2' }}>
             <div className="text-[10px] font-semibold uppercase tracking-wider mb-3" style={{ color: '#AAB0BB' }}>Filter by skill</div>
             <div className="flex flex-wrap gap-1.5">
-              {allSkills.map(s => (
+              {(showMoreSkills ? allSkills : allSkills.slice(0, 6)).map(s => (
                 <button key={s} onClick={() => setFilterSkill(filterSkill === s ? '' : s)}
                   className={`fpill text-[11px] px-2.5 py-1 ${filterSkill === s ? 'on' : ''}`}
                   style={{ fontSize: '11px', padding: '3px 9px', borderRadius: '20px', border: '1px solid #ECEEF2', background: filterSkill === s ? '#EBF5F0' : 'transparent', color: filterSkill === s ? '#1B6B4A' : '#6B7280' }}
                 >{s}</button>
               ))}
+              {allSkills.length > 6 && !showMoreSkills && (
+                <button onClick={() => setShowMoreSkills(true)}
+                  className="text-[10px] font-medium px-2 py-1 rounded-full transition-colors hover:opacity-80"
+                  style={{ color: '#6B7280' }}>+{allSkills.length - 6} more</button>
+              )}
+              {showMoreSkills && allSkills.length > 6 && (
+                <button onClick={() => setShowMoreSkills(false)}
+                  className="text-[10px] font-medium px-2 py-1 rounded-full transition-colors hover:opacity-80"
+                  style={{ color: '#6B7280' }}>Show less</button>
+              )}
             </div>
           </div>
 
@@ -455,9 +492,9 @@ export default function DashboardPage() {
             <h3 className="text-base font-semibold mb-1" style={{ color: '#1A1D23' }}>Weekly limit reached</h3>
             <p className="text-xs mb-4" style={{ color: '#6B7280' }}>Free users get 3 per week. Upgrade for unlimited.</p>
             <button onClick={() => { setLimitModal(false); router.push('/dashboard/billing') }}
-              className="w-full py-2.5 rounded-lg text-sm font-semibold text-white mb-2 transition-opacity hover:opacity-90" style={{ background: '#1B6B4A' }}>Upgrade</button>
+              className="btn-int on text-sm w-full py-2.5 mb-2">Upgrade</button>
             <button onClick={() => setLimitModal(false)}
-              className="w-full py-2 rounded-lg text-xs font-medium transition-colors hover:bg-gray-50" style={{ color: '#6B7280' }}>Later</button>
+              className="w-full py-2 rounded-lg text-xs font-medium transition-colors hover:bg-gray-50 focus-visible:outline-2 focus-visible:outline-green-600" style={{ color: '#6B7280' }}>Later</button>
           </div>
         </div>
       )}
