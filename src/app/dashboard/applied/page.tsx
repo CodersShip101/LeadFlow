@@ -90,8 +90,8 @@ export default function AppliedPage() {
   return (
     <div className="flex-1 pb-20 md:pb-0" style={{ background: '#F2F3F7' }}>
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 md:py-8">
-        <button onClick={() => router.push('/dashboard')} className="flex items-center gap-1.5 text-xs font-medium mb-4" style={{ color: '#6B7280' }}>
-          <i className="ti ti-arrow-left" style={{ fontSize: '12px' }} /> Dashboard
+        <button onClick={() => router.push('/dashboard')} className="btn-back mb-4">
+          <i className="ti ti-arrow-left" /> Dashboard
         </button>
         <h1 className="text-xl font-bold mb-4" style={{ color: '#1A1D23' }}>Applications</h1>
 

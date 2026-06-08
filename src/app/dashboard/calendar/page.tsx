@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { CalendarDays, ArrowLeft } from 'lucide-react'
+import { CalendarDays } from 'lucide-react'
 
 export default function CalendarPage() {
   const router = useRouter()
@@ -15,10 +15,8 @@ export default function CalendarPage() {
         <p className="text-xs mb-5 max-w-[280px]" style={{ color: '#6B7280' }}>
           A full calendar view with deadlines, interviews, and milestones is on the way.
         </p>
-        <button onClick={() => router.push('/dashboard')}
-          className="px-4 py-2 rounded-lg text-xs font-semibold text-white transition-opacity hover:opacity-90"
-          style={{ background: '#1B6B4A' }}>
-          Back to feed
+        <button onClick={() => router.push('/dashboard')} className="btn-back">
+          <i className="ti ti-arrow-left" /> Back to feed
         </button>
       </div>
     </div>

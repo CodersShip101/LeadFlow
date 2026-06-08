@@ -129,10 +129,8 @@ export default function BillingPage() {
   return (
     <div className="flex-1 pb-20 md:pb-0" style={{ background: '#F2F3F7' }}>
       <div className="max-w-3xl mx-auto px-4 py-6">
-        <button onClick={() => router.push('/dashboard')}
-          className="flex items-center gap-1.5 text-xs font-medium mb-5 transition-colors hover:opacity-80"
-          style={{ color: '#6B7280' }}>
-          <i className="ti ti-arrow-left" style={{ fontSize: '13px' }} /> Dashboard
+        <button onClick={() => router.push('/dashboard')} className="btn-back mb-5">
+          <i className="ti ti-arrow-left" /> Dashboard
         </button>
 
         <h1 className="text-lg font-bold mb-5" style={{ color: '#1A1D23', letterSpacing: '-0.03em' }}>Billing</h1>

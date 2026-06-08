@@ -7,11 +7,7 @@ import toast from 'react-hot-toast'
 import type { Lead, Profile, Application } from '@/types'
 import { computeMatchExplanation } from '@/types'
 import { getSourceInfo, formatBudgetGBP, isNewLead, formatDate } from '@/lib/utils'
-import {
-  ArrowLeft, Bookmark, Send, Trophy, ExternalLink,
-  Lock, Check, Briefcase, MapPin, Calendar,
-  ThumbsUp, ThumbsDown, HelpCircle
-} from 'lucide-react'
+
 
 const statusConfig: Record<string, { label: string, color: string, bg: string }> = {
   saved:      { label: 'Saved', color: '#7C3AED', bg: '#F0EFFE' },
@@ -118,13 +114,8 @@ export default function LeadDetailPage() {
   return (
     <div className="flex-1 pb-20 md:pb-0" style={{ background: '#F2F3F7' }}>
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6 md:py-8">
-        <button
-          onClick={() => router.push('/dashboard')}
-          className="flex items-center gap-1.5 text-sm font-medium mb-4 transition-colors hover:opacity-80"
-          style={{ color: '#6B7280' }}
-        >
-          <ArrowLeft size={14} />
-          Back to leads
+        <button onClick={() => router.push('/dashboard')} className="btn-back mb-4">
+          <i className="ti ti-arrow-left" /> Back to leads
         </button>
 
         <div className="bg-white rounded-xl p-6 md:p-8" style={{ border: '1px solid #ECEEF2' }}>
@@ -146,7 +137,7 @@ export default function LeadDetailPage() {
                 <h1 className="text-xl md:text-2xl font-bold truncate" style={{ color: '#1A1D23' }}>{lead.title}</h1>
                 <div className="flex items-center gap-2 mt-0.5 text-xs" style={{ color: '#AAB0BB' }}>
                   {lead.project_type && <span className="capitalize">{lead.project_type}</span>}
-                  {lead.client_location && <><Briefcase size={10} /><span>{lead.client_location}</span></>}
+                  {lead.client_location && <><i className="ti ti-briefcase" style={{ fontSize: '10px' }} /><span>{lead.client_location}</span></>}
                 </div>
               </div>
             </div>
@@ -172,7 +163,7 @@ export default function LeadDetailPage() {
             )}
             {lead.client_location && (
               <span className="text-sm px-3 py-1 rounded-lg flex items-center gap-1" style={{ background: '#F2F3F7', color: '#6B7280' }}>
-                <MapPin size={12} /> {lead.client_location}
+                <i className="ti ti-map-pin" style={{ fontSize: '12px' }} /> {lead.client_location}
               </span>
             )}
           </div>
@@ -202,12 +193,12 @@ export default function LeadDetailPage() {
           {/* Dates */}
           <div className="flex flex-wrap gap-4 mt-6 text-xs" style={{ color: '#9CA3AF' }}>
             <span className="flex items-center gap-1">
-              <Calendar size={12} />
+              <i className="ti ti-calendar" style={{ fontSize: '12px' }} />
               Posted {new Date(lead.posted_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
             </span>
             {lead.expiry_date && (
               <span className="flex items-center gap-1">
-                <Calendar size={12} />
+                <i className="ti ti-calendar" style={{ fontSize: '12px' }} />
                 Expires {new Date(lead.expiry_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
               </span>
             )}
@@ -219,14 +210,14 @@ export default function LeadDetailPage() {
               <h3 className="text-sm font-semibold mb-2" style={{ color: '#1A1D23' }}>Source</h3>
               {isFree ? (
                 <div className="rounded-lg p-4 text-center" style={{ background: '#F9FAFB', border: '1px solid #ECEEF2' }}>
-                  <Lock size={20} className="mx-auto mb-2" color="#AAB0BB" />
+                  <i className="ti ti-lock" style={{ fontSize: '20px', display: 'block', margin: '0 auto 8px', color: '#AAB0BB' }} />
                   <div className="text-xs font-medium" style={{ color: '#6B7280' }}>Source URL hidden</div>
                   <div className="text-xs mt-1" style={{ color: '#9CA3AF' }}>
                     Upgrade to Pro to see where this lead came from and apply directly.
                   </div>
                   <button
                     onClick={() => router.push('/dashboard/billing')}
-                    className="mt-3 px-4 py-1.5 rounded-lg text-xs font-semibold text-white" style={{ background: '#1B6B4A' }}
+                    className="btn-int on text-xs px-4 py-1.5 mt-3"
                   >
                     Upgrade to Pro — £49/month
                   </button>
@@ -240,7 +231,7 @@ export default function LeadDetailPage() {
                   style={{ color: '#2563EB' }}
                 >
                   {lead.source_url}
-                  <ExternalLink size={12} />
+                  <i className="ti ti-external-link" style={{ fontSize: '12px' }} />
                 </a>
               )}
             </div>
@@ -254,7 +245,7 @@ export default function LeadDetailPage() {
               {matchInfo.breakdown.map(item => (
                 <div key={item.label} className="flex items-center justify-between text-xs">
                   <div className="flex items-center gap-2 min-w-0">
-                    <Check size={12} color={item.achieved ? '#1B6B4A' : '#D0D4DE'} />
+                    <i className={`ti ${item.achieved ? 'ti-check' : 'ti-x'}`} style={{ fontSize: '12px', color: item.achieved ? '#1B6B4A' : '#D0D4DE' }} />
                     <span style={{ color: '#6B7280' }}>{item.label}</span>
                   </div>
                   <span className="font-medium shrink-0 ml-2" style={{ color: item.achieved ? '#6B7280' : '#AAB0BB' }}>
@@ -299,30 +290,27 @@ export default function LeadDetailPage() {
               <p className="text-xs mb-3" style={{ color: '#6B7280' }}>Help us improve your matches by telling us what happened.</p>
               <div className="flex flex-wrap gap-2">
                 {[
-                  { outcome: 'won', label: 'Got it!', icon: ThumbsUp, color: '#1B6B4A', bg: '#EBF5F0' },
-                  { outcome: 'lost', label: 'Did not get it', icon: ThumbsDown, color: '#DC2626', bg: '#FEF2F2' },
-                  { outcome: 'pending', label: 'Still waiting', icon: HelpCircle, color: '#D97706', bg: '#FEF3E2' },
-                ].map(opt => {
-                  const Icon = opt.icon
-                  return (
-                    <button key={opt.outcome} onClick={async () => {
-                      const res = await fetch('/api/applications', {
-                        method: 'PATCH',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ lead_id: id, outcome: opt.outcome }),
-                      })
-                      if (res.ok) {
-                        const app = await res.json()
-                        setApplication(app)
-                        toast.success('Saved!')
-                      }
-                    }}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all hover:opacity-80"
-                      style={{ background: opt.bg, color: opt.color }}>
-                      <Icon size={12} /> {opt.label}
-                    </button>
-                  )
-                })}
+                  { outcome: 'won', label: 'Got it!', icon: 'ti-thumb-up', color: '#1B6B4A', bg: '#EBF5F0' },
+                  { outcome: 'lost', label: 'Did not get it', icon: 'ti-thumb-down', color: '#DC2626', bg: '#FEF2F2' },
+                  { outcome: 'pending', label: 'Still waiting', icon: 'ti-clock', color: '#D97706', bg: '#FEF3E2' },
+                ].map(opt => (
+                  <button key={opt.outcome} onClick={async () => {
+                    const res = await fetch('/api/applications', {
+                      method: 'PATCH',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ lead_id: id, outcome: opt.outcome }),
+                    })
+                    if (res.ok) {
+                      const app = await res.json()
+                      setApplication(app)
+                      toast.success('Saved!')
+                    }
+                  }}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all hover:opacity-80 min-h-[32px]"
+                    style={{ background: opt.bg, color: opt.color }}>
+                    <i className={`ti ${opt.icon}`} style={{ fontSize: '12px' }} /> {opt.label}
+                  </button>
+                ))}
               </div>
             </div>
           )}
@@ -330,7 +318,7 @@ export default function LeadDetailPage() {
           {application?.outcome && (
             <div className="mt-5 pt-5" style={{ borderTop: '1px solid #ECEEF2' }}>
               <div className="flex items-center gap-2 text-sm font-medium" style={{ color: application.outcome === 'won' ? '#1B6B4A' : application.outcome === 'lost' ? '#DC2626' : '#D97706' }}>
-                {application.outcome === 'won' ? <ThumbsUp size={14} /> : application.outcome === 'lost' ? <ThumbsDown size={14} /> : <HelpCircle size={14} />}
+                <i className={`ti ${application.outcome === 'won' ? 'ti-thumb-up' : application.outcome === 'lost' ? 'ti-thumb-down' : 'ti-clock'}`} style={{ fontSize: '14px' }} />
                 {application.outcome === 'won' ? 'You got this project!' : application.outcome === 'lost' ? 'Did not get this project' : 'Still waiting on this project'}
               </div>
             </div>
@@ -343,53 +331,48 @@ export default function LeadDetailPage() {
                 href={lead.source_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold text-white transition-opacity hover:opacity-90"
-                style={{ background: '#1B6B4A' }}
+                className="btn-int on gap-2 px-5 py-2.5 text-sm no-underline"
               >
-                <ExternalLink size={14} />
+                <i className="ti ti-external-link" style={{ fontSize: '14px' }} />
                 Apply on {source.label}
               </a>
             )}
             <button
               onClick={handleInterested}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition-all"
-              style={{
-                background: application?.status === 'interested' || application?.status === 'applied' || application?.status === 'hired' ? '#1B6B4A' : '#EBF5F0',
-                color: application?.status === 'interested' || application?.status === 'applied' || application?.status === 'hired' ? 'white' : '#1B6B4A',
-              }}
+              className={`btn-int gap-2 px-5 py-2.5 text-sm ${application?.status === 'interested' || application?.status === 'applied' || application?.status === 'hired' ? 'on' : ''}`}
             >
-              <Send size={14} />
+              <i className="ti ti-send" style={{ fontSize: '14px' }} />
               {application?.status === 'interested' || application?.status === 'applied' || application?.status === 'hired' ? 'Interest Expressed' : 'Express Interest'}
             </button>
 
             <button
               onClick={handleBookmark}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all min-h-[36px] hover:bg-gray-100 active:scale-[0.97]"
               style={{
                 background: application?.status === 'saved' ? '#F0EFFE' : '#F2F3F7',
                 color: application?.status === 'saved' ? '#7C3AED' : '#6B7280',
               }}
             >
-              <Bookmark size={14} fill={application?.status === 'saved' ? '#7C3AED' : 'none'} />
+              <i className={`ti ${application?.status === 'saved' ? 'ti-bookmark-filled' : 'ti-bookmark'}`} style={{ fontSize: '14px' }} />
               {application?.status === 'saved' ? 'Saved' : 'Save for later'}
             </button>
 
             {application?.status === 'interested' && (
               <button
                 onClick={() => { updateApplication('applied'); toast.success('Marked as applied') }}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium min-h-[36px] transition-all hover:opacity-80 active:scale-[0.97]"
                 style={{ background: '#FEF3E2', color: '#D97706' }}
               >
-                <Send size={14} /> Mark as Applied
+                <i className="ti ti-send" style={{ fontSize: '14px' }} /> Mark as Applied
               </button>
             )}
             {application?.status === 'applied' && (
               <button
                 onClick={() => { updateApplication('hired'); toast.success('Marked as hired!') }}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium min-h-[36px] transition-all hover:opacity-80 active:scale-[0.97]"
                 style={{ background: '#EBF5F0', color: '#1B6B4A' }}
               >
-                <Trophy size={14} /> Mark as Hired
+                <i className="ti ti-trophy" style={{ fontSize: '14px' }} /> Mark as Hired
               </button>
             )}
 

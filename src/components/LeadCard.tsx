@@ -211,10 +211,10 @@ export default function LeadCard({ lead, profile, application, isFreeUser, index
         <div className="flex items-center gap-2 shrink-0">
           <button
             onClick={handleInterest}
-            className={`btn-int ${isInterested ? 'on' : ''}`}
+            className={`btn-int min-h-[36px] ${isInterested ? 'on' : ''}`}
           >
             <i className={`ti ${isInterested ? 'ti-check' : 'ti-heart'}`} style={{ fontSize: '12px' }} />
-            {' '}{isInterested ? 'Interested' : 'Interested'}
+            {' '}{isInterested ? 'Interested' : "I'm interested"}
           </button>
           <span className="text-[10.5px]" style={{ color: '#AAB0BB' }} title={formatDate(lead.posted_date)}>
             {timeAgoShort(lead.posted_date)}

@@ -79,10 +79,8 @@ export default function ProfilePage() {
   return (
     <div className="flex-1 pb-20 md:pb-0" style={{ background: '#F2F3F7' }}>
       <div className="max-w-2xl mx-auto px-4 py-6">
-        <button onClick={() => router.push('/dashboard')}
-          className="flex items-center gap-1.5 text-xs font-medium mb-5 transition-colors hover:opacity-80"
-          style={{ color: '#6B7280' }}>
-          <i className="ti ti-arrow-left" style={{ fontSize: '13px' }} /> Back to dashboard
+        <button onClick={() => router.push('/dashboard')} className="btn-back mb-5">
+          <i className="ti ti-arrow-left" /> Back to dashboard
         </button>
 
         {/* Header */}

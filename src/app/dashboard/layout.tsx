@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-client'
 import type { Profile } from '@/types'
-import { AlertTriangle, LogOut, CreditCard, User } from 'lucide-react'
+import { AlertTriangle } from 'lucide-react'
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null)
@@ -133,7 +133,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     <button
                       key={item.label}
                       onClick={() => router.push(item.href)}
-                      className="flex items-center gap-2.5 px-3 py-2 text-sm w-full text-left transition-all duration-150 rounded-lg"
+                      className="flex items-center gap-2.5 px-3 min-h-[44px] text-sm w-full text-left transition-all duration-150 rounded-lg hover:bg-gray-50 active:scale-[0.98]"
                       style={{
                         background: active ? '#EBF5F0' : 'transparent',
                         color: active ? '#1B6B4A' : '#6B7280',
@@ -151,14 +151,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <div className="border-t pt-3 space-y-0.5" style={{ borderColor: '#ECEEF2' }}>
             <button
               onClick={() => router.push('/dashboard/profile')}
-              className="flex items-center gap-2.5 px-3 py-2 text-sm w-full text-left rounded-lg transition-colors"
+              className="flex items-center gap-2.5 px-3 min-h-[44px] text-sm w-full text-left rounded-lg transition-colors hover:bg-gray-50 active:scale-[0.98]"
               style={{ color: '#6B7280' }}
             >
               <i className="ti ti-settings" style={{ fontSize: '16px' }} /> Settings
             </button>
             <button
               onClick={() => {}}
-              className="flex items-center gap-2.5 px-3 py-2 text-sm w-full text-left rounded-lg transition-colors"
+              className="flex items-center gap-2.5 px-3 min-h-[44px] text-sm w-full text-left rounded-lg transition-colors hover:bg-gray-50 active:scale-[0.98]"
               style={{ color: '#6B7280' }}
             >
               <i className="ti ti-help-circle" style={{ fontSize: '16px' }} /> Help
@@ -182,14 +182,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </div>
           </div>
           <div className="mt-2 flex gap-2">
-            <button onClick={() => router.push('/dashboard/profile')} className="text-[10px] flex items-center gap-1 transition-colors hover:opacity-80" style={{ color: '#AAB0BB' }}>
-              <User size={10} /> Profile
+            <button onClick={() => router.push('/dashboard/profile')} className="text-[10px] flex items-center gap-1 transition-all hover:opacity-80 active:scale-[0.97] min-h-[28px]" style={{ color: '#AAB0BB' }}>
+              <i className="ti ti-user" style={{ fontSize: '10px' }} /> Profile
             </button>
-            <button onClick={() => router.push('/dashboard/billing')} className="text-[10px] flex items-center gap-1 transition-colors hover:opacity-80" style={{ color: '#AAB0BB' }}>
-              <CreditCard size={10} /> Billing
+            <button onClick={() => router.push('/dashboard/billing')} className="text-[10px] flex items-center gap-1 transition-all hover:opacity-80 active:scale-[0.97] min-h-[28px]" style={{ color: '#AAB0BB' }}>
+              <i className="ti ti-credit-card" style={{ fontSize: '10px' }} /> Billing
             </button>
-            <button onClick={handleLogout} className="text-[10px] flex items-center gap-1 transition-colors hover:opacity-80" style={{ color: '#DC2626' }}>
-              <LogOut size={10} /> Exit
+            <button onClick={handleLogout} className="text-[10px] flex items-center gap-1 transition-all hover:opacity-80 active:scale-[0.97] min-h-[28px]" style={{ color: '#DC2626' }}>
+              <i className="ti ti-logout" style={{ fontSize: '10px' }} /> Exit
             </button>
           </div>
         </div>

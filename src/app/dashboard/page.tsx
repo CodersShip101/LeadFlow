@@ -445,19 +445,13 @@ export default function DashboardPage() {
             <div className="flex flex-wrap gap-1.5">
               {(showMoreSkills ? allSkills : allSkills.slice(0, 6)).map(s => (
                 <button key={s} onClick={() => setFilterSkill(filterSkill === s ? '' : s)}
-                  className={`fpill text-[11px] px-2.5 py-1 ${filterSkill === s ? 'on' : ''}`}
-                  style={{ fontSize: '11px', padding: '3px 9px', borderRadius: '20px', border: '1px solid #ECEEF2', background: filterSkill === s ? '#EBF5F0' : 'transparent', color: filterSkill === s ? '#1B6B4A' : '#6B7280' }}
+                  className={`fpill ${filterSkill === s ? 'on' : ''}`}
                 >{s}</button>
               ))}
-              {allSkills.length > 6 && !showMoreSkills && (
-                <button onClick={() => setShowMoreSkills(true)}
-                  className="text-[10px] font-medium px-2 py-1 rounded-full transition-colors hover:opacity-80"
-                  style={{ color: '#6B7280' }}>+{allSkills.length - 6} more</button>
-              )}
-              {showMoreSkills && allSkills.length > 6 && (
-                <button onClick={() => setShowMoreSkills(false)}
-                  className="text-[10px] font-medium px-2 py-1 rounded-full transition-colors hover:opacity-80"
-                  style={{ color: '#6B7280' }}>Show less</button>
+              {allSkills.length > 6 && (
+                <button onClick={() => setShowMoreSkills(!showMoreSkills)}
+                  className="text-[11px] font-medium min-h-[32px] px-3 rounded-full transition-all duration-150 hover:bg-gray-100 active:scale-[0.97]"
+                  style={{ color: '#6B7280' }}>{showMoreSkills ? 'Show less' : `+${allSkills.length - 6} more`}</button>
               )}
             </div>
           </div>
@@ -494,7 +488,7 @@ export default function DashboardPage() {
             <button onClick={() => { setLimitModal(false); router.push('/dashboard/billing') }}
               className="btn-int on text-sm w-full py-2.5 mb-2">Upgrade</button>
             <button onClick={() => setLimitModal(false)}
-              className="w-full py-2 rounded-lg text-xs font-medium transition-colors hover:bg-gray-50 focus-visible:outline-2 focus-visible:outline-green-600" style={{ color: '#6B7280' }}>Later</button>
+              className="btn-ghost w-full justify-center">Dismiss</button>
           </div>
         </div>
       )}
