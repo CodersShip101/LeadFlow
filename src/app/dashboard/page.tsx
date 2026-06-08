@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase-client'
 import toast from 'react-hot-toast'
 import type { Lead, Profile, Application } from '@/types'
 import { computeQualityScore } from '@/types'
+import { isUKLead } from '@/lib/utils'
 import LeadCard from '@/components/LeadCard'
 import UpgradeModal from '@/components/UpgradeModal'
 import {
@@ -56,9 +57,9 @@ export default function DashboardPage() {
 
   const sortedLeads = useMemo(() =>
     [...leads].sort((a, b) => {
-      const sa = computeQualityScore(a), sb = computeQualityScore(b)
-      if (sa !== sb) return sb - sa
-      return new Date(b.posted_date).getTime() - new Date(a.posted_date).getTime()
+      const da = new Date(b.posted_date).getTime() - new Date(a.posted_date).getTime()
+      if (da !== 0) return da
+      return computeQualityScore(b) - computeQualityScore(a)
     }), [leads])
 
   const visible = isFree ? sortedLeads.slice(0, 3) : sortedLeads
@@ -96,7 +97,7 @@ export default function DashboardPage() {
       const { data: p } = await supabase.from('profiles').select('*').eq('id', user.id).single()
       setProfile(p)
       const { data: l } = await supabase.from('leads').select('*').eq('status', 'active').order('posted_date', { ascending: false })
-      setLeads(l || [])
+      setLeads((l || []).filter(lead => isUKLead(lead.client_location, lead.source_url)))
       const r = await fetch('/api/applications')
       if (r.ok) setApplications(await r.json())
       setLoading(false)
@@ -151,7 +152,7 @@ export default function DashboardPage() {
       localStorage.setItem('lr', String(now))
       setLastRefresh(now)
       const { data: l } = await supabase.from('leads').select('*').eq('status', 'active').order('posted_date', { ascending: false })
-      setLeads(l || [])
+      setLeads((l || []).filter(lead => isUKLead(lead.client_location, lead.source_url)))
     } catch { toast.error('Failed') }
     setRefreshing(false)
   }, [lastRefresh, supabase])

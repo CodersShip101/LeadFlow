@@ -39,3 +39,34 @@ export function formatDate(date: string) {
     day: 'numeric', month: 'short', year: 'numeric',
   })
 }
+
+const ukPlaces = [
+  'uk', 'united kingdom', 'britain', 'england', 'scotland', 'wales', 'northern ireland',
+  'london', 'manchester', 'birmingham', 'leeds', 'edinburgh', 'glasgow', 'bristol',
+  'liverpool', 'newcastle', 'sheffield', 'cardiff', 'belfast', 'aberdeen', 'nottingham',
+  'leicester', 'oxford', 'cambridge', 'brighton', 'southampton', 'portsmouth',
+  'reading', 'bath', 'york', 'exeter', 'dundee', 'swansea', 'coventry', 'hull',
+  'plymouth', 'derby', 'milton keynes',
+]
+
+const nonUkPlaces = [
+  'us', 'usa', 'united states', 'america', 'canada', 'australia', 'germany', 'france',
+  'spain', 'italy', 'india', 'china', 'japan', 'brazil', 'mexico', 'netherlands',
+  'switzerland', 'sweden', 'norway', 'denmark', 'finland', 'belgium', 'austria',
+  'ireland', 'new zealand', 'singapore', 'dubai', 'uae', 'hong kong',
+]
+
+export function isUKLead(location: string | null, sourceUrl: string | null): boolean {
+  const loc = (location || '').toLowerCase().trim()
+  const url = (sourceUrl || '').toLowerCase()
+
+  // If location mentions a UK place → keep
+  if (loc && ukPlaces.some(p => loc.includes(p))) return true
+  // If location mentions a non-UK place and no UK place → reject
+  if (loc && nonUkPlaces.some(p => loc.includes(p))) return false
+  // If source URL is UK-specific → keep
+  if (url.includes('.co.uk') || url.includes('reed.co.uk') || url.includes('cwjobs.co.uk') ||
+      url.includes('totaljobs.com') || url.includes('indeed.co.uk')) return true
+  // If location is empty or ambiguous → keep (assume UK)
+  return true
+}

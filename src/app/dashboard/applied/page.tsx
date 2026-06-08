@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-client'
 import toast from 'react-hot-toast'
 import type { Lead, Profile, Application } from '@/types'
-import { getSourceInfo, formatBudgetGBP, timeAgo, isNewLead, formatDate } from '@/lib/utils'
+import { getSourceInfo, formatBudgetGBP, timeAgo, isNewLead, formatDate, isUKLead } from '@/lib/utils'
 import { Send, Trophy, ArrowLeft, Check } from 'lucide-react'
 
 const statusConfig: Record<string, { label: string, color: string, bg: string }> = {
@@ -35,7 +35,7 @@ export default function AppliedPage() {
       const activeLeadIds = apps.filter(a => a.status !== 'saved').map(a => a.lead_id)
       if (activeLeadIds.length > 0) {
         const { data: leads } = await supabase.from('leads').select('*').in('id', activeLeadIds).eq('status', 'active')
-        setLeads(leads || [])
+        setLeads((leads || []).filter(lead => isUKLead(lead.client_location, lead.source_url)))
       }
       setLoading(false)
     }

@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase-client'
 import toast from 'react-hot-toast'
 import type { Lead, Profile, Application } from '@/types'
 import { computeQualityScore } from '@/types'
-import { getSourceInfo, formatBudgetGBP, timeAgo, isNewLead, formatDate } from '@/lib/utils'
+import { getSourceInfo, formatBudgetGBP, timeAgo, isNewLead, formatDate, isUKLead } from '@/lib/utils'
 import { Bookmark, ArrowLeft, ExternalLink } from 'lucide-react'
 
 export default function SavedPage() {
@@ -30,7 +30,7 @@ export default function SavedPage() {
       const savedLeadIds = apps.filter(a => a.status === 'saved').map(a => a.lead_id)
       if (savedLeadIds.length > 0) {
         const { data: leads } = await supabase.from('leads').select('*').in('id', savedLeadIds).eq('status', 'active')
-        setLeads(leads || [])
+        setLeads((leads || []).filter(lead => isUKLead(lead.client_location, lead.source_url)))
       }
       setLoading(false)
     }
@@ -39,9 +39,9 @@ export default function SavedPage() {
 
   const sortedLeads = useMemo(() => {
     return [...leads].sort((a, b) => {
-      const sa = computeQualityScore(a), sb = computeQualityScore(b)
-      if (sa !== sb) return sb - sa
-      return new Date(b.posted_date).getTime() - new Date(a.posted_date).getTime()
+      const da = new Date(b.posted_date).getTime() - new Date(a.posted_date).getTime()
+      if (da !== 0) return da
+      return computeQualityScore(b) - computeQualityScore(a)
     })
   }, [leads])
 
