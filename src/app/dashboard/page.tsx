@@ -229,9 +229,10 @@ export default function DashboardPage() {
             {aiStatus === 'searching' ? <><Loader2 size={10} className="animate-spin" /> AI searching</> : aiStatus === 'found' ? 'New leads found' : 'AI idle'}
           </div>
           <button onClick={() => doRefresh(false)} disabled={refreshing}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all disabled:opacity-40"
-            style={{ background: '#F5F5F7', color: '#6B7280' }}>
-            <RefreshCw size={11} className={refreshing ? 'animate-spin' : ''} />
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white disabled:opacity-60 transition-opacity hover:opacity-90"
+            style={{ background: '#1B6B4A' }}>
+            <RefreshCw size={12} className={refreshing ? 'animate-spin' : ''} />
+            <span className="hidden sm:inline">Refresh</span>
           </button>
         </div>
       </header>
