@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import PricingCard from '@/components/PricingCard'
+import SignupCounter from '@/components/SignupCounter'
 import type { PricingTier } from '@/types'
 import { Sparkles, Target, TrendingUp, Zap, CheckCircle, Quote } from 'lucide-react'
 
@@ -75,6 +76,9 @@ export default function HomePage() {
             Get Started Free
           </Link>
           <p className="mt-3 text-xs" style={{ color: '#9CA3AF' }}>No credit card required. Free plan available.</p>
+          <p className="mt-6 text-xs" style={{ color: '#AAB0BB' }}>
+            <SignupCounter /> freelancers already onboarded
+          </p>
         </div>
       </section>
 

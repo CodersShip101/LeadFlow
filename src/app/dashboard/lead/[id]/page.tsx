@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase-client'
 import toast from 'react-hot-toast'
 import type { Lead, Profile, Application } from '@/types'
 import { computeMatchExplanation } from '@/types'
-import { getSourceInfo, formatBudgetGBP } from '@/lib/utils'
+import { getSourceInfo, formatBudgetGBP, isNewLead, formatDate } from '@/lib/utils'
 import {
   ArrowLeft, Bookmark, Send, Trophy, ExternalLink,
   Lock, Check, Briefcase, MapPin, Calendar,
@@ -133,12 +133,15 @@ export default function LeadDetailPage() {
             <div className="flex items-center gap-3 min-w-0">
               <button
                 onClick={() => { if (!isFree && lead.source_url) window.open(lead.source_url, '_blank', 'noopener,noreferrer') }}
-                className="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-medium shrink-0 transition-opacity hover:opacity-80"
+                className="text-xs font-semibold px-2.5 py-1 rounded-lg shrink-0 transition-opacity hover:opacity-80"
                 style={{ background: source.bg, color: source.color }}
                 title={`View on ${source.label}`}
               >
-                {source.label[0]}
+                {source.label}
               </button>
+              {isNewLead(lead.posted_date) && (
+                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-lg shrink-0" style={{ background: '#EBF5F0', color: '#1B6B4A' }}>New</span>
+              )}
               <div className="min-w-0">
                 <h1 className="text-xl md:text-2xl font-bold truncate" style={{ color: '#1A1D23' }}>{lead.title}</h1>
                 <div className="flex items-center gap-2 mt-0.5 text-xs" style={{ color: '#AAB0BB' }}>

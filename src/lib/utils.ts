@@ -29,3 +29,13 @@ export function timeAgo(date: string) {
   if (hrs < 24) return `${hrs}h`
   return `${Math.floor(hrs / 24)}d`
 }
+
+export function isNewLead(date: string, hours = 48) {
+  return Date.now() - new Date(date).getTime() < hours * 3600000
+}
+
+export function formatDate(date: string) {
+  return new Date(date).toLocaleDateString('en-GB', {
+    day: 'numeric', month: 'short', year: 'numeric',
+  })
+}

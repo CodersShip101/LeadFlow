@@ -4,7 +4,7 @@ import { useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import type { Lead, Profile, Application } from '@/types'
 import { computeMatchExplanation } from '@/types'
-import { getSourceInfo, formatBudgetGBP, timeAgo } from '@/lib/utils'
+import { getSourceInfo, formatBudgetGBP, timeAgo, isNewLead, formatDate } from '@/lib/utils'
 import { Bookmark, Eye, ExternalLink } from 'lucide-react'
 
 interface LeadCardProps {
@@ -60,7 +60,7 @@ export default function LeadCard({ lead, profile, application, isFreeUser, index
           <span className="text-xs font-semibold flex-1 truncate" style={{ color: '#AAB0BB' }}>Pro Lead</span>
           {budget && <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: '#F2F3F7', color: '#AAB0BB' }}>{budget}</span>}
           <span className="text-[10px] px-1.5 py-0.5 rounded font-medium" style={{ background: '#F2F3F7', color: '#AAB0BB' }}>Pro only</span>
-          <span className="text-[10px]" style={{ color: '#C0C6D2' }}>{timeAgo(lead.posted_date)}</span>
+          <span className="text-[10px]" style={{ color: '#C0C6D2' }} title={formatDate(lead.posted_date)}>{timeAgo(lead.posted_date)}</span>
         </div>
       </div>
     )
@@ -89,12 +89,15 @@ export default function LeadCard({ lead, profile, application, isFreeUser, index
       <div className="flex items-center gap-2">
         <button
           onClick={e => { e.stopPropagation(); if (isFreeUser) { onUpgrade(); return } if (lead.source_url) window.open(lead.source_url, '_blank', 'noopener,noreferrer') }}
-          className="w-[22px] h-[22px] rounded flex items-center justify-center text-[8px] font-medium shrink-0 transition-opacity hover:opacity-80"
+          className="text-[9px] font-semibold px-1.5 py-0.5 rounded shrink-0 transition-opacity hover:opacity-80"
           style={{ background: src.bg, color: src.color }}
           title={`View on ${src.label}`}
         >
-          {src.label[0]}
+          {src.label}
         </button>
+        {isNewLead(lead.posted_date) && (
+          <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded shrink-0" style={{ background: '#EBF5F0', color: '#1B6B4A' }}>New</span>
+        )}
         <h3
           className="text-xs font-bold flex-1 truncate"
           style={{ color: '#1A1D23', fontWeight: 700, fontSize: '13px' }}
@@ -164,7 +167,7 @@ export default function LeadCard({ lead, profile, application, isFreeUser, index
           >
             {isInterested ? 'Interested ✓' : 'Interested'}
           </button>
-          <span className="text-[10px]" style={{ color: '#B0B6C2' }}>{timeAgo(lead.posted_date)}</span>
+          <span className="text-[10px]" style={{ color: '#B0B6C2' }} title={formatDate(lead.posted_date)}>{timeAgo(lead.posted_date)}</span>
         </div>
       </div>
     </div>

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-client'
 import toast from 'react-hot-toast'
 import type { Lead, Profile, Application } from '@/types'
-import { getSourceInfo, formatBudgetGBP, timeAgo } from '@/lib/utils'
+import { getSourceInfo, formatBudgetGBP, timeAgo, isNewLead, formatDate } from '@/lib/utils'
 import { Send, Trophy, ArrowLeft, Check } from 'lucide-react'
 
 const statusConfig: Record<string, { label: string, color: string, bg: string }> = {
@@ -155,9 +155,12 @@ export default function AppliedPage() {
                   onClick={() => router.push(`/dashboard/lead/${lead.id}`)}
                 >
                   <div className="flex items-start gap-3">
-                    <button onClick={e => { e.stopPropagation(); if (lead.source_url) window.open(lead.source_url, '_blank', 'noopener,noreferrer') }} className="w-7 h-7 rounded-lg flex items-center justify-center text-[10px] font-medium shrink-0 transition-opacity hover:opacity-80" style={{ background: source.bg, color: source.color }} title={`View on ${source.label}`}>{source.label[0]}</button>
+                    <button onClick={e => { e.stopPropagation(); if (lead.source_url) window.open(lead.source_url, '_blank', 'noopener,noreferrer') }} className="text-[9px] font-semibold px-1.5 py-0.5 rounded shrink-0 transition-opacity hover:opacity-80" style={{ background: source.bg, color: source.color }} title={`View on ${source.label}`}>{source.label}</button>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
+                        {isNewLead(lead.posted_date) && (
+                          <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded shrink-0" style={{ background: '#EBF5F0', color: '#1B6B4A' }}>New</span>
+                        )}
                         <h3 className="text-sm font-semibold truncate" style={{ color: '#1A1D23' }}>{lead.title}</h3>
                         {app?.status && (
                           <span className="text-[10px] font-medium px-1.5 py-0.5 rounded" style={{ background: statusConfig[app.status]?.bg, color: statusConfig[app.status]?.color }}>
@@ -196,7 +199,7 @@ export default function AppliedPage() {
                         </button>
                       )}
                       {app && (
-                        <span className="text-[10px] whitespace-nowrap" style={{ color: '#AAB0BB' }}>
+                        <span className="text-[10px] whitespace-nowrap" style={{ color: '#AAB0BB' }} title={formatDate(lead.posted_date)}>
                           {timeAgo(app.created_at)}
                         </span>
                       )}
