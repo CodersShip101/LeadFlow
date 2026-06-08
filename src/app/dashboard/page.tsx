@@ -11,7 +11,7 @@ import LeadCard from '@/components/LeadCard'
 import UpgradeModal from '@/components/UpgradeModal'
 import {
   Trophy, RefreshCw, Search, X, Filter, Sparkles,
-  ChevronLeft, ChevronRight,
+  ChevronLeft, ChevronRight, Loader2,
   Send, Lock, Bookmark, AlertTriangle
 } from 'lucide-react'
 
@@ -39,6 +39,7 @@ export default function DashboardPage() {
   const [budgetFilter, setBudgetFilter] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
   const [refreshing, setRefreshing] = useState(false)
+  const [aiStatus, setAiStatus] = useState<'idle' | 'searching' | 'found'>('idle')
   const [lastRefresh, setLastRefresh] = useState<number>(() => typeof window !== 'undefined' ? parseInt(localStorage.getItem('lr') || '0') : 0)
   const [upgradeModal, setUpgradeModal] = useState(false)
   const [limitModal, setLimitModal] = useState(false)
@@ -137,25 +138,36 @@ export default function DashboardPage() {
     toast.success('Added')
   }, [appMap, updateApp, isFree, applications])
 
-  const doRefresh = useCallback(async () => {
+  const doRefresh = useCallback(async (silent = false) => {
     const now = Date.now()
-    if (now - lastRefresh < 3600000) {
-      const m = Math.ceil((3600000 - (now - lastRefresh)) / 60000)
+    if (now - lastRefresh < 300000 && !silent) {
+      const m = Math.ceil((300000 - (now - lastRefresh)) / 60000)
       toast.error(`${m}min until next refresh`); return
     }
+    if (now - lastRefresh < 60000) return
     setRefreshing(true)
+    setAiStatus('searching')
     try {
       const r = await fetch('/api/scrape-leads', { method: 'POST' })
       const d = await r.json()
-      if (d.inserted > 0) toast.success(`${d.inserted} new leads`)
-      else toast.success('Up to date')
       localStorage.setItem('lr', String(now))
       setLastRefresh(now)
       const { data: l } = await supabase.from('leads').select('*').eq('status', 'active').order('posted_date', { ascending: false })
       setLeads((l || []).filter(lead => isUKLead(lead.client_location, lead.source_url)))
-    } catch { toast.error('Failed') }
+      if (d.inserted > 0) { setAiStatus('found'); toast.success(`${d.inserted} new lead${d.inserted > 1 ? 's' : ''} found`); setTimeout(() => setAiStatus('idle'), 3000) }
+      else { setAiStatus('idle') }
+    } catch { setAiStatus('idle') }
     setRefreshing(false)
   }, [lastRefresh, supabase])
+
+  // Auto-refresh: on mount, on interval, on tab focus
+  useEffect(() => {
+    doRefresh(true)
+    const interval = setInterval(() => doRefresh(true), 600000)
+    const onFocus = () => doRefresh(true)
+    window.addEventListener('focus', onFocus)
+    return () => { clearInterval(interval); window.removeEventListener('focus', onFocus) }
+  }, [])
 
   const allSkills = useMemo(() => {
     const s = new Set<string>()
@@ -212,12 +224,16 @@ export default function DashboardPage() {
           <option value="2500">£2.5k+</option>
           <option value="5000">£5k+</option>
         </select>
-        <button onClick={doRefresh} disabled={refreshing}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-white disabled:opacity-60 transition-opacity hover:opacity-90"
-          style={{ background: '#1B6B4A' }}>
-          <RefreshCw size={12} className={refreshing ? 'animate-spin' : ''} />
-          <span className="hidden sm:inline">{refreshing ? '' : 'Refresh'}</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <div className="hidden sm:flex items-center gap-1.5 text-[10px] font-medium" style={{ color: aiStatus === 'searching' ? '#1B6B4A' : aiStatus === 'found' ? '#D97706' : '#AAB0BB' }}>
+            {aiStatus === 'searching' ? <><Loader2 size={10} className="animate-spin" /> AI searching</> : aiStatus === 'found' ? 'New leads found' : 'AI idle'}
+          </div>
+          <button onClick={() => doRefresh(false)} disabled={refreshing}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all disabled:opacity-40"
+            style={{ background: '#F5F5F7', color: '#6B7280' }}>
+            <RefreshCw size={11} className={refreshing ? 'animate-spin' : ''} />
+          </button>
+        </div>
       </header>
 
       {/* Stat cards */}
@@ -286,8 +302,10 @@ export default function DashboardPage() {
                 <button onClick={() => { setSearchQuery(''); setFilterSkill(''); setFilterType(''); setBudgetFilter('') }}
                   className="mt-4 px-4 py-2 rounded-lg text-xs font-semibold text-white" style={{ background: '#1B6B4A' }}>Clear filters</button>
               ) : (
-                <button onClick={doRefresh} disabled={refreshing}
-                  className="mt-4 px-4 py-2 rounded-lg text-xs font-semibold text-white" style={{ background: '#1B6B4A' }}>Refresh leads</button>
+                <div className="mt-4 flex items-center gap-2 text-xs" style={{ color: '#AAB0BB' }}>
+                  <Loader2 size={12} className="animate-spin" style={{ color: '#1B6B4A' }} />
+                  AI is searching for UK leads...
+                </div>
               )}
             </div>
           ) : (
