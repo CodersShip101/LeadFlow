@@ -5,32 +5,8 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-client'
 import toast from 'react-hot-toast'
 import type { Lead, Profile, Application } from '@/types'
+import { getSourceInfo, formatBudgetGBP, timeAgo } from '@/lib/utils'
 import { Send, Trophy, ArrowLeft, Check } from 'lucide-react'
-
-function timeAgo(date: string) {
-  const diff = Date.now() - new Date(date).getTime()
-  const mins = Math.floor(diff / 60000)
-  if (mins < 60) return `${mins}m ago`
-  const hrs = Math.floor(mins / 60)
-  if (hrs < 24) return `${hrs}h ago`
-  const days = Math.floor(hrs / 24)
-  return `${days}d ago`
-}
-
-function getSourceInfo(url: string | null) {
-  if (!url) return { label: 'Remote', color: '#7C3AED', bg: '#F0EFFE' }
-  if (url.includes('reddit')) return { label: 'Reddit', color: '#D97706', bg: '#FEF3E2' }
-  if (url.includes('remotive')) return { label: 'Remotive', color: '#1B6B4A', bg: '#EBF5F0' }
-  if (url.includes('weworkremotely')) return { label: 'WWR', color: '#2563EB', bg: '#EBF1FC' }
-  return { label: 'Remote', color: '#7C3AED', bg: '#F0EFFE' }
-}
-
-function formatBudgetGBP(min: number | null, max: number | null) {
-  if (!min && !max) return null
-  if (min && max) return `£${min}-${max}`
-  if (min) return `From £${min}`
-  return `Up to £${max}`
-}
 
 const statusConfig: Record<string, { label: string, color: string, bg: string }> = {
   interested: { label: 'Interested', color: '#1B6B4A', bg: '#EBF5F0' },
@@ -179,7 +155,7 @@ export default function AppliedPage() {
                   onClick={() => router.push(`/dashboard/lead/${lead.id}`)}
                 >
                   <div className="flex items-start gap-3">
-                    <div className="w-7 h-7 rounded-lg flex items-center justify-center text-[10px] font-medium shrink-0" style={{ background: source.bg, color: source.color }}>{source.label[0]}</div>
+                    <button onClick={e => { e.stopPropagation(); if (lead.source_url) window.open(lead.source_url, '_blank', 'noopener,noreferrer') }} className="w-7 h-7 rounded-lg flex items-center justify-center text-[10px] font-medium shrink-0 transition-opacity hover:opacity-80" style={{ background: source.bg, color: source.color }} title={`View on ${source.label}`}>{source.label[0]}</button>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <h3 className="text-sm font-semibold truncate" style={{ color: '#1A1D23' }}>{lead.title}</h3>

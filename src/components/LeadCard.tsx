@@ -4,7 +4,8 @@ import { useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import type { Lead, Profile, Application } from '@/types'
 import { computeMatchExplanation } from '@/types'
-import { Bookmark, Eye } from 'lucide-react'
+import { getSourceInfo, formatBudgetGBP, timeAgo } from '@/lib/utils'
+import { Bookmark, Eye, ExternalLink } from 'lucide-react'
 
 interface LeadCardProps {
   lead: Lead
@@ -15,30 +16,6 @@ interface LeadCardProps {
   onBookmark: (id: string) => void
   onInterest: (id: string) => void
   onUpgrade: () => void
-}
-
-function getSourceInfo(url: string | null) {
-  if (!url) return { label: 'Remote', color: '#7C3AED', bg: '#F0EFFE' }
-  if (url?.includes('reddit')) return { label: 'Reddit', color: '#EA580C', bg: '#FEF0EB' }
-  if (url?.includes('remotive')) return { label: 'Remotive', color: '#1B6B4A', bg: '#EBF5F0' }
-  if (url?.includes('weworkremotely')) return { label: 'WWR', color: '#2563EB', bg: '#EBF1FC' }
-  return { label: 'Remote', color: '#7C3AED', bg: '#F0EFFE' }
-}
-
-function formatBudgetGBP(min: number | null, max: number | null) {
-  if (!min && !max) return null
-  if (min && max) return `£${min}—${max}`
-  if (min) return `From £${min}`
-  return `Up to £${max}`
-}
-
-function timeAgo(date: string) {
-  const diff = Date.now() - new Date(date).getTime()
-  const mins = Math.floor(diff / 60000)
-  if (mins < 60) return `${mins}m`
-  const hrs = Math.floor(mins / 60)
-  if (hrs < 24) return `${hrs}h`
-  return `${Math.floor(hrs / 24)}d`
 }
 
 export default function LeadCard({ lead, profile, application, isFreeUser, index = 0, onBookmark, onInterest, onUpgrade }: LeadCardProps) {
@@ -110,12 +87,14 @@ export default function LeadCard({ lead, profile, application, isFreeUser, index
     >
       {/* Row 1: source icon + title + bookmark + score badge */}
       <div className="flex items-center gap-2">
-        <div
-          className="w-[22px] h-[22px] rounded flex items-center justify-center text-[8px] font-medium shrink-0"
+        <button
+          onClick={e => { e.stopPropagation(); if (isFreeUser) { onUpgrade(); return } if (lead.source_url) window.open(lead.source_url, '_blank', 'noopener,noreferrer') }}
+          className="w-[22px] h-[22px] rounded flex items-center justify-center text-[8px] font-medium shrink-0 transition-opacity hover:opacity-80"
           style={{ background: src.bg, color: src.color }}
+          title={`View on ${src.label}`}
         >
           {src.label[0]}
-        </div>
+        </button>
         <h3
           className="text-xs font-bold flex-1 truncate"
           style={{ color: '#1A1D23', fontWeight: 700, fontSize: '13px' }}

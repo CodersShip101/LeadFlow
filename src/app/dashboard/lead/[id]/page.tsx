@@ -6,26 +6,12 @@ import { createClient } from '@/lib/supabase-client'
 import toast from 'react-hot-toast'
 import type { Lead, Profile, Application } from '@/types'
 import { computeMatchExplanation } from '@/types'
+import { getSourceInfo, formatBudgetGBP } from '@/lib/utils'
 import {
   ArrowLeft, Bookmark, Send, Trophy, ExternalLink,
-  Lock, Star, Check, Briefcase, MapPin, Calendar,
-  Sparkles, ThumbsUp, ThumbsDown, HelpCircle
+  Lock, Check, Briefcase, MapPin, Calendar,
+  ThumbsUp, ThumbsDown, HelpCircle
 } from 'lucide-react'
-
-function getSourceInfo(url: string | null) {
-  if (!url) return { label: 'Remote', color: '#7C3AED', bg: '#F0EFFE' }
-  if (url.includes('reddit')) return { label: 'Reddit', color: '#D97706', bg: '#FEF3E2' }
-  if (url.includes('remotive')) return { label: 'Remotive', color: '#1B6B4A', bg: '#EBF5F0' }
-  if (url.includes('weworkremotely')) return { label: 'WWR', color: '#2563EB', bg: '#EBF1FC' }
-  return { label: 'Remote', color: '#7C3AED', bg: '#F0EFFE' }
-}
-
-function formatBudgetGBP(min: number | null, max: number | null) {
-  if (!min && !max) return null
-  if (min && max) return `£${min} — £${max}`
-  if (min) return `From £${min}`
-  return `Up to £${max}`
-}
 
 const statusConfig: Record<string, { label: string, color: string, bg: string }> = {
   saved:      { label: 'Saved', color: '#7C3AED', bg: '#F0EFFE' },
@@ -145,9 +131,14 @@ export default function LeadDetailPage() {
           {/* Header */}
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-center gap-3 min-w-0">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-medium shrink-0" style={{ background: source.bg, color: source.color }}>
+              <button
+                onClick={() => { if (!isFree && lead.source_url) window.open(lead.source_url, '_blank', 'noopener,noreferrer') }}
+                className="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-medium shrink-0 transition-opacity hover:opacity-80"
+                style={{ background: source.bg, color: source.color }}
+                title={`View on ${source.label}`}
+              >
                 {source.label[0]}
-              </div>
+              </button>
               <div className="min-w-0">
                 <h1 className="text-xl md:text-2xl font-bold truncate" style={{ color: '#1A1D23' }}>{lead.title}</h1>
                 <div className="flex items-center gap-2 mt-0.5 text-xs" style={{ color: '#AAB0BB' }}>
