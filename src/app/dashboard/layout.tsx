@@ -208,7 +208,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </div>
 
       {/* ── MOBILE BOTTOM NAV ── */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 h-14 bg-white border-t flex items-center justify-around z-40" style={{ borderColor: '#ECEEF2' }}>
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t flex items-center justify-around z-40 pb-safe" style={{ borderColor: '#ECEEF2', minHeight: '56px', paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
         {[
           { icon: 'ti-layout-dashboard', label: 'Feed',     href: '/dashboard' },
           { icon: 'ti-bookmark',         label: 'Saved',    href: '/dashboard/saved' },
@@ -218,10 +218,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           const active = isActive(item.href)
           return (
             <button key={item.label} onClick={() => router.push(item.href)}
-              className="flex flex-col items-center gap-0.5 px-4 py-1"
+              className="flex flex-col items-center gap-0.5 px-4 py-2 min-h-[48px] min-w-[72px] transition-all active:scale-[0.97]"
               style={{ color: active ? '#1B6B4A' : '#AAB0BB' }}>
-              <i className={`ti ${item.icon}`} style={{ fontSize: '17px' }} />
-              <span className="text-[9px] font-medium">{item.label}</span>
+              <i className={`ti ${item.icon}`} style={{ fontSize: '20px' }} />
+              <span className="text-[10px] font-medium">{item.label}</span>
             </button>
           )
         })}
