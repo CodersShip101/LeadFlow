@@ -7,20 +7,25 @@ import toast from 'react-hot-toast'
 import type { Lead, Profile, Application } from '@/types'
 import { getSourceInfo, formatBudgetGBP, timeAgo, isNewLead, formatDate, isUKLead } from '@/lib/utils'
 
-
-const statusConfig: Record<string, { label: string, color: string, bg: string }> = {
-  interested: { label: 'Interested', color: '#1B6B4A', bg: '#EBF5F0' },
-  applied:    { label: 'Applied', color: '#D97706', bg: '#FEF3E2' },
-  hired:      { label: 'Hired', color: '#059669', bg: '#ECFDF5' },
+interface Column {
+  key: string
+  label: string
+  icon: string
+  accent: string
+  bg: string
+  border: string
 }
 
-type Tab = 'all' | 'interested' | 'applied' | 'hired'
+const columns: Column[] = [
+  { key: 'interested', label: 'Interested', icon: 'ti ti-heart', accent: '#1B6B4A', bg: '#F0FDF7', border: '#BBE0CE' },
+  { key: 'applied', label: 'Applied', icon: 'ti ti-send', accent: '#D97706', bg: '#FEF3E2', border: '#FCD68A' },
+  { key: 'hired', label: 'Won', icon: 'ti ti-trophy', accent: '#059669', bg: '#ECFDF5', border: '#A7F3D0' },
+]
 
-export default function AppliedPage() {
+export default function PipelinePage() {
   const [leads, setLeads] = useState<Lead[]>([])
   const [applications, setApplications] = useState<Application[]>([])
   const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState<Tab>('all')
   const supabase = createClient()
   const router = useRouter()
 
@@ -48,16 +53,19 @@ export default function AppliedPage() {
     return m
   }, [applications])
 
-  const filteredLeads = useMemo(() => {
-    let list = leads
-    if (activeTab !== 'all') {
-      list = list.filter(lead => appMap.get(lead.id)?.status === activeTab)
-    }
-    return list.sort((a, b) => {
-      const appA = appMap.get(a.id), appB = appMap.get(b.id)
-      return (appB ? new Date(appB.created_at).getTime() : 0) - (appA ? new Date(appA.created_at).getTime() : 0)
+  const grouped = useMemo(() => {
+    const groups: Record<string, Lead[]> = { interested: [], applied: [], hired: [] }
+    leads.forEach(lead => {
+      const app = appMap.get(lead.id)
+      if (app && app.status !== 'saved' && groups[app.status]) {
+        groups[app.status].push(lead)
+      }
     })
-  }, [leads, activeTab, appMap])
+    return groups
+  }, [leads, appMap])
+
+  const wonCount = grouped.hired.length
+  const totalActive = applications.filter(a => a.status !== 'saved').length
 
   const updateApplication = useCallback(async (leadId: string, status: string) => {
     const res = await fetch('/api/applications', {
@@ -71,15 +79,9 @@ export default function AppliedPage() {
         const filtered = prev.filter(a => a.lead_id !== leadId)
         return [...filtered, app]
       })
-      toast.success(status === 'applied' ? 'Marked as applied' : 'Marked as hired!')
+      toast.success(status === 'applied' ? 'Marked as applied' : status === 'hired' ? 'Nice — marked as hired!' : 'Marked as interested')
     }
   }, [])
-
-  const counts = useMemo(() => ({
-    interested: applications.filter(a => a.status === 'interested').length,
-    applied: applications.filter(a => a.status === 'applied').length,
-    hired: applications.filter(a => a.status === 'hired').length,
-  }), [applications])
 
   if (loading) return (
     <div className="flex items-center justify-center min-h-screen" style={{ background: '#F2F3F7' }}>
@@ -89,121 +91,103 @@ export default function AppliedPage() {
 
   return (
     <div className="flex-1 pb-20 md:pb-0" style={{ background: '#F2F3F7' }}>
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 md:py-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 md:py-8">
         <button onClick={() => router.push('/dashboard')} className="btn-back mb-4">
           <i className="ti ti-arrow-left" /> Dashboard
         </button>
-        <h1 className="text-xl font-bold mb-4" style={{ color: '#1A1D23' }}>Applications</h1>
 
-        <div className="flex items-center gap-2 mb-4" style={{ borderBottom: '1px solid #ECEEF2' }}>
-          {[
-            { key: 'all' as Tab, label: 'All', count: applications.filter(a => a.status !== 'saved').length },
-            { key: 'interested' as Tab, label: 'Interested', count: counts.interested },
-            { key: 'applied' as Tab, label: 'Applied', count: counts.applied },
-            { key: 'hired' as Tab, label: 'Won', count: counts.hired },
-          ].map(tab => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
-              className="px-4 py-2 text-sm font-medium transition-all -mb-px"
-              style={{
-                color: activeTab === tab.key ? '#1B6B4A' : '#6B7280',
-                borderBottom: activeTab === tab.key ? '2px solid #1B6B4A' : '2px solid transparent',
-              }}
-            >
-              {tab.label}
-              {tab.count > 0 && (
-                <span className="ml-1.5 text-xs" style={{ color: activeTab === tab.key ? '#1B6B4A' : '#AAB0BB' }}>({tab.count})</span>
-              )}
-            </button>
-          ))}
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-xl font-bold" style={{ color: '#1A1D23' }}>Pipeline</h1>
+            <p className="text-xs mt-0.5" style={{ color: '#AAB0BB' }}>{totalActive} active lead{totalActive !== 1 ? 's' : ''}</p>
+          </div>
+          {wonCount > 0 && (
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg" style={{ background: '#ECFDF5' }}>
+              <i className="ti ti-trophy" style={{ fontSize: '14px', color: '#059669' }} />
+              <span className="text-xs font-semibold" style={{ color: '#059669' }}>{wonCount} won</span>
+            </div>
+          )}
         </div>
 
-        {filteredLeads.length === 0 ? (
+        {totalActive === 0 ? (
           <div className="text-center py-20" style={{ color: '#AAB0BB' }}>
-            <div className="flex justify-center mb-3">
-              <i className={`ti ${activeTab === 'all' ? 'ti-send' : activeTab === 'hired' ? 'ti-trophy' : 'ti-check'}`} style={{ fontSize: '28px', color: '#AAB0BB' }} />
-            </div>
-            <div className="text-sm font-medium">
-              {activeTab === 'all' ? "You haven't expressed interest in any leads yet" :
-               activeTab === 'interested' ? 'No leads marked as interested' :
-               activeTab === 'applied' ? 'No applications yet' : 'No wins yet'}
-            </div>
-            <div className="text-xs mt-1">
-              {activeTab === 'all' ? 'Browse the feed and click Interested on leads you like' :
-               activeTab === 'interested' ? '' :
-               activeTab === 'applied' ? 'Click "Mark as Applied" on leads you\'ve pursued' :
-               'Mark leads as hired when you land them!'}
-            </div>
-            <button
-              onClick={() => router.push('/dashboard')}
-              className="btn-int on text-sm px-4 py-2 mt-4"
-            >
-              Go to feed
-            </button>
+            <i className="ti ti-send" style={{ fontSize: '28px', color: '#AAB0BB', display: 'block', margin: '0 auto 12px' }} />
+            <div className="text-sm font-medium">No leads in your pipeline yet</div>
+            <div className="text-xs mt-1">Browse the feed and click Interested on leads you like</div>
+            <button onClick={() => router.push('/dashboard')} className="btn-int on text-sm px-4 py-2 mt-4">Go to feed</button>
           </div>
         ) : (
-          <div className="space-y-2">
-            {filteredLeads.map(lead => {
-              const source = getSourceInfo(lead.source_url)
-              const app = appMap.get(lead.id)
+          <div className="grid md:grid-cols-3 gap-4" style={{ alignItems: 'start' }}>
+            {columns.map(col => {
+              const colLeads = grouped[col.key] || []
               return (
-                <div
-                  key={lead.id}
-                  className="bg-white rounded-lg px-4 py-3 transition-all cursor-pointer"
-                  style={{ border: '1px solid #ECEEF2' }}
-                  onClick={() => router.push(`/dashboard/lead/${lead.id}`)}
-                >
-                  <div className="flex items-start gap-3">
-                    <button onClick={e => { e.stopPropagation(); if (lead.source_url) window.open(lead.source_url, '_blank', 'noopener,noreferrer') }} className="text-[9px] font-semibold px-1.5 py-0.5 rounded shrink-0 transition-opacity hover:opacity-80" style={{ background: source.bg, color: source.color }} title={`View on ${source.label}`}>{source.label}</button>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        {isNewLead(lead.posted_date) && (
-                          <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded shrink-0" style={{ background: '#EBF5F0', color: '#1B6B4A' }}>New</span>
-                        )}
-                        <h3 className="text-sm font-semibold truncate" style={{ color: '#1A1D23' }}>{lead.title}</h3>
-                        {app?.status && (
-                          <span className="text-[10px] font-medium px-1.5 py-0.5 rounded" style={{ background: statusConfig[app.status]?.bg, color: statusConfig[app.status]?.color }}>
-                            {statusConfig[app.status]?.label}
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-xs line-clamp-1 mt-0.5" style={{ color: '#6B7280' }}>{lead.description}</p>
-                      <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
-                        {formatBudgetGBP(lead.budget_min, lead.budget_max) && (
-                          <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: '#F2F3F7', color: '#6B7280' }}>{formatBudgetGBP(lead.budget_min, lead.budget_max)}</span>
-                        )}
-                        {lead.skills_required?.slice(0, 2).map(s => (
-                          <span key={s} className="text-[10px] px-1.5 py-0.5 rounded font-medium" style={{ background: '#EBF1FC', color: '#2563EB' }}>{s}</span>
-                        ))}
-                        <span className="text-[10px]" style={{ color: '#AAB0BB' }}>{timeAgo(lead.posted_date)}</span>
-                      </div>
-                    </div>
-                    <div className="flex flex-col gap-1.5 shrink-0">
-                      {app?.status === 'interested' && (
-                        <button
-                          onClick={e => { e.stopPropagation(); updateApplication(lead.id, 'applied') }}
-                          className="text-[10px] font-medium px-2 py-1 rounded whitespace-nowrap"
-                          style={{ background: '#FEF3E2', color: '#D97706' }}
-                        >
-                          Mark applied
-                        </button>
-                      )}
-                      {app?.status === 'applied' && (
-                        <button
-                          onClick={e => { e.stopPropagation(); updateApplication(lead.id, 'hired') }}
-                          className="text-[10px] font-medium px-2 py-1 rounded whitespace-nowrap"
-                          style={{ background: '#EBF5F0', color: '#1B6B4A' }}
-                        >
-                          Mark hired
-                        </button>
-                      )}
-                      {app && (
-                        <span className="text-[10px] whitespace-nowrap" style={{ color: '#AAB0BB' }} title={formatDate(lead.posted_date)}>
-                          {timeAgo(app.created_at)}
-                        </span>
-                      )}
-                    </div>
+                <div key={col.key} className="rounded-xl bg-white overflow-hidden" style={{ border: '1px solid #ECEEF2' }}>
+                  {/* Column header */}
+                  <div className="flex items-center gap-2 px-4 py-2.5 border-b" style={{ borderColor: col.border, background: col.bg }}>
+                    <i className={col.icon} style={{ fontSize: '14px', color: col.accent }} />
+                    <span className="text-xs font-semibold" style={{ color: col.accent }}>{col.label}</span>
+                    <span className="ml-auto text-[10px] font-medium px-1.5 py-0.5 rounded-full" style={{ background: 'white', color: col.accent }}>{colLeads.length}</span>
+                  </div>
+
+                  {/* Cards */}
+                  <div className="p-2.5 space-y-2 min-h-[120px]">
+                    {colLeads.length === 0 ? (
+                      <div className="text-center py-8 text-[11px]" style={{ color: '#C0C6D2' }}>No leads yet</div>
+                    ) : (
+                      colLeads.map(lead => {
+                        const source = getSourceInfo(lead.source_url)
+                        const app = appMap.get(lead.id)
+                        return (
+                          <div
+                            key={lead.id}
+                            className="rounded-lg px-3 py-2.5 cursor-pointer transition-all hover:shadow-sm active:scale-[0.99]"
+                            style={{ border: '1px solid #ECEEF2', background: '#FFFFFF' }}
+                            onClick={() => router.push(`/dashboard/lead/${lead.id}`)}
+                          >
+                            <div className="flex items-center gap-1.5 mb-1.5">
+                              <button
+                                onClick={e => { e.stopPropagation(); if (lead.source_url) window.open(lead.source_url, '_blank', 'noopener,noreferrer') }}
+                                className="text-[8px] font-semibold px-1.5 py-0.5 rounded shrink-0 transition-opacity hover:opacity-80"
+                                style={{ background: source.bg, color: source.color }}
+                                title={`View on ${source.label}`}
+                              >{source.label}</button>
+                              {isNewLead(lead.posted_date) && (
+                                <span className="text-[8px] font-semibold px-1.5 py-0.5 rounded shrink-0" style={{ background: '#EBF5F0', color: '#1B6B4A' }}>New</span>
+                              )}
+                              <span className="ml-auto text-[9px]" style={{ color: '#AAB0BB' }}>{timeAgo(lead.posted_date)}</span>
+                            </div>
+                            <div className="text-xs font-semibold leading-snug line-clamp-1" style={{ color: '#1A1D23' }}>{lead.title}</div>
+                            {formatBudgetGBP(lead.budget_min, lead.budget_max) && (
+                              <div className="text-[10px] font-medium mt-1" style={{ color: '#6B7280' }}>{formatBudgetGBP(lead.budget_min, lead.budget_max)}</div>
+                            )}
+                            <div className="flex flex-wrap gap-1 mt-1.5">
+                              {lead.skills_required?.slice(0, 2).map(s => (
+                                <span key={s} className="text-[8px] px-1 py-0.5 rounded" style={{ background: '#F5F5F7', color: '#AAB0BB' }}>{s}</span>
+                              ))}
+                            </div>
+                            {/* Action button */}
+                            <div className="mt-2 pt-2 border-t" style={{ borderColor: '#F2F3F7' }}>
+                              {col.key === 'interested' && (
+                                <button onClick={e => { e.stopPropagation(); updateApplication(lead.id, 'applied') }}
+                                  className="w-full text-[10px] font-medium py-1.5 rounded transition-all hover:opacity-80 active:scale-[0.97]"
+                                  style={{ background: '#FEF3E2', color: '#D97706' }}>Mark as Applied</button>
+                              )}
+                              {col.key === 'applied' && (
+                                <button onClick={e => { e.stopPropagation(); updateApplication(lead.id, 'hired') }}
+                                  className="w-full text-[10px] font-medium py-1.5 rounded transition-all hover:opacity-80 active:scale-[0.97]"
+                                  style={{ background: '#ECFDF5', color: '#059669' }}>Mark as Won</button>
+                              )}
+                              {col.key === 'hired' && (
+                                <div className="flex items-center gap-1.5 justify-center text-[10px] font-medium py-1" style={{ color: '#059669' }}>
+                                  <i className="ti ti-check" style={{ fontSize: '11px' }} /> Won
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )
+                      })
+                    )}
                   </div>
                 </div>
               )

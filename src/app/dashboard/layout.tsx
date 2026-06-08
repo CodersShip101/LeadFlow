@@ -50,7 +50,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const railItems = [
     { icon: 'ti-layout-dashboard', label: 'Feed',          href: '/dashboard' },
     { icon: 'ti-bookmark',         label: 'Saved',         href: '/dashboard/saved' },
-    { icon: 'ti-send',            label: 'Applications',  href: '/dashboard/applied' },
+    { icon: 'ti-send',            label: 'Pipeline',  href: '/dashboard/applied' },
     { icon: 'ti-chart-line',       label: 'Analytics',     href: '/dashboard/analytics' },
     { icon: 'ti-calendar',         label: 'Calendar',      href: '/dashboard/calendar' },
     { icon: 'ti-settings',         label: 'Settings',      href: '/dashboard/profile' },
@@ -62,7 +62,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       items: [
         { icon: 'ti-layout-dashboard', label: 'Feed',          href: '/dashboard' },
         { icon: 'ti-bookmark',         label: 'Saved',         href: '/dashboard/saved' },
-        { icon: 'ti-send',            label: 'Applications',  href: '/dashboard/applied' },
+        { icon: 'ti-send',            label: 'Pipeline',  href: '/dashboard/applied' },
         { icon: 'ti-chart-line',       label: 'Analytics',     href: '/dashboard/analytics' },
       ],
     },
@@ -212,7 +212,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {[
           { icon: 'ti-layout-dashboard', label: 'Feed',     href: '/dashboard' },
           { icon: 'ti-bookmark',         label: 'Saved',    href: '/dashboard/saved' },
-          { icon: 'ti-send',             label: 'Applied',   href: '/dashboard/applied' },
+          { icon: 'ti-send',             label: 'Pipeline',   href: '/dashboard/applied' },
           { icon: 'ti-settings',         label: 'Profile',   href: '/dashboard/profile' },
         ].map(item => {
           const active = isActive(item.href)
