@@ -2,7 +2,7 @@ import Link from 'next/link'
 import PricingCard from '@/components/PricingCard'
 import SignupCounter from '@/components/SignupCounter'
 import type { PricingTier } from '@/types'
-import { Sparkles, Target, TrendingUp, Zap, CheckCircle, Quote } from 'lucide-react'
+import { Target, Zap, CheckCircle, Quote } from 'lucide-react'
 
 const pricingTiers: PricingTier[] = [
   {
@@ -58,19 +58,19 @@ export default function HomePage() {
   return (
     <div>
       {/* Hero */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 text-center">
-        <h1 className="text-5xl sm:text-6xl font-bold tracking-tight" style={{ color: '#1A1D23' }}>
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-0 text-center">
+        <h1 className="text-5xl sm:text-6xl font-bold tracking-tight leading-[1.1]" style={{ color: '#1A1D23' }}>
           Stop chasing clients.<br />
           <span style={{ color: '#1B6B4A' }}>Start choosing them.</span>
         </h1>
-        <p className="mt-6 text-lg max-w-2xl mx-auto" style={{ color: '#6B7280' }}>
+        <p className="mt-6 text-lg max-w-2xl mx-auto leading-relaxed" style={{ color: '#6B7280' }}>
           We find freelance leads that match your skills and budget. You pick the ones you want.
           No more cold pitching or scrolling through job boards.
         </p>
         <div className="mt-10">
           <Link
             href="/auth/signup"
-            className="text-white px-8 py-3 rounded-lg text-lg font-semibold hover:opacity-90 transition-opacity"
+            className="inline-block text-white px-8 py-3 rounded-lg text-lg font-semibold transition-all duration-150 hover:opacity-90 active:scale-[0.98]"
             style={{ background: '#1B6B4A' }}
           >
             Get Started Free
@@ -79,6 +79,41 @@ export default function HomePage() {
           <p className="mt-6 text-xs" style={{ color: '#AAB0BB' }}>
             <SignupCounter /> freelancers already onboarded
           </p>
+        </div>
+
+        {/* Dashboard preview with skew */}
+        <div className="mt-16 max-w-4xl mx-auto relative">
+          <div className="rounded-xl overflow-hidden shadow-2xl" style={{ transform: 'perspective(1200px) rotateX(2deg)', border: '1px solid #ECEEF2' }}>
+            <div style={{ background: '#FFFFFF' }}>
+              <div className="flex items-center gap-2 px-5 h-10 border-b" style={{ background: '#F9FAFB', borderColor: '#ECEEF2' }}>
+                <div className="flex gap-1.5">
+                  <div className="w-2.5 h-2.5 rounded-full" style={{ background: '#DC2626' }} />
+                  <div className="w-2.5 h-2.5 rounded-full" style={{ background: '#D97706' }} />
+                  <div className="w-2.5 h-2.5 rounded-full" style={{ background: '#1B6B4A' }} />
+                </div>
+              </div>
+              <div className="flex">
+                <div className="w-48 border-r shrink-0 p-4 space-y-2" style={{ borderColor: '#ECEEF2', background: '#FAFAFA' }}>
+                  <div className="h-2 w-16 rounded" style={{ background: '#E5E7EB' }} />
+                  <div className="h-2 w-20 rounded" style={{ background: '#E5E7EB' }} />
+                  <div className="h-2 w-14 rounded" style={{ background: '#E5E7EB' }} />
+                </div>
+                <div className="flex-1 p-4 space-y-3">
+                  {['Senior React Developer - London', 'UX Designer - Remote UK', 'Full Stack Dev - Manchester'].map((t, i) => (
+                    <div key={i} className="flex items-center gap-3 p-3 rounded-lg" style={{ background: i === 0 ? '#EBF5F0' : '#F9FAFB' }}>
+                      <div className="w-6 h-6 rounded flex items-center justify-center text-[8px] font-bold" style={{ background: '#1B6B4A', color: 'white' }}>{['U','U','U'][i]}</div>
+                      <div className="flex-1">
+                        <div className="h-2 w-44 rounded" style={{ background: '#E5E7EB' }} />
+                        <div className="h-2 w-24 rounded mt-1.5" style={{ background: '#ECEEF2' }} />
+                      </div>
+                      <div className="h-5 w-12 rounded" style={{ background: '#E5E7EB' }} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="absolute -bottom-3 left-0 right-0 h-6 rounded-xl" style={{ background: 'rgba(0,0,0,0.03)', transform: 'perspective(1200px) rotateX(2deg)' }} />
         </div>
       </section>
 
@@ -104,24 +139,19 @@ export default function HomePage() {
       {/* How It Works */}
       <section id="how-it-works" className="py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-center" style={{ color: '#1A1D23' }}>How It Works</h2>
+          <h2 className="text-3xl font-bold text-center tracking-tight" style={{ color: '#1A1D23' }}>How It Works</h2>
           <div className="mt-16 grid md:grid-cols-3 gap-8">
             {[
-              { icon: Sparkles, title: 'Tell us what you do', description: 'Share your skills, rates, and preferences. Takes 2 minutes.' },
-              { icon: Target, title: 'We find the right leads', description: 'We scan dozens of sources daily and pick leads that actually fit your profile.' },
-              { icon: TrendingUp, title: 'Pick your next client', description: 'Get notified when a match comes in. Express interest and land the gig.' },
-            ].map((item) => {
-              const Icon = item.icon
-              return (
-                <div key={item.title} className="text-center">
-                  <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto" style={{ background: '#EBF5F0', color: '#1B6B4A' }}>
-                    <Icon size={24} />
-                  </div>
-                  <h3 className="mt-6 text-lg font-semibold" style={{ color: '#1A1D23' }}>{item.title}</h3>
-                  <p className="mt-3" style={{ color: '#6B7280' }}>{item.description}</p>
-                </div>
-              )
-            })}
+              { step: '01', title: 'Set your profile', description: 'Share your skills, rates, and preferences. Takes 2 minutes.' },
+              { step: '02', title: 'We scan & match', description: 'Our AI scans dozens of sources daily and picks leads that fit your profile.' },
+              { step: '03', title: 'Pick your next client', description: 'Get notified when a match comes in. Express interest and land the gig.' },
+            ].map((item) => (
+              <div key={item.title} className="text-left p-6 rounded-xl bg-white" style={{ border: '1px solid #ECEEF2' }}>
+                <div className="text-3xl font-bold tracking-tight" style={{ color: '#1B6B4A' }}>{item.step}</div>
+                <h3 className="mt-4 text-lg font-semibold tracking-tight" style={{ color: '#1A1D23' }}>{item.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed" style={{ color: '#6B7280' }}>{item.description}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -200,7 +230,7 @@ export default function HomePage() {
           </p>
           <Link
             href="/auth/signup"
-            className="mt-8 inline-block px-8 py-3 rounded-lg text-lg font-semibold hover:opacity-90 transition-opacity"
+            className="mt-8 inline-block px-8 py-3 rounded-lg text-lg font-semibold transition-all duration-150 hover:opacity-90 active:scale-[0.98]"
             style={{ background: 'white', color: '#1B6B4A' }}
           >
             Get Started Free

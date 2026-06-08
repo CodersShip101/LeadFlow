@@ -33,7 +33,7 @@ export default function PricingCard({ tier }: PricingCardProps) {
       </ul>
       <Link
         href="/auth/signup"
-        className={`mt-8 block w-full text-center py-3 rounded-lg text-sm font-semibold transition-opacity ${
+        className={`mt-8 block w-full text-center py-3 rounded-lg text-sm font-semibold transition-all duration-150 active:scale-[0.98] ${
           tier.highlighted
             ? 'text-white hover:opacity-90'
             : 'hover:opacity-80'

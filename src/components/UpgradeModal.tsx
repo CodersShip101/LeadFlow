@@ -55,7 +55,7 @@ export default function UpgradeModal({ open, onClose, title = 'Upgrade to Pro', 
 
           <button
             onClick={() => { onClose(); router.push('/dashboard/billing') }}
-            className="w-full py-2.5 rounded-lg text-sm font-semibold text-white transition-opacity hover:opacity-90"
+            className="w-full py-2.5 rounded-lg text-sm font-semibold text-white transition-all duration-150 hover:opacity-90 active:scale-[0.98]"
             style={{ background: '#1B6B4A' }}
           >
             Upgrade to Pro — £49/month

@@ -10,9 +10,9 @@ import { isUKLead } from '@/lib/utils'
 import LeadCard from '@/components/LeadCard'
 import UpgradeModal from '@/components/UpgradeModal'
 import {
-  Trophy, RefreshCw, Search, X, Filter, Sparkles,
+  RefreshCw, Search, X, Filter,
   ChevronLeft, ChevronRight, Loader2,
-  Send, Lock, Bookmark, AlertTriangle
+  Lock, AlertTriangle
 } from 'lucide-react'
 
 const today = new Date()
@@ -229,7 +229,7 @@ export default function DashboardPage() {
             {aiStatus === 'searching' ? <><Loader2 size={10} className="animate-spin" /> AI searching</> : aiStatus === 'found' ? 'New leads found' : 'AI idle'}
           </div>
           <button onClick={() => doRefresh(false)} disabled={refreshing}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white disabled:opacity-60 transition-opacity hover:opacity-90"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white disabled:opacity-60 transition-all duration-150 hover:opacity-90 active:scale-[0.97]"
             style={{ background: '#1B6B4A' }}>
             <RefreshCw size={12} className={refreshing ? 'animate-spin' : ''} />
             <span className="hidden sm:inline">Refresh</span>
@@ -240,27 +240,19 @@ export default function DashboardPage() {
       {/* Stat cards */}
       <div className="flex gap-3 px-4 md:px-8 pt-5 overflow-x-auto">
         {[
-          { label: 'New today', value: stats.new, icon: Sparkles, bg: '#EBF5F0', color: '#1B6B4A', trend: stats.new > 0 ? `↑ ${stats.new}` : null },
-          { label: 'Applied', value: stats.applied, icon: Send, bg: '#EBF1FC', color: '#2563EB', trend: null },
-          { label: 'Saved', value: stats.saved, icon: Bookmark, bg: '#FEF3E2', color: '#D97706', trend: null },
-          { label: 'Won', value: stats.won, icon: Trophy, bg: '#F0EFFE', color: '#7C3AED', trend: null },
-        ].map(s => {
-          const Icon = s.icon
-          return (
-            <div key={s.label} className="flex items-center gap-3 bg-white rounded-xl p-4 flex-1 min-w-[130px]" style={{ border: '1px solid #ECEEF2' }}>
-              <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ background: s.bg, color: s.color }}>
-                <Icon size={18} />
-              </div>
-              <div>
-                <div className="text-[22px] font-bold leading-none" style={{ color: '#1A1D23', fontWeight: 700 }}>{s.value}</div>
-                <div className="text-xs mt-0.5" style={{ color: '#AAB0BB' }}>{s.label}</div>
-                {s.trend && (
-                  <span className="text-[10px] font-medium px-1.5 py-0.5 rounded mt-1 inline-block" style={{ background: '#EBF5F0', color: '#1B6B4A' }}>{s.trend}</span>
-                )}
-              </div>
-            </div>
-          )
-        })}
+          { label: 'New today', value: stats.new, color: '#1B6B4A', badge: stats.new > 0 ? `+${stats.new}` : null },
+          { label: 'Applied', value: stats.applied, color: '#2563EB', badge: null },
+          { label: 'Saved', value: stats.saved, color: '#D97706', badge: null },
+          { label: 'Won', value: stats.won, color: '#7C3AED', badge: null },
+        ].map(s => (
+          <div key={s.label} className="bg-white rounded-xl p-4 flex-1 min-w-[110px]" style={{ border: '1px solid #ECEEF2' }}>
+            <div className="text-[26px] font-bold leading-none tracking-tight" style={{ color: '#1A1D23' }}>{s.value}</div>
+            <div className="text-xs mt-1" style={{ color: '#AAB0BB' }}>{s.label}</div>
+            {s.badge && (
+              <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded mt-1.5 inline-block" style={{ background: '#EBF5F0', color: '#1B6B4A' }}>{s.badge}</span>
+            )}
+          </div>
+        ))}
       </div>
 
       {/* Skill filter chips */}
@@ -336,7 +328,7 @@ export default function DashboardPage() {
                     <div className="text-xs" style={{ color: '#6B7280' }}>Upgrade to see all leads with full details</div>
                   </div>
                   <button onClick={() => router.push('/dashboard/billing')}
-                    className="px-4 py-2 rounded-lg text-xs font-semibold text-white shrink-0 transition-opacity hover:opacity-90"
+                    className="px-4 py-2 rounded-lg text-xs font-semibold text-white shrink-0 transition-all duration-150 hover:opacity-90 active:scale-[0.97]"
                     style={{ background: '#1B6B4A' }}>Upgrade</button>
                 </div>
               )}

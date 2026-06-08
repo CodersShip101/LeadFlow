@@ -1,11 +1,11 @@
 'use client'
 
-import { useCallback } from 'react'
+import { useCallback, useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import type { Lead, Profile, Application } from '@/types'
 import { computeMatchExplanation } from '@/types'
 import { getSourceInfo, formatBudgetGBP, timeAgo, isNewLead, formatDate } from '@/lib/utils'
-import { Bookmark, Eye, ExternalLink, Send } from 'lucide-react'
+import { Bookmark, Eye, ExternalLink, Send, MoreVertical } from 'lucide-react'
 
 interface LeadCardProps {
   lead: Lead
@@ -26,6 +26,16 @@ export default function LeadCard({ lead, profile, application, isFreeUser, index
   const isLocked = isFreeUser && index >= 3
   const isInterested = !!(application && application.status !== 'saved')
   const isSaved = application?.status === 'saved'
+  const [menuOpen, setMenuOpen] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const handle = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false)
+    }
+    document.addEventListener('mousedown', handle)
+    return () => document.removeEventListener('mousedown', handle)
+  }, [])
 
   const handleClick = useCallback(() => {
     if (isLocked) { onUpgrade(); return }
@@ -47,6 +57,16 @@ export default function LeadCard({ lead, profile, application, isFreeUser, index
     if (isLocked) { onUpgrade(); return }
     router.push(`/dashboard/lead/${lead.id}`)
   }, [isLocked, lead.id, onUpgrade, router])
+
+  const handleApply = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (lead.source_url) window.open(lead.source_url, '_blank', 'noopener,noreferrer')
+  }, [lead.source_url])
+
+  const toggleMenu = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation()
+    setMenuOpen(prev => !prev)
+  }, [])
 
   if (isLocked) {
     return (
@@ -104,13 +124,6 @@ export default function LeadCard({ lead, profile, application, isFreeUser, index
         >
           {lead.title}
         </h3>
-        <button
-          onClick={handleBookmark}
-          className="p-0.5 rounded transition-all duration-150 hover:scale-110"
-          style={{ color: isSaved ? '#2563EB' : '#D0D4DE', transition: 'color 150ms ease, transform 150ms ease' }}
-        >
-          <Bookmark size={13} fill={isSaved ? '#2563EB' : 'none'} />
-        </button>
         <span
           className="text-[10px] font-semibold px-1.5 py-0.5 rounded shrink-0"
           style={{
@@ -149,34 +162,53 @@ export default function LeadCard({ lead, profile, application, isFreeUser, index
         )}
 
         <div className="flex items-center gap-1 ml-auto shrink-0">
-          {!isFreeUser && lead.source_url && (
+          <button
+            onClick={handleBookmark}
+            className="p-1 rounded transition-all duration-150 hover:scale-110"
+            style={{ color: isSaved ? '#2563EB' : '#D0D4DE' }}
+          >
+            <Bookmark size={13} fill={isSaved ? '#2563EB' : 'none'} />
+          </button>
+          <div className="relative" ref={menuRef}>
             <button
-              onClick={e => { e.stopPropagation(); if (lead.source_url) window.open(lead.source_url, '_blank', 'noopener,noreferrer') }}
-              className="text-[10px] font-semibold px-2 py-1 rounded transition-all duration-150 flex items-center gap-1"
-              style={{ background: '#1B6B4A', color: '#FFFFFF' }}
-              title={`Apply on ${src.label}`}
+              onClick={toggleMenu}
+              className="p-1 rounded hover:bg-gray-100 transition-colors duration-150"
+              style={{ color: '#AAB0BB' }}
             >
-              <Send size={10} /> Apply
+              <MoreVertical size={14} />
             </button>
-          )}
-          <button
-            onClick={handleView}
-            className="p-1 rounded hover:bg-gray-100 transition-colors duration-150"
-            style={{ color: '#AAB0BB' }}
-          >
-            <Eye size={13} />
-          </button>
-          <button
-            onClick={handleInterest}
-            className="text-[10px] font-semibold px-2.5 py-1 rounded transition-all duration-150"
-            style={{
-              background: isInterested ? '#1B6B4A' : '#F5F5F7',
-              color: isInterested ? '#FFFFFF' : '#6B7280',
-              transition: 'background 150ms ease, color 150ms ease',
-            }}
-          >
-            {isInterested ? 'Interested ✓' : 'Interested'}
-          </button>
+            {menuOpen && (
+              <div
+                className="absolute right-0 top-full mt-0.5 bg-white rounded-lg shadow-lg border py-1 z-50 min-w-[130px]"
+                style={{ borderColor: '#ECEEF2' }}
+              >
+                <button
+                  onClick={handleView}
+                  className="flex items-center gap-2 px-3 py-1.5 text-xs w-full text-left hover:bg-gray-50 transition-colors"
+                  style={{ color: '#6B7280' }}
+                >
+                  <Eye size={13} /> View details
+                </button>
+                {!isFreeUser && lead.source_url && (
+                  <button
+                    onClick={handleApply}
+                    className="flex items-center gap-2 px-3 py-1.5 text-xs w-full text-left hover:bg-gray-50 transition-colors"
+                    style={{ color: '#6B7280' }}
+                  >
+                    <ExternalLink size={13} /> Apply externally
+                  </button>
+                )}
+                <div className="border-t my-1" style={{ borderColor: '#ECEEF2' }} />
+                <button
+                  onClick={handleInterest}
+                  className="flex items-center gap-2 px-3 py-1.5 text-xs w-full text-left hover:bg-gray-50 transition-colors"
+                  style={{ color: isInterested ? '#1B6B4A' : '#6B7280' }}
+                >
+                  <Send size={13} /> {isInterested ? 'Mark not interested' : "I'm interested"}
+                </button>
+              </div>
+            )}
+          </div>
           <span className="text-[10px]" style={{ color: '#B0B6C2' }} title={formatDate(lead.posted_date)}>{timeAgo(lead.posted_date)}</span>
         </div>
       </div>
