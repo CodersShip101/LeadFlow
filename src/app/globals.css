@@ -28,6 +28,7 @@
   --color-orange: #EA580C;
   --color-orange-light: #FEF0EB;
   --font-sans: var(--font-dm-sans), 'DM Sans', sans-serif;
+  --font-serif: var(--font-instrument-serif), 'Instrument Serif', serif;
 
   --toast-success-bg: #EBF5F0;
   --toast-success-border: #BBE0CE;
@@ -84,3 +85,135 @@ input::placeholder, textarea::placeholder {
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #D0D4DE; border-radius: 4px; }
 ::-webkit-scrollbar-thumb:hover { background: #AAB0BB; }
+
+/* ── Component styles ── */
+
+/* Icon button */
+.ibtn {
+  width: 28px; height: 28px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border-tertiary);
+  background: transparent;
+  color: var(--color-text-tertiary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all .15s;
+  font-size: 14px;
+}
+.ibtn:hover { border-color: var(--color-border-secondary); color: var(--color-text-secondary); background: var(--color-background-secondary); }
+.ibtn:active { transform: scale(.92); }
+.ibtn.saved { color: var(--color-blue); border-color: #BBE0CE; background: var(--color-blue-light); }
+.ibtn.dots { font-size: 16px; }
+
+/* Source badge */
+.sbadge {
+  font-size: 10px; font-weight: 500;
+  padding: 2px 7px; border-radius: 5px;
+  letter-spacing: .02em; flex-shrink: 0;
+}
+.sb-reddit { background: rgba(255,90,20,.14); color: #ff7040; }
+.sb-reed { background: rgba(122,171,255,.12); color: var(--color-blue); }
+.sb-indeed { background: rgba(245,166,35,.12); color: var(--color-amber); }
+.sb-cwjobs { background: rgba(160,120,255,.12); color: #b08fff; }
+.sb-linkedin { background: rgba(10,102,194,.12); color: #0a66c2; }
+.sb-upwork { background: rgba(108,180,70,.12); color: #6cb446; }
+.sb-peopleperhour { background: rgba(233,82,165,.12); color: #e952a5; }
+.sb-freelancer { background: rgba(0,153,204,.12); color: #0099cc; }
+.sb-default { background: var(--color-background-secondary); color: var(--color-text-secondary); }
+
+/* New badge */
+.bnew {
+  font-size: 10px; font-weight: 500;
+  padding: 2px 7px; border-radius: 5px;
+  background: var(--color-green-light); color: var(--color-green);
+}
+
+/* Match score badge */
+.mscore {
+  font-size: 11px; font-weight: 500;
+  padding: 3px 8px; border-radius: 6px;
+}
+.ms-hi { background: var(--color-green-light); color: var(--color-green); }
+.ms-mid { background: var(--color-amber-light); color: var(--color-amber); }
+.ms-lo { background: var(--color-background-secondary); color: var(--color-text-tertiary); }
+
+/* Meta pills */
+.mpill {
+  font-size: 11px; padding: 3px 8px;
+  border-radius: 6px; background: var(--color-background-secondary);
+  color: var(--color-text-secondary);
+  display: inline-flex; align-items: center; gap: 4px;
+}
+.mpill i { font-size: 12px; }
+.mpill.bud { background: var(--color-green-light); color: var(--color-green); }
+.mpill.loc i { color: var(--color-blue); }
+.mpill.typ i { color: var(--color-amber); }
+
+/* Skills */
+.sk {
+  font-size: 10px; padding: 2px 7px;
+  border-radius: 5px; background: var(--color-background-secondary);
+  color: var(--color-text-tertiary); border: 1px solid var(--color-border-primary);
+}
+.sk.m { background: var(--color-green-light); color: var(--color-green); border-color: var(--color-green-border); }
+
+/* Interested button */
+.btn-int {
+  font-size: 11.5px; font-weight: 500;
+  padding: 5px 13px; border-radius: 8px;
+  border: 1px solid var(--color-green-border);
+  background: var(--color-green-light);
+  color: var(--color-green);
+  cursor: pointer; transition: all .15s;
+  font-family: var(--font-sans);
+}
+.btn-int:hover { background: #DAEFE2; }
+.btn-int:active { transform: scale(.96); }
+.btn-int.on { background: var(--color-green); color: white; border-color: var(--color-green); }
+
+/* Scrape dots */
+.dot-done { background: var(--color-green-light); color: var(--color-green); }
+.dot-active { background: var(--color-amber-light); color: var(--color-amber); }
+.dot-wait { background: var(--color-background-secondary); color: var(--color-text-tertiary); }
+
+/* Sparkline */
+svg.spark path { fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+
+/* Activity */
+.aico {
+  width: 26px; height: 26px;
+  border-radius: 8px;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 13px; flex-shrink: 0;
+}
+.aico.g { background: var(--color-green-light); color: var(--color-green); }
+.aico.a { background: var(--color-amber-light); color: var(--color-amber); }
+.aico.b { background: var(--color-blue-light); color: var(--color-blue); }
+.aico.r { background: var(--color-red-light); color: var(--color-red); }
+
+/* Calendar dots */
+.cday.dot::after {
+  content: '';
+  position: absolute; bottom: 2px; left: 50%;
+  transform: translateX(-50%);
+  width: 3px; height: 3px;
+  border-radius: 50%;
+  background: var(--color-green);
+}
+.cday.today { background: var(--color-green); color: white; font-weight: 500; }
+.cday.today::after { background: white; }
+.cday.empty { pointer-events: none; }
+
+/* Filter pill */
+.fpill {
+  font-size: 11.5px; padding: 5px 11px;
+  border-radius: 20px;
+  border: 1px solid var(--color-border-primary);
+  background: transparent; color: var(--color-text-secondary);
+  cursor: pointer; transition: all .15s;
+  font-family: var(--font-sans); white-space: nowrap;
+}
+.fpill:hover { border-color: var(--color-border-secondary); color: var(--color-text-primary); }
+.fpill.on { background: var(--color-green-light); border-color: var(--color-green-border); color: var(--color-green); }

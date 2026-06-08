@@ -4,8 +4,7 @@ import { useCallback, useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import type { Lead, Profile, Application } from '@/types'
 import { computeMatchExplanation } from '@/types'
-import { getSourceInfo, formatBudgetGBP, timeAgo, isNewLead, formatDate } from '@/lib/utils'
-import { Bookmark, Eye, ExternalLink, Send, MoreVertical } from 'lucide-react'
+import { getSourceInfo, timeAgo, isNewLead, formatDate } from '@/lib/utils'
 
 interface LeadCardProps {
   lead: Lead
@@ -18,10 +17,38 @@ interface LeadCardProps {
   onUpgrade: () => void
 }
 
+function getSourceClass(srcLabel: string): string {
+  const map: Record<string, string> = {
+    reddit: 'sb-reddit', reed: 'sb-reed', indeed: 'sb-indeed',
+    cwjobs: 'sb-cwjobs', linkedin: 'sb-linkedin', upwork: 'sb-upwork',
+    'people per hour': 'sb-peopleperhour', freelancer: 'sb-freelancer',
+  }
+  return map[srcLabel.toLowerCase()] || 'sb-default'
+}
+
+function timeAgoShort(dateStr?: string | number) {
+  if (!dateStr) return ''
+  const now = Date.now()
+  const then = typeof dateStr === 'number' ? dateStr : new Date(dateStr).getTime()
+  const diff = now - then
+  if (diff < 60000) return 'just now'
+  if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`
+  if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`
+  return `${Math.floor(diff / 86400000)}d ago`
+}
+
+function formatBudgetShort(min?: number | null, max?: number | null): string {
+  if (!min && !max) return ''
+  const fmt = (n: number) => n >= 1000 ? `£${n / 1000}k` : `£${n}`
+  if (min && max) return `${fmt(min)}–${fmt(max)}`
+  if (min) return `${fmt(min)}+`
+  if (max) return `up to ${fmt(max)}`
+  return ''
+}
+
 export default function LeadCard({ lead, profile, application, isFreeUser, index = 0, onBookmark, onInterest, onUpgrade }: LeadCardProps) {
   const router = useRouter()
   const src = getSourceInfo(lead.source_url)
-  const budget = formatBudgetGBP(lead.budget_min, lead.budget_max)
   const match = computeMatchExplanation(lead, profile)
   const isLocked = isFreeUser && index >= 3
   const isInterested = !!(application && application.status !== 'saved')
@@ -76,15 +103,16 @@ export default function LeadCard({ lead, profile, application, isFreeUser, index
         style={{ border: '0.5px solid #E5E7EB', background: '#F9FAFB', opacity: 0.4, cursor: 'not-allowed' }}
       >
         <div className="flex items-center gap-2">
-          <div className="w-[22px] h-[22px] rounded flex items-center justify-center text-[8px] font-medium shrink-0" style={{ background: src.bg, color: src.color }}>{src.label[0]}</div>
+          <span className="sbadge sb-default">{src.label}</span>
           <span className="text-xs font-semibold flex-1 truncate" style={{ color: '#AAB0BB' }}>Pro Lead</span>
-          {budget && <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: '#F2F3F7', color: '#AAB0BB' }}>{budget}</span>}
           <span className="text-[10px] px-1.5 py-0.5 rounded font-medium" style={{ background: '#F2F3F7', color: '#AAB0BB' }}>Pro only</span>
-          <span className="text-[10px]" style={{ color: '#C0C6D2' }} title={formatDate(lead.posted_date)}>{timeAgo(lead.posted_date)}</span>
+          <span className="text-[10px]" style={{ color: '#C0C6D2' }}>{timeAgo(lead.posted_date)}</span>
         </div>
       </div>
     )
   }
+
+  const budget = formatBudgetShort(lead.budget_min, lead.budget_max)
 
   return (
     <div
@@ -105,111 +133,92 @@ export default function LeadCard({ lead, profile, application, isFreeUser, index
         e.currentTarget.style.boxShadow = 'none'
       }}
     >
-      {/* Row 1: source icon + title + bookmark + score badge */}
-      <div className="flex items-center gap-2">
-        <button
-          onClick={e => { e.stopPropagation(); if (isFreeUser) { onUpgrade(); return } if (lead.source_url) window.open(lead.source_url, '_blank', 'noopener,noreferrer') }}
-          className="text-[9px] font-semibold px-1.5 py-0.5 rounded shrink-0 transition-opacity hover:opacity-80"
-          style={{ background: src.bg, color: src.color }}
-          title={`View on ${src.label}`}
-        >
-          {src.label}
-        </button>
-        {isNewLead(lead.posted_date) && (
-          <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded shrink-0" style={{ background: '#EBF5F0', color: '#1B6B4A' }}>New</span>
-        )}
-        <h3
-          className="text-xs font-bold flex-1 truncate"
-          style={{ color: '#1A1D23', fontWeight: 700, fontSize: '13px' }}
-        >
-          {lead.title}
-        </h3>
-        <span
-          className="text-[10px] font-semibold px-1.5 py-0.5 rounded shrink-0"
-          style={{
-            background: match.score >= 8 ? '#EBF5F0' : match.score >= 6 ? '#FEF3E2' : '#F5F5F7',
-            color: match.score >= 8 ? '#1B6B4A' : match.score >= 6 ? '#D97706' : '#AAB0BB',
-          }}
-        >
-          {match.score}
-        </span>
-      </div>
-
-      {/* Row 2: description (2 lines, ~30px left padding from source icon) */}
-      <p
-        className="text-[11px] leading-relaxed line-clamp-2 mt-1"
-        style={{ paddingLeft: '26px', color: isLocked ? '#AAB0BB' : '#6B7280' }}
-      >
-        {isLocked ? '████████████████████████████████████████████████████████████' : lead.description}
-      </p>
-
-      {/* Row 3: pills + action buttons + time */}
-      <div className="flex items-center gap-1.5 mt-1.5" style={{ paddingLeft: '26px' }}>
-        {budget && (
-          <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: '#F5F5F7', color: '#6B7280' }}>{budget}</span>
-        )}
-        {lead.client_location && (
-          <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: '#F5F5F7', color: '#6B7280' }}>{lead.client_location}</span>
-        )}
-        {lead.project_type && (
-          <span className="text-[10px] px-1.5 py-0.5 rounded capitalize" style={{ background: '#F5F5F7', color: '#6B7280' }}>{lead.project_type}</span>
-        )}
-        {lead.skills_required?.slice(0, 2).map(s => (
-          <span key={s} className="text-[10px] px-1.5 py-0.5 rounded font-medium" style={{ background: '#EBF1FC', color: '#2563EB' }}>{s}</span>
-        ))}
-        {(lead.skills_required?.length || 0) > 2 && (
-          <span className="text-[9px]" style={{ color: '#AAB0BB' }}>+{lead.skills_required!.length - 2}</span>
-        )}
-
-        <div className="flex items-center gap-1 ml-auto shrink-0">
+      {/* Top row: source badge + New + score + bookmark + dots */}
+      <div className="flex items-center gap-2 mb-2">
+        <span className={`sbadge ${getSourceClass(src.label)}`}>{src.label}</span>
+        {isNewLead(lead.posted_date) && <span className="bnew">New</span>}
+        <div className="ml-auto flex items-center gap-1.5">
+          <span className={`mscore ${match.score >= 8 ? 'ms-hi' : match.score >= 6 ? 'ms-mid' : 'ms-lo'}`}>
+            {match.score}/10
+          </span>
           <button
             onClick={handleBookmark}
-            className="p-1 rounded transition-all duration-150 hover:scale-110"
-            style={{ color: isSaved ? '#2563EB' : '#D0D4DE' }}
+            className={`ibtn ${isSaved ? 'saved' : ''}`}
+            title={isSaved ? 'Saved' : 'Save'}
           >
-            <Bookmark size={13} fill={isSaved ? '#2563EB' : 'none'} />
+            <i className={`ti ${isSaved ? 'ti-bookmark-filled' : 'ti-bookmark'}`} />
           </button>
           <div className="relative" ref={menuRef}>
-            <button
-              onClick={toggleMenu}
-              className="p-1 rounded hover:bg-gray-100 transition-colors duration-150"
-              style={{ color: '#AAB0BB' }}
-            >
-              <MoreVertical size={14} />
-            </button>
+            <button onClick={toggleMenu} className="ibtn dots" title="More"><i className="ti ti-dots" /></button>
             {menuOpen && (
-              <div
-                className="absolute right-0 top-full mt-0.5 bg-white rounded-lg shadow-lg border py-1 z-50 min-w-[130px]"
-                style={{ borderColor: '#ECEEF2' }}
-              >
-                <button
-                  onClick={handleView}
-                  className="flex items-center gap-2 px-3 py-1.5 text-xs w-full text-left hover:bg-gray-50 transition-colors"
-                  style={{ color: '#6B7280' }}
-                >
-                  <Eye size={13} /> View details
+              <div className="absolute right-0 top-full mt-1 bg-white rounded-lg shadow-lg border py-1 z-50 min-w-[140px]" style={{ borderColor: '#ECEEF2' }}>
+                <button onClick={handleView} className="flex items-center gap-2 px-3 py-1.5 text-xs w-full text-left hover:bg-gray-50" style={{ color: '#6B7280' }}>
+                  <i className="ti ti-eye" style={{ fontSize: '13px' }} /> View details
                 </button>
-                {!isFreeUser && lead.source_url && (
-                  <button
-                    onClick={handleApply}
-                    className="flex items-center gap-2 px-3 py-1.5 text-xs w-full text-left hover:bg-gray-50 transition-colors"
-                    style={{ color: '#6B7280' }}
-                  >
-                    <ExternalLink size={13} /> Apply externally
+                {lead.source_url && (
+                  <button onClick={handleApply} className="flex items-center gap-2 px-3 py-1.5 text-xs w-full text-left hover:bg-gray-50" style={{ color: '#6B7280' }}>
+                    <i className="ti ti-external-link" style={{ fontSize: '13px' }} /> Apply externally
                   </button>
                 )}
                 <div className="border-t my-1" style={{ borderColor: '#ECEEF2' }} />
-                <button
-                  onClick={handleInterest}
-                  className="flex items-center gap-2 px-3 py-1.5 text-xs w-full text-left hover:bg-gray-50 transition-colors"
-                  style={{ color: isInterested ? '#1B6B4A' : '#6B7280' }}
-                >
-                  <Send size={13} /> {isInterested ? 'Mark not interested' : "I'm interested"}
+                <button onClick={handleInterest} className="flex items-center gap-2 px-3 py-1.5 text-xs w-full text-left hover:bg-gray-50" style={{ color: isInterested ? '#1B6B4A' : '#6B7280' }}>
+                  <i className="ti ti-send" style={{ fontSize: '13px' }} /> {isInterested ? 'Mark not interested' : "I'm interested"}
                 </button>
               </div>
             )}
           </div>
-          <span className="text-[10px]" style={{ color: '#B0B6C2' }} title={formatDate(lead.posted_date)}>{timeAgo(lead.posted_date)}</span>
+        </div>
+      </div>
+
+      {/* Title */}
+      <div className="text-[13.5px] font-semibold leading-snug mb-1 line-clamp-1" style={{ color: '#1A1D23' }}>
+        {lead.title}
+      </div>
+
+      {/* Description */}
+      <p className="text-xs leading-relaxed line-clamp-2 mb-2" style={{ color: '#6B7280' }}>
+        {lead.description}
+      </p>
+
+      {/* Meta row */}
+      <div className="flex items-center gap-1.5 flex-wrap mb-3">
+        {budget && (
+          <span className="mpill bud"><i className="ti ti-currency-pound" />{budget}</span>
+        )}
+        {lead.client_location && (
+          <span className="mpill loc"><i className="ti ti-map-pin" />{lead.client_location}</span>
+        )}
+        {lead.project_type && (
+          <span className="mpill typ">
+            <i className={`ti ${lead.project_type === 'contract' ? 'ti-file-description' : 'ti-refresh'}`} />
+            {lead.project_type}
+          </span>
+        )}
+      </div>
+
+      {/* Footer: skills + CTA */}
+      <div className="flex items-center justify-between pt-2.5" style={{ borderTop: '1px solid #ECEEF2' }}>
+        <div className="flex items-center gap-1.5 flex-wrap">
+          {lead.skills_required?.slice(0, 3).map(s => (
+            <span key={s} className={`sk ${profile?.skills?.some(ps => ps.toLowerCase() === s.toLowerCase()) ? 'm' : ''}`}>
+              {s}
+            </span>
+          ))}
+          {(lead.skills_required?.length || 0) > 3 && (
+            <span className="text-[10px]" style={{ color: '#AAB0BB' }}>+{lead.skills_required!.length - 3}</span>
+          )}
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            onClick={handleInterest}
+            className={`btn-int ${isInterested ? 'on' : ''}`}
+          >
+            <i className={`ti ${isInterested ? 'ti-check' : 'ti-heart'}`} style={{ fontSize: '12px' }} />
+            {' '}{isInterested ? 'Interested' : 'Interested'}
+          </button>
+          <span className="text-[10.5px]" style={{ color: '#AAB0BB' }} title={formatDate(lead.posted_date)}>
+            {timeAgoShort(lead.posted_date)}
+          </span>
         </div>
       </div>
     </div>
