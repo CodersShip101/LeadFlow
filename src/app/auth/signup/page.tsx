@@ -16,54 +16,77 @@ export default function SignupPage() {
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
+
     const { data, error } = await supabase.auth.signUp({
-      email, password,
-      options: { data: { full_name: '' } },
+      email,
+      password,
+      options: {
+        data: { full_name: '' },
+      },
     })
-    if (error) { toast.error(error.message); setLoading(false); return }
+
+    if (error) {
+      toast.error(error.message)
+      setLoading(false)
+      return
+    }
+
     if (data.user) {
       await supabase.from('profiles').upsert({
-        id: data.user.id, email: data.user.email, subscription_status: 'free',
+        id: data.user.id,
+        email: data.user.email,
+        subscription_status: 'free',
       })
     }
+
     toast.success('Account created! Check your email for confirmation.')
     router.push('/dashboard/onboarding')
   }
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
-      <div className="w-full max-w-sm animate-fade-in">
-        <div className="text-center mb-8">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-4" style={{ background: '#1B6B4A' }}>
-            <span className="text-white text-sm font-bold">LF</span>
-          </div>
-          <h1 className="text-2xl font-bold tracking-tight" style={{ color: '#111827' }}>Create your account</h1>
-          <p className="mt-1.5 text-sm" style={{ color: '#6B7280' }}>Start getting quality freelance leads.</p>
-        </div>
-        <form onSubmit={handleSignup} className="space-y-4">
+    <div className="min-h-[80vh] flex items-center justify-center px-4">
+      <div className="w-full max-w-md">
+        <h1 className="text-3xl font-bold text-gray-900 text-center">Create your account</h1>
+        <p className="mt-2 text-gray-600 text-center text-sm">
+          Start getting quality freelance leads delivered to you.
+        </p>
+        <form onSubmit={handleSignup} className="mt-8 space-y-4">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium mb-1.5" style={{ color: '#374151' }}>Email</label>
-            <input id="email" type="email" required value={email}
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
+            <input
+              id="email"
+              type="email"
+              required
+              value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="block w-full rounded-xl border px-3.5 py-2.5 text-sm outline-none transition-all"
-              style={{ borderColor: '#D1D5DB', color: '#111827', background: '#FFFFFF' }}
-              placeholder="you@example.com" />
+              className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-[#1B6B4A] focus:ring-1 focus:ring-[#1B6B4A]"
+              placeholder="you@example.com"
+            />
           </div>
           <div>
-            <label htmlFor="password" className="block text-sm font-medium mb-1.5" style={{ color: '#374151' }}>Password</label>
-            <input id="password" type="password" required minLength={6} value={password}
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
+            <input
+              id="password"
+              type="password"
+              required
+              minLength={6}
+              value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="block w-full rounded-xl border px-3.5 py-2.5 text-sm outline-none transition-all"
-              style={{ borderColor: '#D1D5DB', color: '#111827', background: '#FFFFFF' }}
-              placeholder="At least 6 characters" />
+              className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-[#1B6B4A] focus:ring-1 focus:ring-[#1B6B4A]"
+              placeholder="At least 6 characters"
+            />
           </div>
-          <button type="submit" disabled={loading} className="btn-primary w-full justify-center">
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full py-2.5 rounded-lg text-sm font-semibold text-white hover:opacity-90 disabled:opacity-50" style={{ background: '#1B6B4A' }}
+          >
             {loading ? 'Creating account...' : 'Create Account'}
           </button>
         </form>
-        <p className="mt-6 text-center text-sm" style={{ color: '#6B7280' }}>
+        <p className="mt-6 text-center text-sm text-gray-600">
           Already have an account?{' '}
-          <Link href="/auth/login" className="font-semibold hover:underline" style={{ color: '#1B6B4A' }}>Login</Link>
+          <Link href="/auth/login" className="text-[#1B6B4A] font-medium hover:underline">Login</Link>
         </p>
       </div>
     </div>

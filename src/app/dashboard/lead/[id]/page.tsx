@@ -1,220 +1,387 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useRouter, useParams } from 'next/navigation'
+import { useCallback, useEffect, useState } from 'react'
+import { useParams, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-client'
 import toast from 'react-hot-toast'
 import type { Lead, Profile, Application } from '@/types'
 import { computeMatchExplanation } from '@/types'
-import { getSourceInfo, formatBudgetGBP, formatDate, isUKLead } from '@/lib/utils'
+import { getSourceInfo, formatBudgetGBP, isNewLead, formatDate } from '@/lib/utils'
+
+
+const statusConfig: Record<string, { label: string, color: string, bg: string }> = {
+  saved:      { label: 'Saved', color: '#7C3AED', bg: '#F0EFFE' },
+  interested: { label: 'Interested', color: '#1B6B4A', bg: '#EBF5F0' },
+  applied:    { label: 'Applied', color: '#D97706', bg: '#FEF3E2' },
+  hired:      { label: 'Hired', color: '#059669', bg: '#ECFDF5' },
+}
 
 export default function LeadDetailPage() {
+  const { id } = useParams<{ id: string }>()
   const [lead, setLead] = useState<Lead | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
   const [application, setApplication] = useState<Application | null>(null)
   const [loading, setLoading] = useState(true)
-  const [outcome, setOutcome] = useState<'won' | 'lost' | null>(null)
-  const [loggingOutcome, setLoggingOutcome] = useState(false)
   const router = useRouter()
-  const params = useParams()
   const supabase = createClient()
 
   useEffect(() => {
     const load = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/auth/login'); return }
-      const [p, l] = await Promise.all([
+      const [leadRes, profileRes] = await Promise.all([
+        supabase.from('leads').select('*').eq('id', id).single(),
         supabase.from('profiles').select('*').eq('id', user.id).single(),
-        supabase.from('leads').select('*').eq('id', params.id).single(),
       ])
-      setProfile(p.data)
-      if (l.data && isUKLead(l.data.client_location, l.data.source_url)) setLead(l.data)
-      else { toast.error('Lead not found'); router.push('/dashboard') }
-      const r = await fetch('/api/applications')
-      if (r.ok) {
-        const apps: Application[] = await r.json()
-        const app = apps.find(a => a.lead_id === params.id)
-        setApplication(app || null)
+      if (leadRes.error || !leadRes.data) {
+        toast.error('Lead not found')
+        router.push('/dashboard')
+        return
+      }
+      setLead(leadRes.data)
+      setProfile(profileRes.data)
+      const res = await fetch('/api/applications')
+      if (res.ok) {
+        const apps: Application[] = await res.json()
+        setApplication(apps.find(a => a.lead_id === id) || null)
       }
       setLoading(false)
     }
     load()
-  }, [supabase, router, params.id])
+  }, [id, supabase, router])
 
-  const handleInterest = async () => {
-    if (!lead) return
-    const res = await fetch('/api/applications', {
-      method: application ? 'DELETE' : 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(application ? { lead_id: lead.id } : { lead_id: lead.id, status: 'interested' }),
-    })
-    if (res.ok) {
-      if (application) { setApplication(null); toast.success('Removed') }
-      else { const app = await res.json(); setApplication(app); toast.success('Added to pipeline') }
-    }
-  }
-
-  const handleApply = () => {
-    if (!lead?.source_url) return
-    window.open(lead.source_url, '_blank', 'noopener,noreferrer')
-    if (application && application.status !== 'applied') {
-      fetch('/api/applications', {
-        method: 'POST',
+  const updateApplication = useCallback(async (status: string) => {
+    if (status === 'remove') {
+      const res = await fetch('/api/applications', {
+        method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ lead_id: lead.id, status: 'applied' }),
-      }).then(r => { if (r.ok) return r.json() }).then(app => { setApplication(app); toast.success('Marked as applied') })
+        body: JSON.stringify({ lead_id: id }),
+      })
+      if (res.ok) { setApplication(null) }
+      return
     }
-  }
-
-  const handleOutcome = async (outcomeVal: 'won' | 'lost') => {
-    if (!lead || !application) return
-    setLoggingOutcome(true)
     const res = await fetch('/api/applications', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ lead_id: lead.id, status: 'applied', outcome: outcomeVal }),
+      body: JSON.stringify({ lead_id: id, status }),
     })
     if (res.ok) {
       const app = await res.json()
       setApplication(app)
-      setOutcome(outcomeVal)
-      toast.success(outcomeVal === 'won' ? 'Congratulations!' : 'Logged as lost')
     }
-    setLoggingOutcome(false)
+  }, [id])
+
+  const handleBookmark = () => {
+    if (application?.status === 'saved') {
+      updateApplication('remove')
+      toast.success('Lead removed from saved')
+    } else if (application?.status === 'interested' || application?.status === 'applied' || application?.status === 'hired') {
+      updateApplication('saved')
+      toast.success('Lead saved for later')
+    } else {
+      updateApplication('saved')
+      toast.success('Lead saved for later')
+    }
+  }
+
+  const handleInterested = () => {
+    if (application?.status === 'interested' || application?.status === 'applied' || application?.status === 'hired') {
+      updateApplication('remove')
+      toast.success('Removed from applications')
+    } else {
+      updateApplication('interested')
+      toast.success('Added to your applications')
+    }
   }
 
   if (loading) return (
-    <div className="pb-20 md:pb-0" style={{ background: '#F9FAFB' }}>
-      <div className="px-4 md:px-8 pt-6 space-y-3">
-        <div className="h-5 w-24 skel" />
-        <div className="h-8 w-72 skel" />
-        <div className="h-4 w-48 skel" />
-      </div>
+    <div className="flex items-center justify-center min-h-screen" style={{ background: '#F2F3F7' }}>
+      <div className="animate-spin h-8 w-8 border-4 rounded-full" style={{ borderColor: '#1B6B4A', borderTopColor: 'transparent' }} />
     </div>
   )
 
   if (!lead) return null
 
-  const match = computeMatchExplanation(lead, profile)
+  const isFree = profile?.subscription_status === 'free'
   const source = getSourceInfo(lead.source_url)
+  const matchInfo = computeMatchExplanation(lead, profile)
+  const score = matchInfo.score
+  const budget = formatBudgetGBP(lead.budget_min, lead.budget_max)
+
   const daysSince = application ? Math.floor((Date.now() - new Date(application.created_at).getTime()) / 86400000) : 0
   const showOutcomePrompt = application && daysSince >= 14 && !application.outcome
 
   return (
-    <div className="flex-1 pb-24 md:pb-0" style={{ background: '#F9FAFB' }}>
-      <div className="max-w-4xl mx-auto px-4 sm:px-8 py-6 md:py-8">
-        <button onClick={() => router.push('/dashboard')} className="btn-ghost-sm mb-4">
-          <i className="ti ti-arrow-left" /> Back to feed
+    <div className="flex-1 pb-20 md:pb-0" style={{ background: '#F2F3F7' }}>
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6 md:py-8">
+        <button onClick={() => router.push('/dashboard')} className="btn-back mb-4">
+          <i className="ti ti-arrow-left" /> Back to leads
         </button>
 
-        <div className="card p-6 mb-4">
+        <div className="bg-white rounded-xl p-6 md:p-8" style={{ border: '1px solid #ECEEF2' }}>
+          {/* Header */}
           <div className="flex items-start justify-between gap-4">
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="tag" style={{ background: source.bg, color: source.color }}>{source.label}</span>
-                {lead.project_type && (
-                  <span className="tag" style={{ background: '#F3F4F6', color: '#6B7280' }}>{lead.project_type}</span>
-                )}
-              </div>
-              <h1 className="text-xl font-bold tracking-tight" style={{ color: '#111827' }}>{lead.title}</h1>
-              <div className="flex flex-wrap items-center gap-2 mt-2">
-                {formatBudgetGBP(lead.budget_min, lead.budget_max) && (
-                  <span className="text-sm font-semibold" style={{ color: '#059669' }}>{formatBudgetGBP(lead.budget_min, lead.budget_max)}</span>
-                )}
-                <span className="text-xs" style={{ color: '#9CA3AF' }}>· {formatDate(lead.posted_date)}</span>
-                {lead.client_location && <span className="text-xs" style={{ color: '#9CA3AF' }}>· {lead.client_location}</span>}
+            <div className="flex items-center gap-3 min-w-0">
+              <button
+                onClick={() => { if (!isFree && lead.source_url) window.open(lead.source_url, '_blank', 'noopener,noreferrer') }}
+                className="text-xs font-semibold px-2.5 py-1 rounded-lg shrink-0 transition-opacity hover:opacity-80"
+                style={{ background: source.bg, color: source.color }}
+                title={`View on ${source.label}`}
+              >
+                {source.label}
+              </button>
+              {isNewLead(lead.posted_date) && (
+                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-lg shrink-0" style={{ background: '#EBF5F0', color: '#1B6B4A' }}>New</span>
+              )}
+              <div className="min-w-0">
+                <h1 className="text-xl md:text-2xl font-bold truncate" style={{ color: '#1A1D23' }}>{lead.title}</h1>
+                <div className="flex items-center gap-2 mt-0.5 text-xs" style={{ color: '#AAB0BB' }}>
+                  {lead.project_type && <span className="capitalize">{lead.project_type}</span>}
+                  {lead.client_location && <><i className="ti ti-briefcase" style={{ fontSize: '10px' }} /><span>{lead.client_location}</span></>}
+                </div>
               </div>
             </div>
+            <span className="text-xs font-bold px-3 py-1 rounded-full shrink-0" style={{
+              background: score >= 8 ? '#EBF5F0' : score >= 5 ? '#FEF3E2' : '#F2F3F7',
+              color: score >= 8 ? '#1B6B4A' : score >= 5 ? '#D97706' : '#6B7280',
+            }}>
+              {score}/10
+            </span>
+          </div>
 
-            {/* Match score */}
-            <div className="flex flex-col items-center shrink-0">
-              <div className={`w-14 h-14 rounded-xl flex items-center justify-center text-lg font-bold ${
-                match.score >= 8 ? 'bg-[#ECFDF5] text-[#059669]' :
-                match.score >= 6 ? 'bg-[#FFFBEB] text-[#D97706]' :
-                'bg-[#F3F4F6] text-[#9CA3AF]'
-              }`}>
-                {match.score}
-              </div>
-              <span className="text-[10px] mt-1 font-medium" style={{ color: '#9CA3AF' }}>Match</span>
-            </div>
+          {/* Meta row */}
+          <div className="flex flex-wrap items-center gap-2 mt-4">
+            {budget && (
+              <span className="text-sm font-semibold px-3 py-1 rounded-lg" style={{ background: '#EBF5F0', color: '#1B6B4A' }}>
+                {budget}
+              </span>
+            )}
+            {lead.project_type && (
+              <span className="text-sm px-3 py-1 rounded-lg capitalize" style={{ background: '#F2F3F7', color: '#6B7280' }}>
+                {lead.project_type}
+              </span>
+            )}
+            {lead.client_location && (
+              <span className="text-sm px-3 py-1 rounded-lg flex items-center gap-1" style={{ background: '#F2F3F7', color: '#6B7280' }}>
+                <i className="ti ti-map-pin" style={{ fontSize: '12px' }} /> {lead.client_location}
+              </span>
+            )}
+          </div>
+
+          {/* Description */}
+          <div className="mt-6">
+            <h3 className="text-sm font-semibold mb-2" style={{ color: '#1A1D23' }}>Description</h3>
+            <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: '#4B5563' }}>
+              {lead.description}
+            </p>
           </div>
 
           {/* Skills */}
           {lead.skills_required && lead.skills_required.length > 0 && (
-            <div className="flex flex-wrap gap-1.5 mt-4">
-              {lead.skills_required.map(s => {
-                const matched = match.skillMatch.matched.includes(s)
-                return (
-                  <span key={s} className="tag" style={{ background: matched ? '#ECFDF5' : '#F3F4F6', color: matched ? '#059669' : '#6B7280' }}>
-                    {s} {matched && <i className="ti ti-circle-check ml-0.5" style={{ fontSize: '10px' }} />}
+            <div className="mt-6">
+              <h3 className="text-sm font-semibold mb-2" style={{ color: '#1A1D23' }}>Skills Required</h3>
+              <div className="flex flex-wrap gap-2">
+                {lead.skills_required.map(skill => (
+                  <span key={skill} className="text-xs font-medium px-3 py-1.5 rounded-lg" style={{ background: '#EBF1FC', color: '#2563EB' }}>
+                    {skill}
                   </span>
-                )
-              })}
+                ))}
+              </div>
             </div>
           )}
-        </div>
 
-        {/* Description */}
-        <div className="card p-6 mb-4">
-          <div className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: '#9CA3AF' }}>Description</div>
-          <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: '#6B7280' }}>{lead.description || 'No description provided.'}</p>
-        </div>
-
-        {/* Match breakdown */}
-        <div className="card p-6 mb-4">
-          <div className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: '#9CA3AF' }}>Match breakdown</div>
-          <div className="space-y-2">
-            {match.breakdown.map(b => (
-              <div key={b.label} className="flex items-center gap-2 text-xs">
-                <i className={`ti ${b.achieved ? 'ti-circle-check' : 'ti-circle-minus'}`}
-                  style={{ fontSize: '14px', color: b.achieved ? '#059669' : '#D1D5DB' }} />
-                <span style={{ color: b.achieved ? '#111827' : '#9CA3AF' }}>{b.label}</span>
-                <span className="ml-auto" style={{ color: '#9CA3AF' }}>{b.detail}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Actions */}
-        <div className="card p-6">
-          <div className="flex flex-wrap items-center gap-2">
-            <button onClick={handleInterest}
-              className={application && application.status !== 'saved' ? 'btn-ghost' : 'btn-primary'}>
-              <i className={`ti ${application && application.status !== 'saved' ? 'ti-heart-off' : 'ti-heart'}`} />
-              {application && application.status !== 'saved' ? 'Remove from pipeline' : 'I\'m interested'}
-            </button>
-            {lead.source_url && (
-              <button onClick={handleApply} className="btn-secondary">
-                <i className="ti ti-external-link" /> Apply on {source.label}
-              </button>
+          {/* Dates */}
+          <div className="flex flex-wrap gap-4 mt-6 text-xs" style={{ color: '#9CA3AF' }}>
+            <span className="flex items-center gap-1">
+              <i className="ti ti-calendar" style={{ fontSize: '12px' }} />
+              Posted {new Date(lead.posted_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+            </span>
+            {lead.expiry_date && (
+              <span className="flex items-center gap-1">
+                <i className="ti ti-calendar" style={{ fontSize: '12px' }} />
+                Expires {new Date(lead.expiry_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+              </span>
             )}
           </div>
 
-          {/* Outcome prompt */}
-          {showOutcomePrompt && !outcome && (
-            <div className="mt-4 p-4 rounded-xl animate-fade-in" style={{ background: '#FFFBEB', border: '1px solid #FDE68A' }}>
-              <div className="text-xs font-semibold mb-2" style={{ color: '#92400E' }}>
-                <i className="ti ti-help-circle mr-1" /> How did this one go?
+          {/* Source URL */}
+          {lead.source_url && (
+            <div className="mt-5 pt-5" style={{ borderTop: '1px solid #ECEEF2' }}>
+              <h3 className="text-sm font-semibold mb-2" style={{ color: '#1A1D23' }}>Source</h3>
+              {isFree ? (
+                <div className="rounded-lg p-4 text-center" style={{ background: '#F9FAFB', border: '1px solid #ECEEF2' }}>
+                  <i className="ti ti-lock" style={{ fontSize: '20px', display: 'block', margin: '0 auto 8px', color: '#AAB0BB' }} />
+                  <div className="text-xs font-medium" style={{ color: '#6B7280' }}>Source URL hidden</div>
+                  <div className="text-xs mt-1" style={{ color: '#9CA3AF' }}>
+                    Upgrade to Pro to see where this lead came from and apply directly.
+                  </div>
+                  <button
+                    onClick={() => router.push('/dashboard/billing')}
+                    className="btn-int on text-xs px-4 py-1.5 mt-3"
+                  >
+                    Upgrade to Pro — £49/month
+                  </button>
+                </div>
+              ) : (
+                <a
+                  href={lead.source_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm hover:underline inline-flex items-center gap-1"
+                  style={{ color: '#2563EB' }}
+                >
+                  {lead.source_url}
+                  <i className="ti ti-external-link" style={{ fontSize: '12px' }} />
+                </a>
+              )}
+            </div>
+          )}
+
+          {/* Match explanation */}
+          <div className="mt-5 pt-5" style={{ borderTop: '1px solid #ECEEF2' }}>
+            <h3 className="text-sm font-semibold mb-1" style={{ color: '#1A1D23' }}>Match Analysis</h3>
+            <p className="text-xs mb-3" style={{ color: '#6B7280' }}>{matchInfo.summary}</p>
+            <div className="space-y-2">
+              {matchInfo.breakdown.map(item => (
+                <div key={item.label} className="flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <i className={`ti ${item.achieved ? 'ti-check' : 'ti-x'}`} style={{ fontSize: '12px', color: item.achieved ? '#1B6B4A' : '#D0D4DE' }} />
+                    <span style={{ color: '#6B7280' }}>{item.label}</span>
+                  </div>
+                  <span className="font-medium shrink-0 ml-2" style={{ color: item.achieved ? '#6B7280' : '#AAB0BB' }}>
+                    {item.detail}
+                  </span>
+                </div>
+              ))}
+              <div className="flex items-center justify-between text-xs font-bold pt-2" style={{ borderTop: '1px solid #ECEEF2' }}>
+                <span style={{ color: '#1A1D23' }}>Overall Score</span>
+                <span style={{ color: '#1B6B4A' }}>{score}/10</span>
               </div>
-              <div className="flex gap-2">
-                <button onClick={() => handleOutcome('won')} disabled={loggingOutcome}
-                  className="btn-primary-sm">Won it</button>
-                <button onClick={() => handleOutcome('lost')} disabled={loggingOutcome}
-                  className="btn-ghost-sm" style={{ color: '#DC2626' }}>Didn&apos;t get it</button>
+            </div>
+
+            {/* Skill match */}
+            {profile?.skills && profile.skills.length > 0 && (
+              <div className="mt-4 pt-3" style={{ borderTop: '1px solid #ECEEF2' }}>
+                <div className="text-xs font-semibold mb-2" style={{ color: '#1A1D23' }}>
+                  Skill Match: {matchInfo.skillMatch.matched.length}/{lead.skills_required?.length || 0}
+                </div>
+                {matchInfo.skillMatch.matched.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mb-1.5">
+                    {matchInfo.skillMatch.matched.map(s => (
+                      <span key={s} className="text-[10px] px-2 py-0.5 rounded font-medium" style={{ background: '#EBF5F0', color: '#1B6B4A' }}>{s} ✓</span>
+                    ))}
+                  </div>
+                )}
+                {matchInfo.skillMatch.missing.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5">
+                    {matchInfo.skillMatch.missing.map(s => (
+                      <span key={s} className="text-[10px] px-2 py-0.5 rounded font-medium" style={{ background: '#F2F3F7', color: '#AAB0BB' }}>{s}</span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Outcome logging */}
+          {showOutcomePrompt && (
+            <div className="mt-5 pt-5" style={{ borderTop: '1px solid #ECEEF2' }}>
+              <h3 className="text-sm font-semibold mb-2" style={{ color: '#1A1D23' }}>Did you get this project?</h3>
+              <p className="text-xs mb-3" style={{ color: '#6B7280' }}>Help us improve your matches by telling us what happened.</p>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { outcome: 'won', label: 'Got it!', icon: 'ti-thumb-up', color: '#1B6B4A', bg: '#EBF5F0' },
+                  { outcome: 'lost', label: 'Did not get it', icon: 'ti-thumb-down', color: '#DC2626', bg: '#FEF2F2' },
+                  { outcome: 'pending', label: 'Still waiting', icon: 'ti-clock', color: '#D97706', bg: '#FEF3E2' },
+                ].map(opt => (
+                  <button key={opt.outcome} onClick={async () => {
+                    const res = await fetch('/api/applications', {
+                      method: 'PATCH',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ lead_id: id, outcome: opt.outcome }),
+                    })
+                    if (res.ok) {
+                      const app = await res.json()
+                      setApplication(app)
+                      toast.success('Saved!')
+                    }
+                  }}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all hover:opacity-80 min-h-[32px]"
+                    style={{ background: opt.bg, color: opt.color }}>
+                    <i className={`ti ${opt.icon}`} style={{ fontSize: '12px' }} /> {opt.label}
+                  </button>
+                ))}
               </div>
             </div>
           )}
 
-          {outcome && (
-            <div className="mt-4 p-3 rounded-xl text-xs font-semibold" style={{
-              background: outcome === 'won' ? '#ECFDF5' : '#FEF2F2',
-              color: outcome === 'won' ? '#059669' : '#DC2626',
-              border: `1px solid ${outcome === 'won' ? '#A7F3D0' : '#FECACA'}`,
-            }}>
-              <i className={`ti ${outcome === 'won' ? 'ti-trophy' : 'ti-thumb-down'} mr-1`} />
-              {outcome === 'won' ? 'Logged as won' : 'Logged as lost'}
+          {application?.outcome && (
+            <div className="mt-5 pt-5" style={{ borderTop: '1px solid #ECEEF2' }}>
+              <div className="flex items-center gap-2 text-sm font-medium" style={{ color: application.outcome === 'won' ? '#1B6B4A' : application.outcome === 'lost' ? '#DC2626' : '#D97706' }}>
+                <i className={`ti ${application.outcome === 'won' ? 'ti-thumb-up' : application.outcome === 'lost' ? 'ti-thumb-down' : 'ti-clock'}`} style={{ fontSize: '14px' }} />
+                {application.outcome === 'won' ? 'You got this project!' : application.outcome === 'lost' ? 'Did not get this project' : 'Still waiting on this project'}
+              </div>
             </div>
           )}
+
+          {/* Actions */}
+          <div className="flex flex-wrap items-center gap-3 mt-6 pt-5" style={{ borderTop: '1px solid #ECEEF2' }}>
+            {!isFree && lead.source_url && (
+              <a
+                href={lead.source_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-int on gap-2 px-5 py-2.5 text-sm no-underline"
+              >
+                <i className="ti ti-external-link" style={{ fontSize: '14px' }} />
+                Apply on {source.label}
+              </a>
+            )}
+            <button
+              onClick={handleInterested}
+              className={`btn-int gap-2 px-5 py-2.5 text-sm ${application?.status === 'interested' || application?.status === 'applied' || application?.status === 'hired' ? 'on' : ''}`}
+            >
+              <i className="ti ti-send" style={{ fontSize: '14px' }} />
+              {application?.status === 'interested' || application?.status === 'applied' || application?.status === 'hired' ? 'Interest Expressed' : 'Express Interest'}
+            </button>
+
+            <button
+              onClick={handleBookmark}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all min-h-[36px] hover:bg-gray-100 active:scale-[0.97]"
+              style={{
+                background: application?.status === 'saved' ? '#F0EFFE' : '#F2F3F7',
+                color: application?.status === 'saved' ? '#7C3AED' : '#6B7280',
+              }}
+            >
+              <i className={`ti ${application?.status === 'saved' ? 'ti-bookmark-filled' : 'ti-bookmark'}`} style={{ fontSize: '14px' }} />
+              {application?.status === 'saved' ? 'Saved' : 'Save for later'}
+            </button>
+
+            {application?.status === 'interested' && (
+              <button
+                onClick={() => { updateApplication('applied'); toast.success('Marked as applied') }}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium min-h-[36px] transition-all hover:opacity-80 active:scale-[0.97]"
+                style={{ background: '#FEF3E2', color: '#D97706' }}
+              >
+                <i className="ti ti-send" style={{ fontSize: '14px' }} /> Mark as Applied
+              </button>
+            )}
+            {application?.status === 'applied' && (
+              <button
+                onClick={() => { updateApplication('hired'); toast.success('Marked as hired!') }}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium min-h-[36px] transition-all hover:opacity-80 active:scale-[0.97]"
+                style={{ background: '#EBF5F0', color: '#1B6B4A' }}
+              >
+                <i className="ti ti-trophy" style={{ fontSize: '14px' }} /> Mark as Hired
+              </button>
+            )}
+
+            {application?.status && application.status !== 'saved' && (
+              <span className="text-xs font-medium px-3 py-1.5 rounded-full" style={{ background: statusConfig[application.status]?.bg, color: statusConfig[application.status]?.color }}>
+                {statusConfig[application.status]?.label || application.status}
+              </span>
+            )}
+          </div>
         </div>
       </div>
     </div>

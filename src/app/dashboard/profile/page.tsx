@@ -1,25 +1,23 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-client'
 import toast from 'react-hot-toast'
 import type { Profile } from '@/types'
 
-const skillOptions = ['React', 'TypeScript', 'Node.js', 'Python', 'Figma', 'UI/UX', 'Branding', 'Copywriting', 'Illustrator', 'After Effects', 'Next.js', 'Tailwind', 'Django', 'Flutter', 'Swift', 'AWS', 'Docker', 'PostgreSQL', 'MongoDB', 'GraphQL', 'REST APIs', 'Animation', 'Motion Design', 'Prototyping', 'Design Systems', 'Research', 'HTML/CSS', 'JavaScript', 'Vue', 'Angular', 'PHP', 'WordPress', 'Shopify', 'SEO', 'Content Strategy']
-
-const experienceOptions = ['Junior', 'Mid-level', 'Senior', 'Lead']
 
 export default function ProfilePage() {
   const [profile, setProfile] = useState<Profile | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
   const [fullName, setFullName] = useState('')
-  const [skills, setSkills] = useState<string[]>([])
+  const [skillTags, setSkillTags] = useState<string[]>([])
+  const [skillInput, setSkillInput] = useState('')
   const [experienceLevel, setExperienceLevel] = useState('')
   const [hourlyRate, setHourlyRate] = useState('')
   const [location, setLocation] = useState('')
+  const [portfolioUrl, setPortfolioUrl] = useState('')
   const [availability, setAvailability] = useState('')
+  const [saving, setSaving] = useState(false)
   const router = useRouter()
   const supabase = createClient()
 
@@ -28,119 +26,157 @@ export default function ProfilePage() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/auth/login'); return }
       const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single()
-      setProfile(data)
-      setFullName(data?.full_name || '')
-      setSkills(data?.skills || [])
-      setExperienceLevel(data?.experience_level || '')
-      setHourlyRate(data?.hourly_rate ? String(data.hourly_rate) : '')
-      setLocation(data?.location || '')
-      setAvailability(data?.availability || '')
-      setLoading(false)
+      if (data) {
+        setProfile(data)
+        setFullName(data.full_name || '')
+        setSkillTags(data.skills || [])
+        setExperienceLevel(data.experience_level || '')
+        setHourlyRate(data.hourly_rate?.toString() || '')
+        setLocation(data.location || '')
+        setPortfolioUrl(data.portfolio_url || '')
+        setAvailability(data.availability || '')
+      }
     }
     load()
   }, [supabase, router])
 
-  const toggleSkill = (skill: string) => {
-    setSkills(prev => prev.includes(skill) ? prev.filter(s => s !== skill) : [...prev, skill])
-  }
+  const addSkill = useCallback(() => {
+    const s = skillInput.trim()
+    if (s && !skillTags.includes(s)) {
+      setSkillTags(prev => [...prev, s])
+      setSkillInput('')
+    }
+  }, [skillInput, skillTags])
 
-  const handleSave = async () => {
+  const removeSkill = useCallback((s: string) => {
+    setSkillTags(prev => prev.filter(t => t !== s))
+  }, [])
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault()
     setSaving(true)
-    const { error } = await supabase.from('profiles').update({
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+    const { error } = await supabase.from('profiles').upsert({
+      id: user.id,
       full_name: fullName,
-      skills,
+      skills: skillTags,
       experience_level: experienceLevel,
       hourly_rate: hourlyRate ? parseInt(hourlyRate) : null,
       location,
+      portfolio_url: portfolioUrl,
       availability,
-    }).eq('id', profile?.id)
-    if (error) { toast.error(error.message); setSaving(false); return }
-    toast.success('Profile saved')
+    })
+    if (error) toast.error(error.message)
+    else toast.success('Profile saved!')
     setSaving(false)
   }
 
-  if (loading) return (
-    <div className="pb-20 md:pb-0" style={{ background: '#F9FAFB' }}>
-      <div className="px-4 md:px-8 pt-6 space-y-3">
-        <div className="h-7 w-32 skel" />
-        <div className="h-4 w-48 skel" />
-      </div>
-    </div>
-  )
+  const fields = [fullName, skillTags.length > 0, experienceLevel, hourlyRate, location, portfolioUrl, availability]
+  const filled = fields.filter(Boolean).length
+  const completion = Math.round((filled / fields.length) * 100)
 
   return (
-    <div className="flex-1 pb-24 md:pb-0" style={{ background: '#F9FAFB' }}>
-      <div className="max-w-3xl mx-auto px-4 sm:px-8 py-6 md:py-8">
-        <button onClick={() => router.push('/dashboard')} className="btn-ghost-sm mb-4">
-          <i className="ti ti-arrow-left" /> Feed
+    <div className="flex-1 pb-20 md:pb-0" style={{ background: '#F2F3F7' }}>
+      <div className="max-w-2xl mx-auto px-4 py-6">
+        <button onClick={() => router.push('/dashboard')} className="btn-back mb-5">
+          <i className="ti ti-arrow-left" /> Back to dashboard
         </button>
-        <h1 className="text-xl font-bold" style={{ color: '#111827' }}>Settings</h1>
-        <p className="text-xs mt-1 mb-6" style={{ color: '#9CA3AF' }}>Update your profile to improve lead matching.</p>
 
-        <div className="space-y-4">
-          <div className="card p-5">
-            <div className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: '#9CA3AF' }}>Basic info</div>
-            <div className="space-y-3">
-              <div>
-                <label className="text-sm font-medium" style={{ color: '#374151' }}>Full name</label>
-                <input value={fullName} onChange={e => setFullName(e.target.value)}
-                  className="block w-full rounded-xl border px-3.5 py-2.5 text-sm outline-none mt-1"
-                  style={{ borderColor: '#D1D5DB', color: '#111827' }} placeholder="Your name" />
-              </div>
-              <div>
-                <label className="text-sm font-medium" style={{ color: '#374151' }}>Location</label>
-                <input value={location} onChange={e => setLocation(e.target.value)}
-                  className="block w-full rounded-xl border px-3.5 py-2.5 text-sm outline-none mt-1"
-                  style={{ borderColor: '#D1D5DB', color: '#111827' }} placeholder="e.g. London, UK" />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-sm font-medium" style={{ color: '#374151' }}>Hourly rate (£)</label>
-                  <input value={hourlyRate} onChange={e => setHourlyRate(e.target.value)} type="number"
-                    className="block w-full rounded-xl border px-3.5 py-2.5 text-sm outline-none mt-1"
-                    style={{ borderColor: '#D1D5DB', color: '#111827' }} placeholder="e.g. 75" />
-                </div>
-                <div>
-                  <label className="text-sm font-medium" style={{ color: '#374151' }}>Experience</label>
-                  <select value={experienceLevel} onChange={e => setExperienceLevel(e.target.value)}
-                    className="block w-full rounded-xl border px-3.5 py-2.5 text-sm outline-none mt-1"
-                    style={{ borderColor: '#D1D5DB', color: '#111827', background: 'white' }}>
-                    <option value="">Select...</option>
-                    {experienceOptions.map(o => <option key={o} value={o}>{o}</option>)}
-                  </select>
-                </div>
-              </div>
-              <div>
-                <label className="text-sm font-medium" style={{ color: '#374151' }}>Availability</label>
-                <select value={availability} onChange={e => setAvailability(e.target.value)}
-                  className="block w-full rounded-xl border px-3.5 py-2.5 text-sm outline-none mt-1"
-                  style={{ borderColor: '#D1D5DB', color: '#111827', background: 'white' }}>
-                  <option value="">Select...</option>
-                  <option value="full-time">Full-time</option>
-                  <option value="part-time">Part-time</option>
-                  <option value="contract">Contract</option>
-                </select>
-              </div>
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-lg font-bold" style={{ color: '#1A1D23' }}>Your Profile</h1>
+          <div className="flex items-center gap-2">
+            <div className="w-20 bg-gray-200 rounded-full h-1.5 overflow-hidden">
+              <div className="h-full rounded-full transition-all duration-300" style={{ background: '#1B6B4A', width: `${completion}%` }} />
             </div>
-          </div>
-
-          <div className="card p-5">
-            <div className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: '#9CA3AF' }}>Skills</div>
-            <div className="flex flex-wrap gap-1.5">
-              {skillOptions.map(s => (
-                <button key={s} onClick={() => toggleSkill(s)}
-                  className={`tag transition-all active:scale-[0.95] ${skills.includes(s) ? 'bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0]' : 'bg-[#F3F4F6] text-[#6B7280] border border-transparent hover:border-[#D1D5DB]'}`}>
-                  {s}
-                  {skills.includes(s) && <i className="ti ti-check ml-1" style={{ fontSize: '10px' }} />}
-                </button>
-              ))}
-            </div>
+            <span className="text-[11px] font-medium" style={{ color: completion === 100 ? '#1B6B4A' : '#6B7280' }}>{completion}%</span>
           </div>
         </div>
 
-        <button onClick={handleSave} disabled={saving} className="btn-primary mt-6">
-          {saving ? 'Saving...' : 'Save changes'}
-        </button>
+        <form onSubmit={handleSave} className="bg-white rounded-xl p-6 space-y-5" style={{ border: '1px solid #ECEEF2' }}>
+          <div className="section-divider mb-2">
+            <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: '#AAB0BB' }}>Personal info</span>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-medium mb-1" style={{ color: '#374151' }}>Full Name</label>
+              <input type="text" value={fullName} onChange={e => setFullName(e.target.value)}
+                className="w-full rounded-lg border px-3 py-2 text-xs outline-none" style={{ borderColor: '#E5E7EB', color: '#1A1D23' }}
+                placeholder="Jane Doe" />
+            </div>
+            <div>
+              <label className="block text-xs font-medium mb-1" style={{ color: '#374151' }}>Experience Level</label>
+              <select value={experienceLevel} onChange={e => setExperienceLevel(e.target.value)}
+                className="w-full rounded-lg border px-3 py-2 text-xs outline-none" style={{ borderColor: '#E5E7EB', color: '#1A1D23' }}>
+                <option value="">Select...</option>
+                <option value="junior">Junior</option>
+                <option value="mid">Mid-level</option>
+                <option value="senior">Senior</option>
+                <option value="lead">Lead / Expert</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-medium mb-1" style={{ color: '#374151' }}>Hourly Rate (£)</label>
+              <input type="number" value={hourlyRate} onChange={e => setHourlyRate(e.target.value)}
+                className="w-full rounded-lg border px-3 py-2 text-xs outline-none" style={{ borderColor: '#E5E7EB', color: '#1A1D23' }}
+                placeholder="75" />
+            </div>
+            <div>
+              <label className="block text-xs font-medium mb-1" style={{ color: '#374151' }}>Location</label>
+              <input type="text" value={location} onChange={e => setLocation(e.target.value)}
+                className="w-full rounded-lg border px-3 py-2 text-xs outline-none" style={{ borderColor: '#E5E7EB', color: '#1A1D23' }}
+                placeholder="London, UK" />
+            </div>
+            <div>
+              <label className="block text-xs font-medium mb-1" style={{ color: '#374151' }}>Availability</label>
+              <select value={availability} onChange={e => setAvailability(e.target.value)}
+                className="w-full rounded-lg border px-3 py-2 text-xs outline-none" style={{ borderColor: '#E5E7EB', color: '#1A1D23' }}>
+                <option value="">Select...</option>
+                <option value="full-time">Full-time</option>
+                <option value="part-time">Part-time</option>
+                <option value="evenings">Evenings / Weekends</option>
+                <option value="not-available">Not available</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-medium mb-1" style={{ color: '#374151' }}>Portfolio URL</label>
+              <input type="url" value={portfolioUrl} onChange={e => setPortfolioUrl(e.target.value)}
+                className="w-full rounded-lg border px-3 py-2 text-xs outline-none" style={{ borderColor: '#E5E7EB', color: '#1A1D23' }}
+                placeholder="https://your-portfolio.com" />
+            </div>
+          </div>
+
+          {/* Skills tag input */}
+          <div>
+            <label className="block text-xs font-medium mb-1" style={{ color: '#374151' }}>Skills</label>
+            <div className="flex items-center gap-1.5 flex-wrap mb-2">
+              {skillTags.map(s => (
+                <span key={s} className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-1 rounded-lg" style={{ background: '#EBF1FC', color: '#2563EB' }}>
+                  {s}
+                  <button type="button" onClick={() => removeSkill(s)} className="hover:opacity-70"><i className="ti ti-x" style={{ fontSize: '11px' }} /></button>
+                </span>
+              ))}
+            </div>
+            <div className="flex gap-1.5">
+              <input type="text" value={skillInput} onChange={e => setSkillInput(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addSkill() } }}
+                className="flex-1 rounded-lg border px-3 py-2 text-xs outline-none" style={{ borderColor: '#E5E7EB', color: '#1A1D23' }}
+                placeholder="Type a skill and press Enter" />
+              <button type="button" onClick={addSkill}
+                className="btn-int on px-3 py-2">
+                <i className="ti ti-plus" style={{ fontSize: '14px' }} />
+              </button>
+            </div>
+          </div>
+
+          <div className="pt-2">
+            <button type="submit" disabled={saving}
+              className="btn-int on px-6 py-2.5 text-sm">
+              {saving ? 'Saving...' : 'Save Profile'}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   )
