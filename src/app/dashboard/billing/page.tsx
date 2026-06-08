@@ -3,9 +3,9 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-client'
-import { getStripePublishableKey } from '@/lib/stripe'
 import toast from 'react-hot-toast'
 import type { Profile } from '@/types'
+import { Check, Lock, Loader2, ArrowLeft } from 'lucide-react'
 
 export default function BillingPage() {
   const [profile, setProfile] = useState<Profile | null>(null)
@@ -20,21 +20,14 @@ export default function BillingPage() {
 
     const load = async () => {
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        router.push('/auth/login')
-        return
-      }
+      if (!user) { router.push('/auth/login'); return }
 
       if (justPaid) {
         setProcessing(true)
         let tries = 0
         while (tries < 15) {
           await new Promise(r => setTimeout(r, 2000))
-          const { data } = await supabase
-            .from('profiles')
-            .select('subscription_status')
-            .eq('id', user.id)
-            .single()
+          const { data } = await supabase.from('profiles').select('subscription_status').eq('id', user.id).single()
           if (data?.subscription_status === 'pro') {
             setProcessing(false)
             toast.success('Welcome to Pro!')
@@ -44,121 +37,130 @@ export default function BillingPage() {
           tries++
         }
         setProcessing(false)
-        toast.error('Subscription update is taking longer than expected. Refresh the page.')
+        toast.error('Subscription update is taking longer. Refresh the page.')
       }
 
-      const { data } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single()
-
+      const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single()
       setProfile(data)
       setLoading(false)
     }
-
     load()
   }, [supabase, router])
 
   const handleUpgrade = async () => {
     try {
-      const response = await fetch('/api/create-checkout-session', {
-        method: 'POST',
-      })
-
+      const response = await fetch('/api/create-checkout-session', { method: 'POST' })
       const data = await response.json()
-
-      if (data.url) {
-        router.push(data.url)
-      } else {
-        toast.error('Something went wrong. Please try again.')
-      }
-    } catch {
-      toast.error('Failed to initiate checkout.')
-    }
+      if (data.url) router.push(data.url)
+      else toast.error('Something went wrong.')
+    } catch { toast.error('Failed to initiate checkout.') }
   }
 
-  if (loading) {
-    return (
-      <div className="max-w-3xl mx-auto px-4 py-8">
-        <div className="animate-pulse h-8 bg-gray-200 rounded w-48" />
+  if (loading) return (
+    <div className="flex items-center justify-center min-h-screen" style={{ background: '#F2F3F7' }}>
+      <div className="animate-spin h-8 w-8 border-4 rounded-full" style={{ borderColor: '#1B6B4A', borderTopColor: 'transparent' }} />
+    </div>
+  )
+
+  if (processing) return (
+    <div className="flex items-center justify-center min-h-screen" style={{ background: '#F2F3F7' }}>
+      <div className="text-center">
+        <Loader2 size={28} className="animate-spin mx-auto" style={{ color: '#1B6B4A' }} />
+        <p className="mt-3 text-sm" style={{ color: '#6B7280' }}>Processing your payment...</p>
       </div>
-    )
-  }
-
-  if (processing) {
-    return (
-      <div className="max-w-3xl mx-auto px-4 py-8 text-center">
-        <div className="animate-spin h-8 w-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto" />
-        <p className="mt-4 text-gray-600">Processing your payment...</p>
-      </div>
-    )
-  }
+    </div>
+  )
 
   const isPro = profile?.subscription_status === 'pro'
 
+  const plans = [
+    {
+      name: 'Free',
+      price: '£0',
+      period: 'forever',
+      description: 'Try before you commit. See what we offer.',
+      features: [
+        { text: '3 leads per week', included: true },
+        { text: 'Basic lead details', included: true },
+        { text: 'Email notifications', included: true },
+        { text: 'Full lead details & source URLs', included: false },
+        { text: 'Skill-based filtering', included: false },
+        { text: 'Early access to new leads', included: false },
+        { text: 'Priority matching', included: false },
+      ],
+      cta: isPro ? 'Current plan' : 'Get Started Free',
+      highlighted: false,
+      onClick: () => {},
+    },
+    {
+      name: 'Pro',
+      price: '£49',
+      period: '/month',
+      description: 'For serious freelancers who want consistent work.',
+      features: [
+        { text: 'Unlimited leads', included: true },
+        { text: 'Full lead details & source URLs', included: true },
+        { text: 'Email notifications', included: true },
+        { text: 'Skill-based filtering', included: true },
+        { text: 'Early access to new leads', included: true },
+        { text: 'Priority matching', included: true },
+        { text: 'Cancel anytime', included: true },
+      ],
+      cta: isPro ? 'Current plan' : 'Upgrade to Pro',
+      highlighted: true,
+      onClick: isPro ? () => {} : handleUpgrade,
+    },
+  ]
+
   return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="text-2xl font-bold text-gray-900 mb-8">Billing</h1>
+    <div className="min-h-screen" style={{ background: '#F2F3F7' }}>
+      <div className="max-w-3xl mx-auto px-4 py-6">
+        <button onClick={() => router.push('/dashboard')}
+          className="flex items-center gap-1.5 text-xs font-medium mb-5 transition-colors hover:opacity-80"
+          style={{ color: '#6B7280' }}>
+          <ArrowLeft size={13} /> Dashboard
+        </button>
 
-      <div className="bg-white rounded-xl border border-gray-200 p-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-lg font-semibold text-gray-900">Current Plan</h2>
-            <p className="text-sm text-gray-500 mt-1">
-              {isPro ? 'You are on the Pro plan' : 'You are on the Free plan'}
-            </p>
-          </div>
-          <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-            isPro ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'
-          }`}>
-            {isPro ? 'Pro' : 'Free'}
-          </span>
-        </div>
+        <h1 className="text-lg font-bold mb-6" style={{ color: '#1A1D23' }}>Billing</h1>
 
-        {isPro ? (
-          <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-            <p className="text-sm text-blue-700">
-              You have full access to all leads, filtering, and priority matching.
-            </p>
-          </div>
-        ) : (
-          <div className="mt-8">
-            <div className="rounded-xl border-2 border-blue-600 p-6 bg-blue-50">
-              <h3 className="text-lg font-semibold text-gray-900">Upgrade to Pro</h3>
-              <p className="mt-2 text-sm text-gray-600">
-                Get unlimited leads, skill filtering, early access, and priority matching.
-              </p>
-              <p className="mt-4">
-                <span className="text-3xl font-bold text-gray-900">£49</span>
-                <span className="text-gray-500 ml-1">/month</span>
-              </p>
+        <div className="grid md:grid-cols-2 gap-4">
+          {plans.map(plan => (
+            <div key={plan.name}
+              className="bg-white rounded-xl p-6 flex flex-col"
+              style={{
+                border: plan.highlighted ? '1px solid #1B6B4A' : '1px solid #ECEEF2',
+                background: plan.highlighted ? '#F0FDF7' : '#FFFFFF',
+              }}>
+              <h3 className="text-base font-bold" style={{ color: '#1A1D23' }}>{plan.name}</h3>
+              <div className="mt-2">
+                <span className="text-2xl font-bold" style={{ color: '#1A1D23' }}>{plan.price}</span>
+                <span className="text-xs ml-1" style={{ color: '#9CA3AF' }}>{plan.period}</span>
+              </div>
+              <p className="text-xs mt-1 flex-1" style={{ color: '#6B7280' }}>{plan.description}</p>
               <ul className="mt-4 space-y-2">
-                {[
-                  'Unlimited leads',
-                  'Full lead details & source URLs',
-                  'Skill-based filtering',
-                  'Early access to new leads',
-                  'Priority matching',
-                  'Cancel anytime',
-                ].map((feature) => (
-                  <li key={feature} className="flex items-center gap-2 text-sm text-gray-600">
-                    <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    {feature}
+                {plan.features.map(f => (
+                  <li key={f.text} className="flex items-center gap-2 text-xs" style={{ color: f.included ? '#4B5563' : '#AAB0BB' }}>
+                    {f.included ? (
+                      <Check size={13} style={{ color: '#1B6B4A' }} />
+                    ) : (
+                      <Lock size={11} style={{ color: '#D0D4DE' }} />
+                    )}
+                    {f.text}
                   </li>
                 ))}
               </ul>
-              <button
-                onClick={handleUpgrade}
-                className="mt-6 w-full bg-blue-600 text-white py-3 rounded-lg text-sm font-semibold hover:bg-blue-700"
-              >
-                Upgrade to Pro — £49/month
+              <button onClick={plan.onClick}
+                disabled={isPro && plan.highlighted}
+                className="w-full mt-5 py-2.5 rounded-lg text-sm font-semibold transition-opacity hover:opacity-90 disabled:opacity-60"
+                style={{
+                  background: plan.highlighted ? '#1B6B4A' : '#F5F5F7',
+                  color: plan.highlighted ? 'white' : '#6B7280',
+                }}>
+                {plan.cta}
               </button>
             </div>
-          </div>
-        )}
+          ))}
+        </div>
       </div>
     </div>
   )

@@ -172,7 +172,7 @@ export default function AdminPage() {
         <h1 className="text-2xl font-bold text-gray-900">Admin Panel</h1>
         <button
           onClick={() => setShowForm(!showForm)}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700"
+          className="text-white px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90" style={{ background: '#1B6B4A' }}
         >
           {showForm ? 'Cancel' : 'Add Lead'}
         </button>
@@ -226,9 +226,9 @@ export default function AdminPage() {
 
         {scrapeResult && (
           <div className="grid grid-cols-4 gap-3 mb-4">
-            <div className="bg-blue-50 rounded-lg p-3 text-center">
-              <p className="text-lg font-bold text-blue-700">{scrapeResult.found}</p>
-              <p className="text-xs text-blue-600">Found</p>
+            <div className="rounded-lg p-3 text-center" style={{ background: '#EBF5F0' }}>
+              <p className="text-lg font-bold text-[#1B6B4A]">{scrapeResult.found}</p>
+              <p className="text-xs text-[#1B6B4A]">Found</p>
             </div>
             <div className="bg-green-50 rounded-lg p-3 text-center">
               <p className="text-lg font-bold text-green-700">{scrapeResult.passed_filter}</p>
@@ -276,7 +276,7 @@ export default function AdminPage() {
                 required
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-[#1B6B4A] focus:ring-1 focus:ring-[#1B6B4A]"
               />
             </div>
             <div className="md:col-span-2">
@@ -286,7 +286,7 @@ export default function AdminPage() {
                 rows={4}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-[#1B6B4A] focus:ring-1 focus:ring-[#1B6B4A]"
               />
             </div>
             <div>
@@ -295,7 +295,7 @@ export default function AdminPage() {
                 type="number"
                 value={budgetMin}
                 onChange={(e) => setBudgetMin(e.target.value)}
-                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-[#1B6B4A] focus:ring-1 focus:ring-[#1B6B4A]"
               />
             </div>
             <div>
@@ -304,7 +304,7 @@ export default function AdminPage() {
                 type="number"
                 value={budgetMax}
                 onChange={(e) => setBudgetMax(e.target.value)}
-                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-[#1B6B4A] focus:ring-1 focus:ring-[#1B6B4A]"
               />
             </div>
             <div>
@@ -312,7 +312,7 @@ export default function AdminPage() {
               <select
                 value={projectType}
                 onChange={(e) => setProjectType(e.target.value)}
-                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-[#1B6B4A] focus:ring-1 focus:ring-[#1B6B4A]"
               >
                 <option value="">Select...</option>
                 <option value="one-off">One-off</option>
@@ -325,7 +325,7 @@ export default function AdminPage() {
                 type="text"
                 value={clientLocation}
                 onChange={(e) => setClientLocation(e.target.value)}
-                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-[#1B6B4A] focus:ring-1 focus:ring-[#1B6B4A]"
               />
             </div>
             <div className="md:col-span-2">
@@ -334,7 +334,7 @@ export default function AdminPage() {
                 type="text"
                 value={skillsRequired}
                 onChange={(e) => setSkillsRequired(e.target.value)}
-                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-[#1B6B4A] focus:ring-1 focus:ring-[#1B6B4A]"
                 placeholder="React, Node.js, TypeScript"
               />
             </div>
@@ -344,13 +344,13 @@ export default function AdminPage() {
                 type="url"
                 value={sourceUrl}
                 onChange={(e) => setSourceUrl(e.target.value)}
-                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-[#1B6B4A] focus:ring-1 focus:ring-[#1B6B4A]"
               />
             </div>
           </div>
           <button
             type="submit"
-            className="bg-blue-600 text-white px-6 py-2.5 rounded-lg text-sm font-semibold hover:bg-blue-700"
+            className="text-white px-6 py-2.5 rounded-lg text-sm font-semibold hover:opacity-90" style={{ background: '#1B6B4A' }}
           >
             Add Lead
           </button>

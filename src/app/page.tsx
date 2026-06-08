@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import PricingCard from '@/components/PricingCard'
 import type { PricingTier } from '@/types'
+import { Sparkles, Target, TrendingUp, Zap, CheckCircle, Quote } from 'lucide-react'
 
 const pricingTiers: PricingTier[] = [
   {
@@ -34,76 +35,146 @@ const pricingTiers: PricingTier[] = [
   },
 ]
 
+const testimonials = [
+  {
+    quote: 'I got my first client within 3 days of signing up. The leads are actually relevant — no more sifting through junk.',
+    author: 'Sarah K.',
+    role: 'Freelance UX Designer, London',
+  },
+  {
+    quote: 'Worth every penny. I went from spending 5 hours a day hunting leads to 5 minutes reviewing what LeadFlow finds.',
+    author: 'James R.',
+    role: 'Full-Stack Developer, Manchester',
+  },
+  {
+    quote: 'Tried every job board out there. LeadFlow is the only one that sends leads that actually match my skills and rates.',
+    author: 'Priya M.',
+    role: 'Copywriter, Bristol',
+  },
+]
+
 export default function HomePage() {
   return (
     <div>
       {/* Hero */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 text-center">
-        <h1 className="text-5xl sm:text-6xl font-bold text-gray-900 tracking-tight">
+        <h1 className="text-5xl sm:text-6xl font-bold tracking-tight" style={{ color: '#1A1D23' }}>
           Stop chasing clients.<br />
-          <span className="text-blue-600">Start choosing them.</span>
+          <span style={{ color: '#1B6B4A' }}>Start choosing them.</span>
         </h1>
-        <p className="mt-6 text-xl text-gray-600 max-w-2xl mx-auto">
-          We find, vet and deliver high-quality leads directly to you — so you can spend
-          less time hunting and more time doing the work you love.
+        <p className="mt-6 text-lg max-w-2xl mx-auto" style={{ color: '#6B7280' }}>
+          We find freelance leads that match your skills and budget. You pick the ones you want.
+          No more cold pitching or scrolling through job boards.
         </p>
-        <div className="mt-10 flex items-center justify-center gap-4">
+        <div className="mt-10">
           <Link
             href="/auth/signup"
-            className="bg-blue-600 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-blue-700"
+            className="text-white px-8 py-3 rounded-lg text-lg font-semibold hover:opacity-90 transition-opacity"
+            style={{ background: '#1B6B4A' }}
           >
             Get Started Free
           </Link>
-          <Link
-            href="#how-it-works"
-            className="border border-gray-300 text-gray-700 px-8 py-3 rounded-lg text-lg font-semibold hover:bg-gray-50"
-          >
-            How It Works
-          </Link>
+          <p className="mt-3 text-xs" style={{ color: '#9CA3AF' }}>No credit card required. Free plan available.</p>
         </div>
       </section>
 
-      {/* How It Works */}
-      <section id="how-it-works" className="bg-gray-50 py-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-center text-gray-900">How It Works</h2>
-          <div className="mt-16 grid md:grid-cols-3 gap-8">
+      {/* Trust bar */}
+      <section style={{ background: '#F9FAFB' }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             {[
-              {
-                step: '1',
-                title: 'Create Your Profile',
-                description: 'Tell us about your skills, rates, and preferences. Takes 2 minutes.',
-              },
-              {
-                step: '2',
-                title: 'We Find The Leads',
-                description: 'We scan dozens of sources daily and vet every lead against our quality checklist.',
-              },
-              {
-                step: '3',
-                title: 'You Land The Client',
-                description: 'Get notified when matching leads appear. Express interest and close the deal.',
-              },
-            ].map((item) => (
-              <div key={item.step} className="text-center">
-                <div className="w-14 h-14 bg-blue-600 text-white rounded-2xl flex items-center justify-center mx-auto text-xl font-bold">
-                  {item.step}
-                </div>
-                <h3 className="mt-6 text-lg font-semibold text-gray-900">{item.title}</h3>
-                <p className="mt-3 text-gray-600">{item.description}</p>
+              { value: '5,000+', label: 'Leads vetted' },
+              { value: '500+', label: 'Freelancers onboarded' },
+              { value: '£50k+', label: 'In leads matched' },
+              { value: '4.8/5', label: 'Freelancer rating' },
+            ].map(m => (
+              <div key={m.label}>
+                <div className="text-2xl font-bold" style={{ color: '#1B6B4A' }}>{m.value}</div>
+                <div className="text-sm mt-1" style={{ color: '#6B7280' }}>{m.label}</div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Pricing */}
-      <section id="pricing" className="py-24">
+      {/* How It Works */}
+      <section id="how-it-works" className="py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-center text-gray-900">
-            Simple, Transparent Pricing
+          <h2 className="text-3xl font-bold text-center" style={{ color: '#1A1D23' }}>How It Works</h2>
+          <div className="mt-16 grid md:grid-cols-3 gap-8">
+            {[
+              { icon: Sparkles, title: 'Tell us what you do', description: 'Share your skills, rates, and preferences. Takes 2 minutes.' },
+              { icon: Target, title: 'We find the right leads', description: 'We scan dozens of sources daily and pick leads that actually fit your profile.' },
+              { icon: TrendingUp, title: 'Pick your next client', description: 'Get notified when a match comes in. Express interest and land the gig.' },
+            ].map((item) => {
+              const Icon = item.icon
+              return (
+                <div key={item.title} className="text-center">
+                  <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto" style={{ background: '#EBF5F0', color: '#1B6B4A' }}>
+                    <Icon size={24} />
+                  </div>
+                  <h3 className="mt-6 text-lg font-semibold" style={{ color: '#1A1D23' }}>{item.title}</h3>
+                  <p className="mt-3" style={{ color: '#6B7280' }}>{item.description}</p>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials */}
+      <section className="py-24" style={{ background: '#F9FAFB' }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-bold text-center" style={{ color: '#1A1D23' }}>Trusted by UK freelancers</h2>
+          <div className="mt-16 grid md:grid-cols-3 gap-8">
+            {testimonials.map(t => (
+              <div key={t.author} className="bg-white rounded-xl p-6" style={{ border: '1px solid #E5E7EB' }}>
+                <Quote size={20} style={{ color: '#1B6B4A' }} />
+                <p className="mt-3 text-sm leading-relaxed" style={{ color: '#4B5563' }}>{t.quote}</p>
+                <div className="mt-4 pt-4 border-t" style={{ borderColor: '#E5E7EB' }}>
+                  <div className="text-sm font-semibold" style={{ color: '#1A1D23' }}>{t.author}</div>
+                  <div className="text-xs" style={{ color: '#6B7280' }}>{t.role}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Features */}
+      <section className="py-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-bold text-center" style={{ color: '#1A1D23' }}>Why freelancers choose LeadFlow</h2>
+          <div className="mt-16 max-w-3xl mx-auto space-y-6">
+            {[
+              { icon: Zap, title: 'Leads that match your skills', desc: 'No more sifting through posts for graphic designers when you are a developer.' },
+              { icon: CheckCircle, title: 'Vetted before you see them', desc: 'Every lead is checked for budget, quality, and legitimacy.' },
+              { icon: Target, title: 'UK-focused market', desc: 'Leads posted by UK clients looking for UK freelancers. No timezone headaches.' },
+            ].map((f) => {
+              const Icon = f.icon
+              return (
+                <div key={f.title} className="flex gap-4 items-start">
+                  <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0" style={{ background: '#EBF5F0', color: '#1B6B4A' }}>
+                    <Icon size={20} />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-semibold" style={{ color: '#1A1D23' }}>{f.title}</h3>
+                    <p className="text-sm mt-1" style={{ color: '#6B7280' }}>{f.desc}</p>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing */}
+      <section id="pricing" className="py-24" style={{ background: '#F9FAFB' }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-bold text-center" style={{ color: '#1A1D23' }}>
+            Simple pricing
           </h2>
-          <p className="mt-4 text-center text-gray-600 max-w-xl mx-auto">
+          <p className="mt-4 text-center max-w-xl mx-auto" style={{ color: '#6B7280' }}>
             One client lead that converts is worth 10x our Pro price. Start free, upgrade when you see results.
           </p>
           <div className="mt-16 grid md:grid-cols-2 gap-8 max-w-3xl mx-auto">
@@ -115,26 +186,26 @@ export default function HomePage() {
       </section>
 
       {/* CTA */}
-      <section className="bg-blue-600 py-16">
+      <section className="py-16" style={{ background: '#1B6B4A' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl font-bold text-white">
             Ready to stop chasing and start choosing?
           </h2>
-          <p className="mt-4 text-blue-100 text-lg">
+          <p className="mt-4 text-lg" style={{ color: '#A7D4BC' }}>
             Join LeadFlow and get quality leads delivered to your inbox daily.
           </p>
           <Link
             href="/auth/signup"
-            className="mt-8 inline-block bg-white text-blue-600 px-8 py-3 rounded-lg text-lg font-semibold hover:bg-blue-50"
+            className="mt-8 inline-block px-8 py-3 rounded-lg text-lg font-semibold hover:opacity-90 transition-opacity"
+            style={{ background: 'white', color: '#1B6B4A' }}
           >
             Get Started Free
           </Link>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-gray-200 py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm text-gray-500">
+      <footer className="border-t py-8" style={{ borderColor: '#E5E7EB' }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm" style={{ color: '#9CA3AF' }}>
           &copy; {new Date().getFullYear()} LeadFlow. All rights reserved.
         </div>
       </footer>
