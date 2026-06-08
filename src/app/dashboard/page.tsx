@@ -9,7 +9,7 @@ import { computeQualityScore } from '@/types'
 import { isUKLead } from '@/lib/utils'
 import LeadCard from '@/components/LeadCard'
 import UpgradeModal from '@/components/UpgradeModal'
-import { Loader2, AlertTriangle, Filter } from 'lucide-react'
+import { Loader2, AlertTriangle } from 'lucide-react'
 
 const today = new Date()
 const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
@@ -357,7 +357,7 @@ export default function DashboardPage() {
           {filteredLeads.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20" style={{ color: '#AAB0BB' }}>
               <div className="w-11 h-11 rounded-lg flex items-center justify-center mb-3" style={{ background: '#F5F5F7' }}>
-                <Filter size={20} />
+                <i className="ti ti-filter" style={{ fontSize: '18px', color: '#AAB0BB' }} />
               </div>
               <div className="text-sm font-semibold" style={{ color: '#6B7280' }}>
                 {searchQuery || filterSkill || filterType || budgetFilter ? 'No matches found' : 'No leads yet'}
@@ -367,7 +367,7 @@ export default function DashboardPage() {
               </div>
               {searchQuery || filterSkill || filterType || budgetFilter ? (
                 <button onClick={() => { setSearchQuery(''); setFilterSkill(''); setFilterType(''); setBudgetFilter('') }}
-                  className="mt-4 px-4 py-2 rounded-lg text-xs font-semibold text-white" style={{ background: '#1B6B4A' }}>Clear filters</button>
+                  className="btn-int on text-xs px-4 py-2 mt-4">Clear filters</button>
               ) : (
                 <div className="mt-4 flex items-center gap-2 text-xs" style={{ color: '#AAB0BB' }}>
                   <Loader2 size={12} className="animate-spin" style={{ color: '#1B6B4A' }} />

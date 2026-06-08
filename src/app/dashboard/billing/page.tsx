@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-client'
 import toast from 'react-hot-toast'
 import type { Profile } from '@/types'
-import { Check, Lock, Loader2, ArrowLeft, Receipt, Zap } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 
 type Tab = 'plans' | 'usage'
 
@@ -121,9 +121,9 @@ export default function BillingPage() {
     },
   ]
 
-  const tabs: { key: Tab; label: string; icon: typeof Receipt }[] = [
-    { key: 'plans', label: 'Plans', icon: Zap },
-    { key: 'usage', label: 'Usage', icon: Receipt },
+  const tabs: { key: Tab; label: string; icon: string }[] = [
+    { key: 'plans', label: 'Plans', icon: 'ti ti-bolt' },
+    { key: 'usage', label: 'Usage', icon: 'ti ti-receipt' },
   ]
 
   return (
@@ -132,7 +132,7 @@ export default function BillingPage() {
         <button onClick={() => router.push('/dashboard')}
           className="flex items-center gap-1.5 text-xs font-medium mb-5 transition-colors hover:opacity-80"
           style={{ color: '#6B7280' }}>
-          <ArrowLeft size={13} /> Dashboard
+          <i className="ti ti-arrow-left" style={{ fontSize: '13px' }} /> Dashboard
         </button>
 
         <h1 className="text-lg font-bold mb-5" style={{ color: '#1A1D23', letterSpacing: '-0.03em' }}>Billing</h1>
@@ -140,7 +140,6 @@ export default function BillingPage() {
         {/* Tabs */}
         <div className="flex gap-0.5 bg-white rounded-lg p-0.5 mb-6" style={{ border: '1px solid #ECEEF2' }}>
           {tabs.map(t => {
-            const Icon = t.icon
             const isActive = tab === t.key
             return (
               <button
@@ -152,7 +151,7 @@ export default function BillingPage() {
                   color: isActive ? 'white' : '#6B7280',
                 }}
               >
-                <Icon size={13} />
+                <i className={t.icon} style={{ fontSize: '13px' }} />
                 {t.label}
               </button>
             )
@@ -190,9 +189,9 @@ export default function BillingPage() {
                   {plan.features.map(f => (
                     <li key={f.text} className="flex items-center gap-2 text-xs" style={{ color: f.included ? '#4B5563' : '#AAB0BB' }}>
                       {f.included ? (
-                        <Check size={13} style={{ color: '#1B6B4A' }} />
+                        <i className="ti ti-check" style={{ fontSize: '13px', color: '#1B6B4A' }} />
                       ) : (
-                        <Lock size={11} style={{ color: '#D0D4DE' }} />
+                        <i className="ti ti-lock" style={{ fontSize: '11px', color: '#D0D4DE' }} />
                       )}
                       {f.text}
                     </li>
@@ -200,11 +199,8 @@ export default function BillingPage() {
                 </ul>
                 <button onClick={plan.onClick}
                   disabled={isPro && plan.highlighted}
-                  className="w-full mt-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-150 hover:opacity-90 disabled:opacity-60 active:scale-[0.98]"
-                  style={{
-                    background: plan.highlighted ? '#1B6B4A' : '#F5F5F7',
-                    color: plan.highlighted ? 'white' : '#6B7280',
-                  }}>
+                  className={`w-full mt-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-150 disabled:opacity-60 ${plan.highlighted ? 'btn-int on' : ''}`}
+                  style={!plan.highlighted ? { background: '#F5F5F7', color: '#6B7280' } : undefined}>
                   {plan.cta}
                 </button>
               </div>

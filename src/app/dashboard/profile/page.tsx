@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-client'
 import toast from 'react-hot-toast'
 import type { Profile } from '@/types'
-import { ArrowLeft, X, Plus } from 'lucide-react'
+
 
 export default function ProfilePage() {
   const [profile, setProfile] = useState<Profile | null>(null)
@@ -82,7 +82,7 @@ export default function ProfilePage() {
         <button onClick={() => router.push('/dashboard')}
           className="flex items-center gap-1.5 text-xs font-medium mb-5 transition-colors hover:opacity-80"
           style={{ color: '#6B7280' }}>
-          <ArrowLeft size={13} /> Back to dashboard
+          <i className="ti ti-arrow-left" style={{ fontSize: '13px' }} /> Back to dashboard
         </button>
 
         {/* Header */}
@@ -97,6 +97,9 @@ export default function ProfilePage() {
         </div>
 
         <form onSubmit={handleSave} className="bg-white rounded-xl p-6 space-y-5" style={{ border: '1px solid #ECEEF2' }}>
+          <div className="section-divider mb-2">
+            <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: '#AAB0BB' }}>Personal info</span>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-medium mb-1" style={{ color: '#374151' }}>Full Name</label>
@@ -153,7 +156,7 @@ export default function ProfilePage() {
               {skillTags.map(s => (
                 <span key={s} className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-1 rounded-lg" style={{ background: '#EBF1FC', color: '#2563EB' }}>
                   {s}
-                  <button type="button" onClick={() => removeSkill(s)} className="hover:opacity-70"><X size={11} /></button>
+                  <button type="button" onClick={() => removeSkill(s)} className="hover:opacity-70"><i className="ti ti-x" style={{ fontSize: '11px' }} /></button>
                 </span>
               ))}
             </div>
@@ -163,16 +166,15 @@ export default function ProfilePage() {
                 className="flex-1 rounded-lg border px-3 py-2 text-xs outline-none" style={{ borderColor: '#E5E7EB', color: '#1A1D23' }}
                 placeholder="Type a skill and press Enter" />
               <button type="button" onClick={addSkill}
-                className="px-3 py-2 rounded-lg text-xs font-medium text-white transition-opacity hover:opacity-90" style={{ background: '#1B6B4A' }}>
-                <Plus size={14} />
+                className="btn-int on px-3 py-2">
+                <i className="ti ti-plus" style={{ fontSize: '14px' }} />
               </button>
             </div>
           </div>
 
           <div className="pt-2">
             <button type="submit" disabled={saving}
-              className="px-6 py-2.5 rounded-lg text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
-              style={{ background: '#1B6B4A' }}>
+              className="btn-int on px-6 py-2.5 text-sm">
               {saving ? 'Saving...' : 'Save Profile'}
             </button>
           </div>

@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase-client'
 import toast from 'react-hot-toast'
 import type { Lead, Profile, Application } from '@/types'
 import { getSourceInfo, formatBudgetGBP, timeAgo, isNewLead, formatDate, isUKLead } from '@/lib/utils'
-import { Send, Trophy, ArrowLeft, Check } from 'lucide-react'
+
 
 const statusConfig: Record<string, { label: string, color: string, bg: string }> = {
   interested: { label: 'Interested', color: '#1B6B4A', bg: '#EBF5F0' },
@@ -91,7 +91,7 @@ export default function AppliedPage() {
     <div className="flex-1 pb-20 md:pb-0" style={{ background: '#F2F3F7' }}>
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 md:py-8">
         <button onClick={() => router.push('/dashboard')} className="flex items-center gap-1.5 text-xs font-medium mb-4" style={{ color: '#6B7280' }}>
-          <ArrowLeft size={12} /> Dashboard
+          <i className="ti ti-arrow-left" style={{ fontSize: '12px' }} /> Dashboard
         </button>
         <h1 className="text-xl font-bold mb-4" style={{ color: '#1A1D23' }}>Applications</h1>
 
@@ -122,7 +122,7 @@ export default function AppliedPage() {
         {filteredLeads.length === 0 ? (
           <div className="text-center py-20" style={{ color: '#AAB0BB' }}>
             <div className="flex justify-center mb-3">
-              {activeTab === 'all' ? <Send size={32} /> : activeTab === 'hired' ? <Trophy size={32} /> : <Check size={32} />}
+              <i className={`ti ${activeTab === 'all' ? 'ti-send' : activeTab === 'hired' ? 'ti-trophy' : 'ti-check'}`} style={{ fontSize: '28px', color: '#AAB0BB' }} />
             </div>
             <div className="text-sm font-medium">
               {activeTab === 'all' ? "You haven't expressed interest in any leads yet" :
@@ -137,7 +137,7 @@ export default function AppliedPage() {
             </div>
             <button
               onClick={() => router.push('/dashboard')}
-              className="mt-4 px-4 py-2 rounded-lg text-sm font-medium text-white" style={{ background: '#1B6B4A' }}
+              className="btn-int on text-sm px-4 py-2 mt-4"
             >
               Go to feed
             </button>
