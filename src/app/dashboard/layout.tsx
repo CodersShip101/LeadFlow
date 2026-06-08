@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase-client'
 import type { Profile } from '@/types'
 import {
   LayoutDashboard, Bookmark, Send, MessageSquare,
-  CalendarDays, Settings, AlertTriangle
+  CalendarDays, Settings, AlertTriangle, Bell
 } from 'lucide-react'
 
 const today = new Date()
@@ -41,6 +41,7 @@ const mobileItems = [
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null)
+  const [newLeadCount, setNewLeadCount] = useState(0)
   const [cal, setCal] = useState({ month: '', year: 0, days: [] as (number | null)[] })
   const router = useRouter()
   const pathname = usePathname() || ''
@@ -53,6 +54,18 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       if (!user) { router.push('/auth/login'); return }
       const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single()
       setProfile(data)
+
+      // Count new leads since last seen
+      const lastSeen = parseInt(localStorage.getItem('lastSeen') || '0')
+      if (lastSeen > 0) {
+        const { count } = await supabase
+          .from('leads')
+          .select('id', { count: 'exact', head: true })
+          .eq('status', 'active')
+          .gte('posted_date', new Date(lastSeen).toISOString())
+        setNewLeadCount(count || 0)
+      }
+      localStorage.setItem('lastSeen', String(Date.now()))
     }
     load()
   }, [supabase, router])
@@ -93,6 +106,18 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             )
           })}
         </nav>
+        <div className="px-3 mb-2">
+          <button onClick={() => router.push('/dashboard')}
+            className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm w-full text-left transition-colors relative" style={{ color: '#6B7280' }}>
+            <Bell size={16} />
+            <span className="flex-1">Notifications</span>
+            {newLeadCount > 0 && (
+              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full text-white" style={{ background: '#1B6B4A', minWidth: '18px', textAlign: 'center' }}>
+                {newLeadCount > 9 ? '9+' : newLeadCount}
+              </span>
+            )}
+          </button>
+        </div>
         <div className="flex items-center gap-2 px-5 py-3.5 border-t shrink-0" style={{ borderColor: '#ECEEF2' }}>
           <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-medium" style={{ background: '#1B6B4A' }}>
             {(profile?.email?.[0] || 'U').toUpperCase()}

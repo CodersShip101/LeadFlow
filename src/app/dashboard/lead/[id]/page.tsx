@@ -338,6 +338,18 @@ export default function LeadDetailPage() {
 
           {/* Actions */}
           <div className="flex flex-wrap items-center gap-3 mt-6 pt-5" style={{ borderTop: '1px solid #ECEEF2' }}>
+            {!isFree && lead.source_url && (
+              <a
+                href={lead.source_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold text-white transition-opacity hover:opacity-90"
+                style={{ background: '#1B6B4A' }}
+              >
+                <ExternalLink size={14} />
+                Apply on {source.label}
+              </a>
+            )}
             <button
               onClick={handleInterested}
               className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition-all"

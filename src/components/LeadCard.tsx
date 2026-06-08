@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import type { Lead, Profile, Application } from '@/types'
 import { computeMatchExplanation } from '@/types'
 import { getSourceInfo, formatBudgetGBP, timeAgo, isNewLead, formatDate } from '@/lib/utils'
-import { Bookmark, Eye, ExternalLink } from 'lucide-react'
+import { Bookmark, Eye, ExternalLink, Send } from 'lucide-react'
 
 interface LeadCardProps {
   lead: Lead
@@ -149,6 +149,16 @@ export default function LeadCard({ lead, profile, application, isFreeUser, index
         )}
 
         <div className="flex items-center gap-1 ml-auto shrink-0">
+          {!isFreeUser && lead.source_url && (
+            <button
+              onClick={e => { e.stopPropagation(); if (lead.source_url) window.open(lead.source_url, '_blank', 'noopener,noreferrer') }}
+              className="text-[10px] font-semibold px-2 py-1 rounded transition-all duration-150 flex items-center gap-1"
+              style={{ background: '#1B6B4A', color: '#FFFFFF' }}
+              title={`Apply on ${src.label}`}
+            >
+              <Send size={10} /> Apply
+            </button>
+          )}
           <button
             onClick={handleView}
             className="p-1 rounded hover:bg-gray-100 transition-colors duration-150"
