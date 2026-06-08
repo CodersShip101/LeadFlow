@@ -89,7 +89,7 @@ export default function SavedPage() {
   )
 
   return (
-    <div className="min-h-screen" style={{ background: '#F2F3F7', fontFamily: "'DM Sans', sans-serif" }}>
+    <div className="flex-1 pb-20 md:pb-0" style={{ background: '#F2F3F7' }}>
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 md:py-8">
         <button onClick={() => router.push('/dashboard')} className="flex items-center gap-1.5 text-xs font-medium mb-4" style={{ color: '#6B7280' }}>
           <ArrowLeft size={12} /> Dashboard

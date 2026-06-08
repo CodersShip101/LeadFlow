@@ -9,10 +9,9 @@ import { computeQualityScore } from '@/types'
 import LeadCard from '@/components/LeadCard'
 import UpgradeModal from '@/components/UpgradeModal'
 import {
-  Trophy, RefreshCw, Search, X, Filter, Sparkles, Zap,
-  Activity, CalendarDays, Settings, MessageSquare, ChevronLeft, ChevronRight,
-  ThumbsUp, ThumbsDown, HelpCircle, LayoutDashboard, Send, AlertTriangle,
-  Lock, ChevronUp, Bookmark
+  Trophy, RefreshCw, Search, X, Filter, Sparkles,
+  ChevronLeft, ChevronRight,
+  Send, Lock, Bookmark, AlertTriangle
 } from 'lucide-react'
 
 const today = new Date()
@@ -82,8 +81,6 @@ export default function DashboardPage() {
   const stats = useMemo(() => {
     const applied = applications.filter(a => a.status === 'interested' || a.status === 'applied' || a.status === 'hired')
     const won = applications.filter(a => a.status === 'hired' || a.outcome === 'won')
-    const completed = applications.filter(a => a.outcome !== null)
-    const wonCompleted = completed.filter(a => a.outcome === 'won')
     return {
       new: leads.filter(l => Date.now() - new Date(l.posted_date).getTime() < 86400000).length,
       applied: applied.length,
@@ -172,162 +169,103 @@ export default function DashboardPage() {
   )
 
   return (
-    <div className="flex min-h-screen" style={{ background: '#F2F3F7' }}>
-      {/* Sidebar */}
-      <aside className="hidden md:flex w-[210px] bg-white border-r shrink-0 flex-col" style={{ borderColor: '#ECEEF2' }}>
-        <div className="flex items-center gap-2 px-5 h-14 border-b shrink-0" style={{ borderColor: '#ECEEF2' }}>
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-sm font-bold" style={{ background: '#1B6B4A' }}>L</div>
-          <span className="text-base font-semibold" style={{ color: '#1A1D23' }}>LeadFlow</span>
+    <>
+      {/* Topbar */}
+      <header className="flex items-center gap-3 px-4 md:px-8 h-14 bg-white border-b shrink-0" style={{ borderColor: '#ECEEF2' }}>
+        <div className="flex-1 hidden md:block">
+          <div className="text-sm font-medium" style={{ color: '#6B7280' }}>
+            {(() => { const h = today.getHours(); return h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening' })()}, {profile?.email?.split('@')[0] || 'there'}
+          </div>
+          <div className="text-xs" style={{ color: '#AAB0BB' }}>{days[today.getDay()]}, {months[today.getMonth()]} {today.getDate()}</div>
         </div>
-        <nav className="flex-1 px-3 pt-5 space-y-0.5">
-          {[
-            { label: 'Dashboard', icon: LayoutDashboard, active: true },
-            { label: 'Leads', icon: Zap, count: leads.length },
-            { label: 'Applications', icon: Send },
-            { label: 'Messages', icon: MessageSquare },
-            { label: 'Calendar', icon: CalendarDays },
-            { label: 'Settings', icon: Settings },
-          ].map((item) => {
-            const Icon = item.icon
-            return (
-              <div key={item.label}
-                className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm cursor-pointer transition-colors"
-                style={{
-                  background: item.active ? '#EBF5F0' : 'transparent',
-                  color: item.active ? '#1B6B4A' : '#6B7280',
-                  fontWeight: item.active ? 500 : 400,
-                }}
-              >
-                <Icon size={16} />
-                <span className="flex-1">{item.label}</span>
-                {item.count !== undefined && (
-                  <span className="text-[11px] font-medium px-2 py-0.5 rounded-full text-white" style={{ background: '#1B6B4A' }}>{item.count}</span>
+
+        {/* Search */}
+        <div className={`relative ${showMobileSearch ? 'flex-1' : 'w-auto'} md:flex-1 md:max-w-[220px]`}>
+          <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2" style={{ color: '#AAB0BB' }} />
+          <input
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            placeholder="Search leads..."
+            className={`${showMobileSearch ? 'w-full' : 'w-0 md:w-full'} md:w-full rounded-lg border pl-8 pr-2 py-1.5 text-xs outline-none transition-all`}
+            style={{ borderColor: '#ECEEF2', background: '#F5F5F7', color: '#1A1D23' }}
+          />
+          {searchQuery && <button onClick={() => setSearchQuery('')} className="absolute right-2 top-1/2 -translate-y-1/2"><X size={12} style={{ color: '#AAB0BB' }} /></button>}
+        </div>
+        <button className="md:hidden p-1 rounded" style={{ color: '#6B7280' }} onClick={() => setShowMobileSearch(!showMobileSearch)}>
+          <Search size={15} />
+        </button>
+
+        {/* Filters */}
+        <select value={filterType} onChange={e => setFilterType(e.target.value)}
+          className="hidden sm:block rounded-lg border px-2 py-1.5 text-xs outline-none" style={{ borderColor: '#ECEEF2', background: '#F5F5F7', color: '#6B7280' }}>
+          <option value="">Type</option>
+          <option value="contract">Contract</option>
+          <option value="one-off">One-off</option>
+          <option value="ongoing">Ongoing</option>
+        </select>
+        <select value={budgetFilter} onChange={e => setBudgetFilter(e.target.value)}
+          className="hidden sm:block rounded-lg border px-2 py-1.5 text-xs outline-none" style={{ borderColor: '#ECEEF2', background: '#F5F5F7', color: '#6B7280' }}>
+          <option value="">Budget</option>
+          <option value="500">£500+</option>
+          <option value="1000">£1k+</option>
+          <option value="2500">£2.5k+</option>
+          <option value="5000">£5k+</option>
+        </select>
+        <button onClick={doRefresh} disabled={refreshing}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-white disabled:opacity-60 transition-opacity hover:opacity-90"
+          style={{ background: '#1B6B4A' }}>
+          <RefreshCw size={12} className={refreshing ? 'animate-spin' : ''} />
+          <span className="hidden sm:inline">{refreshing ? '' : 'Refresh'}</span>
+        </button>
+      </header>
+
+      {/* Stat cards */}
+      <div className="flex gap-3 px-4 md:px-8 pt-5 overflow-x-auto">
+        {[
+          { label: 'New today', value: stats.new, icon: Sparkles, bg: '#EBF5F0', color: '#1B6B4A', trend: stats.new > 0 ? `↑ ${stats.new}` : null },
+          { label: 'Applied', value: stats.applied, icon: Send, bg: '#EBF1FC', color: '#2563EB', trend: null },
+          { label: 'Saved', value: stats.saved, icon: Bookmark, bg: '#FEF3E2', color: '#D97706', trend: null },
+          { label: 'Won', value: stats.won, icon: Trophy, bg: '#F0EFFE', color: '#7C3AED', trend: null },
+        ].map(s => {
+          const Icon = s.icon
+          return (
+            <div key={s.label} className="flex items-center gap-3 bg-white rounded-xl p-4 flex-1 min-w-[130px]" style={{ border: '1px solid #ECEEF2' }}>
+              <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ background: s.bg, color: s.color }}>
+                <Icon size={18} />
+              </div>
+              <div>
+                <div className="text-[22px] font-bold leading-none" style={{ color: '#1A1D23', fontWeight: 700 }}>{s.value}</div>
+                <div className="text-xs mt-0.5" style={{ color: '#AAB0BB' }}>{s.label}</div>
+                {s.trend && (
+                  <span className="text-[10px] font-medium px-1.5 py-0.5 rounded mt-1 inline-block" style={{ background: '#EBF5F0', color: '#1B6B4A' }}>{s.trend}</span>
                 )}
               </div>
-            )
-          })}
-        </nav>
-        <div className="flex items-center gap-2 px-5 py-3.5 border-t shrink-0" style={{ borderColor: '#ECEEF2' }}>
-          <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-medium" style={{ background: '#1B6B4A' }}>
-            {(profile?.email?.[0] || 'U').toUpperCase()}
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="text-xs font-medium truncate" style={{ color: '#1A1D23' }}>{profile?.email?.split('@')[0] || 'User'}</div>
-            <div className="text-[10px]" style={{ color: '#AAB0BB' }}>{isFree ? 'Free' : 'Pro'}</div>
-          </div>
-        </div>
-      </aside>
-
-      {/* Main */}
-      <div className="flex-1 flex flex-col min-w-0 max-w-full">
-        {/* Profile banner */}
-        {profile && (!profile.skills || profile.skills.length === 0 || !profile.hourly_rate) && (
-          <div className="flex items-center gap-2 px-4 md:px-8 py-2.5 text-xs font-medium" style={{ background: '#FAEEDA', borderBottom: '1px solid #FCD68A' }}>
-            <AlertTriangle size={14} style={{ color: '#D97706' }} />
-            <span style={{ color: '#92400E' }}>Complete your profile to get matched leads.</span>
-            <button onClick={() => router.push('/dashboard/profile')} className="underline font-semibold" style={{ color: '#92400E' }}>Add your skills now →</button>
-          </div>
-        )}
-
-        {/* Topbar */}
-        <header className="flex items-center gap-3 px-4 md:px-8 h-14 bg-white border-b shrink-0" style={{ borderColor: '#ECEEF2' }}>
-          {/* Mobile hamburger */}
-          <button className="md:hidden p-1 -ml-1 rounded" style={{ color: '#6B7280' }} onClick={() => router.push('/dashboard/profile')}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
-          </button>
-
-          <div className="flex-1 hidden md:block">
-            <div className="text-sm font-medium" style={{ color: '#6B7280' }}>
-              {(() => { const h = today.getHours(); return h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening' })()}, {profile?.email?.split('@')[0] || 'there'}
             </div>
-            <div className="text-xs" style={{ color: '#AAB0BB' }}>{days[today.getDay()]}, {months[today.getMonth()]} {today.getDate()}</div>
-          </div>
+          )
+        })}
+      </div>
 
-          {/* Search */}
-          <div className={`relative ${showMobileSearch ? 'flex-1' : 'w-auto'} md:flex-1 md:max-w-[220px]`}>
-            <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2" style={{ color: '#AAB0BB' }} />
-            <input
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              placeholder="Search leads..."
-              className={`${showMobileSearch ? 'w-full' : 'w-0 md:w-full'} md:w-full rounded-lg border pl-8 pr-2 py-1.5 text-xs outline-none transition-all`}
-              style={{ borderColor: '#ECEEF2', background: '#F5F5F7', color: '#1A1D23' }}
-            />
-            {searchQuery && <button onClick={() => setSearchQuery('')} className="absolute right-2 top-1/2 -translate-y-1/2"><X size={12} style={{ color: '#AAB0BB' }} /></button>}
-          </div>
-          <button className="md:hidden p-1 rounded" style={{ color: '#6B7280' }} onClick={() => setShowMobileSearch(!showMobileSearch)}>
-            <Search size={15} />
-          </button>
-
-          {/* Filters */}
-          <select value={filterType} onChange={e => setFilterType(e.target.value)}
-            className="hidden sm:block rounded-lg border px-2 py-1.5 text-xs outline-none" style={{ borderColor: '#ECEEF2', background: '#F5F5F7', color: '#6B7280' }}>
-            <option value="">Type</option>
-            <option value="contract">Contract</option>
-            <option value="one-off">One-off</option>
-            <option value="ongoing">Ongoing</option>
-          </select>
-          <select value={budgetFilter} onChange={e => setBudgetFilter(e.target.value)}
-            className="hidden sm:block rounded-lg border px-2 py-1.5 text-xs outline-none" style={{ borderColor: '#ECEEF2', background: '#F5F5F7', color: '#6B7280' }}>
-            <option value="">Budget</option>
-            <option value="500">£500+</option>
-            <option value="1000">£1k+</option>
-            <option value="2500">£2.5k+</option>
-            <option value="5000">£5k+</option>
-          </select>
-          <button onClick={doRefresh} disabled={refreshing}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-white disabled:opacity-60 transition-opacity hover:opacity-90"
-            style={{ background: '#1B6B4A' }}>
-            <RefreshCw size={12} className={refreshing ? 'animate-spin' : ''} />
-            <span className="hidden sm:inline">{refreshing ? '' : 'Refresh'}</span>
-          </button>
-        </header>
-
-        {/* Stat cards */}
-        <div className="flex gap-3 px-4 md:px-8 pt-5 overflow-x-auto">
-          {[
-            { label: 'New today', value: stats.new, icon: Sparkles, bg: '#EBF5F0', color: '#1B6B4A', trend: stats.new > 0 ? `↑ ${stats.new}` : null },
-            { label: 'Applied', value: stats.applied, icon: Send, bg: '#EBF1FC', color: '#2563EB', trend: null },
-            { label: 'Saved', value: stats.saved, icon: Bookmark, bg: '#FEF3E2', color: '#D97706', trend: null },
-            { label: 'Won', value: stats.won, icon: Trophy, bg: '#F0EFFE', color: '#7C3AED', trend: null },
-          ].map(s => {
-            const Icon = s.icon
-            return (
-              <div key={s.label} className="flex items-center gap-3 bg-white rounded-xl p-4 flex-1 min-w-[130px]" style={{ border: '1px solid #ECEEF2' }}>
-                <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ background: s.bg, color: s.color }}>
-                  <Icon size={18} />
-                </div>
-                <div>
-                  <div className="text-[22px] font-bold leading-none" style={{ color: '#1A1D23', fontWeight: 700 }}>{s.value}</div>
-                  <div className="text-xs mt-0.5" style={{ color: '#AAB0BB' }}>{s.label}</div>
-                  {s.trend && (
-                    <span className="text-[10px] font-medium px-1.5 py-0.5 rounded mt-1 inline-block" style={{ background: '#EBF5F0', color: '#1B6B4A' }}>{s.trend}</span>
-                  )}
-                </div>
-              </div>
-            )
-          })}
+      {/* Skill filter chips */}
+      {allSkills.length > 0 && (
+        <div className="flex items-center gap-1.5 px-4 md:px-8 pt-4 overflow-x-auto scrollbar-hide">
+          {allSkills.map(s => (
+            <button key={s} onClick={() => setFilterSkill(filterSkill === s ? '' : s)}
+              className="text-[10px] px-2.5 py-1 rounded-full font-medium whitespace-nowrap transition-all shrink-0"
+              style={{
+                background: filterSkill === s ? '#1B6B4A' : '#F5F5F7',
+                color: filterSkill === s ? 'white' : '#6B7280',
+              }}
+            >{s}</button>
+          ))}
+          {(searchQuery || filterSkill || filterType || budgetFilter) && (
+            <button onClick={() => { setSearchQuery(''); setFilterSkill(''); setFilterType(''); setBudgetFilter('') }}
+              className="text-[10px] px-2 py-1 rounded-full whitespace-nowrap shrink-0" style={{ color: '#6B7280' }}>Clear</button>
+          )}
         </div>
+      )}
 
-        {/* Skill filter chips */}
-        {allSkills.length > 0 && (
-          <div className="flex items-center gap-1.5 px-4 md:px-8 pt-4 overflow-x-auto scrollbar-hide">
-            {allSkills.map(s => (
-              <button key={s} onClick={() => setFilterSkill(filterSkill === s ? '' : s)}
-                className="text-[10px] px-2.5 py-1 rounded-full font-medium whitespace-nowrap transition-all shrink-0"
-                style={{
-                  background: filterSkill === s ? '#1B6B4A' : '#F5F5F7',
-                  color: filterSkill === s ? 'white' : '#6B7280',
-                }}
-              >{s}</button>
-            ))}
-            {(searchQuery || filterSkill || filterType || budgetFilter) && (
-              <button onClick={() => { setSearchQuery(''); setFilterSkill(''); setFilterType(''); setBudgetFilter('') }}
-                className="text-[10px] px-2 py-1 rounded-full whitespace-nowrap shrink-0" style={{ color: '#6B7280' }}>Clear</button>
-            )}
-          </div>
-        )}
-
+      {/* Lead cards + Right panel wrapper */}
+      <div className="flex-1 flex min-h-0">
         {/* Lead cards */}
         <div className="flex-1 overflow-y-auto px-4 md:px-8 pt-4 pb-20 md:pb-8 space-y-2">
           {filteredLeads.length === 0 ? (
@@ -385,93 +323,73 @@ export default function DashboardPage() {
             </>
           )}
         </div>
-      </div>
 
-      {/* Right Panel */}
-      <aside className="hidden xl:block w-[220px] bg-white border-l shrink-0 flex flex-col overflow-y-auto" style={{ borderColor: '#ECEEF2' }}>
-        {/* Calendar */}
-        <div className="p-4 border-b" style={{ borderColor: '#ECEEF2' }}>
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-sm font-semibold" style={{ color: '#1A1D23' }}>{cal.month} {cal.year}</span>
-            <div className="flex gap-1" style={{ color: '#AAB0BB' }}>
-              <button className="p-0.5"><ChevronLeft size={13} /></button>
-              <button className="p-0.5"><ChevronRight size={13} /></button>
+        {/* Right Panel */}
+        <aside className="hidden xl:block w-[220px] border-l shrink-0 flex flex-col overflow-y-auto" style={{ borderColor: '#ECEEF2', background: '#F2F3F7' }}>
+          {/* Calendar */}
+          <div className="p-4 bg-white m-3 mb-0 rounded-xl" style={{ border: '1px solid #ECEEF2' }}>
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-sm font-semibold" style={{ color: '#1A1D23' }}>{cal.month} {cal.year}</span>
+              <div className="flex gap-1" style={{ color: '#AAB0BB' }}>
+                <button className="p-0.5"><ChevronLeft size={13} /></button>
+                <button className="p-0.5"><ChevronRight size={13} /></button>
+              </div>
+            </div>
+            <div className="grid grid-cols-7 gap-0 text-center mb-1">
+              {['S','M','T','W','T','F','S'].map(d => (
+                <span key={d} className="text-[10px] py-1" style={{ color: '#AAB0BB' }}>{d}</span>
+              ))}
+            </div>
+            <div className="grid grid-cols-7 gap-0 text-center">
+              {cal.days.map((d, i) => (
+                <span key={i} className="text-xs py-1 rounded"
+                  style={{
+                    color: d === today.getDate() ? 'white' : d ? '#1A1D23' : 'transparent',
+                    background: d === today.getDate() ? '#1B6B4A' : 'transparent',
+                    fontWeight: d === today.getDate() ? 600 : 400,
+                  }}
+                >{d || ''}</span>
+              ))}
             </div>
           </div>
-          <div className="grid grid-cols-7 gap-0 text-center mb-1">
-            {['S','M','T','W','T','F','S'].map(d => (
-              <span key={d} className="text-[10px] py-1" style={{ color: '#AAB0BB' }}>{d}</span>
-            ))}
-          </div>
-          <div className="grid grid-cols-7 gap-0 text-center">
-            {cal.days.map((d, i) => (
-              <span key={i} className="text-xs py-1 rounded"
-                style={{
-                  color: d === today.getDate() ? 'white' : d ? '#1A1D23' : 'transparent',
-                  background: d === today.getDate() ? '#1B6B4A' : 'transparent',
-                  fontWeight: d === today.getDate() ? 600 : 400,
-                }}
-              >{d || ''}</span>
-            ))}
-          </div>
-        </div>
 
-        {/* Recent activity */}
-        <div className="p-4 border-b" style={{ borderColor: '#ECEEF2' }}>
-          <div className="text-xs font-semibold mb-3" style={{ color: '#1A1D23' }}>Recent Activity</div>
-          <div className="space-y-2.5">
-            {[
-              { text: 'New leads scraped', time: '2h ago', dot: '#1B6B4A' },
-              { text: 'Profile updated', time: '1d ago', dot: '#2563EB' },
-              { text: 'Lead interested', time: '2d ago', dot: '#D97706' },
-            ].map((act, i) => (
-              <div key={i} className="flex items-start gap-2">
-                <div className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0" style={{ background: act.dot }} />
-                <div className="min-w-0">
-                  <div className="text-[11px] font-medium truncate" style={{ color: '#1A1D23' }}>{act.text}</div>
-                  <div className="text-[10px]" style={{ color: '#AAB0BB' }}>{act.time}</div>
+          {/* Recent activity */}
+          <div className="p-4 bg-white mx-3 mb-0 rounded-xl" style={{ border: '1px solid #ECEEF2' }}>
+            <div className="text-xs font-semibold mb-3" style={{ color: '#1A1D23' }}>Recent Activity</div>
+            <div className="space-y-2.5">
+              {[
+                { text: 'New leads scraped', time: '2h ago', dot: '#1B6B4A' },
+                { text: 'Profile updated', time: '1d ago', dot: '#2563EB' },
+                { text: 'Lead interested', time: '2d ago', dot: '#D97706' },
+              ].map((act, i) => (
+                <div key={i} className="flex items-start gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0" style={{ background: act.dot }} />
+                  <div className="min-w-0">
+                    <div className="text-[11px] font-medium truncate" style={{ color: '#1A1D23' }}>{act.text}</div>
+                    <div className="text-[10px]" style={{ color: '#AAB0BB' }}>{act.time}</div>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
 
-        {/* Skills */}
-        <div className="p-4">
-          <div className="text-xs font-semibold mb-3" style={{ color: '#1A1D23' }}>Skills</div>
-          <div className="flex flex-wrap gap-1.5">
-            {allSkills.map(s => (
-              <button key={s} onClick={() => setFilterSkill(filterSkill === s ? '' : s)}
-                className="text-[10px] px-2 py-1 rounded-lg font-medium transition-all"
-                style={{
-                  background: filterSkill === s ? '#1B6B4A' : '#F5F5F7',
-                  color: filterSkill === s ? 'white' : '#6B7280',
-                }}
-              >{s}</button>
-            ))}
+          {/* Skills */}
+          <div className="p-4 bg-white mx-3 mb-3 rounded-xl" style={{ border: '1px solid #ECEEF2' }}>
+            <div className="text-xs font-semibold mb-3" style={{ color: '#1A1D23' }}>Skills</div>
+            <div className="flex flex-wrap gap-1.5">
+              {allSkills.map(s => (
+                <button key={s} onClick={() => setFilterSkill(filterSkill === s ? '' : s)}
+                  className="text-[10px] px-2 py-1 rounded-lg font-medium transition-all"
+                  style={{
+                    background: filterSkill === s ? '#1B6B4A' : '#F5F5F7',
+                    color: filterSkill === s ? 'white' : '#6B7280',
+                  }}
+                >{s}</button>
+              ))}
+            </div>
           </div>
-        </div>
-      </aside>
-
-      {/* Mobile bottom nav */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 h-14 bg-white border-t flex items-center justify-around z-40" style={{ borderColor: '#ECEEF2' }}>
-        {[
-          { icon: LayoutDashboard, label: 'Feed', href: '/dashboard', active: true },
-          { icon: Bookmark, label: 'Saved', href: '/dashboard/saved' },
-          { icon: Send, label: 'Applied', href: '/dashboard/applied' },
-          { icon: Settings, label: 'Profile', href: '/dashboard/profile' },
-        ].map(item => {
-          const Icon = item.icon
-          return (
-            <button key={item.label} onClick={() => router.push(item.href)}
-              className="flex flex-col items-center gap-0.5 px-4 py-1"
-              style={{ color: item.active ? '#1B6B4A' : '#AAB0BB' }}>
-              <Icon size={17} />
-              <span className="text-[9px] font-medium">{item.label}</span>
-            </button>
-          )
-        })}
-      </nav>
+        </aside>
+      </div>
 
       {/* Modals */}
       <UpgradeModal open={upgradeModal} onClose={() => setUpgradeModal(false)} />
@@ -491,6 +409,6 @@ export default function DashboardPage() {
           </div>
         </div>
       )}
-    </div>
+    </>
   )
 }

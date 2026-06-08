@@ -6,7 +6,7 @@ import { BarChart3 } from 'lucide-react'
 export default function AnalyticsPage() {
   const router = useRouter()
   return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: '#F2F3F7', fontFamily: "'DM Sans', sans-serif" }}>
+    <div className="flex-1 flex items-center justify-center pb-20 md:pb-0" style={{ background: '#F2F3F7' }}>
       <div className="text-center">
         <BarChart3 size={36} className="mx-auto mb-3" color="#AAB0BB" />
         <h1 className="text-xl font-bold mb-2" style={{ color: '#1A1D23' }}>Analytics</h1>
