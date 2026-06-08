@@ -14,45 +14,32 @@ export default function ResetPasswordPage() {
   const handleReset = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-
     const { error } = await supabase.auth.updateUser({ password })
-
-    if (error) {
-      toast.error(error.message)
-      setLoading(false)
-      return
-    }
-
+    if (error) { toast.error(error.message); setLoading(false); return }
     toast.success('Password updated!')
     router.push('/auth/login')
   }
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center px-4">
-      <div className="w-full max-w-md">
-        <h1 className="text-3xl font-bold text-gray-900 text-center">Set new password</h1>
-        <p className="mt-2 text-gray-600 text-center text-sm">
-          Enter your new password below.
-        </p>
-        <form onSubmit={handleReset} className="mt-8 space-y-4">
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">New password</label>
-            <input
-              id="password"
-              type="password"
-              required
-              minLength={6}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-[#1B6B4A] focus:ring-1 focus:ring-[#1B6B4A]"
-              placeholder="At least 6 characters"
-            />
+    <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
+      <div className="w-full max-w-sm animate-fade-in">
+        <div className="text-center mb-8">
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-4" style={{ background: '#1B6B4A' }}>
+            <span className="text-white text-sm font-bold">LF</span>
           </div>
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-2.5 rounded-lg text-sm font-semibold text-white hover:opacity-90 disabled:opacity-50" style={{ background: '#1B6B4A' }}
-          >
+          <h1 className="text-2xl font-bold tracking-tight" style={{ color: '#111827' }}>Set new password</h1>
+          <p className="mt-1.5 text-sm" style={{ color: '#6B7280' }}>Enter your new password below.</p>
+        </div>
+        <form onSubmit={handleReset} className="space-y-4">
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium mb-1.5" style={{ color: '#374151' }}>New password</label>
+            <input id="password" type="password" required minLength={6} value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="block w-full rounded-xl border px-3.5 py-2.5 text-sm outline-none transition-all"
+              style={{ borderColor: '#D1D5DB', color: '#111827', background: '#FFFFFF' }}
+              placeholder="At least 6 characters" />
+          </div>
+          <button type="submit" disabled={loading} className="btn-primary w-full justify-center">
             {loading ? 'Updating...' : 'Update Password'}
           </button>
         </form>

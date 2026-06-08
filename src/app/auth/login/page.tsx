@@ -16,70 +16,55 @@ export default function LoginPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
-
-    if (error) {
-      toast.error(error.message)
-      setLoading(false)
-      return
-    }
-
+    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    if (error) { toast.error(error.message); setLoading(false); return }
     toast.success('Welcome back!')
     router.push('/dashboard')
   }
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center px-4">
-      <div className="w-full max-w-md">
-        <h1 className="text-3xl font-bold text-gray-900 text-center">Welcome back</h1>
-        <p className="mt-2 text-gray-600 text-center text-sm">
-          Login to access your leads dashboard.
-        </p>
-        <form onSubmit={handleLogin} className="mt-8 space-y-4">
+    <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
+      <div className="w-full max-w-sm animate-fade-in">
+        <div className="text-center mb-8">
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-4" style={{ background: '#1B6B4A' }}>
+            <span className="text-white text-sm font-bold">LF</span>
+          </div>
+          <h1 className="text-2xl font-bold tracking-tight" style={{ color: '#111827' }}>Welcome back</h1>
+          <p className="mt-1.5 text-sm" style={{ color: '#6B7280' }}>Login to access your leads dashboard.</p>
+        </div>
+        <form onSubmit={handleLogin} className="space-y-4">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
+            <label htmlFor="email" className="block text-sm font-medium mb-1.5" style={{ color: '#374151' }}>Email</label>
             <input
-              id="email"
-              type="email"
-              required
-              value={email}
+              id="email" type="email" required value={email}
               onChange={(e) => setEmail(e.target.value)}
-                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-[#1B6B4A] focus:ring-1 focus:ring-[#1B6B4A]"
+              className="block w-full rounded-xl border px-3.5 py-2.5 text-sm outline-none transition-all"
+              style={{ borderColor: '#D1D5DB', color: '#111827', background: '#FFFFFF' }}
               placeholder="you@example.com"
             />
           </div>
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
+            <label htmlFor="password" className="block text-sm font-medium mb-1.5" style={{ color: '#374151' }}>Password</label>
             <input
-              id="password"
-              type="password"
-              required
-              value={password}
+              id="password" type="password" required value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-[#1B6B4A] focus:ring-1 focus:ring-[#1B6B4A]"
+              className="block w-full rounded-xl border px-3.5 py-2.5 text-sm outline-none transition-all"
+              style={{ borderColor: '#D1D5DB', color: '#111827', background: '#FFFFFF' }}
               placeholder="Your password"
             />
           </div>
           <div className="flex items-center justify-end">
-            <Link href="/auth/forgot-password" className="text-sm text-[#1B6B4A] hover:underline">
+            <Link href="/auth/forgot-password" className="text-sm font-medium hover:underline" style={{ color: '#1B6B4A' }}>
               Forgot password?
             </Link>
           </div>
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-2.5 rounded-lg text-sm font-semibold text-white hover:opacity-90 disabled:opacity-50" style={{ background: '#1B6B4A' }}
-          >
+          <button type="submit" disabled={loading} className="btn-primary w-full justify-center">
             {loading ? 'Logging in...' : 'Login'}
           </button>
         </form>
-        <p className="mt-6 text-center text-sm text-gray-600">
+        <p className="mt-6 text-center text-sm" style={{ color: '#6B7280' }}>
           Don&apos;t have an account?{' '}
-          <Link href="/auth/signup" className="text-[#1B6B4A] font-medium hover:underline">Sign up</Link>
+          <Link href="/auth/signup" className="font-semibold hover:underline" style={{ color: '#1B6B4A' }}>Sign up</Link>
         </p>
       </div>
     </div>
