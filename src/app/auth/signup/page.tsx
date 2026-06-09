@@ -102,13 +102,15 @@ export default function SignupPage() {
             <div className="space-y-2.5">
               {roles.map(r => (
                 <button key={r.id} onClick={() => { setRole(r.id); setStep(1) }}
-                  className="w-full flex items-center gap-3 p-3.5 rounded-xl border-2 text-left transition-all hover:translate-y-[-1px] hover:shadow-md active:scale-[0.98]"
+                  className="w-full flex items-center gap-3 p-3.5 rounded-xl border-2 text-left transition-all duration-150 cursor-pointer hover:border-[var(--green-300)] hover:bg-[var(--green-50)] active:scale-[0.98] active:border-[var(--green-600)]"
                   style={{ borderColor: role === r.id ? 'var(--green-500)' : 'var(--base-300)', background: role === r.id ? 'var(--green-50)' : 'white' }}>
-                  <div className="w-9 h-9 rounded-lg flex items-center justify-center text-sm" style={{ background: 'var(--green-100)', color: 'var(--green-600)' }}>
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center text-base transition-colors" style={{ background: role === r.id ? 'var(--green-600)' : 'var(--green-100)', color: role === r.id ? 'white' : 'var(--green-600)' }}>
                     <i className={`ti ${r.icon}`} />
                   </div>
-                  <span className="text-sm font-medium" style={{ color: 'var(--base-900)' }}>{r.label}</span>
-                  <i className="ti ti-arrow-right ml-auto text-sm" style={{ color: 'var(--base-400)' }} />
+                  <div className="flex-1">
+                    <span className="text-sm font-semibold" style={{ color: 'var(--base-900)' }}>{r.label}</span>
+                  </div>
+                  <i className="ti ti-chevron-right text-base" style={{ color: role === r.id ? 'var(--green-600)' : 'var(--base-400)' }} />
                 </button>
               ))}
               <p className="text-center text-sm mt-4">
