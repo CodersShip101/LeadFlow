@@ -26,15 +26,15 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex">
       {/* LEFT: brand panel */}
-      <div className="hidden lg:flex w-[40%] flex-col justify-between p-12" style={{ background: 'var(--green-600)' }}>
+      <div className="hidden lg:flex w-[40%] flex-col justify-between p-12" style={{ background: 'var(--green-900)' }}>
         <div className="flex items-center gap-2 text-white text-sm font-bold">
-          <span className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-xs font-bold" style={{ background: 'var(--green-600)' }}>LF</span>
+          <span className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-xs font-bold" style={{ background: 'var(--green-500)' }}>LF</span>
           LeadFlow
         </div>
         <div>
           <div className="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold mb-4" style={{ background: 'var(--amber-500)' }}>SK</div>
           <p className="text-sm leading-relaxed text-white/80">&ldquo;I was spending 3 hours a day on job boards. Now I open LeadFlow once and have 5 curated leads waiting.&rdquo;</p>
-          <p className="text-xs mt-3" style={{ color: 'var(--green-600)' }}>Sarah K. — Freelance UX Designer</p>
+          <p className="text-xs mt-3" style={{ color: 'var(--green-200)' }}>Sarah K. — Freelance UX Designer</p>
         </div>
       </div>
 
@@ -65,7 +65,7 @@ export default function LoginPage() {
               </div>
             </div>
             <div className="flex items-center justify-end">
-              <Link href="/auth/reset-password" className="text-xs font-medium hover:underline" style={{ color: 'var(--green-600)' }}>Forgot password?</Link>
+              <Link href="/auth/reset-password" className="text-xs font-medium hover:underline" style={{ color: 'var(--green-500)' }}>Forgot password?</Link>
             </div>
             <button type="submit" disabled={loading} className="btn-p w-full justify-center">
               {loading ? 'Signing in...' : 'Sign in'}
@@ -73,7 +73,7 @@ export default function LoginPage() {
           </form>
           <div className="mt-6 text-center text-xs" style={{ color: 'var(--base-500)' }}>
             Don&apos;t have an account?{' '}
-            <Link href="/auth/signup" className="font-semibold hover:underline" style={{ color: 'var(--green-600)' }}>Sign up →</Link>
+            <Link href="/auth/signup" className="font-semibold hover:underline" style={{ color: 'var(--green-500)' }}>Sign up →</Link>
           </div>
         </div>
       </div>

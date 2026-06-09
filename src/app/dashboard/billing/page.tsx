@@ -48,7 +48,7 @@ export default function BillingPage() {
   if (loading) return (
     <div className="flex-1 flex items-center justify-center pt-16">
       <div className="flex items-center gap-2" style={{ color: 'var(--base-500)' }}>
-        <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: 'var(--green-600)' }} /> Loading...
+        <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: 'var(--green-500)' }} /> Loading...
       </div>
     </div>
   )
@@ -81,7 +81,7 @@ export default function BillingPage() {
               <span className="text-xs font-semibold" style={{ color: 'var(--green-600)' }}>{profile?.subscription_status === 'free' ? '0/5' : 'Unlimited'}</span>
             </div>
             <div className="h-2 rounded-full" style={{ background: 'var(--base-200)' }}>
-              <div className="h-2 rounded-full" style={{ width: profile?.subscription_status === 'free' ? '0%' : '100%', background: 'var(--green-600)', transition: 'width 0.4s ease' }} />
+              <div className="h-2 rounded-full" style={{ width: profile?.subscription_status === 'free' ? '0%' : '100%', background: 'var(--green-500)', transition: 'width 0.4s ease' }} />
             </div>
           </div>
           <div className="card">

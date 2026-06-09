@@ -117,9 +117,9 @@ export default function OnboardingPage() {
                 {goalOptions.map(g => (
                   <button key={g.value} onClick={() => setGoal(g.value)}
                     className="w-full text-left p-4 rounded-xl border-2 transition-all active:scale-[0.98]"
-                    style={{ borderColor: goal === g.value ? 'var(--green-600)' : 'var(--base-300)', background: goal === g.value ? 'var(--green-600)' : 'white' }}>
+                    style={{ borderColor: goal === g.value ? 'var(--green-500)' : 'var(--base-300)', background: goal === g.value ? 'var(--green-50)' : 'white' }}>
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ background: 'var(--green-600)', color: 'white' }}>
+                      <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ background: 'var(--green-100)', color: 'var(--green-600)' }}>
                         <i className={`ti ${g.icon}`} style={{ fontSize: '18px' }} />
                       </div>
                       <div>

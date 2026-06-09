@@ -10,7 +10,7 @@ export default function PricingCard({ tier }: PricingCardProps) {
   return (
     <div className={`rounded-2xl p-8 border-2 ${
       tier.highlighted
-        ? 'border-[var(--green-600)] bg-[var(--green-600)]'
+        ? 'border-[#1B6B4A] bg-[#EBF5F0]'
         : 'border-gray-200 bg-white'
     }`}>
       <h3 className="text-lg font-semibold" style={{ color: '#1A1D23' }}>{tier.name}</h3>
@@ -26,7 +26,7 @@ export default function PricingCard({ tier }: PricingCardProps) {
       <ul className="mt-6 space-y-3">
         {tier.features.map((feature) => (
           <li key={feature} className="flex items-start gap-2 text-sm" style={{ color: '#6B7280' }}>
-            <Check size={16} className="shrink-0 mt-0.5" color="var(--green-600)" />
+            <Check size={16} className="shrink-0 mt-0.5" color="#1B6B4A" />
             {feature}
           </li>
         ))}
@@ -39,7 +39,7 @@ export default function PricingCard({ tier }: PricingCardProps) {
             : 'hover:opacity-80'
         }`}
         style={{
-          background: tier.highlighted ? 'var(--green-600)' : '#F3F4F6',
+          background: tier.highlighted ? '#1B6B4A' : '#F3F4F6',
           color: tier.highlighted ? 'white' : '#1A1D23',
         }}
       >

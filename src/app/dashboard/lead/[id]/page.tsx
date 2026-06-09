@@ -11,9 +11,9 @@ import { getSourceInfo, formatBudgetGBP, isNewLead, formatDate } from '@/lib/uti
 
 const statusConfig: Record<string, { label: string, color: string, bg: string }> = {
   saved:      { label: 'Saved', color: '#7C3AED', bg: '#F0EFFE' },
-  interested: { label: 'Interested', color: 'var(--green-600)', bg: 'var(--green-600)' },
+  interested: { label: 'Interested', color: '#1B6B4A', bg: '#EBF5F0' },
   applied:    { label: 'Applied', color: '#D97706', bg: '#FEF3E2' },
-  hired:      { label: 'Hired', color: 'var(--green-600)', bg: 'var(--green-600)' },
+  hired:      { label: 'Hired', color: '#059669', bg: '#ECFDF5' },
 }
 
 export default function LeadDetailPage() {
@@ -96,7 +96,7 @@ export default function LeadDetailPage() {
 
   if (loading) return (
     <div className="flex items-center justify-center min-h-screen" style={{ background: '#F2F3F7' }}>
-      <div className="animate-spin h-8 w-8 border-4 rounded-full" style={{ borderColor: 'var(--green-600)', borderTopColor: 'transparent' }} />
+      <div className="animate-spin h-8 w-8 border-4 rounded-full" style={{ borderColor: '#1B6B4A', borderTopColor: 'transparent' }} />
     </div>
   )
 
@@ -131,7 +131,7 @@ export default function LeadDetailPage() {
                 {source.label}
               </button>
               {isNewLead(lead.posted_date) && (
-                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-lg shrink-0" style={{ background: 'var(--green-600)', color: 'var(--green-600)' }}>New</span>
+                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-lg shrink-0" style={{ background: '#EBF5F0', color: '#1B6B4A' }}>New</span>
               )}
               <div className="min-w-0">
                 <h1 className="text-xl md:text-2xl font-bold truncate" style={{ color: '#1A1D23' }}>{lead.title}</h1>
@@ -142,8 +142,8 @@ export default function LeadDetailPage() {
               </div>
             </div>
             <span className="text-xs font-bold px-3 py-1 rounded-full shrink-0" style={{
-              background: score >= 8 ? 'var(--green-600)' : score >= 5 ? '#FEF3E2' : '#F2F3F7',
-              color: score >= 8 ? 'var(--green-600)' : score >= 5 ? '#D97706' : '#6B7280',
+              background: score >= 8 ? '#EBF5F0' : score >= 5 ? '#FEF3E2' : '#F2F3F7',
+              color: score >= 8 ? '#1B6B4A' : score >= 5 ? '#D97706' : '#6B7280',
             }}>
               {score}/10
             </span>
@@ -152,7 +152,7 @@ export default function LeadDetailPage() {
           {/* Meta row */}
           <div className="flex flex-wrap items-center gap-2 mt-4">
             {budget && (
-              <span className="text-sm font-semibold px-3 py-1 rounded-lg" style={{ background: 'var(--green-600)', color: 'var(--green-600)' }}>
+              <span className="text-sm font-semibold px-3 py-1 rounded-lg" style={{ background: '#EBF5F0', color: '#1B6B4A' }}>
                 {budget}
               </span>
             )}
@@ -245,7 +245,7 @@ export default function LeadDetailPage() {
               {matchInfo.breakdown.map(item => (
                 <div key={item.label} className="flex items-center justify-between text-xs">
                   <div className="flex items-center gap-2 min-w-0">
-                    <i className={`ti ${item.achieved ? 'ti-check' : 'ti-x'}`} style={{ fontSize: '12px', color: item.achieved ? 'var(--green-600)' : '#D0D4DE' }} />
+                    <i className={`ti ${item.achieved ? 'ti-check' : 'ti-x'}`} style={{ fontSize: '12px', color: item.achieved ? '#1B6B4A' : '#D0D4DE' }} />
                     <span style={{ color: '#6B7280' }}>{item.label}</span>
                   </div>
                   <span className="font-medium shrink-0 ml-2" style={{ color: item.achieved ? '#6B7280' : '#AAB0BB' }}>
@@ -255,7 +255,7 @@ export default function LeadDetailPage() {
               ))}
               <div className="flex items-center justify-between text-xs font-bold pt-2" style={{ borderTop: '1px solid #ECEEF2' }}>
                 <span style={{ color: '#1A1D23' }}>Overall Score</span>
-                <span style={{ color: 'var(--green-600)' }}>{score}/10</span>
+                <span style={{ color: '#1B6B4A' }}>{score}/10</span>
               </div>
             </div>
 
@@ -268,7 +268,7 @@ export default function LeadDetailPage() {
                 {matchInfo.skillMatch.matched.length > 0 && (
                   <div className="flex flex-wrap gap-1.5 mb-1.5">
                     {matchInfo.skillMatch.matched.map(s => (
-                      <span key={s} className="text-[10px] px-2 py-0.5 rounded font-medium" style={{ background: 'var(--green-600)', color: 'var(--green-600)' }}>{s} ✓</span>
+                      <span key={s} className="text-[10px] px-2 py-0.5 rounded font-medium" style={{ background: '#EBF5F0', color: '#1B6B4A' }}>{s} ✓</span>
                     ))}
                   </div>
                 )}
@@ -290,7 +290,7 @@ export default function LeadDetailPage() {
               <p className="text-xs mb-3" style={{ color: '#6B7280' }}>Help us improve your matches by telling us what happened.</p>
               <div className="flex flex-wrap gap-2">
                 {[
-                  { outcome: 'won', label: 'Got it!', icon: 'ti-thumb-up', color: 'var(--green-600)', bg: 'var(--green-600)' },
+                  { outcome: 'won', label: 'Got it!', icon: 'ti-thumb-up', color: '#1B6B4A', bg: '#EBF5F0' },
                   { outcome: 'lost', label: 'Did not get it', icon: 'ti-thumb-down', color: '#DC2626', bg: '#FEF2F2' },
                   { outcome: 'pending', label: 'Still waiting', icon: 'ti-clock', color: '#D97706', bg: '#FEF3E2' },
                 ].map(opt => (
@@ -317,7 +317,7 @@ export default function LeadDetailPage() {
 
           {application?.outcome && (
             <div className="mt-5 pt-5" style={{ borderTop: '1px solid #ECEEF2' }}>
-              <div className="flex items-center gap-2 text-sm font-medium" style={{ color: application.outcome === 'won' ? 'var(--green-600)' : application.outcome === 'lost' ? '#DC2626' : '#D97706' }}>
+              <div className="flex items-center gap-2 text-sm font-medium" style={{ color: application.outcome === 'won' ? '#1B6B4A' : application.outcome === 'lost' ? '#DC2626' : '#D97706' }}>
                 <i className={`ti ${application.outcome === 'won' ? 'ti-thumb-up' : application.outcome === 'lost' ? 'ti-thumb-down' : 'ti-clock'}`} style={{ fontSize: '14px' }} />
                 {application.outcome === 'won' ? 'You got this project!' : application.outcome === 'lost' ? 'Did not get this project' : 'Still waiting on this project'}
               </div>
@@ -370,7 +370,7 @@ export default function LeadDetailPage() {
               <button
                 onClick={() => { updateApplication('hired'); toast.success('Marked as hired!') }}
                 className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium min-h-[36px] transition-all hover:opacity-80 active:scale-[0.97]"
-                style={{ background: 'var(--green-600)', color: 'var(--green-600)' }}
+                style={{ background: '#EBF5F0', color: '#1B6B4A' }}
               >
                 <i className="ti ti-trophy" style={{ fontSize: '14px' }} /> Mark as Hired
               </button>

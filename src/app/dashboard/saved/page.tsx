@@ -38,7 +38,7 @@ export default function SavedPage() {
   if (loading) return (
     <div className="flex-1 flex items-center justify-center pt-16">
       <div className="flex items-center gap-2" style={{ color: 'var(--base-500)' }}>
-        <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: 'var(--green-600)' }} /> Loading...
+        <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: 'var(--green-500)' }} /> Loading...
       </div>
     </div>
   )
