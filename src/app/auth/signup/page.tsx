@@ -102,7 +102,7 @@ export default function SignupPage() {
             <div className="space-y-2.5">
               {roles.map(r => (
                 <button key={r.id} onClick={() => { setRole(r.id); setStep(1) }}
-                  className="w-full flex items-center gap-3 p-3.5 rounded-xl border-2 text-left transition-all active:scale-[0.98]"
+                  className="w-full flex items-center gap-3 p-3.5 rounded-xl border-2 text-left transition-all hover:translate-y-[-1px] hover:shadow-md active:scale-[0.98]"
                   style={{ borderColor: role === r.id ? 'var(--green-500)' : 'var(--base-300)', background: role === r.id ? 'var(--green-50)' : 'white' }}>
                   <div className="w-9 h-9 rounded-lg flex items-center justify-center text-sm" style={{ background: 'var(--green-100)', color: 'var(--green-600)' }}>
                     <i className={`ti ${r.icon}`} />
@@ -126,7 +126,7 @@ export default function SignupPage() {
                   <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--base-700)' }}>Full name</label>
                   <input type="text" required value={fullName} onChange={e => setFullName(e.target.value)}
                     className="input" placeholder="Your name" autoFocus />
-                  <button type="button" onClick={() => setStep(2)} disabled={!fullName.trim()} className="btn-p w-full justify-center mt-4">
+                  <button type="button" onClick={() => setStep(2)} disabled={!fullName.trim()} className="btn-p w-full justify-center mt-4 hover:translate-y-[-1px]">
                     Next <i className="ti ti-arrow-right" />
                   </button>
                 </div>
@@ -136,7 +136,7 @@ export default function SignupPage() {
                   <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--base-700)' }}>Email</label>
                   <input type="email" required value={email} onChange={e => setEmail(e.target.value)}
                     className="input" placeholder="you@example.com" autoFocus />
-                  <button type="button" onClick={() => setStep(3)} disabled={!email.trim()} className="btn-p w-full justify-center mt-4">
+                  <button type="button" onClick={() => setStep(3)} disabled={!email.trim()} className="btn-p w-full justify-center mt-4 hover:translate-y-[-1px]">
                     Next <i className="ti ti-arrow-right" />
                   </button>
                 </div>
