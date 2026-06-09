@@ -1,280 +1,373 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import PricingCard from '@/components/PricingCard'
 import SignupCounter from '@/components/SignupCounter'
 import type { PricingTier } from '@/types'
-import { Target, Zap, CheckCircle, Quote, X } from 'lucide-react'
 
 const pricingTiers: PricingTier[] = [
-  {
-    name: 'Free',
-    price: 0,
-    priceLabel: 'Free',
-    description: '3 leads per week. Enough to see the difference.',
-    features: [
-      '3 leads per week',
-      'Basic lead details',
-      'Email notifications',
-      'No credit card required',
-    ],
-    cta: 'Get 3 free leads this week',
-  },
-  {
-    name: 'Pro',
-    price: 49,
-    priceLabel: '£49/month',
-    description: 'For serious freelancers who want consistent work.',
-    features: [
-      'Unlimited leads',
-      'Full lead details & source URLs',
-      'Skill-based filtering',
-      'Early access to new leads',
-      'Priority matching',
-      'Cancel anytime',
-    ],
-    cta: 'Start Pro Free Trial',
-    highlighted: true,
-  },
+  { name: 'Free', price: 0, priceLabel: '£0', description: 'Try LeadFlow with a limited number of leads per week.', features: ['3 leads per week', 'Basic lead details', 'Email digest'], cta: 'Get started free' },
+  { name: 'Pro', price: 29, priceLabel: '£29/mo', description: 'Unlimited leads for serious freelancers. Cancel anytime.', features: ['Unlimited leads', 'Source URLs', 'Full pipeline', 'Skill matching', 'Priority support'], cta: 'Upgrade to Pro', highlighted: true },
+  { name: 'Growth', price: 49, priceLabel: '£49/mo', description: 'For teams and agencies who need leads at scale.', features: ['Everything in Pro', '5 team seats', 'Team analytics', 'Shared pipeline', 'Custom skill matching'], cta: 'Upgrade to Growth' },
 ]
 
-const sampleLeads = [
-  { title: 'Senior React Developer — London', rate: '£450–£550/day', source: 'Reed', skills: ['React', 'TypeScript', 'Next.js'], score: '9/10' },
-  { title: 'UX Designer — Remote UK', rate: '£300–£400/day', source: 'Reddit', skills: ['Figma', 'User Research'], score: '8/10' },
-  { title: 'Full-Stack Dev — Manchester', rate: '£350–£500/day', source: 'CWJobs', skills: ['Node', 'React', 'PostgreSQL'], score: '7/10' },
+const faqs = [
+  { q: 'How does LeadFlow find leads?', a: 'Our AI scans Reddit, Reed, WWR, Remotive, and 20+ other sources every 6 hours. Each lead is scored for quality and matched against your skills and rates.' },
+  { q: 'What makes a lead "high quality"?', a: 'Every lead must have a clear budget, detailed scope, and relevant skills. Our AI filters out vague posts, low-ball offers, and non-UK opportunities.' },
+  { q: 'Can I try it for free?', a: 'Yes. Free users get 3 curated leads per week with basic details. No credit card required. Upgrade anytime to unlock unlimited access.' },
+  { q: 'Where are the leads based?', a: 'We focus on UK-based and remote-friendly opportunities. Every lead is vetted for UK relevance before it reaches your feed.' },
+  { q: 'How often are leads refreshed?', a: 'Our scrapers run every 6 hours around the clock. New leads appear in your feed within minutes of being posted on source sites.' },
+  { q: 'Can I cancel my subscription?', a: 'Yes, anytime. Your Pro access continues until the end of your billing period. No cancellation fees, no hassle.' },
+  { q: 'Do you offer team plans?', a: 'Yes. Our Growth plan supports up to 5 team seats with a shared pipeline and team analytics. Contact us for larger teams.' },
+  { q: 'How does the match scoring work?', a: 'Each lead is scored 1-10 based on budget clarity, scope detail, skill overlap with your profile, and location fit. Scores help you prioritise the best opportunities.' },
 ]
 
-export default function HomePage() {
-  const [sampleOpen, setSampleOpen] = useState(false)
+const testimonials = [
+  { initials: 'SK', name: 'Sarah K.', role: 'Freelance UX Designer', quote: 'I was spending 3 hours a day on job boards. Now I open LeadFlow once and have 5 curated leads waiting. Game changer.' },
+  { initials: 'MJ', name: 'Marcus J.', role: 'Full-Stack Developer', quote: 'Got my first client within 48 hours of signing up. The match scoring saved me from wasting time on bad leads.' },
+  { initials: 'AL', name: 'Aisha L.', role: 'Copywriter', quote: 'The quality difference is incredible. No more ghost listings or vague briefs. Every lead has real details.' },
+]
+
+export default function LandingPage() {
+  const [scrolled, setScrolled] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [annual, setAnnual] = useState(false)
+  const [openFaq, setOpenFaq] = useState<number | null>(null)
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 20)
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
+  useEffect(() => {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible') })
+    }, { threshold: 0.1 })
+    document.querySelectorAll('.scroll-reveal').forEach(el => observer.observe(el))
+    return () => observer.disconnect()
+  }, [])
 
   return (
-    <div>
-      {/* ── HERO ── */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-0">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          <div>
-            <h1 className="text-5xl sm:text-6xl font-bold tracking-tight leading-[1.1]" style={{ color: '#1A1D23' }}>
-              Stop chasing clients.<br />
-              <span style={{ color: '#1B6B4A' }}>Start choosing them.</span>
-            </h1>
-            <p className="mt-5 text-lg leading-relaxed" style={{ color: '#6B7280' }}>
-              LeadFlow sends UK freelancers 3–5 highly targeted leads per day — no job board scrolling.
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link
-                href="/auth/signup"
-                className="inline-block text-white px-7 py-3 rounded-lg text-base font-semibold transition-all duration-150 hover:opacity-90 active:scale-[0.98]"
-                style={{ background: '#1B6B4A' }}
-              >
-                Get 3 free leads this week
-              </Link>
-              <button
-                onClick={() => setSampleOpen(true)}
-                className="inline-block px-7 py-3 rounded-lg text-base font-semibold transition-all duration-150 hover:bg-gray-100 active:scale-[0.98]"
-                style={{ background: '#F3F4F6', color: '#6B7280' }}
-              >
-                View sample leads
-              </button>
+    <>
+      {/* ── NAVBAR ── */}
+      <nav className={`sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b transition-shadow ${scrolled ? 'shadow-sm' : ''}`} style={{ borderColor: 'var(--base-300)' }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12">
+          <div className="flex justify-between h-14 items-center">
+            <Link href="/" className="flex items-center gap-2 text-sm font-bold" style={{ color: 'var(--base-900)' }}>
+              <span className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-xs font-bold" style={{ background: 'var(--green-600)' }}>LF</span>
+              LeadFlow
+            </Link>
+            <div className="hidden md:flex items-center gap-6 text-sm" style={{ color: 'var(--base-600)' }}>
+              <a href="#features" className="hover:underline">Features</a>
+              <a href="#how-it-works" className="hover:underline">How it works</a>
+              <a href="#pricing" className="hover:underline">Pricing</a>
             </div>
-            <p className="mt-3 text-xs" style={{ color: '#9CA3AF' }}>No credit card required. Free plan available.</p>
-            <p className="mt-5 text-xs" style={{ color: '#AAB0BB' }}>
-              <SignupCounter /> freelancers already onboarded
-            </p>
+            <div className="hidden md:flex items-center gap-3">
+              <Link href="/auth/login" className="btn-g">Log in</Link>
+              <Link href="/auth/signup" className="btn-amber">Start free</Link>
+            </div>
+            <button className="md:hidden p-2 min-h-[44px] min-w-[44px] flex items-center justify-center" onClick={() => setMenuOpen(!menuOpen)} aria-label="Menu" aria-expanded={menuOpen}>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: 'var(--base-600)' }}>
+                {menuOpen ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /> : <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />}
+              </svg>
+            </button>
           </div>
-
-          {/* Dashboard preview */}
-          <div className="rounded-xl overflow-hidden shadow-xl" style={{ border: '1px solid #ECEEF2', background: '#FFFFFF' }}>
-            <div className="flex items-center gap-2 px-5 h-11 border-b" style={{ background: '#F9FAFB', borderColor: '#ECEEF2' }}>
-              <div className="flex gap-1.5">
-                <div className="w-2.5 h-2.5 rounded-full" style={{ background: '#DC2626' }} />
-                <div className="w-2.5 h-2.5 rounded-full" style={{ background: '#D97706' }} />
-                <div className="w-2.5 h-2.5 rounded-full" style={{ background: '#1B6B4A' }} />
-              </div>
-              <span className="text-[11px] font-medium ml-2" style={{ color: '#AAB0BB' }}>leadflow.app/feed</span>
-            </div>
-            <div className="p-4 space-y-2.5">
-              <div className="flex items-center gap-2 pb-2 border-b" style={{ borderColor: '#ECEEF2' }}>
-                <div className="flex gap-1.5 text-[10px]">
-                  <span className="px-2 py-0.5 rounded-full" style={{ background: '#EBF5F0', color: '#1B6B4A' }}>● Reddit</span>
-                  <span className="px-2 py-0.5 rounded-full" style={{ background: '#FEF3E2', color: '#D97706' }}>● Indeed</span>
-                  <span className="px-2 py-0.5 rounded-full" style={{ background: '#F5F5F7', color: '#AAB0BB' }}>○ Reed</span>
-                </div>
-                <span className="ml-auto text-[10px] font-medium" style={{ color: '#AAB0BB' }}>Today 09:41</span>
-              </div>
-              {sampleLeads.map((lead, i) => (
-                <div key={i} className="flex items-start gap-3 p-3 rounded-lg" style={{ background: i === 0 ? '#F0FDF7' : '#F9FAFB', border: i === 0 ? '1px solid #BBE0CE' : '1px solid transparent' }}>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded" style={{ background: lead.source === 'Reed' ? 'rgba(122,171,255,.12)' : lead.source === 'Reddit' ? 'rgba(255,90,20,.14)' : 'rgba(160,120,255,.12)', color: lead.source === 'Reed' ? '#2563EB' : lead.source === 'Reddit' ? '#ff7040' : '#b08fff' }}>{lead.source}</span>
-                      <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded" style={{ background: lead.score >= '8' ? '#EBF5F0' : '#FEF3E2', color: lead.score >= '8' ? '#1B6B4A' : '#D97706' }}>{lead.score}</span>
-                      <span className="ml-auto text-[10px] font-medium" style={{ color: '#1B6B4A' }}>{lead.rate}</span>
-                    </div>
-                    <div className="text-xs font-semibold mt-1 truncate" style={{ color: '#1A1D23' }}>{lead.title}</div>
-                    <div className="flex gap-1 mt-1">
-                      {lead.skills.map(s => (
-                        <span key={s} className="text-[9px] px-1.5 py-0.5 rounded" style={{ background: '#EBF5F0', color: '#1B6B4A', border: '1px solid #BBE0CE' }}>{s}</span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
+          {menuOpen && (
+            <div className="md:hidden pb-3 space-y-1.5 border-t pt-2" style={{ borderColor: 'var(--base-300)' }}>
+              {['Features','How it works','Pricing'].map(item => (
+                <a key={item} href={`#${item.toLowerCase().replace(/\s+/g,'-')}`} onClick={() => setMenuOpen(false)}
+                  className="block text-sm py-2 px-1 rounded" style={{ color: 'var(--base-600)' }}>{item}</a>
               ))}
-              <div className="pt-1 text-center">
-                <span className="text-[10px] font-medium" style={{ color: '#AAB0BB' }}>Showing 3 of 5 new leads today</span>
-              </div>
+              <Link href="/auth/login" className="block text-sm py-2 px-1 rounded" style={{ color: 'var(--base-600)' }} onClick={() => setMenuOpen(false)}>Log in</Link>
+              <Link href="/auth/signup" className="block text-sm py-2 px-1 rounded font-semibold" style={{ color: 'var(--green-600)' }} onClick={() => setMenuOpen(false)}>Start free</Link>
+            </div>
+          )}
+        </div>
+      </nav>
+
+      {/* ── HERO ── */}
+      <section className="relative overflow-hidden" style={{ background: 'var(--base-100)' }}>
+        <div className="absolute inset-0 pointer-events-none opacity-[0.03]">
+          <div className="absolute top-20 left-10 w-64 h-64 rounded-full" style={{ background: 'var(--green-600)' }} />
+          <div className="absolute bottom-20 right-10 w-80 h-80 rounded-full" style={{ background: 'var(--green-500)' }} />
+        </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 pt-20 pb-24 md:pt-28 md:pb-32">
+          <div className="max-w-3xl mx-auto text-center">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium mb-6" style={{ background: 'var(--amber-100)', color: 'var(--amber-600)', border: '1px solid var(--amber-200)' }}>
+              <span className="w-2 h-2 rounded-full animate-pulse-dot" style={{ background: 'var(--green-500)' }} />
+              Now in beta — join <SignupCounter /> freelancers
+            </div>
+            <h1 className="text-[40px] md:text-[56px] font-extrabold leading-[1.05] tracking-[-1.5px]" style={{ color: 'var(--base-900)' }}>
+              Stop hunting for clients.<br />
+              <span style={{ color: 'var(--green-600)' }}>Start choosing them.</span>
+            </h1>
+            <p className="mt-5 text-lg max-w-xl mx-auto leading-relaxed" style={{ color: 'var(--base-600)' }}>
+              LeadFlow finds, vets and scores freelance leads for you — delivered fresh every 6 hours.
+            </p>
+            <div className="mt-8 flex items-center justify-center gap-3 flex-wrap">
+              <Link href="/auth/signup" className="btn-amber" style={{ padding: '14px 28px', fontSize: '15px' }}>
+                Get started free <i className="ti ti-arrow-right" />
+              </Link>
+              <a href="#how-it-works" className="btn-s">See how it works <i className="ti ti-arrow-right" /></a>
+            </div>
+            <div className="mt-8 flex items-center justify-center gap-4 text-xs" style={{ color: 'var(--base-500)' }}>
+              <span className="flex items-center gap-1"><i className="ti ti-circle-check" style={{ color: 'var(--green-500)' }} /> No card needed</span>
+              <span className="flex items-center gap-1"><i className="ti ti-circle-check" style={{ color: 'var(--green-500)' }} /> 3 free leads</span>
+              <span className="flex items-center gap-1"><i className="ti ti-circle-check" style={{ color: 'var(--green-500)' }} /> Cancel anytime</span>
             </div>
           </div>
         </div>
       </section>
 
       {/* ── SOCIAL PROOF ── */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-8">
-        <div className="grid md:grid-cols-3 gap-6">
-          {[
-            { initials: 'SK', name: 'Sarah K.', role: 'Freelance UX Designer, London', line: 'Got my first client in 3 days.' },
-            { initials: 'JR', name: 'James R.', role: 'Full-Stack Developer, Manchester', line: 'Cut lead hunting from 5h to 5min.' },
-            { initials: 'PM', name: 'Priya M.', role: 'Copywriter, Bristol', line: 'Finally, leads that match my actual skills.' },
-          ].map(t => (
-            <div key={t.name} className="flex items-start gap-3 p-4 rounded-xl bg-white" style={{ border: '1px solid #ECEEF2' }}>
-              <div className="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0" style={{ background: '#1B6B4A' }}>{t.initials}</div>
-              <div>
-                <div className="text-sm font-semibold leading-snug" style={{ color: '#1A1D23' }}>{t.line}</div>
-                <div className="text-xs mt-1" style={{ color: '#9CA3AF' }}>{t.name} — {t.role}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ── HOW IT WORKS (PIPELINE) ── */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <h2 className="text-3xl font-bold text-center tracking-tight" style={{ color: '#1A1D23' }}>How it works</h2>
-        <p className="mt-3 text-sm text-center max-w-xl mx-auto" style={{ color: '#6B7280' }}>Most freelancers apply to their first lead within 10 minutes of signing up.</p>
-        <div className="mt-12 grid md:grid-cols-3 gap-8">
-          {[
-            { icon: 'ti ti-user', title: 'Set your profile', desc: 'Skills, rates, location. Takes 2 minutes.' },
-            { icon: 'ti ti-search', title: 'We scan & match daily', desc: '7+ sources, UK-only, AI-ranked by fit.' },
-            { icon: 'ti ti-thumb-up', title: 'You pick & apply', desc: '3–5 leads/day. Track applied → hired.' },
-          ].map((item, i) => (
-            <div key={item.title} className="text-center p-6 rounded-xl bg-white" style={{ border: '1px solid #ECEEF2' }}>
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4" style={{ background: '#EBF5F0' }}>
-                <i className={item.icon} style={{ fontSize: '22px', color: '#1B6B4A' }} />
-              </div>
-              <div className="flex items-center justify-center gap-2 mb-2">
-                <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full" style={{ background: '#F5F5F7', color: '#AAB0BB' }}>Step {i + 1}</span>
-              </div>
-              <h3 className="text-base font-semibold" style={{ color: '#1A1D23' }}>{item.title}</h3>
-              <p className="text-sm mt-1" style={{ color: '#6B7280' }}>{item.desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ── WHY DIFFERENT ── */}
-      <section className="py-16" style={{ background: '#F9FAFB' }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-center tracking-tight" style={{ color: '#1A1D23' }}>Why LeadFlow is different</h2>
-          <div className="mt-12 grid md:grid-cols-3 gap-8">
+      <section style={{ background: 'var(--green-900)' }}>
+        <div className="max-w-5xl mx-auto px-4 sm:px-8 py-10">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
             {[
-              { icon: Zap, title: 'Curated, not a job board', desc: 'You never see irrelevant roles — only leads that match your skills and rates.' },
-              { icon: Target, title: 'UK-only focus', desc: 'No timezone headaches. Clients expect UK freelancers.' },
-              { icon: CheckCircle, title: 'Outcome-driven AI', desc: 'The more you log wins and losses, the better your matches get.' },
-            ].map(f => {
-              const Icon = f.icon
-              return (
-                <div key={f.title} className="bg-white rounded-xl p-6" style={{ border: '1px solid #ECEEF2' }}>
-                  <div className="w-10 h-10 rounded-lg flex items-center justify-center mb-4" style={{ background: '#EBF5F0', color: '#1B6B4A' }}>
-                    <Icon size={20} />
-                  </div>
-                  <h3 className="text-base font-semibold" style={{ color: '#1A1D23' }}>{f.title}</h3>
-                  <p className="text-sm mt-1 leading-relaxed" style={{ color: '#6B7280' }}>{f.desc}</p>
+              { value: '2,400+', label: 'Leads posted' },
+              { value: '340+', label: 'Freelancers in beta' },
+              { value: '£1.2M+', label: 'In contracts' },
+              { value: '9.1/10', label: 'Avg quality score' },
+            ].map(s => (
+              <div key={s.label}>
+                <div className="text-2xl md:text-3xl font-bold text-white">{s.value}</div>
+                <div className="text-sm mt-1" style={{ color: 'var(--green-200)' }}>{s.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── PROBLEM ── */}
+      <section className="py-20 scroll-reveal">
+        <div className="max-w-5xl mx-auto px-4 sm:px-8">
+          <h2 className="text-3xl font-bold text-center tracking-tight" style={{ color: 'var(--base-900)' }}>The feast-or-famine cycle stops here</h2>
+          <div className="mt-12 grid md:grid-cols-3 gap-6">
+            {[
+              { title: 'Wasting hours on job boards', desc: 'Scrolling through irrelevant listings, filtering noise, and applying blind.' },
+              { title: 'Applying to leads with no substance', desc: 'No budget, no scope, no response. Your time deserves better.' },
+              { title: 'Landing clients, then scrambling', desc: 'The feast-or-famine cycle ends when leads arrive consistently.' },
+            ].map((item, i) => (
+              <div key={i} className="card" style={{ borderLeft: '3px solid var(--amber-500)' }}>
+                <h3 className="text-base font-semibold" style={{ color: 'var(--base-900)' }}>{item.title}</h3>
+                <p className="text-sm mt-2" style={{ color: 'var(--base-600)' }}>{item.desc}</p>
+              </div>
+            ))}
+          </div>
+          <div className="text-center mt-8 text-sm font-semibold" style={{ color: 'var(--green-600)' }}>
+            LeadFlow fixes all three <i className="ti ti-arrow-right" />
+          </div>
+        </div>
+      </section>
+
+      {/* ── HOW IT WORKS ── */}
+      <section id="how-it-works" className="py-20 scroll-reveal" style={{ background: 'white' }}>
+        <div className="max-w-5xl mx-auto px-4 sm:px-8">
+          <h2 className="text-3xl font-bold text-center tracking-tight" style={{ color: 'var(--base-900)' }}>How it works</h2>
+          <div className="mt-12 grid md:grid-cols-3 gap-8 relative">
+            <div className="hidden md:block absolute top-12 left-[16%] right-[16%] h-0.5" style={{ background: 'var(--base-300)' }} />
+            {[
+              { num: '01', icon: 'ti-user-check', title: 'Create your profile', desc: 'Tell us your skills and rates. 2 minutes.' },
+              { num: '02', icon: 'ti-search', title: 'We find and score leads', desc: 'AI scans Reddit, Reed, WWR every 6 hours. Only quality leads get through.' },
+              { num: '03', icon: 'ti-briefcase', title: 'Land the work', desc: 'Browse your feed, express interest, apply directly.' },
+            ].map(s => (
+              <div key={s.num} className="text-center relative">
+                <div className="w-16 h-16 rounded-xl flex items-center justify-center mx-auto mb-4 relative z-10" style={{ background: 'var(--green-100)', color: 'var(--green-600)' }}>
+                  <i className={`ti ${s.icon}`} style={{ fontSize: '24px' }} />
                 </div>
-              )
-            })}
+                <div className="text-xs font-bold tracking-widest mb-1" style={{ color: 'var(--green-400)' }}>{s.num}</div>
+                <h3 className="text-lg font-semibold mb-1" style={{ color: 'var(--base-900)' }}>{s.title}</h3>
+                <p className="text-sm max-w-xs mx-auto" style={{ color: 'var(--base-600)' }}>{s.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── FEATURES ── */}
+      <section id="features" className="py-20 scroll-reveal" style={{ background: 'var(--base-200)' }}>
+        <div className="max-w-5xl mx-auto px-4 sm:px-8">
+          <h2 className="text-3xl font-bold text-center tracking-tight" style={{ color: 'var(--base-900)' }}>Everything you need to win consistently</h2>
+          <div className="mt-12 grid md:grid-cols-3 gap-6">
+            {[
+              { icon: 'ti-star', title: 'AI quality scoring', desc: 'Every lead rated 1-10 so you prioritise the best opportunities first.' },
+              { icon: 'ti-refresh', title: '6-hour refresh', desc: 'Always fresh, never stale. New leads appear within minutes of being posted.' },
+              { icon: 'ti-user-search', title: 'Skill matching', desc: 'Only see leads that match your skills and rates. No irrelevant noise.' },
+              { icon: 'ti-currency-pound', title: 'Budget visible', desc: 'Real numbers upfront. No more applying to leads with vague budgets.' },
+              { icon: 'ti-link', title: 'Source URLs', desc: 'Apply directly on the original platform. Full transparency on every lead.' },
+              { icon: 'ti-send', title: 'Pipeline tracking', desc: 'Follow your applications from interested to won. Never lose track.' },
+            ].map(f => (
+              <div key={f.title} className="card card-hover">
+                <div className="w-10 h-10 rounded-lg flex items-center justify-center mb-3" style={{ background: 'var(--green-100)', color: 'var(--green-600)' }}>
+                  <i className={`ti ${f.icon}`} style={{ fontSize: '18px' }} />
+                </div>
+                <h3 className="text-sm font-semibold" style={{ color: 'var(--base-900)' }}>{f.title}</h3>
+                <p className="text-xs mt-1.5 leading-relaxed" style={{ color: 'var(--base-600)' }}>{f.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── DASHBOARD PREVIEW ── */}
+      <section className="py-20" style={{ background: 'var(--green-900)' }}>
+        <div className="max-w-5xl mx-auto px-4 sm:px-8">
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            <div>
+              <h2 className="text-3xl font-bold tracking-tight text-white">See your leads at a glance</h2>
+              <ul className="mt-6 space-y-3">
+                {['Quality score on every lead', 'Budget, skills, and source at a glance', 'One-click interest and bookmark', 'Pipeline tracking from apply to won'].map(item => (
+                  <li key={item} className="flex items-center gap-2 text-sm" style={{ color: 'var(--green-200)' }}>
+                    <i className="ti ti-circle-check" style={{ color: 'var(--green-400)' }} /> {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="rounded-xl overflow-hidden shadow-2xl" style={{ boxShadow: 'var(--shadow-green-lg)' }}>
+              <div className="p-4" style={{ background: 'var(--base-100)' }}>
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-3 h-3 rounded-full" style={{ background: '#DC2626' }} />
+                  <div className="w-3 h-3 rounded-full" style={{ background: '#F5B942' }} />
+                  <div className="w-3 h-3 rounded-full" style={{ background: '#22C55E' }} />
+                  <div className="text-xs ml-2" style={{ color: 'var(--base-500)' }}>LeadFlow Dashboard</div>
+                </div>
+                <div className="space-y-2">
+                  {['Senior UX Designer — London', 'Full-Stack Dev — Remote UK', 'Brand Identity — 3-month contract'].map((title, i) => (
+                    <div key={i} className="card p-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="badge" style={{ background: i === 0 ? '#FEF0EB' : i === 1 ? '#EFF6FF' : 'var(--green-100)', color: i === 0 ? '#EA580C' : i === 1 ? '#1D4ED8' : 'var(--green-700)' }}>
+                            {['Reddit', 'WWR', 'Reed'][i]}
+                          </span>
+                          <span className="text-xs font-semibold" style={{ color: 'var(--base-900)' }}>{title}</span>
+                        </div>
+                        <span className="badge badge-hi">9/10</span>
+                      </div>
+                      <div className="text-xs mt-1" style={{ color: 'var(--base-600)' }}>£350-450/day · Figma, Design Systems</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── TESTIMONIALS ── */}
+      <section className="py-20 scroll-reveal" style={{ background: 'white' }}>
+        <div className="max-w-5xl mx-auto px-4 sm:px-8">
+          <h2 className="text-3xl font-bold text-center tracking-tight" style={{ color: 'var(--base-900)' }}>Trusted by freelancers</h2>
+          <div className="mt-12 grid md:grid-cols-3 gap-6">
+            {testimonials.map(t => (
+              <div key={t.initials} className="card">
+                <i className="ti ti-quote" style={{ fontSize: '20px', color: 'var(--amber-400)' }} />
+                <p className="text-sm mt-3 leading-relaxed" style={{ color: 'var(--base-700)' }}>&ldquo;{t.quote}&rdquo;</p>
+                <div className="flex items-center gap-3 mt-4 pt-3" style={{ borderTop: '1px solid var(--base-300)' }}>
+                  <div className="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold" style={{ background: 'var(--green-600)' }}>{t.initials}</div>
+                  <div>
+                    <div className="text-sm font-semibold" style={{ color: 'var(--base-900)' }}>{t.name}</div>
+                    <div className="text-xs" style={{ color: 'var(--base-500)' }}>{t.role}</div>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* ── PRICING ── */}
-      <section id="pricing" className="py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-center tracking-tight" style={{ color: '#1A1D23' }}>
-            Simple pricing
-          </h2>
-          <p className="mt-3 text-sm text-center max-w-xl mx-auto" style={{ color: '#6B7280' }}>
-            One decent client covers a year of Pro. Start free, upgrade when you see results.
-          </p>
-          <div className="mt-12 grid md:grid-cols-2 gap-8 max-w-3xl mx-auto">
-            {pricingTiers.map((tier) => (
+      <section id="pricing" className="py-20 scroll-reveal" style={{ background: 'var(--base-100)' }}>
+        <div className="max-w-5xl mx-auto px-4 sm:px-8">
+          <div className="text-center">
+            <h2 className="text-3xl font-bold tracking-tight" style={{ color: 'var(--base-900)' }}>Simple, transparent pricing</h2>
+            <div className="flex items-center justify-center gap-3 mt-4">
+              <span className="text-sm" style={{ color: annual ? 'var(--base-500)' : 'var(--base-900)' }}>Monthly</span>
+              <button onClick={() => setAnnual(!annual)}
+                className="w-10 h-5 rounded-full relative transition-colors" style={{ background: annual ? 'var(--green-600)' : 'var(--base-300)' }}>
+                <div className={`w-4 h-4 rounded-full bg-white absolute top-0.5 transition-all shadow-sm ${annual ? 'left-5' : 'left-0.5'}`} />
+              </button>
+              <span className="text-sm" style={{ color: annual ? 'var(--base-900)' : 'var(--base-500)' }}>Annual <span className="text-xs" style={{ color: 'var(--green-600)' }}>Save 2 months</span></span>
+            </div>
+          </div>
+          <div className="mt-10 grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            {pricingTiers.map(tier => (
               <PricingCard key={tier.name} tier={tier} />
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── CTA ── */}
-      <section className="py-20" style={{ background: '#1B6B4A' }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold text-white tracking-tight">
-            Ready to stop chasing and start choosing?
-          </h2>
-          <p className="mt-4 text-lg" style={{ color: '#A7D4BC' }}>
-            3 free leads this week. No credit card required.
-          </p>
-          <Link
-            href="/auth/signup"
-            className="mt-8 inline-block px-8 py-3 rounded-lg text-lg font-semibold transition-all duration-150 hover:opacity-90 active:scale-[0.98]"
-            style={{ background: 'white', color: '#1B6B4A' }}
-          >
-            Get 3 free leads this week
-          </Link>
+      {/* ── FAQ ── */}
+      <section className="py-20 scroll-reveal" style={{ background: 'var(--base-200)' }}>
+        <div className="max-w-3xl mx-auto px-4 sm:px-8">
+          <h2 className="text-3xl font-bold text-center tracking-tight" style={{ color: 'var(--base-900)' }}>Frequently asked questions</h2>
+          <div className="mt-10 space-y-2">
+            {faqs.map((faq, i) => (
+              <div key={i} className="card p-0 overflow-hidden">
+                <button onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                  className="w-full flex items-center justify-between px-5 py-4 text-sm font-semibold text-left transition-colors hover:bg-[var(--base-200)]"
+                  style={{ color: 'var(--base-900)' }}>
+                  {faq.q}
+                  <i className={`ti ti-chevron-down transition-transform duration-200 ${openFaq === i ? 'rotate-180' : ''}`} />
+                </button>
+                <div className={`overflow-hidden transition-all duration-200 ${openFaq === i ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'}`}>
+                  <p className="px-5 pb-4 text-sm" style={{ color: 'var(--base-600)' }}>{faq.a}</p>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
-      <footer className="border-t py-8" style={{ borderColor: '#E5E7EB' }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm" style={{ color: '#9CA3AF' }}>
-          &copy; {new Date().getFullYear()} LeadFlow. All rights reserved.
+      {/* ── FINAL CTA ── */}
+      <section style={{ background: 'var(--green-900)' }} className="py-20">
+        <div className="max-w-3xl mx-auto px-4 sm:px-8 text-center">
+          <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight">
+            Join 340+ freelancers getting quality leads daily
+          </h2>
+          <Link href="/auth/signup" className="btn-amber mt-6 inline-flex" style={{ padding: '14px 28px', fontSize: '15px' }}>
+            Get started free <i className="ti ti-arrow-right" />
+          </Link>
+          <p className="mt-3 text-sm" style={{ color: 'var(--green-300)' }}>No credit card required · Cancel anytime</p>
         </div>
-      </footer>
+      </section>
 
-      {/* ── SAMPLE LEADS MODAL ── */}
-      {sampleOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.35)' }} onClick={() => setSampleOpen(false)}>
-          <div className="bg-white rounded-xl max-w-lg w-full mx-4 shadow-xl relative" onClick={e => e.stopPropagation()}>
-            <button onClick={() => setSampleOpen(false)} className="absolute top-3 right-3 w-8 h-8 rounded-lg flex items-center justify-center hover:bg-gray-100 transition-colors" style={{ color: '#AAB0BB' }}>
-              <X size={16} />
-            </button>
-            <div className="p-6">
-              <h3 className="text-base font-bold" style={{ color: '#1A1D23' }}>Sample leads</h3>
-              <p className="text-xs mt-1 mb-4" style={{ color: '#6B7280' }}>These are real anonymised leads from our feed. Yours will match your skills.</p>
-              <div className="space-y-3">
-                {sampleLeads.map((lead, i) => (
-                  <div key={i} className="rounded-lg p-4" style={{ background: '#F9FAFB', border: '1px solid #ECEEF2' }}>
-                    <div className="flex items-center gap-2">
-                      <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded" style={{ background: lead.source === 'Reed' ? 'rgba(122,171,255,.12)' : lead.source === 'Reddit' ? 'rgba(255,90,20,.14)' : 'rgba(160,120,255,.12)', color: lead.source === 'Reed' ? '#2563EB' : lead.source === 'Reddit' ? '#ff7040' : '#b08fff' }}>{lead.source}</span>
-                      <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded" style={{ background: '#EBF5F0', color: '#1B6B4A' }}>{lead.score}</span>
-                      <span className="ml-auto text-xs font-medium" style={{ color: '#1B6B4A' }}>{lead.rate}</span>
-                    </div>
-                    <div className="text-sm font-semibold mt-1.5" style={{ color: '#1A1D23' }}>{lead.title}</div>
-                    <div className="flex gap-1.5 mt-2">
-                      {lead.skills.map(s => (
-                        <span key={s} className="text-[9px] px-1.5 py-0.5 rounded" style={{ background: '#EBF5F0', color: '#1B6B4A', border: '1px solid #BBE0CE' }}>{s}</span>
-                      ))}
-                    </div>
-                  </div>
-                ))}
+      {/* ── FOOTER ── */}
+      <footer style={{ background: 'var(--green-900)', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 py-12">
+          <div className="grid md:grid-cols-4 gap-8">
+            <div>
+              <div className="flex items-center gap-2 text-sm font-bold text-white mb-3">
+                <span className="w-6 h-6 rounded-lg flex items-center justify-center text-white text-[10px] font-bold" style={{ background: 'var(--green-600)' }}>LF</span>
+                LeadFlow
               </div>
-              <Link
-                href="/auth/signup"
-                className="mt-5 block w-full text-center py-2.5 rounded-lg text-sm font-semibold text-white transition-all duration-150 hover:opacity-90 active:scale-[0.98]"
-                style={{ background: '#1B6B4A' }}
-              >
-                Get your matched leads
-              </Link>
+              <p className="text-xs" style={{ color: 'var(--green-300)' }}>Quality freelance leads delivered daily.</p>
             </div>
+            {[
+              { title: 'Product', links: ['Features', 'Pricing', 'Blog'] },
+              { title: 'Company', links: ['About', 'Careers', 'Contact'] },
+              { title: 'Legal', links: ['Privacy', 'Terms', 'Cookies'] },
+            ].map(col => (
+              <div key={col.title}>
+                <div className="text-xs font-semibold mb-3" style={{ color: 'var(--green-200)' }}>{col.title}</div>
+                <div className="space-y-2">
+                  {col.links.map(link => (
+                    <div key={link} className="text-xs" style={{ color: 'var(--green-400)' }}>{link}</div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-10 pt-6 flex flex-col md:flex-row items-center justify-between gap-4" style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+            <div className="text-xs" style={{ color: 'var(--green-400)' }}>&copy; {new Date().getFullYear()} LeadFlow. All rights reserved.</div>
+            <button className="text-xs flex items-center gap-1" style={{ color: 'var(--green-300)' }}>
+              <i className="ti ti-sun" /> Light mode
+            </button>
           </div>
         </div>
-      )}
-    </div>
+      </footer>
+    </>
   )
 }

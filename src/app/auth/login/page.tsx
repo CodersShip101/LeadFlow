@@ -10,77 +10,72 @@ export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
+  const [showPw, setShowPw] = useState(false)
   const router = useRouter()
   const supabase = createClient()
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
-
-    if (error) {
-      toast.error(error.message)
-      setLoading(false)
-      return
-    }
-
+    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    if (error) { toast.error(error.message); setLoading(false); return }
     toast.success('Welcome back!')
     router.push('/dashboard')
   }
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center px-4">
-      <div className="w-full max-w-md">
-        <h1 className="text-3xl font-bold text-gray-900 text-center">Welcome back</h1>
-        <p className="mt-2 text-gray-600 text-center text-sm">
-          Login to access your leads dashboard.
-        </p>
-        <form onSubmit={handleLogin} className="mt-8 space-y-4">
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
-            <input
-              id="email"
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-[#1B6B4A] focus:ring-1 focus:ring-[#1B6B4A]"
-              placeholder="you@example.com"
-            />
+    <div className="min-h-screen flex">
+      {/* LEFT: brand panel */}
+      <div className="hidden lg:flex w-[40%] flex-col justify-between p-12" style={{ background: 'var(--green-900)' }}>
+        <div className="flex items-center gap-2 text-white text-sm font-bold">
+          <span className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-xs font-bold" style={{ background: 'var(--green-500)' }}>LF</span>
+          LeadFlow
+        </div>
+        <div>
+          <div className="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold mb-4" style={{ background: 'var(--amber-500)' }}>SK</div>
+          <p className="text-sm leading-relaxed text-white/80">&ldquo;I was spending 3 hours a day on job boards. Now I open LeadFlow once and have 5 curated leads waiting.&rdquo;</p>
+          <p className="text-xs mt-3" style={{ color: 'var(--green-200)' }}>Sarah K. — Freelance UX Designer</p>
+        </div>
+      </div>
+
+      {/* RIGHT: form */}
+      <div className="flex-1 flex items-center justify-center px-6 py-12">
+        <div className="w-full max-w-sm animate-fade-in">
+          <div className="text-center mb-8">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-4" style={{ background: 'var(--green-600)' }}>
+              <span className="text-white text-sm font-bold">LF</span>
+            </div>
+            <h1 className="text-2xl font-bold tracking-tight" style={{ color: 'var(--base-900)' }}>Welcome back</h1>
+            <p className="mt-1.5 text-sm" style={{ color: 'var(--base-600)' }}>Sign in to your LeadFlow account</p>
           </div>
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
-            <input
-              id="password"
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-[#1B6B4A] focus:ring-1 focus:ring-[#1B6B4A]"
-              placeholder="Your password"
-            />
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--base-700)' }}>Email</label>
+              <input type="email" required value={email} onChange={e => setEmail(e.target.value)}
+                className="input" placeholder="you@example.com" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--base-700)' }}>Password</label>
+              <div className="relative">
+                <input type={showPw ? 'text' : 'password'} required value={password} onChange={e => setPassword(e.target.value)}
+                  className="input pr-10" placeholder="Your password" />
+                <button type="button" onClick={() => setShowPw(!showPw)} className="absolute right-3 top-1/2 -translate-y-1/2 text-xs" style={{ color: 'var(--base-500)' }}>
+                  <i className={`ti ${showPw ? 'ti-eye-off' : 'ti-eye'}`} />
+                </button>
+              </div>
+            </div>
+            <div className="flex items-center justify-end">
+              <Link href="/auth/reset-password" className="text-xs font-medium hover:underline" style={{ color: 'var(--green-500)' }}>Forgot password?</Link>
+            </div>
+            <button type="submit" disabled={loading} className="btn-p w-full justify-center">
+              {loading ? 'Signing in...' : 'Sign in'}
+            </button>
+          </form>
+          <div className="mt-6 text-center text-xs" style={{ color: 'var(--base-500)' }}>
+            Don&apos;t have an account?{' '}
+            <Link href="/auth/signup" className="font-semibold hover:underline" style={{ color: 'var(--green-500)' }}>Sign up →</Link>
           </div>
-          <div className="flex items-center justify-end">
-            <Link href="/auth/forgot-password" className="text-sm text-[#1B6B4A] hover:underline">
-              Forgot password?
-            </Link>
-          </div>
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-2.5 rounded-lg text-sm font-semibold text-white hover:opacity-90 disabled:opacity-50" style={{ background: '#1B6B4A' }}
-          >
-            {loading ? 'Logging in...' : 'Login'}
-          </button>
-        </form>
-        <p className="mt-6 text-center text-sm text-gray-600">
-          Don&apos;t have an account?{' '}
-          <Link href="/auth/signup" className="text-[#1B6B4A] font-medium hover:underline">Sign up</Link>
-        </p>
+        </div>
       </div>
     </div>
   )

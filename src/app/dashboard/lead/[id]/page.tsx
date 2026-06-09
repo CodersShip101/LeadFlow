@@ -306,7 +306,7 @@ export default function LeadDetailPage() {
                       toast.success('Saved!')
                     }
                   }}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all hover:opacity-80 min-h-[32px]"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all hover:opacity-80 min-h-[36px]"
                     style={{ background: opt.bg, color: opt.color }}>
                     <i className={`ti ${opt.icon}`} style={{ fontSize: '12px' }} /> {opt.label}
                   </button>

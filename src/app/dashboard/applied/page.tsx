@@ -170,12 +170,12 @@ export default function PipelinePage() {
                             <div className="mt-2 pt-2 border-t" style={{ borderColor: '#F2F3F7' }}>
                               {col.key === 'interested' && (
                                 <button onClick={e => { e.stopPropagation(); updateApplication(lead.id, 'applied') }}
-                                  className="w-full text-[10px] font-medium py-1.5 rounded transition-all hover:opacity-80 active:scale-[0.97]"
+                                  className="w-full text-[10px] font-medium min-h-[36px] py-1.5 rounded transition-all hover:opacity-80 active:scale-[0.97]"
                                   style={{ background: '#FEF3E2', color: '#D97706' }}>Mark as Applied</button>
                               )}
                               {col.key === 'applied' && (
                                 <button onClick={e => { e.stopPropagation(); updateApplication(lead.id, 'hired') }}
-                                  className="w-full text-[10px] font-medium py-1.5 rounded transition-all hover:opacity-80 active:scale-[0.97]"
+                                  className="w-full text-[10px] font-medium min-h-[36px] py-1.5 rounded transition-all hover:opacity-80 active:scale-[0.97]"
                                   style={{ background: '#ECFDF5', color: '#059669' }}>Mark as Won</button>
                               )}
                               {col.key === 'hired' && (
