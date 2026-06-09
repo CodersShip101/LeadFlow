@@ -16,7 +16,6 @@ const goalOptions = [
 
 export default function OnboardingPage() {
   const [step, setStep] = useState(0)
-  const [dir, setDir] = useState<'forward' | 'back'>('forward')
   const [fullName, setFullName] = useState('')
   const [location, setLocation] = useState('')
   const [skills, setSkills] = useState<string[]>([])
@@ -41,8 +40,8 @@ export default function OnboardingPage() {
 
   const toggleSkill = (s: string) => setSkills(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s])
 
-  const goNext = () => { setDir('forward'); setStep(s => s + 1) }
-  const goBack = () => { setDir('back'); setStep(s => s - 1) }
+  const goNext = () => setStep(s => s + 1)
+  const goBack = () => setStep(s => s - 1)
 
   const handleFinish = async () => {
     setSaving(true)
@@ -73,77 +72,69 @@ export default function OnboardingPage() {
           ))}
         </div>
 
-        <div className="overflow-hidden">
-          <div className="transition-all duration-300" style={{ transform: `translateX(${dir === 'forward' ? `-${step * 100}%` : dir === 'back' ? `-${step * 100}%` : '0'})` }}>
-            <div className="flex" style={{ width: `${steps.length * 100}%` }}>
-              {[0,1,2,3].map(s => (
-                <div key={s} className="w-full px-0.5" style={{ opacity: step === s ? 1 : 0, pointerEvents: step === s ? 'auto' : 'none', position: 'absolute', width: '100%', transition: 'opacity 0.3s ease' }}>
-                  {s === 0 && (
-                    <div className="space-y-4">
-                      <div><label className="text-sm font-medium mb-1.5 block" style={{ color: 'var(--base-700)' }}>Full name</label>
-                        <input value={fullName} onChange={e => setFullName(e.target.value)} className="input" placeholder="Your name" autoFocus /></div>
-                      <div><label className="text-sm font-medium mb-1.5 block" style={{ color: 'var(--base-700)' }}>Location</label>
-                        <input value={location} onChange={e => setLocation(e.target.value)} className="input" placeholder="e.g. London, UK" /></div>
-                    </div>
-                  )}
-                  {s === 1 && (
-                    <div>
-                      <p className="text-sm mb-4" style={{ color: 'var(--base-600)' }}>What do you specialise in?</p>
-                      <div className="flex flex-wrap gap-1.5 max-h-80 overflow-y-auto">
-                        {skillOptions.map(sk => (
-                          <button key={sk} onClick={() => toggleSkill(sk)}
-                            className="badge transition-all active:scale-[0.95] cursor-pointer"
-                            style={{ background: skills.includes(sk) ? 'var(--green-600)' : 'var(--base-200)', color: skills.includes(sk) ? 'white' : 'var(--base-600)', border: skills.includes(sk) ? 'none' : '1px solid var(--base-300)' }}>
-                            {sk}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  {s === 2 && (
-                    <div className="space-y-4">
-                      <div><label className="text-sm font-medium mb-1.5 block" style={{ color: 'var(--base-700)' }}>Hourly rate (£)</label>
-                        <input value={rate} onChange={e => setRate(e.target.value)} type="number" className="input" placeholder="e.g. 75" autoFocus /></div>
-                      <div><label className="text-sm font-medium mb-1.5 block" style={{ color: 'var(--base-700)' }}>Experience level</label>
-                        <select value={exp} onChange={e => setExp(e.target.value)} className="input">
-                          <option value="">Select...</option>
-                          {['Junior (0-2 years)','Mid (2-5)','Senior (5-10)','Expert (10+)'].map(o => <option key={o} value={o}>{o}</option>)}
-                        </select></div>
-                      <div><label className="text-sm font-medium mb-1.5 block" style={{ color: 'var(--base-700)' }}>Availability</label>
-                        <select value={avail} onChange={e => setAvail(e.target.value)} className="input">
-                          <option value="">Select...</option>
-                          <option value="now">Available now</option>
-                          <option value="soon">Available from [date]</option>
-                          <option value="no">Not currently available</option>
-                        </select></div>
-                    </div>
-                  )}
-                  {s === 3 && (
-                    <div>
-                      <p className="text-sm mb-4" style={{ color: 'var(--base-600)' }}>What&apos;s your main goal with LeadFlow?</p>
-                      <div className="space-y-3">
-                        {goalOptions.map(g => (
-                          <button key={g.value} onClick={() => setGoal(g.value)}
-                            className="w-full text-left p-4 rounded-xl border-2 transition-all active:scale-[0.98]"
-                            style={{ borderColor: goal === g.value ? 'var(--green-500)' : 'var(--base-300)', background: goal === g.value ? 'var(--green-50)' : 'white' }}>
-                            <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ background: 'var(--green-100)', color: 'var(--green-600)' }}>
-                                <i className={`ti ${g.icon}`} style={{ fontSize: '18px' }} />
-                              </div>
-                              <div>
-                                <div className="text-sm font-semibold" style={{ color: 'var(--base-900)' }}>{g.title}</div>
-                                <div className="text-xs mt-0.5" style={{ color: 'var(--base-600)' }}>{g.desc}</div>
-                              </div>
-                            </div>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))}
+        <div className="min-h-[300px]">
+          {step === 0 && (
+            <div className="space-y-4 animate-fade-in">
+              <div><label className="text-sm font-medium mb-1.5 block" style={{ color: 'var(--base-700)' }}>Full name</label>
+                <input value={fullName} onChange={e => setFullName(e.target.value)} className="input" placeholder="Your name" autoFocus /></div>
+              <div><label className="text-sm font-medium mb-1.5 block" style={{ color: 'var(--base-700)' }}>Location</label>
+                <input value={location} onChange={e => setLocation(e.target.value)} className="input" placeholder="e.g. London, UK" /></div>
             </div>
-          </div>
+          )}
+          {step === 1 && (
+            <div className="animate-fade-in">
+              <p className="text-sm mb-4" style={{ color: 'var(--base-600)' }}>What do you specialise in?</p>
+              <div className="flex flex-wrap gap-1.5 max-h-80 overflow-y-auto">
+                {skillOptions.map(sk => (
+                  <button key={sk} onClick={() => toggleSkill(sk)}
+                    className="badge transition-all active:scale-[0.95] cursor-pointer"
+                    style={{ background: skills.includes(sk) ? 'var(--green-600)' : 'var(--base-200)', color: skills.includes(sk) ? 'white' : 'var(--base-600)', border: skills.includes(sk) ? 'none' : '1px solid var(--base-300)' }}>
+                    {sk}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+          {step === 2 && (
+            <div className="space-y-4 animate-fade-in">
+              <div><label className="text-sm font-medium mb-1.5 block" style={{ color: 'var(--base-700)' }}>Hourly rate (£)</label>
+                <input value={rate} onChange={e => setRate(e.target.value)} type="number" className="input" placeholder="e.g. 75" autoFocus /></div>
+              <div><label className="text-sm font-medium mb-1.5 block" style={{ color: 'var(--base-700)' }}>Experience level</label>
+                <select value={exp} onChange={e => setExp(e.target.value)} className="input">
+                  <option value="">Select...</option>
+                  {['Junior (0-2 years)','Mid (2-5)','Senior (5-10)','Expert (10+)'].map(o => <option key={o} value={o}>{o}</option>)}
+                </select></div>
+              <div><label className="text-sm font-medium mb-1.5 block" style={{ color: 'var(--base-700)' }}>Availability</label>
+                <select value={avail} onChange={e => setAvail(e.target.value)} className="input">
+                  <option value="">Select...</option>
+                  <option value="now">Available now</option>
+                  <option value="soon">Available from [date]</option>
+                  <option value="no">Not currently available</option>
+                </select></div>
+            </div>
+          )}
+          {step === 3 && (
+            <div className="animate-fade-in">
+              <p className="text-sm mb-4" style={{ color: 'var(--base-600)' }}>What&apos;s your main goal with LeadFlow?</p>
+              <div className="space-y-3">
+                {goalOptions.map(g => (
+                  <button key={g.value} onClick={() => setGoal(g.value)}
+                    className="w-full text-left p-4 rounded-xl border-2 transition-all active:scale-[0.98]"
+                    style={{ borderColor: goal === g.value ? 'var(--green-500)' : 'var(--base-300)', background: goal === g.value ? 'var(--green-50)' : 'white' }}>
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ background: 'var(--green-100)', color: 'var(--green-600)' }}>
+                        <i className={`ti ${g.icon}`} style={{ fontSize: '18px' }} />
+                      </div>
+                      <div>
+                        <div className="text-sm font-semibold" style={{ color: 'var(--base-900)' }}>{g.title}</div>
+                        <div className="text-xs mt-0.5" style={{ color: 'var(--base-600)' }}>{g.desc}</div>
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="flex gap-3 mt-8">
