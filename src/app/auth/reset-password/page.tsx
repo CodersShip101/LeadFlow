@@ -55,7 +55,7 @@ export default function ResetPasswordPage() {
       <div className="min-h-screen flex items-center justify-center px-4 py-12" style={{ background: 'var(--base-100)' }}>
         <div className="w-full max-w-sm text-center animate-fade-in">
           <div className="card p-8">
-            <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4 animate-scale-in" style={{ background: 'var(--green-100)' }}>
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4 animate-scale-in" style={{ background: 'var(--green-600)' }}>
               <i className="ti ti-mail text-xl" style={{ color: 'var(--green-600)' }} />
             </div>
             <h1 className="text-xl font-bold" style={{ color: 'var(--base-900)' }}>Check your inbox</h1>
@@ -65,7 +65,7 @@ export default function ResetPasswordPage() {
               {countdown > 0 ? (
                 <span>Resend in {countdown}s</span>
               ) : (
-                <button onClick={handleSendEmail} className="font-medium hover:underline" style={{ color: 'var(--green-500)' }}>Resend email</button>
+                <button onClick={handleSendEmail} className="font-medium hover:underline" style={{ color: 'var(--green-600)' }}>Resend email</button>
               )}
             </p>
             <Link href="/auth/login" className="btn-g mt-6 justify-center w-full">Back to sign in</Link>

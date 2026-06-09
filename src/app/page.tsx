@@ -91,12 +91,12 @@ export default function LandingPage() {
       <section className="relative overflow-hidden" style={{ background: 'var(--base-100)' }}>
         <div className="absolute inset-0 pointer-events-none opacity-[0.03]">
           <div className="absolute top-20 left-10 w-64 h-64 rounded-full" style={{ background: 'var(--green-600)' }} />
-          <div className="absolute bottom-20 right-10 w-80 h-80 rounded-full" style={{ background: 'var(--green-500)' }} />
+          <div className="absolute bottom-20 right-10 w-80 h-80 rounded-full" style={{ background: 'var(--green-600)' }} />
         </div>
         <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 pt-20 pb-24 md:pt-28 md:pb-32">
           <div className="max-w-3xl mx-auto text-center">
             <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium mb-6" style={{ background: 'var(--amber-100)', color: 'var(--amber-600)', border: '1px solid var(--amber-200)' }}>
-              <span className="w-2 h-2 rounded-full animate-pulse-dot" style={{ background: 'var(--green-500)' }} />
+              <span className="w-2 h-2 rounded-full animate-pulse-dot" style={{ background: 'var(--green-600)' }} />
               Now in beta — join <SignupCounter /> freelancers
             </div>
             <h1 className="text-[40px] md:text-[56px] font-extrabold leading-[1.05] tracking-[-1.5px]" style={{ color: 'var(--base-900)' }}>
@@ -113,16 +113,16 @@ export default function LandingPage() {
               <a href="#how-it-works" className="btn-s">See how it works <i className="ti ti-arrow-right" /></a>
             </div>
             <div className="mt-8 flex items-center justify-center gap-4 text-xs" style={{ color: 'var(--base-500)' }}>
-              <span className="flex items-center gap-1"><i className="ti ti-circle-check" style={{ color: 'var(--green-500)' }} /> No card needed</span>
-              <span className="flex items-center gap-1"><i className="ti ti-circle-check" style={{ color: 'var(--green-500)' }} /> 3 free leads</span>
-              <span className="flex items-center gap-1"><i className="ti ti-circle-check" style={{ color: 'var(--green-500)' }} /> Cancel anytime</span>
+              <span className="flex items-center gap-1"><i className="ti ti-circle-check" style={{ color: 'var(--green-600)' }} /> No card needed</span>
+              <span className="flex items-center gap-1"><i className="ti ti-circle-check" style={{ color: 'var(--green-600)' }} /> 3 free leads</span>
+              <span className="flex items-center gap-1"><i className="ti ti-circle-check" style={{ color: 'var(--green-600)' }} /> Cancel anytime</span>
             </div>
           </div>
         </div>
       </section>
 
       {/* ── SOCIAL PROOF ── */}
-      <section style={{ background: 'var(--green-900)' }}>
+      <section style={{ background: 'var(--green-600)' }}>
         <div className="max-w-5xl mx-auto px-4 sm:px-8 py-10">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
             {[
@@ -133,7 +133,7 @@ export default function LandingPage() {
             ].map(s => (
               <div key={s.label}>
                 <div className="text-2xl md:text-3xl font-bold text-white">{s.value}</div>
-                <div className="text-sm mt-1" style={{ color: 'var(--green-200)' }}>{s.label}</div>
+                <div className="text-sm mt-1" style={{ color: 'var(--green-600)' }}>{s.label}</div>
               </div>
             ))}
           </div>
@@ -174,10 +174,10 @@ export default function LandingPage() {
               { num: '03', icon: 'ti-briefcase', title: 'Land the work', desc: 'Browse your feed, express interest, apply directly.' },
             ].map(s => (
               <div key={s.num} className="text-center relative">
-                <div className="w-16 h-16 rounded-xl flex items-center justify-center mx-auto mb-4 relative z-10" style={{ background: 'var(--green-100)', color: 'var(--green-600)' }}>
+                <div className="w-16 h-16 rounded-xl flex items-center justify-center mx-auto mb-4 relative z-10" style={{ background: 'var(--green-600)', color: 'white' }}>
                   <i className={`ti ${s.icon}`} style={{ fontSize: '24px' }} />
                 </div>
-                <div className="text-xs font-bold tracking-widest mb-1" style={{ color: 'var(--green-400)' }}>{s.num}</div>
+                <div className="text-xs font-bold tracking-widest mb-1" style={{ color: 'var(--green-600)' }}>{s.num}</div>
                 <h3 className="text-lg font-semibold mb-1" style={{ color: 'var(--base-900)' }}>{s.title}</h3>
                 <p className="text-sm max-w-xs mx-auto" style={{ color: 'var(--base-600)' }}>{s.desc}</p>
               </div>
@@ -200,7 +200,7 @@ export default function LandingPage() {
               { icon: 'ti-send', title: 'Pipeline tracking', desc: 'Follow your applications from interested to won. Never lose track.' },
             ].map(f => (
               <div key={f.title} className="card card-hover">
-                <div className="w-10 h-10 rounded-lg flex items-center justify-center mb-3" style={{ background: 'var(--green-100)', color: 'var(--green-600)' }}>
+                <div className="w-10 h-10 rounded-lg flex items-center justify-center mb-3" style={{ background: 'var(--green-600)', color: 'white' }}>
                   <i className={`ti ${f.icon}`} style={{ fontSize: '18px' }} />
                 </div>
                 <h3 className="text-sm font-semibold" style={{ color: 'var(--base-900)' }}>{f.title}</h3>
@@ -212,15 +212,15 @@ export default function LandingPage() {
       </section>
 
       {/* ── DASHBOARD PREVIEW ── */}
-      <section className="py-20" style={{ background: 'var(--green-900)' }}>
+      <section className="py-20" style={{ background: 'var(--green-600)' }}>
         <div className="max-w-5xl mx-auto px-4 sm:px-8">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
               <h2 className="text-3xl font-bold tracking-tight text-white">See your leads at a glance</h2>
               <ul className="mt-6 space-y-3">
                 {['Quality score on every lead', 'Budget, skills, and source at a glance', 'One-click interest and bookmark', 'Pipeline tracking from apply to won'].map(item => (
-                  <li key={item} className="flex items-center gap-2 text-sm" style={{ color: 'var(--green-200)' }}>
-                    <i className="ti ti-circle-check" style={{ color: 'var(--green-400)' }} /> {item}
+                  <li key={item} className="flex items-center gap-2 text-sm" style={{ color: 'var(--green-600)' }}>
+                    <i className="ti ti-circle-check" style={{ color: 'var(--green-600)' }} /> {item}
                   </li>
                 ))}
               </ul>
@@ -238,7 +238,7 @@ export default function LandingPage() {
                     <div key={i} className="card p-3">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <span className="badge" style={{ background: i === 0 ? '#FEF0EB' : i === 1 ? '#EFF6FF' : 'var(--green-100)', color: i === 0 ? '#EA580C' : i === 1 ? '#1D4ED8' : 'var(--green-700)' }}>
+                          <span className="badge" style={{ background: i === 0 ? '#FEF0EB' : i === 1 ? '#EFF6FF' : 'var(--green-600)', color: i === 0 ? '#EA580C' : i === 1 ? '#1D4ED8' : 'var(--green-600)' }}>
                             {['Reddit', 'WWR', 'Reed'][i]}
                           </span>
                           <span className="text-xs font-semibold" style={{ color: 'var(--base-900)' }}>{title}</span>
@@ -322,7 +322,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── FINAL CTA ── */}
-      <section style={{ background: 'var(--green-900)' }} className="py-20">
+      <section style={{ background: 'var(--green-600)' }} className="py-20">
         <div className="max-w-3xl mx-auto px-4 sm:px-8 text-center">
           <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight">
             Join 340+ freelancers getting quality leads daily
@@ -330,12 +330,12 @@ export default function LandingPage() {
           <Link href="/auth/signup" className="btn-p mt-6 inline-flex" style={{ padding: '14px 28px', fontSize: '15px' }}>
             Get started free <i className="ti ti-arrow-right" />
           </Link>
-          <p className="mt-3 text-sm" style={{ color: 'var(--green-300)' }}>No credit card required · Cancel anytime</p>
+          <p className="mt-3 text-sm" style={{ color: 'var(--green-600)' }}>No credit card required · Cancel anytime</p>
         </div>
       </section>
 
       {/* ── FOOTER ── */}
-      <footer style={{ background: 'var(--green-900)', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+      <footer style={{ background: 'var(--green-600)', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 py-12">
           <div className="grid md:grid-cols-4 gap-8">
             <div>
@@ -343,7 +343,7 @@ export default function LandingPage() {
                 <span className="w-6 h-6 rounded-lg flex items-center justify-center text-white text-[10px] font-bold" style={{ background: 'var(--green-600)' }}>LF</span>
                 LeadFlow
               </div>
-              <p className="text-xs" style={{ color: 'var(--green-300)' }}>Quality freelance leads delivered daily.</p>
+              <p className="text-xs" style={{ color: 'var(--green-600)' }}>Quality freelance leads delivered daily.</p>
             </div>
             {[
               { title: 'Product', links: ['Features', 'Pricing', 'Blog'] },
@@ -351,18 +351,18 @@ export default function LandingPage() {
               { title: 'Legal', links: ['Privacy', 'Terms', 'Cookies'] },
             ].map(col => (
               <div key={col.title}>
-                <div className="text-xs font-semibold mb-3" style={{ color: 'var(--green-200)' }}>{col.title}</div>
+                <div className="text-xs font-semibold mb-3" style={{ color: 'var(--green-600)' }}>{col.title}</div>
                 <div className="space-y-2">
                   {col.links.map(link => (
-                    <div key={link} className="text-xs" style={{ color: 'var(--green-400)' }}>{link}</div>
+                    <div key={link} className="text-xs" style={{ color: 'var(--green-600)' }}>{link}</div>
                   ))}
                 </div>
               </div>
             ))}
           </div>
           <div className="mt-10 pt-6 flex flex-col md:flex-row items-center justify-between gap-4" style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
-            <div className="text-xs" style={{ color: 'var(--green-400)' }}>&copy; {new Date().getFullYear()} LeadFlow. All rights reserved.</div>
-            <button className="text-xs flex items-center gap-1" style={{ color: 'var(--green-300)' }}>
+            <div className="text-xs" style={{ color: 'var(--green-600)' }}>&copy; {new Date().getFullYear()} LeadFlow. All rights reserved.</div>
+            <button className="text-xs flex items-center gap-1" style={{ color: 'var(--green-600)' }}>
               <i className="ti ti-sun" /> Light mode
             </button>
           </div>

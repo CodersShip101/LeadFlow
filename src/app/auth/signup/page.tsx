@@ -18,8 +18,8 @@ function scorePassword(pw: string) {
 }
 
 const strengthLabels = ['Weak', 'Fair', 'Strong', 'Very strong']
-const strengthColors = ['#DC2626', '#E8A020', '#1E8A56', '#166B42']
-const strengthBgs = ['#FEE2E2', '#FEF3D0', '#D6EDE0', '#D6EDE0']
+const strengthColors = ['#DC2626', '#E8A020', '#166B42', '#166B42']
+const strengthBgs = ['#FEE2E2', '#FEF3D0', 'var(--green-600)', 'var(--green-600)']
 
 export default function SignupPage() {
   const [fullName, setFullName] = useState('')
@@ -55,15 +55,15 @@ export default function SignupPage() {
 
   return (
     <div className="min-h-screen flex">
-      <div className="hidden lg:flex w-[40%] flex-col justify-between p-12" style={{ background: 'var(--green-900)' }}>
+      <div className="hidden lg:flex w-[40%] flex-col justify-between p-12" style={{ background: 'var(--green-600)' }}>
         <div className="flex items-center gap-2 text-white text-sm font-bold">
-          <span className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-xs font-bold" style={{ background: 'var(--green-500)' }}>LF</span>
+          <span className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-xs font-bold" style={{ background: 'var(--green-600)' }}>LF</span>
           LeadFlow
         </div>
         <div>
           <div className="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold mb-4" style={{ background: 'var(--amber-500)' }}>MJ</div>
           <p className="text-sm leading-relaxed text-white/80">&ldquo;Got my first client within 48 hours of signing up. The match scoring saved me from wasting time on bad leads.&rdquo;</p>
-          <p className="text-xs mt-3" style={{ color: 'var(--green-200)' }}>Marcus J. — Full-Stack Developer</p>
+          <p className="text-xs mt-3" style={{ color: 'var(--green-600)' }}>Marcus J. — Full-Stack Developer</p>
         </div>
       </div>
       <div className="flex-1 flex items-center justify-center px-6 py-12">
@@ -112,7 +112,7 @@ export default function SignupPage() {
           </form>
           <div className="mt-6 text-center text-xs" style={{ color: 'var(--base-500)' }}>
             Already have an account?{' '}
-            <Link href="/auth/login" className="font-semibold hover:underline" style={{ color: 'var(--green-500)' }}>Sign in →</Link>
+            <Link href="/auth/login" className="font-semibold hover:underline" style={{ color: 'var(--green-600)' }}>Sign in →</Link>
           </div>
         </div>
       </div>

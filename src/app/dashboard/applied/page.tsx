@@ -17,9 +17,9 @@ interface Column {
 }
 
 const columns: Column[] = [
-  { key: 'interested', label: 'Interested', icon: 'ti ti-heart', accent: '#1B6B4A', bg: '#F0FDF7', border: '#BBE0CE' },
+  { key: 'interested', label: 'Interested', icon: 'ti ti-heart', accent: 'var(--green-600)', bg: 'var(--green-600)', border: 'var(--green-600)' },
   { key: 'applied', label: 'Applied', icon: 'ti ti-send', accent: '#D97706', bg: '#FEF3E2', border: '#FCD68A' },
-  { key: 'hired', label: 'Won', icon: 'ti ti-trophy', accent: '#059669', bg: '#ECFDF5', border: '#A7F3D0' },
+  { key: 'hired', label: 'Won', icon: 'ti ti-trophy', accent: 'var(--green-600)', bg: 'var(--green-600)', border: 'var(--green-600)' },
 ]
 
 export default function PipelinePage() {
@@ -85,7 +85,7 @@ export default function PipelinePage() {
 
   if (loading) return (
     <div className="flex items-center justify-center min-h-screen" style={{ background: '#F2F3F7' }}>
-      <div className="animate-spin h-8 w-8 border-4 rounded-full" style={{ borderColor: '#1B6B4A', borderTopColor: 'transparent' }} />
+      <div className="animate-spin h-8 w-8 border-4 rounded-full" style={{ borderColor: 'var(--green-600)', borderTopColor: 'transparent' }} />
     </div>
   )
 
@@ -103,9 +103,9 @@ export default function PipelinePage() {
             <p className="text-xs mt-0.5" style={{ color: '#AAB0BB' }}>{totalActive} active lead{totalActive !== 1 ? 's' : ''}</p>
           </div>
           {wonCount > 0 && (
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg" style={{ background: '#ECFDF5' }}>
-              <i className="ti ti-trophy" style={{ fontSize: '14px', color: '#059669' }} />
-              <span className="text-xs font-semibold" style={{ color: '#059669' }}>{wonCount} won</span>
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg" style={{ background: 'var(--green-600)' }}>
+              <i className="ti ti-trophy" style={{ fontSize: '14px', color: 'var(--green-600)' }} />
+              <span className="text-xs font-semibold" style={{ color: 'var(--green-600)' }}>{wonCount} won</span>
             </div>
           )}
         </div>
@@ -153,7 +153,7 @@ export default function PipelinePage() {
                                 title={`View on ${source.label}`}
                               >{source.label}</button>
                               {isNewLead(lead.posted_date) && (
-                                <span className="text-[8px] font-semibold px-1.5 py-0.5 rounded shrink-0" style={{ background: '#EBF5F0', color: '#1B6B4A' }}>New</span>
+                                <span className="text-[8px] font-semibold px-1.5 py-0.5 rounded shrink-0" style={{ background: 'var(--green-600)', color: 'var(--green-600)' }}>New</span>
                               )}
                               <span className="ml-auto text-[9px]" style={{ color: '#AAB0BB' }}>{timeAgo(lead.posted_date)}</span>
                             </div>
@@ -176,10 +176,10 @@ export default function PipelinePage() {
                               {col.key === 'applied' && (
                                 <button onClick={e => { e.stopPropagation(); updateApplication(lead.id, 'hired') }}
                                   className="w-full text-[10px] font-medium min-h-[36px] py-1.5 rounded transition-all hover:opacity-80 active:scale-[0.97]"
-                                  style={{ background: '#ECFDF5', color: '#059669' }}>Mark as Won</button>
+                                  style={{ background: 'var(--green-600)', color: 'var(--green-600)' }}>Mark as Won</button>
                               )}
                               {col.key === 'hired' && (
-                                <div className="flex items-center gap-1.5 justify-center text-[10px] font-medium py-1" style={{ color: '#059669' }}>
+                                <div className="flex items-center gap-1.5 justify-center text-[10px] font-medium py-1" style={{ color: 'var(--green-600)' }}>
                                   <i className="ti ti-check" style={{ fontSize: '11px' }} /> Won
                                 </div>
                               )}

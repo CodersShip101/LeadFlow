@@ -68,7 +68,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <button key={item.label} onClick={() => router.push(item.href)} className={`sidebar-link ${active ? 'active' : ''}`}>
                 <i className={`ti ${item.icon}`} style={{ fontSize: '16px' }} />
                 <span>{item.label}</span>
-                {item.label === 'Feed' && newCount > 0 && <span className="ml-auto w-2 h-2 rounded-full" style={{ background: 'var(--green-500)' }} />}
+                {item.label === 'Feed' && newCount > 0 && <span className="ml-auto w-2 h-2 rounded-full" style={{ background: 'var(--green-600)' }} />}
               </button>
             )
           })}

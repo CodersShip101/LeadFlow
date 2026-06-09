@@ -121,7 +121,7 @@ export default function LeadCard({ lead, profile, application, isFreeUser, index
       style={{
         background: '#FFFFFF',
         border: '0.5px solid #E5E7EB',
-        borderLeft: isInterested ? '3px solid #1B6B4A' : '0.5px solid #E5E7EB',
+        borderLeft: isInterested ? '3px solid var(--green-600)' : '0.5px solid #E5E7EB',
         transition: 'border-color 150ms ease, box-shadow 150ms ease',
       }}
       onMouseEnter={e => {
@@ -161,7 +161,7 @@ export default function LeadCard({ lead, profile, application, isFreeUser, index
                   </button>
                 )}
                 <div className="border-t my-1" style={{ borderColor: '#ECEEF2' }} />
-                <button onClick={handleInterest} className="flex items-center gap-2 px-3 py-1.5 text-xs w-full text-left hover:bg-gray-50" style={{ color: isInterested ? '#1B6B4A' : '#6B7280' }}>
+                <button onClick={handleInterest} className="flex items-center gap-2 px-3 py-1.5 text-xs w-full text-left hover:bg-gray-50" style={{ color: isInterested ? 'var(--green-600)' : '#6B7280' }}>
                   <i className="ti ti-send" style={{ fontSize: '13px' }} /> {isInterested ? 'Mark not interested' : "I'm interested"}
                 </button>
               </div>

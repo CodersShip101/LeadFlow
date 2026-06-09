@@ -43,7 +43,7 @@ export default function Navbar() {
             <Link
               href="/auth/signup"
               className="text-white px-4 py-1.5 rounded-lg text-sm font-semibold hover:opacity-90 transition-opacity"
-              style={{ background: '#1B6B4A' }}
+              style={{ background: 'var(--green-600)' }}
             >
               Sign Up Free
             </Link>
@@ -58,7 +58,7 @@ export default function Navbar() {
                 !isAuthPage && (
                   <>
                     <Link href="/auth/login" className="text-sm font-medium" style={{ color: '#6B7280' }}>Login</Link>
-                    <Link href="/auth/signup" className="text-white px-4 py-1.5 rounded-lg text-sm font-semibold hover:opacity-90 transition-opacity" style={{ background: '#1B6B4A' }}>Sign Up Free</Link>
+                    <Link href="/auth/signup" className="text-white px-4 py-1.5 rounded-lg text-sm font-semibold hover:opacity-90 transition-opacity" style={{ background: 'var(--green-600)' }}>Sign Up Free</Link>
                   </>
                 )
               )}
@@ -88,7 +88,7 @@ export default function Navbar() {
             ) : (
               <>
                 <Link href="/auth/login" className="block text-sm py-1" style={{ color: '#6B7280' }} onClick={() => setMenuOpen(false)}>Login</Link>
-                <Link href="/auth/signup" className="block text-sm py-1 font-medium" style={{ color: '#1B6B4A' }} onClick={() => setMenuOpen(false)}>Sign Up Free</Link>
+                <Link href="/auth/signup" className="block text-sm py-1 font-medium" style={{ color: 'var(--green-600)' }} onClick={() => setMenuOpen(false)}>Sign Up Free</Link>
               </>
             )}
           </div>

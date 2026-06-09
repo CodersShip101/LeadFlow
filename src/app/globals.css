@@ -21,12 +21,12 @@ h1, h2, h3, h4 {
 
 input:focus, select:focus, textarea:focus {
   outline: none;
-  border-color: var(--green-500) !important;
-  box-shadow: 0 0 0 3px rgba(30,138,86,0.12) !important;
+  border-color: var(--green-600) !important;
+  box-shadow: 0 0 0 3px rgba(22,107,66,0.12) !important;
 }
 
-*::selection { background: var(--green-100); color: var(--green-700); }
-*:focus-visible { outline: 2px solid var(--green-500); outline-offset: 2px; border-radius: var(--radius-sm); }
+*::selection { background: var(--green-600); color: white; }
+*:focus-visible { outline: 2px solid var(--green-600); outline-offset: 2px; border-radius: var(--radius-sm); }
 
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
@@ -45,8 +45,8 @@ input:focus, select:focus, textarea:focus {
   box-shadow: var(--shadow-xs);
   font-family: 'DM Sans', sans-serif;
 }
-.btn-p:hover { background: var(--green-700); transform: translateY(-1px); box-shadow: var(--shadow-green); }
-.btn-p:active { background: var(--green-800); transform: scale(0.98); }
+.btn-p:hover { background: var(--green-600); transform: translateY(-1px); box-shadow: var(--shadow-green); }
+.btn-p:active { background: var(--green-600); transform: scale(0.98); }
 .btn-p:disabled { opacity: 0.45; cursor: not-allowed; transform: none; box-shadow: none; }
 
 .btn-s {
@@ -141,16 +141,16 @@ input:focus, select:focus, textarea:focus {
   border-radius: var(--radius-full);
   white-space: nowrap;
 }
-.badge-hi { background: var(--green-100); color: var(--green-700); }
+.badge-hi { background: var(--green-600); color: white; }
 .badge-md { background: var(--amber-100); color: var(--amber-600); }
 .badge-lo { background: var(--base-200); color: var(--base-600); }
 .badge-src-reddit { background: #FEF0EB; color: #EA580C; }
 .badge-src-wwr { background: #EFF6FF; color: #1D4ED8; }
-.badge-src-remotive { background: var(--green-100); color: var(--green-700); }
+.badge-src-remotive { background: var(--green-600); color: white; }
 .badge-src-reed { background: #F5F0FF; color: #7C3AED; }
 .badge-skill { background: #EFF6FF; color: #1D4ED8; }
-.badge-skill-matched { background: var(--green-100); color: var(--green-700); }
-.badge-new { background: var(--green-100); color: var(--green-700); }
+.badge-skill-matched { background: var(--green-600); color: white; }
+.badge-new { background: var(--green-600); color: white; }
 
 /* ── SKELETON ── */
 .skel {
@@ -243,8 +243,8 @@ input:focus, select:focus, textarea:focus {
   font-family: 'DM Sans', sans-serif;
   position: relative;
 }
-.sidebar-link:hover { background: var(--green-50); color: var(--green-600); }
-.sidebar-link.active { background: var(--green-100); color: var(--green-700); font-weight: 600; }
+.sidebar-link:hover { background: var(--green-600); color: white; }
+.sidebar-link.active { background: var(--green-600); color: white; font-weight: 600; }
 .sidebar-link.active::before {
   content: ''; position: absolute; left: -12px; top: 50%;
   transform: translateY(-50%);
@@ -268,10 +268,10 @@ input:focus, select:focus, textarea:focus {
 }
 .lead-card:hover {
   transform: translateY(-2px);
-  border-color: var(--green-200);
+  border-color: var(--green-600);
   box-shadow: var(--shadow-green);
 }
-.lead-card:hover .lead-title { color: var(--green-700); }
+.lead-card:hover .lead-title { color: var(--green-600); }
 .lead-card.applied { border-left: 3px solid var(--green-600); }
 .lead-card.saved .bookmark-icon { color: var(--amber-500); fill: var(--amber-500); }
 .lead-card.locked { opacity: 0.5; cursor: not-allowed; }

@@ -172,7 +172,7 @@ export default function AdminPage() {
         <h1 className="text-2xl font-bold text-gray-900">Admin Panel</h1>
         <button
           onClick={() => setShowForm(!showForm)}
-          className="text-white px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90" style={{ background: '#1B6B4A' }}
+          className="text-white px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90" style={{ background: 'var(--green-600)' }}
         >
           {showForm ? 'Cancel' : 'Add Lead'}
         </button>
@@ -210,7 +210,8 @@ export default function AdminPage() {
           <button
             onClick={handleScrape}
             disabled={scraping}
-            className="bg-green-600 text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-green-700 disabled:opacity-50 flex items-center gap-2"
+            className="px-5 py-2.5 rounded-lg text-sm font-semibold disabled:opacity-50 flex items-center gap-2"
+            style={{ background: 'var(--green-600)', color: 'white' }}
           >
             {scraping ? (
               <>
@@ -226,17 +227,17 @@ export default function AdminPage() {
 
         {scrapeResult && (
           <div className="grid grid-cols-4 gap-3 mb-4">
-            <div className="rounded-lg p-3 text-center" style={{ background: '#EBF5F0' }}>
-              <p className="text-lg font-bold text-[#1B6B4A]">{scrapeResult.found}</p>
-              <p className="text-xs text-[#1B6B4A]">Found</p>
+            <div className="rounded-lg p-3 text-center" style={{ background: 'var(--green-600)' }}>
+              <p className="text-lg font-bold text-[var(--green-600)]">{scrapeResult.found}</p>
+              <p className="text-xs text-[var(--green-600)]">Found</p>
             </div>
-            <div className="bg-green-50 rounded-lg p-3 text-center">
-              <p className="text-lg font-bold text-green-700">{scrapeResult.passed_filter}</p>
-              <p className="text-xs text-green-600">Passed AI Filter</p>
+            <div className="rounded-lg p-3 text-center" style={{ background: 'var(--green-600)' }}>
+              <p className="text-lg font-bold" style={{ color: 'white' }}>{scrapeResult.passed_filter}</p>
+              <p className="text-xs" style={{ color: 'white' }}>Passed AI Filter</p>
             </div>
-            <div className="bg-green-50 rounded-lg p-3 text-center">
-              <p className="text-lg font-bold text-green-700">{scrapeResult.inserted}</p>
-              <p className="text-xs text-green-600">Inserted</p>
+            <div className="rounded-lg p-3 text-center" style={{ background: 'var(--green-600)' }}>
+              <p className="text-lg font-bold" style={{ color: 'white' }}>{scrapeResult.inserted}</p>
+              <p className="text-xs" style={{ color: 'white' }}>Inserted</p>
             </div>
             <div className="bg-gray-50 rounded-lg p-3 text-center">
               <p className="text-lg font-bold text-gray-700">{scrapeResult.skipped_duplicates}</p>
@@ -276,7 +277,7 @@ export default function AdminPage() {
                 required
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-[#1B6B4A] focus:ring-1 focus:ring-[#1B6B4A]"
+                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-[var(--green-600)] focus:ring-1 focus:ring-[var(--green-600)]"
               />
             </div>
             <div className="md:col-span-2">
@@ -286,7 +287,7 @@ export default function AdminPage() {
                 rows={4}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-[#1B6B4A] focus:ring-1 focus:ring-[#1B6B4A]"
+                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-[var(--green-600)] focus:ring-1 focus:ring-[var(--green-600)]"
               />
             </div>
             <div>
@@ -295,7 +296,7 @@ export default function AdminPage() {
                 type="number"
                 value={budgetMin}
                 onChange={(e) => setBudgetMin(e.target.value)}
-                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-[#1B6B4A] focus:ring-1 focus:ring-[#1B6B4A]"
+                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-[var(--green-600)] focus:ring-1 focus:ring-[var(--green-600)]"
               />
             </div>
             <div>
@@ -304,7 +305,7 @@ export default function AdminPage() {
                 type="number"
                 value={budgetMax}
                 onChange={(e) => setBudgetMax(e.target.value)}
-                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-[#1B6B4A] focus:ring-1 focus:ring-[#1B6B4A]"
+                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-[var(--green-600)] focus:ring-1 focus:ring-[var(--green-600)]"
               />
             </div>
             <div>
@@ -312,7 +313,7 @@ export default function AdminPage() {
               <select
                 value={projectType}
                 onChange={(e) => setProjectType(e.target.value)}
-                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-[#1B6B4A] focus:ring-1 focus:ring-[#1B6B4A]"
+                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-[var(--green-600)] focus:ring-1 focus:ring-[var(--green-600)]"
               >
                 <option value="">Select...</option>
                 <option value="one-off">One-off</option>
@@ -325,7 +326,7 @@ export default function AdminPage() {
                 type="text"
                 value={clientLocation}
                 onChange={(e) => setClientLocation(e.target.value)}
-                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-[#1B6B4A] focus:ring-1 focus:ring-[#1B6B4A]"
+                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-[var(--green-600)] focus:ring-1 focus:ring-[var(--green-600)]"
               />
             </div>
             <div className="md:col-span-2">
@@ -334,7 +335,7 @@ export default function AdminPage() {
                 type="text"
                 value={skillsRequired}
                 onChange={(e) => setSkillsRequired(e.target.value)}
-                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-[#1B6B4A] focus:ring-1 focus:ring-[#1B6B4A]"
+                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-[var(--green-600)] focus:ring-1 focus:ring-[var(--green-600)]"
                 placeholder="React, Node.js, TypeScript"
               />
             </div>
@@ -344,13 +345,13 @@ export default function AdminPage() {
                 type="url"
                 value={sourceUrl}
                 onChange={(e) => setSourceUrl(e.target.value)}
-                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-[#1B6B4A] focus:ring-1 focus:ring-[#1B6B4A]"
+                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-[var(--green-600)] focus:ring-1 focus:ring-[var(--green-600)]"
               />
             </div>
           </div>
           <button
             type="submit"
-            className="text-white px-6 py-2.5 rounded-lg text-sm font-semibold hover:opacity-90" style={{ background: '#1B6B4A' }}
+            className="text-white px-6 py-2.5 rounded-lg text-sm font-semibold hover:opacity-90" style={{ background: 'var(--green-600)' }}
           >
             Add Lead
           </button>
@@ -389,8 +390,9 @@ export default function AdminPage() {
                 <p className="text-xs text-gray-500">{user.email} &middot; Skills: {user.skills?.join(', ') || 'None'}</p>
               </div>
               <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                user.subscription_status === 'pro' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'
-              }`}>
+                user.subscription_status === 'pro' ? 'text-white' : 'bg-gray-100 text-gray-600'
+              }`}
+                style={user.subscription_status === 'pro' ? { background: 'var(--green-600)' } : undefined}>
                 {user.subscription_status}
               </span>
             </div>

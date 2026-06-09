@@ -31,8 +31,8 @@ export default function UpgradeModal({ open, onClose, title = 'Upgrade to Pro', 
         </button>
 
         <div className="p-6 text-center">
-          <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4" style={{ background: '#EBF5F0' }}>
-            <i className="ti ti-lock" style={{ fontSize: '20px', color: '#1B6B4A' }} />
+          <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4" style={{ background: 'var(--green-600)' }}>
+            <i className="ti ti-lock" style={{ fontSize: '20px', color: 'var(--green-600)' }} />
           </div>
 
           <h3 className="text-base font-semibold mb-1" style={{ color: '#1A1D23' }}>{title}</h3>
@@ -47,7 +47,7 @@ export default function UpgradeModal({ open, onClose, title = 'Upgrade to Pro', 
               'Priority matching',
             ].map(f => (
               <li key={f} className="flex items-center gap-2 text-xs" style={{ color: '#4B5563' }}>
-                <i className="ti ti-check" style={{ fontSize: '13px', color: '#1B6B4A' }} />
+                <i className="ti ti-check" style={{ fontSize: '13px', color: 'var(--green-600)' }} />
                 {f}
               </li>
             ))}

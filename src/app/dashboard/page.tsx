@@ -87,7 +87,7 @@ export default function DashboardPage() {
   if (loading) return (
     <div className="flex-1 flex items-center justify-center">
       <div className="flex items-center gap-2" style={{ color: 'var(--base-500)' }}>
-        <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: 'var(--green-500)' }} /> Loading leads...
+        <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: 'var(--green-600)' }} /> Loading leads...
       </div>
     </div>
   )
@@ -102,7 +102,7 @@ export default function DashboardPage() {
             { label: 'Total Leads', value: leads.length.toString(), color: 'var(--green-600)' },
             { label: 'Applied', value: applications.filter(a => a.status !== 'saved').length.toString(), color: 'var(--amber-500)' },
             { label: 'Saved', value: applications.filter(a => a.status === 'saved').length.toString(), color: 'var(--base-600)' },
-            { label: 'New', value: newCount.toString(), color: 'var(--green-500)' },
+            { label: 'New', value: newCount.toString(), color: 'var(--green-600)' },
           ].map(s => (
             <div key={s.label} className="card shrink-0 min-w-[120px] flex-1">
               <p className="text-xs font-medium" style={{ color: 'var(--base-500)' }}>{s.label}</p>
@@ -163,7 +163,7 @@ export default function DashboardPage() {
                 </div>
                 <div className="flex flex-col gap-1.5 shrink-0">
                   {appMap.has(lead.id) && appMap.get(lead.id)!.status !== 'saved' ? (
-                    <span className="text-[10px] font-medium px-2 py-1 rounded" style={{ background: 'var(--green-50)', color: 'var(--green-600)' }}>
+                    <span className="text-[10px] font-medium px-2 py-1 rounded" style={{ background: 'var(--green-600)', color: 'white' }}>
                       {appMap.get(lead.id)!.status === 'hired' ? 'Won' : appMap.get(lead.id)!.status}
                     </span>
                   ) : (
@@ -207,7 +207,7 @@ export default function DashboardPage() {
 
         {/* Upgrade banner */}
         {profile?.subscription_status === 'free' && (
-          <div className="card mt-4" style={{ background: 'linear-gradient(135deg, var(--green-900), #0a3d24)', border: 'none' }}>
+          <div className="card mt-4" style={{ background: 'linear-gradient(135deg, var(--green-600), var(--green-600))', border: 'none' }}>
             <p className="text-sm font-medium text-white">Upgrade to Pro</p>
             <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.7)' }}>Unlimited applications and advanced insights.</p>
             <button onClick={() => router.push('/dashboard/billing')} className="btn-amber text-sm mt-3 px-5">See Plans</button>

@@ -29,14 +29,14 @@ export default function ForgotPasswordPage() {
       <div className="min-h-screen flex items-center justify-center px-4 py-12" style={{ background: 'var(--base-100)' }}>
         <div className="w-full max-w-sm text-center animate-fade-in">
           <div className="card p-8">
-            <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4 animate-scale-in" style={{ background: 'var(--green-100)' }}>
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4 animate-scale-in" style={{ background: 'var(--green-600)' }}>
               <i className="ti ti-mail text-xl" style={{ color: 'var(--green-600)' }} />
             </div>
             <h1 className="text-xl font-bold" style={{ color: 'var(--base-900)' }}>Check your inbox</h1>
             <p className="text-sm mt-2" style={{ color: 'var(--base-600)' }}>We sent a link to <strong>{email}</strong></p>
             <p className="text-xs mt-6" style={{ color: 'var(--base-500)' }}>
               Didn&apos;t receive it?{' '}
-              <button onClick={() => setSent(false)} className="font-medium hover:underline" style={{ color: 'var(--green-500)' }}>Try again</button>
+              <button onClick={() => setSent(false)} className="font-medium hover:underline" style={{ color: 'var(--green-600)' }}>Try again</button>
             </p>
             <Link href="/auth/login" className="btn-g mt-6 justify-center w-full">Back to sign in</Link>
           </div>
