@@ -285,8 +285,8 @@ export default function LandingPage() {
             <div className="flex items-center justify-center gap-3 mt-4">
               <span className="text-sm" style={{ color: annual ? 'var(--base-500)' : 'var(--base-900)' }}>Monthly</span>
               <button onClick={() => setAnnual(!annual)}
-                className="w-10 h-5 rounded-full relative transition-colors" style={{ background: annual ? 'var(--green-600)' : 'var(--base-300)' }}>
-                <div className={`w-4 h-4 rounded-full bg-white absolute top-0.5 transition-all shadow-sm ${annual ? 'left-5' : 'left-0.5'}`} />
+                className="w-10 h-5 rounded-full relative toggle-track" style={{ background: annual ? 'var(--green-600)' : 'var(--base-300)' }}>
+                <div className={`w-4 h-4 rounded-full bg-white absolute top-0.5 shadow-sm toggle-knob ${annual ? 'left-5' : 'left-0.5'}`} />
               </button>
               <span className="text-sm" style={{ color: annual ? 'var(--base-900)' : 'var(--base-500)' }}>Annual <span className="text-xs" style={{ color: 'var(--green-600)' }}>Save 2 months</span></span>
             </div>
