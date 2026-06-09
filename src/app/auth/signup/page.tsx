@@ -106,7 +106,7 @@ export default function SignupPage() {
                 className="mt-0.5 w-4 h-4 rounded border-gray-300" style={{ accentColor: 'var(--green-600)' }} />
               <label className="text-xs" style={{ color: 'var(--base-600)' }}>I agree to the <a href="#" className="underline">Terms</a> and <a href="#" className="underline">Privacy Policy</a></label>
             </div>
-            <button type="submit" disabled={loading} className="btn-amber w-full justify-center">
+            <button type="submit" disabled={loading} className="btn-p w-full justify-center">
               {loading ? 'Creating account...' : 'Create account'}
             </button>
           </form>

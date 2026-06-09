@@ -66,7 +66,7 @@ export default function LandingPage() {
             </div>
             <div className="hidden md:flex items-center gap-3">
               <Link href="/auth/login" className="btn-g">Log in</Link>
-              <Link href="/auth/signup" className="btn-amber">Start free</Link>
+              <Link href="/auth/signup" className="btn-p">Start free</Link>
             </div>
             <button className="md:hidden p-2 min-h-[44px] min-w-[44px] flex items-center justify-center" onClick={() => setMenuOpen(!menuOpen)} aria-label="Menu" aria-expanded={menuOpen}>
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: 'var(--base-600)' }}>
@@ -107,7 +107,7 @@ export default function LandingPage() {
               LeadFlow finds, vets and scores freelance leads for you — delivered fresh every 6 hours.
             </p>
             <div className="mt-8 flex items-center justify-center gap-3 flex-wrap">
-              <Link href="/auth/signup" className="btn-amber" style={{ padding: '14px 28px', fontSize: '15px' }}>
+              <Link href="/auth/signup" className="btn-p" style={{ padding: '14px 28px', fontSize: '15px' }}>
                 Get started free <i className="ti ti-arrow-right" />
               </Link>
               <a href="#how-it-works" className="btn-s">See how it works <i className="ti ti-arrow-right" /></a>
@@ -327,7 +327,7 @@ export default function LandingPage() {
           <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight">
             Join 340+ freelancers getting quality leads daily
           </h2>
-          <Link href="/auth/signup" className="btn-amber mt-6 inline-flex" style={{ padding: '14px 28px', fontSize: '15px' }}>
+          <Link href="/auth/signup" className="btn-p mt-6 inline-flex" style={{ padding: '14px 28px', fontSize: '15px' }}>
             Get started free <i className="ti ti-arrow-right" />
           </Link>
           <p className="mt-3 text-sm" style={{ color: 'var(--green-300)' }}>No credit card required · Cancel anytime</p>
