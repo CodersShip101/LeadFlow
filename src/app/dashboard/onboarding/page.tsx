@@ -17,7 +17,6 @@ const goalOptions = [
 export default function OnboardingPage() {
   const [step, setStep] = useState(0)
   const [fullName, setFullName] = useState('')
-  const [location, setLocation] = useState('')
   const [skills, setSkills] = useState<string[]>([])
   const [rate, setRate] = useState('')
   const [exp, setExp] = useState('')
@@ -48,7 +47,7 @@ export default function OnboardingPage() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { router.push('/auth/login'); return }
     const { error } = await supabase.from('profiles').update({
-      full_name: fullName, skills, hourly_rate: parseInt(rate), location, experience_level: exp, availability: avail, goal, onboarding_complete: true,
+      full_name: fullName, skills, hourly_rate: parseInt(rate), experience_level: exp, availability: avail, goal, onboarding_complete: true,
     }).eq('id', user.id)
     if (error) { toast.error(error.message); setSaving(false); return }
     toast.success('Welcome to LeadFlow! Your feed is being personalised.')
@@ -74,15 +73,13 @@ export default function OnboardingPage() {
 
         <div className="min-h-[300px]">
           {step === 0 && (
-            <div className="space-y-4 animate-fade-in">
+            <div className="space-y-4">
               <div><label className="text-sm font-medium mb-1.5 block" style={{ color: 'var(--base-700)' }}>Full name</label>
                 <input value={fullName} onChange={e => setFullName(e.target.value)} className="input" placeholder="Your name" autoFocus /></div>
-              <div><label className="text-sm font-medium mb-1.5 block" style={{ color: 'var(--base-700)' }}>Location</label>
-                <input value={location} onChange={e => setLocation(e.target.value)} className="input" placeholder="e.g. London, UK" /></div>
             </div>
           )}
           {step === 1 && (
-            <div className="animate-fade-in">
+            <div>
               <p className="text-sm mb-4" style={{ color: 'var(--base-600)' }}>What do you specialise in?</p>
               <div className="flex flex-wrap gap-1.5 max-h-80 overflow-y-auto">
                 {skillOptions.map(sk => (
@@ -96,7 +93,7 @@ export default function OnboardingPage() {
             </div>
           )}
           {step === 2 && (
-            <div className="space-y-4 animate-fade-in">
+            <div className="space-y-4">
               <div><label className="text-sm font-medium mb-1.5 block" style={{ color: 'var(--base-700)' }}>Hourly rate (£)</label>
                 <input value={rate} onChange={e => setRate(e.target.value)} type="number" className="input" placeholder="e.g. 75" autoFocus /></div>
               <div><label className="text-sm font-medium mb-1.5 block" style={{ color: 'var(--base-700)' }}>Experience level</label>
@@ -114,7 +111,7 @@ export default function OnboardingPage() {
             </div>
           )}
           {step === 3 && (
-            <div className="animate-fade-in">
+            <div>
               <p className="text-sm mb-4" style={{ color: 'var(--base-600)' }}>What&apos;s your main goal with LeadFlow?</p>
               <div className="space-y-3">
                 {goalOptions.map(g => (
