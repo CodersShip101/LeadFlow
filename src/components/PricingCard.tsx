@@ -1,46 +1,50 @@
 import Link from 'next/link'
 import type { PricingTier } from '@/types'
-import { Check } from 'lucide-react'
 
 interface PricingCardProps {
   tier: PricingTier
+  annual?: boolean
 }
 
-export default function PricingCard({ tier }: PricingCardProps) {
+export default function PricingCard({ tier, annual }: PricingCardProps) {
+  const displayPrice = annual && tier.annualPrice !== undefined ? tier.annualPrice : tier.price
+  const showPrice = !(tier.price === 0 && tier.annualPrice === undefined)
+
   return (
-    <div className={`rounded-2xl p-8 border-2 ${
-      tier.highlighted
-        ? 'border-[#1B6B4A] bg-[#EBF5F0]'
-        : 'border-gray-200 bg-white'
-    }`}>
-      <h3 className="text-lg font-semibold" style={{ color: '#1A1D23' }}>{tier.name}</h3>
+    <div
+      className={`rounded-2xl p-8 border-2 ${tier.highlighted ? 'bg-[var(--green-50)]' : 'bg-white'}`}
+      style={{ borderColor: tier.highlighted ? 'var(--green-600)' : 'var(--base-300)' }}
+    >
+      {tier.highlighted && (
+        <div className="text-[11px] font-semibold text-white px-3 py-1 rounded-full w-fit mx-auto -mt-10 mb-4" style={{ background: 'var(--green-600)' }}>
+          Most popular
+        </div>
+      )}
+      <h3 className="text-base font-semibold" style={{ color: 'var(--base-900)' }}>{tier.name}</h3>
       <p className="mt-4">
-        <span className="text-4xl font-bold" style={{ color: '#1A1D23' }}>
-          {tier.price === 0 ? 'Free' : `£${tier.price}`}
+        <span className="text-4xl font-bold" style={{ color: 'var(--base-900)' }}>
+          {!showPrice ? 'Free' : `£${displayPrice}`}
         </span>
-        {tier.price > 0 && (
-          <span className="ml-1" style={{ color: '#9CA3AF' }}>/month</span>
+        {showPrice && (
+          <span className="ml-1 text-sm" style={{ color: 'var(--base-500)' }}>/month</span>
         )}
       </p>
-      <p className="mt-2 text-sm" style={{ color: '#6B7280' }}>{tier.description}</p>
+      <p className="mt-2 text-sm" style={{ color: 'var(--base-600)' }}>{tier.description}</p>
+      <div className="mt-6" style={{ borderTop: `1px solid ${tier.highlighted ? 'var(--green-100)' : 'var(--base-300)'}` }} />
       <ul className="mt-6 space-y-3">
         {tier.features.map((feature) => (
-          <li key={feature} className="flex items-start gap-2 text-sm" style={{ color: '#6B7280' }}>
-            <Check size={16} className="shrink-0 mt-0.5" color="#1B6B4A" />
+          <li key={feature} className="flex items-start gap-2 text-sm" style={{ color: 'var(--base-600)' }}>
+            <i className="ti ti-circle-check" style={{ color: 'var(--green-500)', marginTop: '2px', fontSize: '14px' }} />
             {feature}
           </li>
         ))}
       </ul>
       <Link
         href="/auth/signup"
-        className={`mt-8 block w-full text-center py-3 rounded-lg text-sm font-semibold transition-all duration-150 active:scale-[0.98] ${
-          tier.highlighted
-            ? 'text-white hover:opacity-90'
-            : 'hover:opacity-80'
-        }`}
+        className="mt-8 block w-full text-center py-3 rounded-lg text-sm font-semibold transition-all duration-150 active:scale-[0.94]"
         style={{
-          background: tier.highlighted ? '#1B6B4A' : '#F3F4F6',
-          color: tier.highlighted ? 'white' : '#1A1D23',
+          background: tier.highlighted ? 'var(--green-600)' : 'var(--base-200)',
+          color: tier.highlighted ? 'white' : 'var(--base-700)',
         }}
       >
         {tier.cta}

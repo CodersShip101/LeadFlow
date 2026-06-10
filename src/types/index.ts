@@ -40,6 +40,7 @@ export interface Application {
 export interface PricingTier {
   name: string;
   price: number;
+  annualPrice?: number;
   priceLabel: string;
   description: string;
   features: string[];
