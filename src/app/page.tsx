@@ -133,29 +133,11 @@ export default function LandingPage() {
                 LeadFlow finds, vets, and scores freelance opportunities across the web — delivered fresh every 6 hours, matched to your skills.
               </p>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', marginBottom: '28px' }}>
-                <Link href="/auth/signup"
-                  style={{
-                    fontFamily: 'var(--font-dm-sans)', fontSize: '15px', fontWeight: 500,
-                    color: 'white', background: 'var(--green-600)',
-                    padding: '13px 30px', borderRadius: 'var(--radius-md)',
-                    display: 'inline-flex', alignItems: 'center', gap: '8px',
-                    boxShadow: '0 2px 10px rgba(27,107,74,0.30)',
-                  }}
-                  className="hover:bg-[var(--green-700)]"
-                  onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-1px)'}
-                  onMouseLeave={e => e.currentTarget.style.transform = ''}>
+              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                <Link href="/auth/signup" className="btn-p" style={{ padding: '13px 26px', fontSize: '15px', fontWeight: 500 }}>
                   Get started free <i className="ti ti-arrow-right" />
                 </Link>
-                <a href="#how-it-works"
-                  style={{
-                    fontFamily: 'var(--font-dm-sans)', fontSize: '15px', fontWeight: 500,
-                    color: 'var(--green-700)', background: 'white',
-                    padding: '13px 30px', borderRadius: 'var(--radius-md)',
-                    display: 'inline-flex', alignItems: 'center', gap: '8px',
-                    border: '1px solid var(--base-300)',
-                  }}
-                  className="hover:bg-[var(--green-50)] hover:border-[var(--green-400)]">
+                <a href="#how-it-works" className="btn-s" style={{ padding: '13px 26px', fontSize: '15px', fontWeight: 500 }}>
                   <i className="ti ti-player-play" /> See how it works
                 </a>
               </div>
