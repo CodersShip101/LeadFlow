@@ -98,129 +98,131 @@ export default function LandingPage() {
       </nav>
 
       {/* ── HERO ── */}
-      <section style={{ padding: '130px 0 100px', textAlign: 'center', background: 'white', borderBottom: '1px solid var(--base-300)' }}>
+      <section style={{ padding: '130px 0 100px', background: 'white', borderBottom: '1px solid var(--base-300)' }}>
         <div className="max-w-[1100px] mx-auto px-8">
-          {/* Eyebrow badge (amber) */}
-          <div style={{
-            display: 'inline-flex', alignItems: 'center', gap: '8px',
-            background: 'var(--amber-100)', border: '1px solid var(--amber-200)',
-            borderRadius: '20px', padding: '5px 16px',
-            fontSize: '13px', fontWeight: 500, color: '#92400e', marginBottom: '30px',
-          }}>
-            <span style={{
-              width: '7px', height: '7px', borderRadius: '50%', background: '#16a34a', flexShrink: 0,
-              boxShadow: '0 0 0 2px rgba(22,163,74,0.25)',
-            }} className="animate-pulse-dot" />
-            <span><SignupCounter /> freelancers in beta — spots still open</span>
-          </div>
-
-          {/* Heading in serif */}
-          <h1 style={{
-            fontFamily: 'var(--font-instrument-serif)',
-            fontSize: 'clamp(42px, 6vw, 70px)',
-            lineHeight: 1.08, letterSpacing: '-0.025em',
-            color: 'var(--base-900)', marginBottom: '22px',
-            maxWidth: '800px', marginLeft: 'auto', marginRight: 'auto',
-          }}>
-            Stop chasing leads.<br />
-            <em style={{ fontStyle: 'italic', color: 'var(--green-600)' }}>Start choosing them.</em>
-          </h1>
-
-          <p style={{
-            fontSize: '18px', lineHeight: 1.65, color: 'var(--base-500)',
-            maxWidth: '520px', margin: '0 auto 38px',
-          }}>
-            LeadFlow finds, vets, and scores freelance opportunities across the web — delivered fresh every 6 hours, matched to your skills.
-          </p>
-
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', flexWrap: 'wrap', marginBottom: '28px' }}>
-            <Link href="/auth/signup"
-              style={{
-                fontFamily: 'var(--font-dm-sans)', fontSize: '15px', fontWeight: 500,
-                color: 'white', background: 'var(--green-600)',
-                padding: '13px 30px', borderRadius: 'var(--radius-md)',
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            {/* Left: text */}
+            <div>
+              <div style={{
                 display: 'inline-flex', alignItems: 'center', gap: '8px',
-                boxShadow: '0 2px 10px rgba(27,107,74,0.30)',
-              }}
-              className="hover:bg-[var(--green-700)]"
-              onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-1px)'}
-              onMouseLeave={e => e.currentTarget.style.transform = ''}>
-              Get started free <i className="ti ti-arrow-right" />
-            </Link>
-            <a href="#how-it-works"
-              style={{
-                fontFamily: 'var(--font-dm-sans)', fontSize: '15px', fontWeight: 500,
-                color: 'var(--green-700)', background: 'white',
-                padding: '13px 30px', borderRadius: 'var(--radius-md)',
-                display: 'inline-flex', alignItems: 'center', gap: '8px',
-                border: '1px solid var(--base-300)',
-              }}
-              className="hover:bg-[var(--green-50)] hover:border-[var(--green-400)]">
-              <i className="ti ti-player-play" /> See how it works
-            </a>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '22px', flexWrap: 'wrap' }}>
-            {[
-              { icon: 'ti ti-circle-check', text: 'No card needed' },
-              { icon: 'ti ti-circle-check', text: '3 free leads to start' },
-              { icon: 'ti ti-circle-check', text: 'Cancel anytime' },
-            ].map((t, i) => (
-              <span key={i} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: 'var(--base-500)' }}>
-                <i className={t.icon} style={{ color: 'var(--green-500)', fontSize: '14px' }} /> {t.text}
-              </span>
-            ))}
-          </div>
-
-          {/* Mockup */}
-          <div style={{
-            margin: '56px auto 0', maxWidth: '820px',
-            background: 'white', border: '1px solid var(--base-300)',
-            borderRadius: 'var(--radius-xl)', boxShadow: 'var(--shadow-lg)', overflow: 'hidden',
-          }}>
-            <div style={{ background: 'var(--green-900)', padding: '13px 18px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <div style={{ display: 'flex', gap: '6px' }}>
-                <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#ff5f57' }} />
-                <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#febc2e' }} />
-                <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#28c840' }} />
+                background: 'var(--amber-100)', border: '1px solid var(--amber-200)',
+                borderRadius: '20px', padding: '5px 16px',
+                fontSize: '13px', fontWeight: 500, color: '#92400e', marginBottom: '30px',
+              }}>
+                <span style={{
+                  width: '7px', height: '7px', borderRadius: '50%', background: '#16a34a', flexShrink: 0,
+                  boxShadow: '0 0 0 2px rgba(22,163,74,0.25)',
+                }} className="animate-pulse-dot" />
+                <span><SignupCounter /> freelancers in beta — spots still open</span>
               </div>
-              <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.35)', letterSpacing: '0.02em', marginLeft: '4px' }}>LeadFlow — Today's leads</span>
+
+              <h1 style={{
+                fontFamily: 'var(--font-instrument-serif)',
+                fontSize: 'clamp(36px, 4.5vw, 64px)',
+                lineHeight: 1.08, letterSpacing: '-0.025em',
+                color: 'var(--base-900)', marginBottom: '22px',
+              }}>
+                Stop chasing leads.<br />
+                <em style={{ fontStyle: 'italic', color: 'var(--green-600)' }}>Start choosing them.</em>
+              </h1>
+
+              <p style={{
+                fontSize: '18px', lineHeight: 1.65, color: 'var(--base-500)',
+                marginBottom: '32px',
+              }}>
+                LeadFlow finds, vets, and scores freelance opportunities across the web — delivered fresh every 6 hours, matched to your skills.
+              </p>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', marginBottom: '28px' }}>
+                <Link href="/auth/signup"
+                  style={{
+                    fontFamily: 'var(--font-dm-sans)', fontSize: '15px', fontWeight: 500,
+                    color: 'white', background: 'var(--green-600)',
+                    padding: '13px 30px', borderRadius: 'var(--radius-md)',
+                    display: 'inline-flex', alignItems: 'center', gap: '8px',
+                    boxShadow: '0 2px 10px rgba(27,107,74,0.30)',
+                  }}
+                  className="hover:bg-[var(--green-700)]"
+                  onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-1px)'}
+                  onMouseLeave={e => e.currentTarget.style.transform = ''}>
+                  Get started free <i className="ti ti-arrow-right" />
+                </Link>
+                <a href="#how-it-works"
+                  style={{
+                    fontFamily: 'var(--font-dm-sans)', fontSize: '15px', fontWeight: 500,
+                    color: 'var(--green-700)', background: 'white',
+                    padding: '13px 30px', borderRadius: 'var(--radius-md)',
+                    display: 'inline-flex', alignItems: 'center', gap: '8px',
+                    border: '1px solid var(--base-300)',
+                  }}
+                  className="hover:bg-[var(--green-50)] hover:border-[var(--green-400)]">
+                  <i className="ti ti-player-play" /> See how it works
+                </a>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '22px', flexWrap: 'wrap' }}>
+                {[
+                  { icon: 'ti ti-circle-check', text: 'No card needed' },
+                  { icon: 'ti ti-circle-check', text: '3 free leads to start' },
+                  { icon: 'ti ti-circle-check', text: 'Cancel anytime' },
+                ].map((t, i) => (
+                  <span key={i} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: 'var(--base-500)' }}>
+                    <i className={t.icon} style={{ color: 'var(--green-500)', fontSize: '14px' }} /> {t.text}
+                  </span>
+                ))}
+              </div>
             </div>
-            <div style={{ padding: '20px', background: 'var(--base-100)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
-                <h3 style={{ fontSize: '14px', fontWeight: 600, color: 'var(--base-900)' }}>
-                  Fresh leads <span style={{ color: 'var(--base-500)', fontWeight: 400 }}>· Updated 14 min ago</span>
-                </h3>
-                <span style={{ fontSize: '11px', fontWeight: 500, padding: '3px 10px', borderRadius: '20px', background: 'var(--green-100)', color: 'var(--green-700)' }}>
-                  <i className="ti ti-circle-filled" style={{ fontSize: '8px', verticalAlign: '2px', marginRight: '4px' }} />12 new today
-                </span>
-              </div>
-              {[
-                { src: 'Reddit', srcClass: 'badge-src-reddit', title: 'Senior UX Designer — London (Fintech)', meta: '£350–450/day · Figma, Design Systems · Inside IR35', score: '9.1', scoreClass: 'badge-hi' },
-                { src: 'WWR', srcClass: 'badge-src-wwr', title: 'Full-Stack Developer — Remote UK', meta: '£60–75k · React, Node.js · Starts ASAP', score: '8.7', scoreClass: 'badge-hi' },
-                { src: 'Reed', srcClass: 'badge-src-reed', title: 'Brand Identity — 3-month contract', meta: '£40k pro rata · Branding, Illustrator', score: '7.4', scoreClass: 'badge-md' },
-              ].map((lead, i) => (
-                <div key={i} style={{
-                  background: 'white', border: '1px solid var(--base-300)',
-                  borderRadius: 'var(--radius-md)', padding: '14px 16px',
-                  marginBottom: i < 2 ? '8px' : '0',
-                  display: 'flex', alignItems: 'center', gap: '14px',
-                }}>
-                  <span style={{
-                    fontSize: '10px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em',
-                    padding: '4px 8px', borderRadius: 'var(--radius-sm)', flexShrink: 0,
-                  }} className={`badge ${lead.srcClass}`}>{lead.src}</span>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: '14px', fontWeight: 500, color: 'var(--base-900)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{lead.title}</div>
-                    <span style={{ fontSize: '12px', color: 'var(--base-500)', marginTop: '2px', display: 'block' }}>{lead.meta}</span>
-                  </div>
-                  <div style={{
-                    flexShrink: 0, width: '36px', height: '36px', borderRadius: '50%',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: '13px', fontWeight: 600,
-                  }} className={`badge ${lead.scoreClass}`}>{lead.score}</div>
+
+            {/* Right: mockup */}
+            <div style={{
+              background: 'white', border: '1px solid var(--base-300)',
+              borderRadius: 'var(--radius-xl)', boxShadow: 'var(--shadow-lg)', overflow: 'hidden',
+            }}>
+              <div style={{ background: 'var(--green-900)', padding: '13px 18px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ display: 'flex', gap: '6px' }}>
+                  <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#ff5f57' }} />
+                  <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#febc2e' }} />
+                  <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#28c840' }} />
                 </div>
-              ))}
+                <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.35)', letterSpacing: '0.02em', marginLeft: '4px' }}>LeadFlow — Today's leads</span>
+              </div>
+              <div style={{ padding: '20px', background: 'var(--base-100)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
+                  <h3 style={{ fontSize: '14px', fontWeight: 600, color: 'var(--base-900)' }}>
+                    Fresh leads <span style={{ color: 'var(--base-500)', fontWeight: 400 }}>· Updated 14 min ago</span>
+                  </h3>
+                  <span style={{ fontSize: '11px', fontWeight: 500, padding: '3px 10px', borderRadius: '20px', background: 'var(--green-100)', color: 'var(--green-700)' }}>
+                    <i className="ti ti-circle-filled" style={{ fontSize: '8px', verticalAlign: '2px', marginRight: '4px' }} />12 new today
+                  </span>
+                </div>
+                {[
+                  { src: 'Reddit', srcClass: 'badge-src-reddit', title: 'Senior UX Designer — London (Fintech)', meta: '£350–450/day · Figma, Design Systems · Inside IR35', score: '9.1', scoreClass: 'badge-hi' },
+                  { src: 'WWR', srcClass: 'badge-src-wwr', title: 'Full-Stack Developer — Remote UK', meta: '£60–75k · React, Node.js · Starts ASAP', score: '8.7', scoreClass: 'badge-hi' },
+                  { src: 'Reed', srcClass: 'badge-src-reed', title: 'Brand Identity — 3-month contract', meta: '£40k pro rata · Branding, Illustrator', score: '7.4', scoreClass: 'badge-md' },
+                  { src: 'Remote OK', srcClass: 'badge-hi', title: 'DevOps Engineer — Full-time Remote', meta: '£70–90k · AWS, Terraform, K8s', score: '8.9', scoreClass: 'badge-hi' },
+                ].map((lead, i) => (
+                  <div key={i} style={{
+                    background: 'white', border: '1px solid var(--base-300)',
+                    borderRadius: 'var(--radius-md)', padding: '14px 16px',
+                    marginBottom: i < 3 ? '8px' : '0',
+                    display: 'flex', alignItems: 'center', gap: '14px',
+                  }}>
+                    <span style={{
+                      fontSize: '10px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em',
+                      padding: '4px 8px', borderRadius: 'var(--radius-sm)', flexShrink: 0,
+                    }} className={`badge ${lead.srcClass}`}>{lead.src}</span>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: '14px', fontWeight: 500, color: 'var(--base-900)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{lead.title}</div>
+                      <span style={{ fontSize: '12px', color: 'var(--base-500)', marginTop: '2px', display: 'block' }}>{lead.meta}</span>
+                    </div>
+                    <div style={{
+                      flexShrink: 0, width: '36px', height: '36px', borderRadius: '50%',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontSize: '13px', fontWeight: 600,
+                    }} className={`badge ${lead.scoreClass}`}>{lead.score}</div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
