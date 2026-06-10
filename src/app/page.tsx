@@ -230,14 +230,14 @@ export default function LandingPage() {
       </section>
 
       {/* ── PROBLEM ── */}
-      <section className="py-20 scroll-reveal">
+      <section className="py-24 scroll-reveal">
         <div className="max-w-5xl mx-auto px-4 sm:px-8">
           <div className="text-center">
-            <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: 'var(--green-500)' }}>The problem</p>
+            <p className="text-xs font-semibold tracking-widest uppercase mb-4" style={{ color: 'var(--green-500)' }}>The problem</p>
             <h2 className="text-3xl font-bold tracking-tight" style={{ color: 'var(--base-900)' }}>The old way wastes your time</h2>
-            <p className="mt-3 text-sm max-w-lg mx-auto" style={{ color: 'var(--base-500)' }}>Job boards are noisy, budgets are hidden, and applying blind burns hours you should be billing.</p>
+            <p className="mt-4 text-sm max-w-lg mx-auto" style={{ color: 'var(--base-500)' }}>Job boards are noisy, budgets are hidden, and applying blind burns hours you should be billing.</p>
           </div>
-          <div className="mt-12 grid md:grid-cols-3 gap-6">
+          <div className="mt-14 grid md:grid-cols-3 gap-6">
             {[
               { icon: 'ti-search', title: 'Hours lost to job boards', desc: 'Scrolling through irrelevant listings, filtering noise, applying blind. Time that should be billed, spent on search.' },
               { icon: 'ti-heart', title: 'Leads with no substance', desc: 'No budget, no scope, no response. You\'ve sent the proposal, done the call — and heard nothing back.' },
@@ -256,13 +256,13 @@ export default function LandingPage() {
       </section>
 
       {/* ── HOW IT WORKS ── */}
-      <section id="how-it-works" className="py-20 scroll-reveal" style={{ background: 'var(--base-200)' }}>
+      <section id="how-it-works" className="py-24 scroll-reveal" style={{ background: 'var(--base-200)' }}>
         <div className="max-w-5xl mx-auto px-4 sm:px-8">
           <div className="text-center">
-            <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: 'var(--green-500)' }}>How it works</p>
+            <p className="text-xs font-semibold tracking-widest uppercase mb-4" style={{ color: 'var(--green-500)' }}>How it works</p>
             <h2 className="text-3xl font-bold tracking-tight" style={{ color: 'var(--base-900)' }}>Up and running in minutes</h2>
           </div>
-          <div className="mt-12 grid md:grid-cols-3 gap-8 relative">
+          <div className="mt-14 grid md:grid-cols-3 gap-10 relative">
             <div className="hidden md:block absolute top-8 left-[16%] right-[16%] h-px" style={{ background: 'var(--base-300)' }} />
             {[
               { num: '01', icon: 'ti-user-check', title: 'Create your profile', desc: 'Tell us your skills, day rate, and the kind of work you want. Takes under two minutes.' },
@@ -282,13 +282,13 @@ export default function LandingPage() {
       </section>
 
       {/* ── FEATURES ── */}
-      <section id="features" className="py-20 scroll-reveal" style={{ background: 'white' }}>
+      <section id="features" className="py-24 scroll-reveal" style={{ background: 'white' }}>
         <div className="max-w-5xl mx-auto px-4 sm:px-8">
           <div className="text-center">
-            <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: 'var(--green-500)' }}>Features</p>
+            <p className="text-xs font-semibold tracking-widest uppercase mb-4" style={{ color: 'var(--green-500)' }}>Features</p>
             <h2 className="text-3xl font-bold tracking-tight" style={{ color: 'var(--base-900)' }}>Everything you need, nothing you don't</h2>
           </div>
-          <div className="mt-12 grid md:grid-cols-3 gap-px rounded-xl overflow-hidden" style={{ border: '1px solid var(--base-300)', background: 'var(--base-300)' }}>
+          <div className="mt-14 grid md:grid-cols-3 gap-px rounded-xl overflow-hidden" style={{ border: '1px solid var(--base-300)', background: 'var(--base-300)' }}>
             {[
               { icon: 'ti-star', title: 'AI quality scoring', desc: 'Every lead rated 1-10 so you prioritise the best opportunities first.' },
               { icon: 'ti-refresh', title: '6-hour refresh', desc: 'Always fresh. New leads appear within minutes of being posted on any platform.' },
@@ -297,7 +297,7 @@ export default function LandingPage() {
               { icon: 'ti-link', title: 'Direct source links', desc: 'Apply on the original platform. Full transparency — we never gate-keep the lead.' },
               { icon: 'ti-send', title: 'Pipeline tracking', desc: 'Follow applications from interested to won. Never lose track of where a lead stands.' },
             ].map(f => (
-              <div key={f.title} className="p-6" style={{ background: 'white' }}>
+              <div key={f.title} className="p-7" style={{ background: 'white' }}>
                 <div className="w-9 h-9 rounded-lg flex items-center justify-center mb-3" style={{ background: 'var(--green-50)', border: '1px solid var(--green-100)', color: 'var(--green-600)' }}>
                   <i className={`ti ${f.icon}`} style={{ fontSize: '16px' }} />
                 </div>
@@ -310,14 +310,14 @@ export default function LandingPage() {
       </section>
 
       {/* ── DASHBOARD PREVIEW ── */}
-      <section className="py-20" style={{ background: 'var(--green-900)' }}>
+      <section className="py-24" style={{ background: 'var(--green-900)' }}>
         <div className="max-w-5xl mx-auto px-4 sm:px-8">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
-              <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: 'var(--green-400)' }}>The product</p>
+              <p className="text-xs font-semibold tracking-widest uppercase mb-4" style={{ color: 'var(--green-400)' }}>The product</p>
               <h2 className="text-3xl font-bold tracking-tight text-white">See your leads at a glance</h2>
-              <p className="mt-3 text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.55)' }}>A clean, opinionated feed designed to get you from &ldquo;new leads&rdquo; to &ldquo;application sent&rdquo; in under a minute.</p>
-              <ul className="mt-6 space-y-3">
+              <p className="mt-4 text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.55)' }}>A clean, opinionated feed designed to get you from &ldquo;new leads&rdquo; to &ldquo;application sent&rdquo; in under a minute.</p>
+              <ul className="mt-7 space-y-3">
                 {['Filter by source, score, budget, or skill', 'One click to express interest and save a lead', 'Email digest with your top 5 leads every morning', 'Track pipeline from interest to won'].map(item => (
                   <li key={item} className="flex items-center gap-2 text-sm" style={{ color: 'rgba(255,255,255,0.7)' }}>
                     <i className="ti ti-circle-check" style={{ color: 'var(--green-400)' }} /> {item}
@@ -374,13 +374,13 @@ export default function LandingPage() {
       </section>
 
       {/* ── TESTIMONIALS ── */}
-      <section className="py-20 scroll-reveal" style={{ background: 'var(--base-200)' }}>
+      <section className="py-24 scroll-reveal" style={{ background: 'var(--base-200)' }}>
         <div className="max-w-5xl mx-auto px-4 sm:px-8">
           <div className="text-center">
-            <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: 'var(--green-500)' }}>What freelancers say</p>
+            <p className="text-xs font-semibold tracking-widest uppercase mb-4" style={{ color: 'var(--green-500)' }}>What freelancers say</p>
             <h2 className="text-3xl font-bold tracking-tight" style={{ color: 'var(--base-900)' }}>From the beta community</h2>
           </div>
-          <div className="mt-12 grid md:grid-cols-3 gap-5">
+          <div className="mt-14 grid md:grid-cols-3 gap-6">
             {testimonials.map((t, i) => (
               <div key={t.initials} className="card">
                 <div className="flex gap-0.5 mb-3">
@@ -403,13 +403,13 @@ export default function LandingPage() {
       </section>
 
       {/* ── PRICING ── */}
-      <section id="pricing" className="py-20 scroll-reveal" style={{ background: 'white' }}>
+      <section id="pricing" className="py-24 scroll-reveal" style={{ background: 'white' }}>
         <div className="max-w-5xl mx-auto px-4 sm:px-8">
           <div className="text-center">
-            <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: 'var(--green-500)' }}>Pricing</p>
+            <p className="text-xs font-semibold tracking-widest uppercase mb-4" style={{ color: 'var(--green-500)' }}>Pricing</p>
             <h2 className="text-3xl font-bold tracking-tight" style={{ color: 'var(--base-900)' }}>Simple, honest pricing</h2>
-            <p className="mt-3 text-sm" style={{ color: 'var(--base-500)' }}>Pay monthly or save with annual billing.</p>
-            <div className="flex items-center justify-center gap-3 mt-6">
+            <p className="mt-4 text-sm" style={{ color: 'var(--base-500)' }}>Pay monthly or save with annual billing.</p>
+            <div className="flex items-center justify-center gap-3 mt-8">
               <span className="text-sm font-medium" style={{ color: annual ? 'var(--base-500)' : 'var(--base-900)' }}>Monthly</span>
               <button onClick={() => setAnnual(!annual)}
                 className={`w-11 h-6 rounded-full relative toggle-track ${annual ? 'on' : ''}`}
@@ -423,7 +423,7 @@ export default function LandingPage() {
               <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full" style={{ background: 'var(--green-50)', color: 'var(--green-600)', border: '1px solid var(--green-100)' }}>Save 2 months</span>
             </div>
           </div>
-          <div className="mt-10 grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+          <div className="mt-14 grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
             {pricingTiers.map(tier => (
               <PricingCard key={tier.name} tier={tier} annual={annual} />
             ))}
@@ -432,10 +432,10 @@ export default function LandingPage() {
       </section>
 
       {/* ── FAQ ── */}
-      <section className="py-20 scroll-reveal" style={{ background: 'var(--base-200)' }}>
+      <section className="py-24 scroll-reveal" style={{ background: 'var(--base-200)' }}>
         <div className="max-w-3xl mx-auto px-4 sm:px-8">
-          <div className="text-center mb-10">
-            <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: 'var(--green-500)' }}>FAQ</p>
+          <div className="text-center mb-12">
+            <p className="text-xs font-semibold tracking-widest uppercase mb-4" style={{ color: 'var(--green-500)' }}>FAQ</p>
             <h2 className="text-3xl font-bold tracking-tight" style={{ color: 'var(--base-900)' }}>Common questions</h2>
           </div>
           <div className="space-y-1">
@@ -457,13 +457,13 @@ export default function LandingPage() {
       </section>
 
       {/* ── FINAL CTA ── */}
-      <section style={{ background: 'var(--green-900)' }} className="py-20">
+      <section style={{ background: 'var(--green-900)' }} className="py-24">
         <div className="max-w-3xl mx-auto px-4 sm:px-8 text-center">
           <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight">
             Join 340+ freelancers getting quality leads daily
           </h2>
-          <p className="mt-3 text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>Get your first leads in minutes. No credit card needed.</p>
-          <div className="mt-8 flex items-center justify-center gap-3 flex-wrap">
+          <p className="mt-4 text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>Get your first leads in minutes. No credit card needed.</p>
+          <div className="mt-10 flex items-center justify-center gap-3 flex-wrap">
             <Link href="/auth/signup" className="btn-p" style={{ padding: '14px 28px', fontSize: '15px' }}>
               Get started free <i className="ti ti-arrow-right" />
             </Link>
@@ -476,8 +476,8 @@ export default function LandingPage() {
 
       {/* ── FOOTER ── */}
       <footer style={{ background: 'var(--green-900)', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 py-12">
-          <div className="grid md:grid-cols-4 gap-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 py-14">
+          <div className="grid md:grid-cols-4 gap-10">
             <div>
               <Link href="/" className="flex items-center gap-2 text-sm font-bold text-white mb-3">
                 <span className="w-6 h-6 rounded-lg flex items-center justify-center text-white text-[10px] font-bold" style={{ background: 'var(--green-600)' }}>LF</span>

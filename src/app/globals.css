@@ -47,7 +47,7 @@ input:focus, select:focus, textarea:focus {
   box-shadow: var(--shadow-xs);
   font-family: 'DM Sans', sans-serif;
 }
-.btn-p:hover { background: var(--green-700); transform: translateY(-2px); box-shadow: var(--shadow-green); }
+.btn-p:hover { background: var(--green-800); transform: translateY(-3px); box-shadow: 0 6px 20px rgba(22,107,66,0.30); }
 .btn-p:active { background: var(--green-800); transform: scale(0.94); }
 .btn-p:disabled { opacity: 0.45; cursor: not-allowed; transform: none; box-shadow: none; }
 
@@ -59,10 +59,10 @@ input:focus, select:focus, textarea:focus {
   border: 1px solid var(--base-300);
   background: transparent; color: var(--base-700);
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: all var(--transition-base);
   font-family: 'DM Sans', sans-serif;
 }
-.btn-s:hover { background: var(--base-200); }
+.btn-s:hover { background: var(--base-300); border-color: var(--base-400); color: var(--base-900); transform: translateY(-2px); }
 .btn-s:active { transform: scale(0.94); }
 
 .btn-g {
@@ -72,10 +72,10 @@ input:focus, select:focus, textarea:focus {
   border-radius: var(--radius-md); border: none;
   background: transparent; color: var(--base-600);
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: all var(--transition-base);
   font-family: 'DM Sans', sans-serif;
 }
-.btn-g:hover { background: var(--base-200); color: var(--base-700); }
+.btn-g:hover { background: var(--base-200); color: var(--base-900); transform: translateY(-1px); }
 .btn-g:active { transform: scale(0.94); }
 
 .btn-d {
@@ -85,10 +85,10 @@ input:focus, select:focus, textarea:focus {
   border-radius: var(--radius-md); border: none;
   background: transparent; color: var(--error-text);
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: all var(--transition-base);
   font-family: 'DM Sans', sans-serif;
 }
-.btn-d:hover { background: var(--error-bg); }
+.btn-d:hover { background: var(--error-bg); color: var(--error-text); transform: translateY(-1px); }
 .btn-d:active { transform: scale(0.94); }
 
 .btn-amber {
@@ -98,11 +98,11 @@ input:focus, select:focus, textarea:focus {
   border-radius: var(--radius-md); border: none;
   background: var(--amber-500); color: white;
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: all var(--transition-base);
   box-shadow: var(--shadow-xs);
   font-family: 'DM Sans', sans-serif;
 }
-.btn-amber:hover { background: var(--amber-600); transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.btn-amber:hover { background: var(--amber-600); transform: translateY(-3px); box-shadow: 0 6px 20px rgba(196,127,16,0.30); }
 .btn-amber:active { transform: scale(0.94); }
 
 /* ── INPUTS ── */
