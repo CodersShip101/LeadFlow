@@ -2,15 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import PricingCard from '@/components/PricingCard'
-import SignupCounter from '@/components/SignupCounter'
-import type { PricingTier } from '@/types'
-
-const pricingTiers: PricingTier[] = [
-  { name: 'Free', price: 0, annualPrice: 0, priceLabel: '£0', description: 'For freelancers exploring the platform.', features: ['3 leads per week', 'AI quality scores', 'Direct source links'], cta: 'Get started free' },
-  { name: 'Pro', price: 29, annualPrice: 24, priceLabel: '£29/mo', description: 'For active freelancers building a steady pipeline.', features: ['Unlimited leads', 'Skill + rate filtering', 'Daily email digest', 'Pipeline tracking', 'Priority support'], cta: 'Start 7-day free trial', highlighted: true },
-  { name: 'Growth', price: 49, annualPrice: 40, priceLabel: '£49/mo', description: 'For established freelancers optimising every lead.', features: ['Everything in Pro', 'Custom lead alerts', 'Analytics dashboard', 'CSV export', 'Dedicated onboarding'], cta: 'Start 7-day free trial' },
-]
 
 const faqs = [
   { q: 'How does LeadFlow find leads?', a: 'We scan Reddit (r/forhire, r/freelance, r/hiring), Reed.co.uk, and We Work Remotely every 6 hours. Leads are then processed by our AI scoring model before appearing in your feed.' },
@@ -98,22 +89,14 @@ export default function LandingPage() {
       </nav>
 
       {/* ── HERO ── */}
-      <section style={{ padding: '130px 0 100px', background: 'white', borderBottom: '1px solid var(--base-300)' }}>
+      <section style={{ padding: '130px 0 100px', background: 'var(--base-50)', borderBottom: '1px solid var(--base-100)' }}>
         <div className="max-w-[1100px] mx-auto px-8">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
+          <div className="grid md:grid-cols-2 gap-12 lg:gap-16 items-center">
             {/* Left: text */}
             <div>
-              <div style={{
-                display: 'inline-flex', alignItems: 'center', gap: '8px',
-                background: 'var(--amber-100)', border: '1px solid var(--amber-200)',
-                borderRadius: '20px', padding: '5px 16px',
-                fontSize: '13px', fontWeight: 500, color: '#92400e', marginBottom: '30px',
-              }}>
-                <span style={{
-                  width: '7px', height: '7px', borderRadius: '50%', background: '#16a34a', flexShrink: 0,
-                  boxShadow: '0 0 0 2px rgba(22,163,74,0.25)',
-                }} className="animate-pulse-dot" />
-                <span><SignupCounter /> freelancers in beta — spots still open</span>
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold tracking-wide uppercase mb-6" style={{ background: 'var(--green-50)', border: '1px solid var(--green-100)', color: 'var(--green-600)' }}>
+                <span className="w-1.5 h-1.5 rounded-full animate-pulse-dot" style={{ background: 'var(--green-400)' }} />
+                <span>340+ freelancers in beta</span>
               </div>
 
               <h1 style={{
@@ -213,14 +196,14 @@ export default function LandingPage() {
       {/* ── SOCIAL PROOF ── */}
       <section style={{ background: 'var(--green-900)' }}>
         <div className="max-w-5xl mx-auto px-4 sm:px-8 py-10">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-0 text-center">
             {[
               { value: '2,400+', label: 'Leads posted' },
               { value: '340+', label: 'Freelancers in beta' },
               { value: '6h', label: 'Refresh interval' },
               { value: '9.1', label: 'Avg quality score' },
-            ].map(s => (
-              <div key={s.label}>
+            ].map((s, i) => (
+              <div key={s.label} className="md:border-r last:border-r-0 md:px-6" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
                 <div className="text-2xl md:text-3xl font-bold text-white">{s.value}</div>
                 <div className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.5)' }}>{s.label}</div>
               </div>
@@ -243,7 +226,7 @@ export default function LandingPage() {
               { icon: 'ti-heart', title: 'Leads with no substance', desc: 'No budget, no scope, no response. You\'ve sent the proposal, done the call — and heard nothing back.' },
               { icon: 'ti-trending-up', title: 'Feast-or-famine pipeline', desc: 'Land a project, go dark on new leads. The cycle ends when quality leads arrive on a consistent schedule.' },
             ].map((item, i) => (
-              <div key={i} className="rounded-xl p-6" style={{ background: 'var(--base-100)', border: '1px solid var(--base-200)' }}>
+              <div key={i} className="rounded-xl p-6 card-hover" style={{ background: 'var(--base-100)', border: '1px solid var(--base-200)' }}>
                 <div className="w-9 h-9 rounded-lg flex items-center justify-center mb-3.5" style={{ background: 'var(--green-50)', border: '1px solid var(--green-100)', color: 'var(--green-600)' }}>
                   <i className={`ti ${item.icon}`} style={{ fontSize: '16px' }} />
                 </div>
@@ -256,25 +239,25 @@ export default function LandingPage() {
       </section>
 
       {/* ── HOW IT WORKS ── */}
-      <section id="how-it-works" className="py-24 scroll-reveal" style={{ background: 'var(--base-200)' }}>
+      <section id="how-it-works" className="py-24 scroll-reveal" style={{ background: 'var(--base-50)' }}>
         <div className="max-w-5xl mx-auto px-4 sm:px-8">
           <div className="text-center">
             <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: 'var(--green-500)' }}>How it works</p>
             <h2 className="text-3xl font-bold tracking-tight mb-12" style={{ color: 'var(--base-900)' }}>Up and running in minutes</h2>
           </div>
           <div className="grid md:grid-cols-3 gap-10 relative">
-            <div className="hidden md:block absolute top-8 left-[16%] right-[16%] h-px" style={{ background: 'var(--base-300)' }} />
+              <div className="hidden md:block absolute top-6 left-[16%] right-[16%] h-px" style={{ background: 'var(--base-200)' }} />
             {[
               { num: '01', icon: 'ti-user-check', title: 'Create your profile', desc: 'Tell us your skills, day rate, and the kind of work you want. Takes under two minutes.' },
               { num: '02', icon: 'ti-search', title: 'We find and score leads', desc: 'AI scans Reddit, Reed, and We Work Remotely every 6 hours. Only quality leads make it through.' },
               { num: '03', icon: 'ti-briefcase', title: 'Land the work', desc: 'Browse your personal lead feed, express interest, and apply directly on the original platform.' },
             ].map(s => (
               <div key={s.num} className="text-center relative">
-                <div className="w-11 h-11 rounded-full flex items-center justify-center mx-auto mb-4 relative z-10 text-sm font-bold" style={{ background: 'white', border: '1px solid var(--base-300)', color: 'var(--green-600)' }}>
+                <div className="w-11 h-11 rounded-full flex items-center justify-center mx-auto mb-5 relative z-10 text-sm font-bold" style={{ background: 'white', border: '1px solid var(--base-200)', color: 'var(--green-600)' }}>
                   {s.num}
                 </div>
-                <h3 className="text-sm font-semibold mb-1" style={{ color: 'var(--base-900)' }}>{s.title}</h3>
-                <p className="text-xs max-w-xs mx-auto leading-relaxed" style={{ color: 'var(--base-500)' }}>{s.desc}</p>
+                <h3 className="text-[15px] font-semibold mb-2" style={{ color: 'var(--base-800)' }}>{s.title}</h3>
+                <p className="text-sm max-w-xs mx-auto leading-relaxed" style={{ color: 'var(--base-400)' }}>{s.desc}</p>
               </div>
             ))}
           </div>
@@ -288,7 +271,7 @@ export default function LandingPage() {
             <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: 'var(--green-500)' }}>Features</p>
             <h2 className="text-3xl font-bold tracking-tight mb-10" style={{ color: 'var(--base-900)' }}>Everything you need, nothing you don't</h2>
           </div>
-          <div className="grid md:grid-cols-3 gap-px rounded-xl overflow-hidden" style={{ border: '1px solid var(--base-300)', background: 'var(--base-300)' }}>
+          <div className="grid md:grid-cols-3 gap-px rounded-xl overflow-hidden" style={{ border: '1px solid var(--base-100)', background: 'var(--base-100)' }}>
             {[
               { icon: 'ti-star', title: 'AI quality scoring', desc: 'Every lead rated 1-10 so you prioritise the best opportunities first.' },
               { icon: 'ti-refresh', title: '6-hour refresh', desc: 'Always fresh. New leads appear within minutes of being posted on any platform.' },
@@ -298,11 +281,11 @@ export default function LandingPage() {
               { icon: 'ti-send', title: 'Pipeline tracking', desc: 'Follow applications from interested to won. Never lose track of where a lead stands.' },
             ].map(f => (
               <div key={f.title} className="p-7 transition-colors hover:bg-[var(--base-100)]" style={{ background: 'white' }}>
-                <div className="w-9 h-9 rounded-lg flex items-center justify-center mb-3" style={{ background: 'var(--green-50)', border: '1px solid var(--green-100)', color: 'var(--green-600)' }}>
-                  <i className={`ti ${f.icon}`} style={{ fontSize: '16px' }} />
+                <div className="w-[38px] h-[38px] rounded-lg flex items-center justify-center mb-3.5" style={{ background: 'var(--green-50)', border: '1px solid var(--green-100)', color: 'var(--green-600)' }}>
+                  <i className={`ti ${f.icon}`} />
                 </div>
-                <h3 className="text-sm font-semibold" style={{ color: 'var(--base-900)' }}>{f.title}</h3>
-                <p className="text-xs mt-1 leading-relaxed" style={{ color: 'var(--base-500)' }}>{f.desc}</p>
+                <h3 className="text-sm font-semibold mb-1.5" style={{ color: 'var(--base-800)' }}>{f.title}</h3>
+                <p className="text-xs leading-relaxed" style={{ color: 'var(--base-400)' }}>{f.desc}</p>
               </div>
             ))}
           </div>
@@ -374,26 +357,26 @@ export default function LandingPage() {
       </section>
 
       {/* ── TESTIMONIALS ── */}
-      <section className="py-24 scroll-reveal" style={{ background: 'var(--base-200)' }}>
+      <section className="py-24 scroll-reveal" style={{ background: 'var(--base-50)' }}>
         <div className="max-w-5xl mx-auto px-4 sm:px-8">
           <div className="text-center">
             <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: 'var(--green-500)' }}>What freelancers say</p>
             <h2 className="text-3xl font-bold tracking-tight mb-10" style={{ color: 'var(--base-900)' }}>From the beta community</h2>
           </div>
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-3 gap-5">
             {testimonials.map((t, i) => (
-              <div key={t.initials} className="card">
+              <div key={t.initials} className="rounded-xl p-6 card-hover" style={{ background: 'white', border: '1px solid var(--base-100)' }}>
                 <div className="flex gap-0.5 mb-3">
                   {[1,2,3,4,5].map(s => (
                     <span key={s} style={{ color: '#f59e0b', fontSize: '13px' }}>★</span>
                   ))}
                 </div>
-                <p className="text-sm leading-relaxed" style={{ color: 'var(--base-600)' }}>&ldquo;{t.quote}&rdquo;</p>
-                <div className="flex items-center gap-3 mt-4 pt-3" style={{ borderTop: '1px solid var(--base-300)' }}>
-                  <div className="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold" style={{ background: 'var(--green-600)' }}>{t.initials}</div>
+                <p className="text-sm leading-relaxed italic mb-5" style={{ color: 'var(--base-600)' }}>&ldquo;{t.quote}&rdquo;</p>
+                <div className="flex items-center gap-3 pt-4" style={{ borderTop: '1px solid var(--base-100)' }}>
+                  <div className="w-[38px] h-[38px] rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0" style={{ background: 'var(--green-600)' }}>{t.initials}</div>
                   <div>
-                    <div className="text-sm font-semibold" style={{ color: 'var(--base-900)' }}>{t.name}</div>
-                    <div className="text-xs" style={{ color: 'var(--base-500)' }}>{t.role}</div>
+                    <div className="text-sm font-semibold" style={{ color: 'var(--base-800)' }}>{t.name}</div>
+                    <div className="text-xs" style={{ color: 'var(--base-400)' }}>{t.role}</div>
                   </div>
                 </div>
               </div>
@@ -405,34 +388,78 @@ export default function LandingPage() {
       {/* ── PRICING ── */}
       <section id="pricing" className="py-24 scroll-reveal" style={{ background: 'white' }}>
         <div className="max-w-5xl mx-auto px-4 sm:px-8">
-          <div className="text-center">
+          <div className="text-center mb-12">
             <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: 'var(--green-500)' }}>Pricing</p>
-            <h2 className="text-3xl font-bold tracking-tight mb-[14px]" style={{ color: 'var(--base-900)' }}>Simple, honest pricing</h2>
-            <p className="text-sm mb-8" style={{ color: 'var(--base-500)' }}>Pay monthly or save with annual billing.</p>
+            <h2 className="text-3xl font-bold tracking-tight mb-3" style={{ color: 'var(--base-900)' }}>Simple, honest pricing</h2>
+            <p className="text-base mb-8" style={{ color: 'var(--base-400)' }}>Pay monthly or save with annual billing.</p>
             <div className="flex items-center justify-center gap-3">
-              <span className="text-sm font-medium" style={{ color: annual ? 'var(--base-500)' : 'var(--base-900)' }}>Monthly</span>
+              <span className="text-sm font-medium" style={{ color: annual ? 'var(--base-400)' : 'var(--base-900)' }}>Monthly</span>
               <button onClick={() => setAnnual(!annual)}
                 className={`w-11 h-6 rounded-full relative toggle-track ${annual ? 'on' : ''}`}
-                style={{ background: annual ? 'var(--green-600)' : 'var(--base-300)' }}
+                style={{ background: annual ? 'var(--green-600)' : 'var(--base-200)' }}
                 role="switch" aria-checked={annual} tabIndex={0}
                 onKeyDown={(e) => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); setAnnual(!annual) } }}>
                 <div className="w-[18px] h-[18px] rounded-full bg-white absolute top-[3px] left-[3px] shadow-sm toggle-knob"
                   style={{ transform: annual ? 'translateX(20px)' : 'translateX(0)' }} />
               </button>
-              <span className="text-sm font-medium" style={{ color: annual ? 'var(--base-900)' : 'var(--base-500)' }}>Annual</span>
-              <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full" style={{ background: 'var(--green-50)', color: 'var(--green-600)', border: '1px solid var(--green-100)' }}>Save 2 months</span>
+              <span className="text-sm font-medium" style={{ color: annual ? 'var(--base-900)' : 'var(--base-400)' }}>Annual</span>
+              <span className="text-[11px] font-semibold px-3 py-1 rounded-full" style={{ background: 'var(--green-50)', color: 'var(--green-600)', border: '1px solid var(--green-100)' }}>Save 2 months</span>
             </div>
           </div>
-          <div className="mt-12 grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-            {pricingTiers.map(tier => (
-              <PricingCard key={tier.name} tier={tier} annual={annual} />
-            ))}
+          <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            {/* Free */}
+            <div className="rounded-xl p-7 card-hover" style={{ border: '1px solid var(--base-200)', background: 'white' }}>
+              <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--base-400)' }}>Free</p>
+              <div style={{ fontFamily: 'var(--font-instrument-serif)', fontSize: '2.4rem', fontWeight: 700, lineHeight: 1, color: 'var(--base-900)', marginBottom: '4px' }}>£0</div>
+              <p className="text-xs mb-4" style={{ color: 'var(--base-400)' }}>forever free</p>
+              <p className="text-sm mb-5 leading-relaxed" style={{ color: 'var(--base-400)' }}>For freelancers exploring the platform.</p>
+              <hr style={{ border: 'none', borderTop: '1px solid var(--base-100)', marginBottom: '20px' }} />
+              <ul className="space-y-2.5 mb-8">
+                <li className="flex items-start gap-2 text-sm" style={{ color: 'var(--base-500)' }}><i className="ti ti-circle-check shrink-0 mt-0.5" style={{ color: 'var(--green-500)', fontSize: '14px' }}></i> 3 leads per week</li>
+                <li className="flex items-start gap-2 text-sm" style={{ color: 'var(--base-500)' }}><i className="ti ti-circle-check shrink-0 mt-0.5" style={{ color: 'var(--green-500)', fontSize: '14px' }}></i> AI quality scores</li>
+                <li className="flex items-start gap-2 text-sm" style={{ color: 'var(--base-500)' }}><i className="ti ti-circle-check shrink-0 mt-0.5" style={{ color: 'var(--green-500)', fontSize: '14px' }}></i> Direct source links</li>
+              </ul>
+              <Link href="/auth/signup" className="btn-s w-full justify-center" style={{ padding: '11px 20px', fontSize: '14px' }}>Get started free</Link>
+            </div>
+            {/* Pro (highlighted) */}
+            <div className="rounded-xl p-7 relative card-hover" style={{ border: '2px solid var(--green-600)', background: 'var(--green-50)' }}>
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 text-[11px] font-semibold text-white px-4 py-1 rounded-full whitespace-nowrap" style={{ background: 'var(--green-600)' }}>Most popular</div>
+              <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--base-400)' }}>Pro</p>
+              <div style={{ fontFamily: 'var(--font-instrument-serif)', fontSize: '2.4rem', fontWeight: 700, lineHeight: 1, color: 'var(--base-900)', marginBottom: '4px' }}>£{annual ? '24' : '29'}</div>
+              <p className="text-xs mb-4" style={{ color: 'var(--base-400)' }}>per month</p>
+              <p className="text-sm mb-5 leading-relaxed" style={{ color: 'var(--base-400)' }}>For active freelancers building a steady pipeline.</p>
+              <hr style={{ border: 'none', borderTop: '1px solid var(--green-100)', marginBottom: '20px' }} />
+              <ul className="space-y-2.5 mb-8">
+                <li className="flex items-start gap-2 text-sm" style={{ color: 'var(--base-500)' }}><i className="ti ti-circle-check shrink-0 mt-0.5" style={{ color: 'var(--green-500)', fontSize: '14px' }}></i> Unlimited leads</li>
+                <li className="flex items-start gap-2 text-sm" style={{ color: 'var(--base-500)' }}><i className="ti ti-circle-check shrink-0 mt-0.5" style={{ color: 'var(--green-500)', fontSize: '14px' }}></i> Skill + rate filtering</li>
+                <li className="flex items-start gap-2 text-sm" style={{ color: 'var(--base-500)' }}><i className="ti ti-circle-check shrink-0 mt-0.5" style={{ color: 'var(--green-500)', fontSize: '14px' }}></i> Daily email digest</li>
+                <li className="flex items-start gap-2 text-sm" style={{ color: 'var(--base-500)' }}><i className="ti ti-circle-check shrink-0 mt-0.5" style={{ color: 'var(--green-500)', fontSize: '14px' }}></i> Pipeline tracking</li>
+                <li className="flex items-start gap-2 text-sm" style={{ color: 'var(--base-500)' }}><i className="ti ti-circle-check shrink-0 mt-0.5" style={{ color: 'var(--green-500)', fontSize: '14px' }}></i> Priority support</li>
+              </ul>
+              <Link href="/auth/signup" className="btn-p w-full justify-center" style={{ padding: '11px 20px', fontSize: '14px' }}>Start 7-day free trial</Link>
+            </div>
+            {/* Growth */}
+            <div className="rounded-xl p-7 card-hover" style={{ border: '1px solid var(--base-200)', background: 'white' }}>
+              <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--base-400)' }}>Growth</p>
+              <div style={{ fontFamily: 'var(--font-instrument-serif)', fontSize: '2.4rem', fontWeight: 700, lineHeight: 1, color: 'var(--base-900)', marginBottom: '4px' }}>£{annual ? '40' : '49'}</div>
+              <p className="text-xs mb-4" style={{ color: 'var(--base-400)' }}>per month</p>
+              <p className="text-sm mb-5 leading-relaxed" style={{ color: 'var(--base-400)' }}>For established freelancers optimising every lead.</p>
+              <hr style={{ border: 'none', borderTop: '1px solid var(--base-100)', marginBottom: '20px' }} />
+              <ul className="space-y-2.5 mb-8">
+                <li className="flex items-start gap-2 text-sm" style={{ color: 'var(--base-500)' }}><i className="ti ti-circle-check shrink-0 mt-0.5" style={{ color: 'var(--green-500)', fontSize: '14px' }}></i> Everything in Pro</li>
+                <li className="flex items-start gap-2 text-sm" style={{ color: 'var(--base-500)' }}><i className="ti ti-circle-check shrink-0 mt-0.5" style={{ color: 'var(--green-500)', fontSize: '14px' }}></i> Custom lead alerts</li>
+                <li className="flex items-start gap-2 text-sm" style={{ color: 'var(--base-500)' }}><i className="ti ti-circle-check shrink-0 mt-0.5" style={{ color: 'var(--green-500)', fontSize: '14px' }}></i> Analytics dashboard</li>
+                <li className="flex items-start gap-2 text-sm" style={{ color: 'var(--base-500)' }}><i className="ti ti-circle-check shrink-0 mt-0.5" style={{ color: 'var(--green-500)', fontSize: '14px' }}></i> CSV export</li>
+                <li className="flex items-start gap-2 text-sm" style={{ color: 'var(--base-500)' }}><i className="ti ti-circle-check shrink-0 mt-0.5" style={{ color: 'var(--green-500)', fontSize: '14px' }}></i> Dedicated onboarding</li>
+              </ul>
+              <Link href="/auth/signup" className="btn-s w-full justify-center" style={{ padding: '11px 20px', fontSize: '14px' }}>Start 7-day free trial</Link>
+            </div>
           </div>
         </div>
       </section>
 
       {/* ── FAQ ── */}
-      <section className="py-24 scroll-reveal" style={{ background: 'var(--base-200)' }}>
+      <section className="py-24 scroll-reveal" style={{ background: 'var(--base-50)' }}>
         <div className="max-w-3xl mx-auto px-4 sm:px-8">
           <div className="text-center mb-10">
             <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: 'var(--green-500)' }}>FAQ</p>
@@ -467,7 +494,7 @@ export default function LandingPage() {
             <Link href="/auth/signup" className="btn-p" style={{ padding: '14px 28px', fontSize: '15px' }}>
               Get started free <i className="ti ti-arrow-right" />
             </Link>
-            <Link href="/auth/login" className="inline-flex items-center gap-1.5 text-sm font-medium px-5 py-3 rounded-lg" style={{ color: 'var(--green-200)', border: '1px solid rgba(255,255,255,0.15)' }}>
+            <Link href="/auth/login" className="btn-ghost">
               Log in
             </Link>
           </div>
@@ -475,7 +502,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── FOOTER ── */}
-      <footer style={{ background: 'var(--green-900)', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+      <footer style={{ background: 'var(--green-950)', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 py-14">
           <div className="grid md:grid-cols-4 gap-10">
             <div>
