@@ -89,7 +89,7 @@ export default function LandingPage() {
       </nav>
 
       {/* ── HERO ── */}
-      <section style={{ padding: '130px 0 100px', background: 'var(--base-50)', borderBottom: '1px solid var(--base-100)' }}>
+      <section style={{ padding: '130px 0 100px', background: 'var(--base-100)', borderBottom: '1px solid var(--base-300)' }}>
         <div className="max-w-[1100px] mx-auto px-8">
           <div className="grid md:grid-cols-2 gap-12 lg:gap-16 items-center">
             {/* Left: text */}
@@ -239,7 +239,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── HOW IT WORKS ── */}
-      <section id="how-it-works" className="py-24 scroll-reveal" style={{ background: 'var(--base-50)' }}>
+      <section id="how-it-works" className="py-24 scroll-reveal" style={{ background: 'var(--base-100)' }}>
         <div className="max-w-5xl mx-auto px-4 sm:px-8">
           <div className="text-center">
             <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: 'var(--green-500)' }}>How it works</p>
@@ -256,8 +256,8 @@ export default function LandingPage() {
                 <div className="w-11 h-11 rounded-full flex items-center justify-center mx-auto mb-5 relative z-10 text-sm font-bold" style={{ background: 'white', border: '1px solid var(--base-200)', color: 'var(--green-600)' }}>
                   {s.num}
                 </div>
-                <h3 className="text-[15px] font-semibold mb-2" style={{ color: 'var(--base-800)' }}>{s.title}</h3>
-                <p className="text-sm max-w-xs mx-auto leading-relaxed" style={{ color: 'var(--base-400)' }}>{s.desc}</p>
+                <h3 className="text-[15px] font-semibold mb-2" style={{ color: 'var(--base-700)' }}>{s.title}</h3>
+                <p className="text-sm max-w-xs mx-auto leading-relaxed" style={{ color: 'var(--base-500)' }}>{s.desc}</p>
               </div>
             ))}
           </div>
@@ -284,8 +284,8 @@ export default function LandingPage() {
                 <div className="w-[38px] h-[38px] rounded-lg flex items-center justify-center mb-3.5" style={{ background: 'var(--green-50)', border: '1px solid var(--green-100)', color: 'var(--green-600)' }}>
                   <i className={`ti ${f.icon}`} />
                 </div>
-                <h3 className="text-sm font-semibold mb-1.5" style={{ color: 'var(--base-800)' }}>{f.title}</h3>
-                <p className="text-xs leading-relaxed" style={{ color: 'var(--base-400)' }}>{f.desc}</p>
+                <h3 className="text-sm font-semibold mb-1.5" style={{ color: 'var(--base-700)' }}>{f.title}</h3>
+                <p className="text-xs leading-relaxed" style={{ color: 'var(--base-500)' }}>{f.desc}</p>
               </div>
             ))}
           </div>
@@ -357,7 +357,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── TESTIMONIALS ── */}
-      <section className="py-24 scroll-reveal" style={{ background: 'var(--base-50)' }}>
+      <section className="py-24 scroll-reveal" style={{ background: 'var(--base-100)' }}>
         <div className="max-w-5xl mx-auto px-4 sm:px-8">
           <div className="text-center">
             <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: 'var(--green-500)' }}>What freelancers say</p>
@@ -375,8 +375,8 @@ export default function LandingPage() {
                 <div className="flex items-center gap-3 pt-4" style={{ borderTop: '1px solid var(--base-100)' }}>
                   <div className="w-[38px] h-[38px] rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0" style={{ background: 'var(--green-600)' }}>{t.initials}</div>
                   <div>
-                    <div className="text-sm font-semibold" style={{ color: 'var(--base-800)' }}>{t.name}</div>
-                    <div className="text-xs" style={{ color: 'var(--base-400)' }}>{t.role}</div>
+                    <div className="text-sm font-semibold" style={{ color: 'var(--base-700)' }}>{t.name}</div>
+                    <div className="text-xs" style={{ color: 'var(--base-500)' }}>{t.role}</div>
                   </div>
                 </div>
               </div>
@@ -391,7 +391,7 @@ export default function LandingPage() {
           <div className="text-center mb-12">
             <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: 'var(--green-500)' }}>Pricing</p>
             <h2 className="text-3xl font-bold tracking-tight mb-3" style={{ color: 'var(--base-900)' }}>Simple, honest pricing</h2>
-            <p className="text-base mb-8" style={{ color: 'var(--base-400)' }}>Pay monthly or save with annual billing.</p>
+            <p className="text-base mb-8" style={{ color: 'var(--base-500)' }}>Pay monthly or save with annual billing.</p>
             <div className="flex items-center justify-center gap-3">
               <span className="text-sm font-medium" style={{ color: annual ? 'var(--base-400)' : 'var(--base-900)' }}>Monthly</span>
               <button onClick={() => setAnnual(!annual)}
@@ -409,10 +409,10 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
             {/* Free */}
             <div className="rounded-xl p-7 card-hover" style={{ border: '1px solid var(--base-200)', background: 'white' }}>
-              <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--base-400)' }}>Free</p>
+              <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--base-500)' }}>Free</p>
               <div style={{ fontFamily: 'var(--font-instrument-serif)', fontSize: '2.4rem', fontWeight: 700, lineHeight: 1, color: 'var(--base-900)', marginBottom: '4px' }}>£0</div>
-              <p className="text-xs mb-4" style={{ color: 'var(--base-400)' }}>forever free</p>
-              <p className="text-sm mb-5 leading-relaxed" style={{ color: 'var(--base-400)' }}>For freelancers exploring the platform.</p>
+              <p className="text-xs mb-4" style={{ color: 'var(--base-500)' }}>forever free</p>
+              <p className="text-sm mb-5 leading-relaxed" style={{ color: 'var(--base-500)' }}>For freelancers exploring the platform.</p>
               <hr style={{ border: 'none', borderTop: '1px solid var(--base-100)', marginBottom: '20px' }} />
               <ul className="space-y-2.5 mb-8">
                 <li className="flex items-start gap-2 text-sm" style={{ color: 'var(--base-500)' }}><i className="ti ti-circle-check shrink-0 mt-0.5" style={{ color: 'var(--green-500)', fontSize: '14px' }}></i> 3 leads per week</li>
@@ -424,10 +424,10 @@ export default function LandingPage() {
             {/* Pro (highlighted) */}
             <div className="rounded-xl p-7 relative card-hover" style={{ border: '2px solid var(--green-600)', background: 'var(--green-50)' }}>
               <div className="absolute -top-3 left-1/2 -translate-x-1/2 text-[11px] font-semibold text-white px-4 py-1 rounded-full whitespace-nowrap" style={{ background: 'var(--green-600)' }}>Most popular</div>
-              <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--base-400)' }}>Pro</p>
+              <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--base-500)' }}>Pro</p>
               <div style={{ fontFamily: 'var(--font-instrument-serif)', fontSize: '2.4rem', fontWeight: 700, lineHeight: 1, color: 'var(--base-900)', marginBottom: '4px' }}>£{annual ? '24' : '29'}</div>
-              <p className="text-xs mb-4" style={{ color: 'var(--base-400)' }}>per month</p>
-              <p className="text-sm mb-5 leading-relaxed" style={{ color: 'var(--base-400)' }}>For active freelancers building a steady pipeline.</p>
+              <p className="text-xs mb-4" style={{ color: 'var(--base-500)' }}>per month</p>
+              <p className="text-sm mb-5 leading-relaxed" style={{ color: 'var(--base-500)' }}>For active freelancers building a steady pipeline.</p>
               <hr style={{ border: 'none', borderTop: '1px solid var(--green-100)', marginBottom: '20px' }} />
               <ul className="space-y-2.5 mb-8">
                 <li className="flex items-start gap-2 text-sm" style={{ color: 'var(--base-500)' }}><i className="ti ti-circle-check shrink-0 mt-0.5" style={{ color: 'var(--green-500)', fontSize: '14px' }}></i> Unlimited leads</li>
@@ -440,10 +440,10 @@ export default function LandingPage() {
             </div>
             {/* Growth */}
             <div className="rounded-xl p-7 card-hover" style={{ border: '1px solid var(--base-200)', background: 'white' }}>
-              <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--base-400)' }}>Growth</p>
+              <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--base-500)' }}>Growth</p>
               <div style={{ fontFamily: 'var(--font-instrument-serif)', fontSize: '2.4rem', fontWeight: 700, lineHeight: 1, color: 'var(--base-900)', marginBottom: '4px' }}>£{annual ? '40' : '49'}</div>
-              <p className="text-xs mb-4" style={{ color: 'var(--base-400)' }}>per month</p>
-              <p className="text-sm mb-5 leading-relaxed" style={{ color: 'var(--base-400)' }}>For established freelancers optimising every lead.</p>
+              <p className="text-xs mb-4" style={{ color: 'var(--base-500)' }}>per month</p>
+              <p className="text-sm mb-5 leading-relaxed" style={{ color: 'var(--base-500)' }}>For established freelancers optimising every lead.</p>
               <hr style={{ border: 'none', borderTop: '1px solid var(--base-100)', marginBottom: '20px' }} />
               <ul className="space-y-2.5 mb-8">
                 <li className="flex items-start gap-2 text-sm" style={{ color: 'var(--base-500)' }}><i className="ti ti-circle-check shrink-0 mt-0.5" style={{ color: 'var(--green-500)', fontSize: '14px' }}></i> Everything in Pro</li>
@@ -459,7 +459,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── FAQ ── */}
-      <section className="py-24 scroll-reveal" style={{ background: 'var(--base-50)' }}>
+      <section className="py-24 scroll-reveal" style={{ background: 'var(--base-100)' }}>
         <div className="max-w-3xl mx-auto px-4 sm:px-8">
           <div className="text-center mb-10">
             <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: 'var(--green-500)' }}>FAQ</p>
@@ -470,9 +470,9 @@ export default function LandingPage() {
               <div key={i} className="border-b" style={{ borderColor: 'var(--base-300)' }}>
                 <button onClick={() => setOpenFaq(openFaq === i ? null : i)}
                   className="w-full flex items-center justify-between py-4 text-sm font-medium text-left transition-colors hover:opacity-70 gap-3"
-                  style={{ color: 'var(--base-800)' }}>
+                  style={{ color: 'var(--base-700)' }}>
                   {faq.q}
-                  <i className={`ti ti-chevron-down flex-shrink-0 transition-transform duration-200 ${openFaq === i ? 'rotate-180' : ''}`} style={{ color: 'var(--base-400)' }} />
+                  <i className={`ti ti-chevron-down flex-shrink-0 transition-transform duration-200 ${openFaq === i ? 'rotate-180' : ''}`} style={{ color: 'var(--base-500)' }} />
                 </button>
                 <div className={`overflow-hidden transition-all duration-200 ${openFaq === i ? 'max-h-40 opacity-100 pb-4' : 'max-h-0 opacity-0'}`}>
                   <p className="text-sm leading-relaxed" style={{ color: 'var(--base-500)' }}>{faq.a}</p>
@@ -502,7 +502,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── FOOTER ── */}
-      <footer style={{ background: 'var(--green-950)', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+      <footer style={{ background: 'var(--green-900)', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 py-14">
           <div className="grid md:grid-cols-4 gap-10">
             <div>
