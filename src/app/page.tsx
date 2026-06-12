@@ -194,19 +194,19 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── SOCIAL PROOF ── */}
-      <section style={{ background: 'var(--green-900)' }}>
-        <div className="max-w-5xl mx-auto px-4 sm:px-8 py-12">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-0 text-center">
+      {/* ── METRICS BAR ── */}
+      <section style={{ borderBottom: '1px solid var(--base-100)' }}>
+        <div className="max-w-5xl mx-auto px-4 sm:px-8 py-16">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {[
               { value: '2,400+', label: 'Leads posted' },
               { value: '340+', label: 'Freelancers in beta' },
               { value: '6h', label: 'Refresh interval' },
               { value: '9.1', label: 'Avg quality score' },
             ].map((s, i) => (
-              <div key={s.label} className="md:border-r last:border-r-0 md:px-8" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
-                <div className="text-2xl md:text-3xl font-bold text-white">{s.value}</div>
-                <div className="text-sm mt-2" style={{ color: 'rgba(255,255,255,0.6)' }}>{s.label}</div>
+              <div key={s.label} className="rounded-xl p-6 text-center" style={{ background: 'white', boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02)', border: '1px solid var(--base-100)' }}>
+                <div className="text-2xl md:text-3xl font-bold" style={{ color: 'var(--base-900)' }}>{s.value}</div>
+                <div className="text-sm mt-1.5" style={{ color: 'var(--base-500)' }}>{s.label}</div>
               </div>
             ))}
           </div>
@@ -216,25 +216,27 @@ export default function LandingPage() {
 
 
       {/* ── HOW IT WORKS ── */}
-      <section id="how-it-works" className="py-28 scroll-reveal" style={{ background: 'var(--base-50)' }}>
+      <section id="how-it-works" className="py-28 scroll-reveal" style={{ borderBottom: '1px solid var(--base-100)' }}>
         <div className="max-w-5xl mx-auto px-4 sm:px-8">
-          <div className="text-center">
+          <div className="text-center mb-16">
             <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: 'var(--green-500)' }}>How it works</p>
-            <h2 className="text-3xl font-bold tracking-tight mb-16" style={{ color: 'var(--base-900)' }}>Up and running in minutes</h2>
+            <h2 className="text-3xl font-bold tracking-tight" style={{ color: 'var(--base-900)' }}>Up and running in minutes</h2>
           </div>
-          <div className="grid md:grid-cols-3 gap-12 relative">
-              <div className="hidden md:block absolute top-6 left-[16%] right-[16%] h-[2px]" style={{ background: 'var(--base-400)' }} />
+          <div className="grid md:grid-cols-3 gap-6 relative">
             {[
               { num: '01', icon: 'ti-user-check', title: 'Create your profile', desc: 'Tell us your skills, day rate, and the kind of work you want. Takes under two minutes.' },
               { num: '02', icon: 'ti-search', title: 'We find and score leads', desc: 'AI scans Reddit, Reed, and We Work Remotely every 6 hours. Only quality leads make it through.' },
               { num: '03', icon: 'ti-briefcase', title: 'Land the work', desc: 'Browse your personal lead feed, express interest, and apply directly on the original platform.' },
             ].map(s => (
-              <div key={s.num} className="text-center relative">
-                <div className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-6 relative z-10 text-sm font-bold" style={{ background: 'white', border: '1px solid var(--base-300)', color: 'var(--green-700)' }}>
-                  {s.num}
+              <div key={s.num} className="rounded-xl p-8 transition-all" style={{ background: 'white', border: '1px solid var(--base-100)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+                <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-5" style={{ background: 'var(--green-50)', color: 'var(--green-700)' }}>
+                  <i className={`ti ${s.icon}`} style={{ fontSize: '20px' }} />
                 </div>
-                <h3 className="text-[15px] font-semibold mb-2" style={{ color: 'var(--base-800)' }}>{s.title}</h3>
-                <p className="text-sm max-w-xs mx-auto leading-relaxed" style={{ color: 'var(--base-600)' }}>{s.desc}</p>
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-xs font-semibold tracking-widest" style={{ color: 'var(--green-400)' }}>{s.num}</span>
+                </div>
+                <h3 className="text-base font-semibold mb-2" style={{ color: 'var(--base-900)' }}>{s.title}</h3>
+                <p className="text-sm leading-relaxed" style={{ color: 'var(--base-500)' }}>{s.desc}</p>
               </div>
             ))}
           </div>
@@ -242,13 +244,13 @@ export default function LandingPage() {
       </section>
 
       {/* ── FEATURES ── */}
-      <section id="features" className="py-28 scroll-reveal" style={{ background: 'white' }}>
+      <section id="features" className="py-28 scroll-reveal" style={{ borderBottom: '1px solid var(--base-100)' }}>
         <div className="max-w-5xl mx-auto px-4 sm:px-8">
-          <div className="text-center">
+          <div className="text-center mb-16">
             <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: 'var(--green-500)' }}>Features</p>
-            <h2 className="text-3xl font-bold tracking-tight mb-12" style={{ color: 'var(--base-900)' }}>Everything you need, nothing you don't</h2>
+            <h2 className="text-3xl font-bold tracking-tight" style={{ color: 'var(--base-900)' }}>Everything you need, nothing you don't</h2>
           </div>
-          <div className="grid md:grid-cols-3 gap-px rounded-xl overflow-hidden" style={{ border: '1px solid var(--base-400)', background: 'var(--base-50)' }}>
+          <div className="grid md:grid-cols-3 gap-6">
             {[
               { icon: 'ti-star', title: 'AI quality scoring', desc: 'Every lead rated 1-10 so you prioritise the best opportunities first.' },
               { icon: 'ti-refresh', title: '6-hour refresh', desc: 'Always fresh. New leads appear within minutes of being posted on any platform.' },
@@ -257,12 +259,12 @@ export default function LandingPage() {
               { icon: 'ti-link', title: 'Direct source links', desc: 'Apply on the original platform. Full transparency — we never gate-keep the lead.' },
               { icon: 'ti-send', title: 'Pipeline tracking', desc: 'Follow applications from interested to won. Never lose track of where a lead stands.' },
             ].map(f => (
-              <div key={f.title} className="p-8 transition-all hover:bg-[var(--base-100)] hover:shadow-md" style={{ background: 'white' }}>
-                <div className="w-[38px] h-[38px] rounded-lg flex items-center justify-center mb-4" style={{ background: 'var(--green-50)', border: '1px solid var(--green-200)', color: 'var(--green-700)' }}>
+              <div key={f.title} className="rounded-xl p-7 transition-all" style={{ background: 'white', border: '1px solid var(--base-100)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+                <div className="w-10 h-10 rounded-lg flex items-center justify-center mb-4" style={{ background: 'var(--green-50)', color: 'var(--green-700)' }}>
                   <i className={`ti ${f.icon}`} style={{ fontSize: '18px' }} />
                 </div>
-                <h3 className="text-sm font-semibold mb-2" style={{ color: 'var(--base-800)' }}>{f.title}</h3>
-                <p className="text-xs leading-relaxed" style={{ color: 'var(--base-600)' }}>{f.desc}</p>
+                <h3 className="text-sm font-semibold mb-2" style={{ color: 'var(--base-900)' }}>{f.title}</h3>
+                <p className="text-sm leading-relaxed" style={{ color: 'var(--base-500)' }}>{f.desc}</p>
               </div>
             ))}
           </div>
@@ -274,9 +276,9 @@ export default function LandingPage() {
 
 
       {/* ── PRICING ── */}
-      <section id="pricing" className="py-24 scroll-reveal" style={{ background: 'white' }}>
+      <section id="pricing" className="py-28 scroll-reveal" style={{ borderBottom: '1px solid var(--base-100)' }}>
         <div className="max-w-5xl mx-auto px-4 sm:px-8">
-          <div className="text-center mb-12">
+          <div className="text-center mb-16">
             <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: 'var(--green-500)' }}>Pricing</p>
             <h2 className="text-3xl font-bold tracking-tight mb-3" style={{ color: 'var(--base-900)' }}>Simple, honest pricing</h2>
             <p className="text-base mb-8" style={{ color: 'var(--base-500)' }}>Pay monthly or save with annual billing.</p>
@@ -295,75 +297,73 @@ export default function LandingPage() {
             </div>
           </div>
           <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-            {/* Free */}
-            <div className="rounded-xl p-7 card-hover" style={{ border: '1px solid var(--base-300)', background: 'white' }}>
-              <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--base-500)' }}>Free</p>
-              <div style={{ fontFamily: 'var(--font-instrument-serif)', fontSize: '2.4rem', fontWeight: 700, lineHeight: 1, color: 'var(--base-900)', marginBottom: '4px' }}>£0</div>
-              <p className="text-xs mb-4" style={{ color: 'var(--base-500)' }}>forever free</p>
-              <p className="text-sm mb-5 leading-relaxed" style={{ color: 'var(--base-500)' }}>For freelancers exploring the platform.</p>
-              <hr style={{ border: 'none', borderTop: '1px solid var(--base-300)', marginBottom: '20px' }} />
-              <ul className="space-y-2.5 mb-8">
-                <li className="flex items-start gap-2 text-sm" style={{ color: 'var(--base-500)' }}><i className="ti ti-circle-check shrink-0 mt-0.5" style={{ color: 'var(--green-500)', fontSize: '14px' }}></i> 3 leads per week</li>
-                <li className="flex items-start gap-2 text-sm" style={{ color: 'var(--base-500)' }}><i className="ti ti-circle-check shrink-0 mt-0.5" style={{ color: 'var(--green-500)', fontSize: '14px' }}></i> AI quality scores</li>
-                <li className="flex items-start gap-2 text-sm" style={{ color: 'var(--base-500)' }}><i className="ti ti-circle-check shrink-0 mt-0.5" style={{ color: 'var(--green-500)', fontSize: '14px' }}></i> Direct source links</li>
-              </ul>
-              <Link href="/auth/signup" className="btn-s w-full justify-center" style={{ padding: '11px 20px', fontSize: '14px' }}>Get started free</Link>
-            </div>
-            {/* Pro (highlighted) */}
-            <div className="rounded-xl p-7 relative card-hover" style={{ border: '2px solid var(--green-600)', background: 'var(--green-50)' }}>
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 text-[11px] font-semibold text-white px-4 py-1 rounded-full whitespace-nowrap" style={{ background: 'var(--green-600)' }}>Most popular</div>
-              <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--base-500)' }}>Pro</p>
-              <div style={{ fontFamily: 'var(--font-instrument-serif)', fontSize: '2.4rem', fontWeight: 700, lineHeight: 1, color: 'var(--base-900)', marginBottom: '4px' }}>£{annual ? '24' : '29'}</div>
-              <p className="text-xs mb-4" style={{ color: 'var(--base-500)' }}>per month</p>
-              <p className="text-sm mb-5 leading-relaxed" style={{ color: 'var(--base-500)' }}>For active freelancers building a steady pipeline.</p>
-              <hr style={{ border: 'none', borderTop: '1px solid var(--green-200)', marginBottom: '20px' }} />
-              <ul className="space-y-2.5 mb-8">
-                <li className="flex items-start gap-2 text-sm" style={{ color: 'var(--base-500)' }}><i className="ti ti-circle-check shrink-0 mt-0.5" style={{ color: 'var(--green-500)', fontSize: '14px' }}></i> Unlimited leads</li>
-                <li className="flex items-start gap-2 text-sm" style={{ color: 'var(--base-500)' }}><i className="ti ti-circle-check shrink-0 mt-0.5" style={{ color: 'var(--green-500)', fontSize: '14px' }}></i> Skill + rate filtering</li>
-                <li className="flex items-start gap-2 text-sm" style={{ color: 'var(--base-500)' }}><i className="ti ti-circle-check shrink-0 mt-0.5" style={{ color: 'var(--green-500)', fontSize: '14px' }}></i> Daily email digest</li>
-                <li className="flex items-start gap-2 text-sm" style={{ color: 'var(--base-500)' }}><i className="ti ti-circle-check shrink-0 mt-0.5" style={{ color: 'var(--green-500)', fontSize: '14px' }}></i> Pipeline tracking</li>
-                <li className="flex items-start gap-2 text-sm" style={{ color: 'var(--base-500)' }}><i className="ti ti-circle-check shrink-0 mt-0.5" style={{ color: 'var(--green-500)', fontSize: '14px' }}></i> Priority support</li>
-              </ul>
-              <Link href="/auth/signup" className="btn-p w-full justify-center" style={{ padding: '11px 20px', fontSize: '14px' }}>Start 7-day free trial</Link>
-            </div>
-            {/* Growth */}
-            <div className="rounded-xl p-7 card-hover" style={{ border: '1px solid var(--base-300)', background: 'white' }}>
-              <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--base-500)' }}>Growth</p>
-              <div style={{ fontFamily: 'var(--font-instrument-serif)', fontSize: '2.4rem', fontWeight: 700, lineHeight: 1, color: 'var(--base-900)', marginBottom: '4px' }}>£{annual ? '40' : '49'}</div>
-              <p className="text-xs mb-4" style={{ color: 'var(--base-500)' }}>per month</p>
-              <p className="text-sm mb-5 leading-relaxed" style={{ color: 'var(--base-500)' }}>For established freelancers optimising every lead.</p>
-              <hr style={{ border: 'none', borderTop: '1px solid var(--base-300)', marginBottom: '20px' }} />
-              <ul className="space-y-2.5 mb-8">
-                <li className="flex items-start gap-2 text-sm" style={{ color: 'var(--base-500)' }}><i className="ti ti-circle-check shrink-0 mt-0.5" style={{ color: 'var(--green-500)', fontSize: '14px' }}></i> Everything in Pro</li>
-                <li className="flex items-start gap-2 text-sm" style={{ color: 'var(--base-500)' }}><i className="ti ti-circle-check shrink-0 mt-0.5" style={{ color: 'var(--green-500)', fontSize: '14px' }}></i> Custom lead alerts</li>
-                <li className="flex items-start gap-2 text-sm" style={{ color: 'var(--base-500)' }}><i className="ti ti-circle-check shrink-0 mt-0.5" style={{ color: 'var(--green-500)', fontSize: '14px' }}></i> Analytics dashboard</li>
-                <li className="flex items-start gap-2 text-sm" style={{ color: 'var(--base-500)' }}><i className="ti ti-circle-check shrink-0 mt-0.5" style={{ color: 'var(--green-500)', fontSize: '14px' }}></i> CSV export</li>
-                <li className="flex items-start gap-2 text-sm" style={{ color: 'var(--base-500)' }}><i className="ti ti-circle-check shrink-0 mt-0.5" style={{ color: 'var(--green-500)', fontSize: '14px' }}></i> Dedicated onboarding</li>
-              </ul>
-              <Link href="/auth/signup" className="btn-s w-full justify-center" style={{ padding: '11px 20px', fontSize: '14px' }}>Start 7-day free trial</Link>
-            </div>
+            {[
+              {
+                tier: 'Free', price: '0', tag: 'forever free', desc: 'For freelancers exploring the platform.',
+                features: ['3 leads per week', 'AI quality scores', 'Direct source links'],
+                btn: 'Get started free', highlight: false, href: '/auth/signup', btnClass: 'btn-s',
+              },
+              {
+                tier: 'Pro', price: annual ? '24' : '29', tag: 'per month', desc: 'For active freelancers building a steady pipeline.',
+                features: ['Unlimited leads', 'Skill + rate filtering', 'Daily email digest', 'Pipeline tracking', 'Priority support'],
+                btn: 'Start 7-day free trial', highlight: true, href: '/auth/signup', btnClass: 'btn-p', badge: 'Most popular',
+              },
+              {
+                tier: 'Growth', price: annual ? '40' : '49', tag: 'per month', desc: 'For established freelancers optimising every lead.',
+                features: ['Everything in Pro', 'Custom lead alerts', 'Analytics dashboard', 'CSV export', 'Dedicated onboarding'],
+                btn: 'Start 7-day free trial', highlight: false, href: '/auth/signup', btnClass: 'btn-s',
+              },
+            ].map(p => (
+              <div key={p.tier} className={`rounded-xl p-8 transition-all ${p.highlight ? '' : ''}`}
+                style={{
+                  background: p.highlight ? 'white' : 'white',
+                  border: p.highlight ? '2px solid var(--green-600)' : '1px solid var(--base-100)',
+                  boxShadow: p.highlight ? '0 4px 16px rgba(22,107,66,0.10)' : '0 1px 3px rgba(0,0,0,0.04)',
+                  position: 'relative',
+                }}>
+                {p.badge && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 text-[11px] font-semibold text-white px-4 py-1 rounded-full whitespace-nowrap" style={{ background: 'var(--green-600)' }}>{p.badge}</div>
+                )}
+                <p className="text-xs font-semibold uppercase tracking-wider mb-1" style={{ color: 'var(--base-500)' }}>{p.tier}</p>
+                <div style={{ fontFamily: 'var(--font-instrument-serif)', fontSize: '2.4rem', fontWeight: 700, lineHeight: 1, color: 'var(--base-900)', marginBottom: '2px' }}>£{p.price}</div>
+                <p className="text-xs mb-5" style={{ color: 'var(--base-500)' }}>{p.tag}</p>
+                <p className="text-sm mb-6 leading-relaxed" style={{ color: 'var(--base-500)' }}>{p.desc}</p>
+                <div style={{ borderTop: `1px solid ${p.highlight ? 'var(--green-200)' : 'var(--base-100)'}`, marginBottom: '24px' }} />
+                <ul className="space-y-3 mb-8">
+                  {p.features.map(f => (
+                    <li key={f} className="flex items-start gap-2 text-sm" style={{ color: 'var(--base-600)' }}>
+                      <i className="ti ti-circle-check shrink-0 mt-0.5" style={{ color: 'var(--green-500)', fontSize: '14px' }} /> {f}
+                    </li>
+                  ))}
+                </ul>
+                <Link href={p.href} className={`${p.btnClass} w-full justify-center`} style={{ padding: '11px 20px', fontSize: '14px' }}>{p.btn}</Link>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* ── FAQ ── */}
-      <section className="py-24 scroll-reveal" style={{ background: 'var(--base-100)' }}>
+      <section className="py-28 scroll-reveal" style={{ borderBottom: '1px solid var(--base-100)' }}>
         <div className="max-w-3xl mx-auto px-4 sm:px-8">
-          <div className="text-center mb-10">
+          <div className="text-center mb-12">
             <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: 'var(--green-500)' }}>FAQ</p>
             <h2 className="text-3xl font-bold tracking-tight" style={{ color: 'var(--base-900)' }}>Common questions</h2>
           </div>
-          <div className="space-y-1">
+          <div style={{ background: 'white', borderRadius: 'var(--radius-xl)', border: '1px solid var(--base-100)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', overflow: 'hidden' }}>
             {faqs.map((faq, i) => (
-              <div key={i} className="border-b" style={{ borderColor: 'var(--base-400)' }}>
+              <div key={i} style={{ borderBottom: i < faqs.length - 1 ? '1px solid var(--base-100)' : 'none' }}>
                 <button onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                  className="w-full flex items-center justify-between py-4 text-sm font-medium text-left transition-colors hover:opacity-70 gap-3"
-                  style={{ color: 'var(--base-700)' }}>
+                  className="w-full flex items-center justify-between px-6 py-5 text-sm font-medium text-left transition-colors gap-3"
+                  style={{ color: 'var(--base-800)' }}>
                   {faq.q}
-                  <i className={`ti ti-chevron-down flex-shrink-0 transition-transform duration-200 ${openFaq === i ? 'rotate-180' : ''}`} style={{ color: 'var(--base-500)' }} />
+                  <i className={`ti ti-chevron-down flex-shrink-0 transition-transform duration-200 ${openFaq === i ? 'rotate-180' : ''}`}
+                    style={{ color: 'var(--base-400)', fontSize: '16px' }} />
                 </button>
-                <div className={`overflow-hidden transition-all duration-200 ${openFaq === i ? 'max-h-40 opacity-100 pb-4' : 'max-h-0 opacity-0'}`}>
-                  <p className="text-sm leading-relaxed" style={{ color: 'var(--base-500)' }}>{faq.a}</p>
+                <div className={`overflow-hidden transition-all duration-200 ${openFaq === i ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'}`}>
+                  <div className="px-6 pb-5">
+                    <p className="text-sm leading-relaxed" style={{ color: 'var(--base-500)' }}>{faq.a}</p>
+                  </div>
                 </div>
               </div>
             ))}
@@ -372,14 +372,19 @@ export default function LandingPage() {
       </section>
 
       {/* ── FINAL CTA ── */}
-      <section style={{ background: 'var(--green-900)' }} className="py-28">
+      <section style={{ background: 'var(--green-800)' }} className="py-28">
         <div className="max-w-3xl mx-auto px-4 sm:px-8 text-center">
-          <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight mb-[14px]">
+          <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight mb-3">
             Join 340+ freelancers
           </h2>
           <p className="text-sm mb-10" style={{ color: 'rgba(255,255,255,0.5)' }}>Get your first leads in minutes. No credit card needed.</p>
           <div className="flex items-center justify-center gap-4 flex-wrap">
-            <Link href="/auth/signup" className="btn-p" style={{ padding: '14px 32px', fontSize: '15px', fontWeight: 500, boxShadow: '0 4px 14px rgba(22,107,66,0.25)' }}>
+            <Link href="/auth/signup" style={{ fontFamily: 'var(--font-dm-sans)', fontSize: '15px', fontWeight: 500, color: 'var(--green-800)', background: 'white', padding: '14px 32px', borderRadius: 'var(--radius-sm)', border: 'none', cursor: 'pointer', boxShadow: '0 4px 14px rgba(0,0,0,0.15)', display: 'inline-flex', alignItems: 'center', gap: '8px' }}
+              className="transition-all"
+              onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
+              onMouseLeave={e => e.currentTarget.style.transform = ''}
+              onMouseDown={e => e.currentTarget.style.transform = 'scale(0.94)'}
+              onMouseUp={e => e.currentTarget.style.transform = 'translateY(-2px)'}>
               Get started free <i className="ti ti-arrow-right" />
             </Link>
             <Link href="/auth/login" className="btn-ghost" style={{ padding: '14px 28px', fontSize: '15px', fontWeight: 500 }}>
@@ -401,15 +406,15 @@ export default function LandingPage() {
       </div>
 
       {/* ── FOOTER ── */}
-      <footer style={{ background: 'var(--green-900)', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 py-14">
+      <footer style={{ background: 'var(--green-800)' }}>
+        <div className="max-w-5xl mx-auto px-4 sm:px-8 py-16">
           <div className="grid md:grid-cols-4 gap-10">
             <div>
               <Link href="/" className="flex items-center gap-2 text-sm font-bold text-white mb-3">
                 <span className="w-6 h-6 rounded-lg flex items-center justify-center text-white text-[10px] font-bold" style={{ background: 'var(--green-600)' }}>LF</span>
                 LeadFlow
               </Link>
-              <p className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>Quality freelance leads, delivered every 6 hours.</p>
+              <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.35)' }}>Quality freelance leads, delivered every 6 hours.</p>
             </div>
             {[
               { title: 'Product', links: [{ label: 'Features', href: '#features' }, { label: 'Pricing', href: '#pricing' }, { label: 'Blog', href: '/blog' }] },
@@ -417,13 +422,13 @@ export default function LandingPage() {
               { title: 'Legal', links: [{ label: 'Privacy policy', href: '/privacy' }, { label: 'Terms of service', href: '/terms' }, { label: 'Cookie policy', href: '/cookies' }] },
             ].map(col => (
               <div key={col.title}>
-                <h4 className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: 'rgba(255,255,255,0.5)' }}>{col.title}</h4>
-                <ul className="space-y-2">
+                <h4 className="text-xs font-semibold uppercase tracking-wider mb-4" style={{ color: 'rgba(255,255,255,0.5)' }}>{col.title}</h4>
+                <ul className="space-y-2.5">
                   {col.links.map(link => (
                     <li key={link.label}>
-                      <a href={link.href} className="text-xs transition-colors" style={{ color: 'rgba(255,255,255,0.4)' }}
-                        onMouseEnter={(e) => e.currentTarget.style.color = 'rgba(255,255,255,0.75)'}
-                        onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255,255,255,0.4)'}>
+                      <a href={link.href} className="text-xs transition-all" style={{ color: 'rgba(255,255,255,0.4)' }}
+                        onMouseEnter={(e) => { e.currentTarget.style.color = 'rgba(255,255,255,0.8)'; e.currentTarget.style.paddingLeft = '2px' }}
+                        onMouseLeave={(e) => { e.currentTarget.style.color = 'rgba(255,255,255,0.4)'; e.currentTarget.style.paddingLeft = '0' }}>
                         {link.label}
                       </a>
                     </li>
@@ -432,11 +437,15 @@ export default function LandingPage() {
               </div>
             ))}
           </div>
-          <div className="mt-10 pt-6 flex flex-col md:flex-row items-center justify-between gap-4" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+          <div className="mt-12 pt-6 flex flex-col md:flex-row items-center justify-between gap-4" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
             <div className="text-xs" style={{ color: 'rgba(255,255,255,0.25)' }}>&copy; {new Date().getFullYear()} LeadFlow. All rights reserved.</div>
-            <div className="flex gap-4">
-              <a href="/privacy" className="text-xs" style={{ color: 'rgba(255,255,255,0.25)' }}>Privacy</a>
-              <a href="/terms" className="text-xs" style={{ color: 'rgba(255,255,255,0.25)' }}>Terms</a>
+            <div className="flex gap-5">
+              <a href="/privacy" className="text-xs transition-colors" style={{ color: 'rgba(255,255,255,0.25)' }}
+                onMouseEnter={(e) => e.currentTarget.style.color = 'rgba(255,255,255,0.6)'}
+                onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255,255,255,0.25)'}>Privacy</a>
+              <a href="/terms" className="text-xs transition-colors" style={{ color: 'rgba(255,255,255,0.25)' }}
+                onMouseEnter={(e) => e.currentTarget.style.color = 'rgba(255,255,255,0.6)'}
+                onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255,255,255,0.25)'}>Terms</a>
             </div>
           </div>
         </div>
