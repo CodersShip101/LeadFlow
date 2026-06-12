@@ -197,7 +197,7 @@ export default function LandingPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-0 text-center">
             {[
               { value: '2,400+', label: 'Leads posted' },
-              { value: '340', label: 'Freelancers already inside' },
+              { value: '340+', label: 'Freelancers in beta' },
               { value: '6h', label: 'Refresh interval' },
               { value: '9.1', label: 'Avg quality score' },
             ].map((s, i) => (
