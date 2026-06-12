@@ -17,7 +17,6 @@ export default function ResetPasswordPage() {
   const supabase = createClient()
 
   useEffect(() => {
-    // Check if user came from reset link (has access_token in URL)
     const hash = typeof window !== 'undefined' ? window.location.hash : ''
     if (hash.includes('access_token') || hash.includes('type=recovery')) {
       setStep('reset')
@@ -52,23 +51,23 @@ export default function ResetPasswordPage() {
 
   if (step === 'sent') {
     return (
-      <div className="min-h-screen flex items-center justify-center px-4 py-12" style={{ background: 'var(--base-100)' }}>
+      <div className="min-h-screen flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-sm text-center animate-fade-in">
           <div className="card p-8">
-            <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4 animate-scale-in" style={{ background: 'var(--green-100)' }}>
-              <i className="ti ti-mail text-xl" style={{ color: 'var(--green-600)' }} />
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4 animate-scale-in" style={{ background: 'var(--amber-pale)' }}>
+              <i className="ti ti-mail text-xl" style={{ color: 'var(--amber)' }} />
             </div>
-            <h1 className="text-xl font-bold" style={{ color: 'var(--base-900)' }}>Check your inbox</h1>
-            <p className="text-sm mt-2" style={{ color: 'var(--base-600)' }}>We sent a link to <strong>{email}</strong></p>
-            <p className="text-xs mt-6" style={{ color: 'var(--base-500)' }}>
+            <h1 className="text-xl font-bold" style={{ color: 'var(--cream)' }}>Check your inbox</h1>
+            <p className="text-sm mt-2" style={{ color: 'var(--slate)' }}>We sent a link to <strong style={{ color: 'var(--cream)' }}>{email}</strong></p>
+            <p className="text-xs mt-6" style={{ color: 'var(--slate-2)' }}>
               Didn&apos;t receive it?{' '}
               {countdown > 0 ? (
                 <span>Resend in {countdown}s</span>
               ) : (
-                <button onClick={handleSendEmail} className="font-medium hover:underline" style={{ color: 'var(--green-500)' }}>Resend email</button>
+                <button onClick={handleSendEmail} className="font-medium hover:underline" style={{ color: 'var(--amber)' }}>Resend email</button>
               )}
             </p>
-            <Link href="/auth/login" className="btn-g mt-6 justify-center w-full">Back to sign in</Link>
+            <Link href="/auth/login" className="btn-s mt-6 justify-center w-full">Back to sign in</Link>
           </div>
         </div>
       </div>
@@ -77,19 +76,19 @@ export default function ResetPasswordPage() {
 
   if (step === 'reset') {
     return (
-      <div className="min-h-screen flex items-center justify-center px-4 py-12" style={{ background: 'var(--base-100)' }}>
+      <div className="min-h-screen flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-sm animate-fade-in">
           <div className="card p-8">
-            <h1 className="text-xl font-bold text-center" style={{ color: 'var(--base-900)' }}>Set new password</h1>
-            <p className="text-sm text-center mt-2" style={{ color: 'var(--base-600)' }}>Enter your new password below.</p>
+            <h1 className="text-xl font-bold text-center" style={{ color: 'var(--cream)' }}>Set new password</h1>
+            <p className="text-sm text-center mt-2" style={{ color: 'var(--slate)' }}>Enter your new password below.</p>
             <form onSubmit={handleReset} className="mt-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--base-700)' }}>New password</label>
+                <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--slate-2)' }}>New password</label>
                 <input type="password" required minLength={6} value={password} onChange={e => setPassword(e.target.value)}
                   className="input" placeholder="At least 6 characters" />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--base-700)' }}>Confirm password</label>
+                <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--slate-2)' }}>Confirm password</label>
                 <input type="password" required minLength={6} value={confirm} onChange={e => setConfirm(e.target.value)}
                   className="input" placeholder="Repeat password" />
               </div>
@@ -104,19 +103,19 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-12" style={{ background: 'var(--base-100)' }}>
+    <div className="min-h-screen flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-sm animate-fade-in">
         <div className="card p-8">
           <div className="text-center mb-6">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-3" style={{ background: 'var(--green-600)' }}>
-              <span className="text-white text-sm font-bold">LF</span>
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-3" style={{ background: 'var(--amber)' }}>
+              <span className="text-sm font-bold" style={{ color: 'var(--ink)' }}>LF</span>
             </div>
-            <h1 className="text-xl font-bold" style={{ color: 'var(--base-900)' }}>Reset your password</h1>
-            <p className="text-sm mt-1" style={{ color: 'var(--base-600)' }}>Enter your email and we'll send a reset link.</p>
+            <h1 className="text-xl font-bold" style={{ color: 'var(--cream)' }}>Reset your password</h1>
+            <p className="text-sm mt-1" style={{ color: 'var(--slate)' }}>Enter your email and we'll send a reset link.</p>
           </div>
           <form onSubmit={handleSendEmail} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--base-700)' }}>Email</label>
+              <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--slate-2)' }}>Email</label>
               <input type="email" required value={email} onChange={e => setEmail(e.target.value)}
                 className="input" placeholder="you@example.com" />
             </div>
@@ -124,7 +123,7 @@ export default function ResetPasswordPage() {
               {loading ? 'Sending...' : 'Send Reset Link'}
             </button>
           </form>
-          <Link href="/auth/login" className="btn-g mt-4 justify-center w-full">Back to sign in</Link>
+          <Link href="/auth/login" className="btn-s mt-4 justify-center w-full">Back to sign in</Link>
         </div>
       </div>
     </div>

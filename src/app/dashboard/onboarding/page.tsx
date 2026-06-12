@@ -55,37 +55,37 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-12" style={{ background: 'var(--base-100)' }}>
+    <div className="min-h-screen flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-lg">
         <div className="text-center mb-8">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-3" style={{ background: 'var(--green-600)' }}>
-            <span className="text-white text-sm font-bold">LF</span>
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-3" style={{ background: 'var(--amber)' }}>
+            <span className="text-sm font-bold" style={{ color: 'var(--ink)' }}>LF</span>
           </div>
-          <h1 className="text-xl font-bold tracking-tight" style={{ color: 'var(--base-900)' }}>Let&apos;s get you set up</h1>
-          <p className="text-sm mt-1" style={{ color: 'var(--base-600)' }}>Step {step + 1} of {steps.length}</p>
+          <h1 className="text-xl font-bold tracking-tight" style={{ color: 'var(--cream)' }}>Let&apos;s get you set up</h1>
+          <p className="text-sm mt-1" style={{ color: 'var(--slate)' }}>Step {step + 1} of {steps.length}</p>
         </div>
 
         <div className="flex gap-1.5 mb-8">
           {steps.map((_, i) => (
-            <div key={i} className="flex-1 h-1.5 rounded-full transition-all duration-300" style={{ background: i <= step ? 'var(--green-600)' : 'var(--base-300)' }} />
+            <div key={i} className="flex-1 h-1.5 rounded-full transition-all duration-300" style={{ background: i <= step ? 'var(--amber)' : 'var(--slate-3)' }} />
           ))}
         </div>
 
         <div className="min-h-[300px]">
           {step === 0 && (
             <div className="space-y-4">
-              <div><label className="text-sm font-medium mb-1.5 block" style={{ color: 'var(--base-700)' }}>Full name</label>
+              <div><label className="text-sm font-medium mb-1.5 block" style={{ color: 'var(--slate-2)' }}>Full name</label>
                 <input value={fullName} onChange={e => setFullName(e.target.value)} className="input" placeholder="Your name" autoFocus /></div>
             </div>
           )}
           {step === 1 && (
             <div>
-              <p className="text-sm mb-4" style={{ color: 'var(--base-600)' }}>What do you specialise in?</p>
+              <p className="text-sm mb-4" style={{ color: 'var(--slate)' }}>What do you specialise in?</p>
               <div className="flex flex-wrap gap-1.5 max-h-80 overflow-y-auto">
                 {skillOptions.map(sk => (
                   <button key={sk} onClick={() => toggleSkill(sk)}
                     className="badge transition-all active:scale-[0.95] cursor-pointer"
-                    style={{ background: skills.includes(sk) ? 'var(--green-600)' : 'var(--base-200)', color: skills.includes(sk) ? 'white' : 'var(--base-600)', border: skills.includes(sk) ? 'none' : '1px solid var(--base-300)' }}>
+                    style={{ background: skills.includes(sk) ? 'var(--amber)' : 'var(--ink-3)', color: skills.includes(sk) ? 'var(--ink)' : 'var(--slate)', border: skills.includes(sk) ? 'none' : '1px solid var(--border-card)' }}>
                     {sk}
                   </button>
                 ))}
@@ -94,14 +94,14 @@ export default function OnboardingPage() {
           )}
           {step === 2 && (
             <div className="space-y-4">
-              <div><label className="text-sm font-medium mb-1.5 block" style={{ color: 'var(--base-700)' }}>Hourly rate (£)</label>
+              <div><label className="text-sm font-medium mb-1.5 block" style={{ color: 'var(--slate-2)' }}>Hourly rate (£)</label>
                 <input value={rate} onChange={e => setRate(e.target.value)} type="number" className="input" placeholder="e.g. 75" autoFocus /></div>
-              <div><label className="text-sm font-medium mb-1.5 block" style={{ color: 'var(--base-700)' }}>Experience level</label>
+              <div><label className="text-sm font-medium mb-1.5 block" style={{ color: 'var(--slate-2)' }}>Experience level</label>
                 <select value={exp} onChange={e => setExp(e.target.value)} className="input">
                   <option value="">Select...</option>
                   {['Junior (0-2 years)','Mid (2-5)','Senior (5-10)','Expert (10+)'].map(o => <option key={o} value={o}>{o}</option>)}
                 </select></div>
-              <div><label className="text-sm font-medium mb-1.5 block" style={{ color: 'var(--base-700)' }}>Availability</label>
+              <div><label className="text-sm font-medium mb-1.5 block" style={{ color: 'var(--slate-2)' }}>Availability</label>
                 <select value={avail} onChange={e => setAvail(e.target.value)} className="input">
                   <option value="">Select...</option>
                   <option value="now">Available now</option>
@@ -112,19 +112,19 @@ export default function OnboardingPage() {
           )}
           {step === 3 && (
             <div>
-              <p className="text-sm mb-4" style={{ color: 'var(--base-600)' }}>What&apos;s your main goal with LeadFlow?</p>
+              <p className="text-sm mb-4" style={{ color: 'var(--slate)' }}>What&apos;s your main goal with LeadFlow?</p>
               <div className="space-y-3">
                 {goalOptions.map(g => (
                   <button key={g.value} onClick={() => setGoal(g.value)}
                     className="w-full text-left p-4 rounded-xl border-2 transition-all active:scale-[0.98]"
-                    style={{ borderColor: goal === g.value ? 'var(--green-500)' : 'var(--base-300)', background: goal === g.value ? 'var(--green-50)' : 'white' }}>
+                    style={{ borderColor: goal === g.value ? 'var(--amber)' : 'var(--border-card)', background: goal === g.value ? 'var(--amber-pale)' : 'var(--ink-2)' }}>
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ background: 'var(--green-100)', color: 'var(--green-600)' }}>
+                      <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ background: 'var(--ink-3)', color: 'var(--amber)' }}>
                         <i className={`ti ${g.icon}`} style={{ fontSize: '18px' }} />
                       </div>
                       <div>
-                        <div className="text-sm font-semibold" style={{ color: 'var(--base-900)' }}>{g.title}</div>
-                        <div className="text-xs mt-0.5" style={{ color: 'var(--base-600)' }}>{g.desc}</div>
+                        <div className="text-sm font-semibold" style={{ color: 'var(--cream)' }}>{g.title}</div>
+                        <div className="text-xs mt-0.5" style={{ color: 'var(--slate)' }}>{g.desc}</div>
                       </div>
                     </div>
                   </button>
