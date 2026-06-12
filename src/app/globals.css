@@ -389,6 +389,8 @@ body {
 
 .toast-default { font-size: 13px; font-family: var(--font-body); }
 
+.section { padding: 100px 0; border-bottom: 1px solid var(--border); position: relative; }
+
 /* ── DOT GRID HELPER ── */
 .bg-dot-grid {
   background-image: radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px);
