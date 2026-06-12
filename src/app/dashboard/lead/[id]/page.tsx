@@ -10,10 +10,10 @@ import { getSourceInfo, formatBudgetGBP, isNewLead, formatDate } from '@/lib/uti
 
 
 const statusConfig: Record<string, { label: string, color: string, bg: string }> = {
-  saved:      { label: 'Saved', color: 'var(--amber)', bg: 'var(--amber-pale)' },
-  interested: { label: 'Interested', color: 'var(--amber)', bg: 'var(--amber-pale)' },
-  applied:    { label: 'Applied', color: '#F5C842', bg: 'rgba(245,200,66,0.12)' },
-  hired:      { label: 'Hired', color: 'var(--green-score)', bg: 'rgba(61,219,122,0.12)' },
+  saved:      { label: 'Saved', color: '#7C3AED', bg: '#F0EFFE' },
+  interested: { label: 'Interested', color: '#1B6B4A', bg: '#EBF5F0' },
+  applied:    { label: 'Applied', color: '#D97706', bg: '#FEF3E2' },
+  hired:      { label: 'Hired', color: '#059669', bg: '#ECFDF5' },
 }
 
 export default function LeadDetailPage() {
@@ -95,10 +95,8 @@ export default function LeadDetailPage() {
   }
 
   if (loading) return (
-    <div className="flex-1 flex items-center justify-center pt-16">
-      <div className="flex items-center gap-2" style={{ color: 'var(--slate)' }}>
-        <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: 'var(--amber)' }} /> Loading lead...
-      </div>
+    <div className="flex items-center justify-center min-h-screen" style={{ background: '#F2F3F7' }}>
+      <div className="animate-spin h-8 w-8 border-4 rounded-full" style={{ borderColor: '#1B6B4A', borderTopColor: 'transparent' }} />
     </div>
   )
 
@@ -114,13 +112,13 @@ export default function LeadDetailPage() {
   const showOutcomePrompt = application && daysSince >= 14 && !application.outcome
 
   return (
-    <div className="flex-1 pb-20 md:pb-0">
+    <div className="flex-1 pb-20 md:pb-0" style={{ background: '#F2F3F7' }}>
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6 md:py-8">
-        <button onClick={() => router.push('/dashboard')} className="btn-s mb-4">
+        <button onClick={() => router.push('/dashboard')} className="btn-back mb-4">
           <i className="ti ti-arrow-left" /> Back to leads
         </button>
 
-        <div className="card p-6 md:p-8">
+        <div className="bg-white rounded-xl p-6 md:p-8" style={{ border: '1px solid #ECEEF2' }}>
           {/* Header */}
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-center gap-3 min-w-0">
@@ -133,19 +131,19 @@ export default function LeadDetailPage() {
                 {source.label}
               </button>
               {isNewLead(lead.posted_date) && (
-                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-lg shrink-0" style={{ background: 'var(--amber-pale)', color: 'var(--amber)' }}>New</span>
+                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-lg shrink-0" style={{ background: '#EBF5F0', color: '#1B6B4A' }}>New</span>
               )}
               <div className="min-w-0">
-                <h1 className="text-xl md:text-2xl font-bold truncate" style={{ color: 'var(--cream)' }}>{lead.title}</h1>
-                <div className="flex items-center gap-2 mt-0.5 text-xs" style={{ color: 'var(--slate)' }}>
+                <h1 className="text-xl md:text-2xl font-bold truncate" style={{ color: '#1A1D23' }}>{lead.title}</h1>
+                <div className="flex items-center gap-2 mt-0.5 text-xs" style={{ color: '#AAB0BB' }}>
                   {lead.project_type && <span className="capitalize">{lead.project_type}</span>}
                   {lead.client_location && <><i className="ti ti-briefcase" style={{ fontSize: '10px' }} /><span>{lead.client_location}</span></>}
                 </div>
               </div>
             </div>
             <span className="text-xs font-bold px-3 py-1 rounded-full shrink-0" style={{
-              background: score >= 9 ? 'rgba(61,219,122,0.12)' : score >= 8 ? 'var(--amber-pale)' : score >= 7 ? 'rgba(245,200,66,0.12)' : 'rgba(245,98,66,0.12)',
-              color: score >= 9 ? 'var(--green-score)' : score >= 8 ? 'var(--amber)' : score >= 7 ? 'var(--yellow-score)' : 'var(--red-score)',
+              background: score >= 8 ? '#EBF5F0' : score >= 5 ? '#FEF3E2' : '#F2F3F7',
+              color: score >= 8 ? '#1B6B4A' : score >= 5 ? '#D97706' : '#6B7280',
             }}>
               {score}/10
             </span>
@@ -154,17 +152,17 @@ export default function LeadDetailPage() {
           {/* Meta row */}
           <div className="flex flex-wrap items-center gap-2 mt-4">
             {budget && (
-              <span className="text-sm font-semibold px-3 py-1 rounded-lg" style={{ background: 'rgba(61,219,122,0.10)', color: 'var(--green-score)' }}>
+              <span className="text-sm font-semibold px-3 py-1 rounded-lg" style={{ background: '#EBF5F0', color: '#1B6B4A' }}>
                 {budget}
               </span>
             )}
             {lead.project_type && (
-              <span className="text-sm px-3 py-1 rounded-lg capitalize" style={{ background: 'var(--ink-3)', color: 'var(--slate)' }}>
+              <span className="text-sm px-3 py-1 rounded-lg capitalize" style={{ background: '#F2F3F7', color: '#6B7280' }}>
                 {lead.project_type}
               </span>
             )}
             {lead.client_location && (
-              <span className="text-sm px-3 py-1 rounded-lg flex items-center gap-1" style={{ background: 'var(--ink-3)', color: 'var(--slate)' }}>
+              <span className="text-sm px-3 py-1 rounded-lg flex items-center gap-1" style={{ background: '#F2F3F7', color: '#6B7280' }}>
                 <i className="ti ti-map-pin" style={{ fontSize: '12px' }} /> {lead.client_location}
               </span>
             )}
@@ -172,8 +170,8 @@ export default function LeadDetailPage() {
 
           {/* Description */}
           <div className="mt-6">
-            <h3 className="text-sm font-semibold mb-2" style={{ color: 'var(--cream)' }}>Description</h3>
-            <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: 'var(--slate)' }}>
+            <h3 className="text-sm font-semibold mb-2" style={{ color: '#1A1D23' }}>Description</h3>
+            <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: '#4B5563' }}>
               {lead.description}
             </p>
           </div>
@@ -181,10 +179,10 @@ export default function LeadDetailPage() {
           {/* Skills */}
           {lead.skills_required && lead.skills_required.length > 0 && (
             <div className="mt-6">
-              <h3 className="text-sm font-semibold mb-2" style={{ color: 'var(--cream)' }}>Skills Required</h3>
+              <h3 className="text-sm font-semibold mb-2" style={{ color: '#1A1D23' }}>Skills Required</h3>
               <div className="flex flex-wrap gap-2">
                 {lead.skills_required.map(skill => (
-                  <span key={skill} className="text-xs font-medium px-3 py-1.5 rounded-lg" style={{ background: 'var(--ink-3)', color: 'var(--amber)' }}>
+                  <span key={skill} className="text-xs font-medium px-3 py-1.5 rounded-lg" style={{ background: '#EBF1FC', color: '#2563EB' }}>
                     {skill}
                   </span>
                 ))}
@@ -193,7 +191,7 @@ export default function LeadDetailPage() {
           )}
 
           {/* Dates */}
-          <div className="flex flex-wrap gap-4 mt-6 text-xs" style={{ color: 'var(--slate-2)' }}>
+          <div className="flex flex-wrap gap-4 mt-6 text-xs" style={{ color: '#9CA3AF' }}>
             <span className="flex items-center gap-1">
               <i className="ti ti-calendar" style={{ fontSize: '12px' }} />
               Posted {new Date(lead.posted_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
@@ -208,18 +206,18 @@ export default function LeadDetailPage() {
 
           {/* Source URL */}
           {lead.source_url && (
-            <div className="mt-5 pt-5" style={{ borderTop: '1px solid var(--border)' }}>
-              <h3 className="text-sm font-semibold mb-2" style={{ color: 'var(--cream)' }}>Source</h3>
+            <div className="mt-5 pt-5" style={{ borderTop: '1px solid #ECEEF2' }}>
+              <h3 className="text-sm font-semibold mb-2" style={{ color: '#1A1D23' }}>Source</h3>
               {isFree ? (
-                <div className="rounded-lg p-4 text-center" style={{ background: 'var(--ink-3)', border: '1px solid var(--border-card)' }}>
-                  <i className="ti ti-lock" style={{ fontSize: '20px', display: 'block', margin: '0 auto 8px', color: 'var(--slate-2)' }} />
-                  <div className="text-xs font-medium" style={{ color: 'var(--slate)' }}>Source URL hidden</div>
-                  <div className="text-xs mt-1" style={{ color: 'var(--slate-2)' }}>
+                <div className="rounded-lg p-4 text-center" style={{ background: '#F9FAFB', border: '1px solid #ECEEF2' }}>
+                  <i className="ti ti-lock" style={{ fontSize: '20px', display: 'block', margin: '0 auto 8px', color: '#AAB0BB' }} />
+                  <div className="text-xs font-medium" style={{ color: '#6B7280' }}>Source URL hidden</div>
+                  <div className="text-xs mt-1" style={{ color: '#9CA3AF' }}>
                     Upgrade to Pro to see where this lead came from and apply directly.
                   </div>
                   <button
                     onClick={() => router.push('/dashboard/billing')}
-                    className="btn-amber text-xs px-4 py-1.5 mt-3"
+                    className="btn-int on text-xs px-4 py-1.5 mt-3"
                   >
                     Upgrade to Pro — £49/month
                   </button>
@@ -230,7 +228,7 @@ export default function LeadDetailPage() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-sm hover:underline inline-flex items-center gap-1"
-                  style={{ color: 'var(--amber)' }}
+                  style={{ color: '#2563EB' }}
                 >
                   {lead.source_url}
                   <i className="ti ti-external-link" style={{ fontSize: '12px' }} />
@@ -240,44 +238,44 @@ export default function LeadDetailPage() {
           )}
 
           {/* Match explanation */}
-          <div className="mt-5 pt-5" style={{ borderTop: '1px solid var(--border)' }}>
-            <h3 className="text-sm font-semibold mb-1" style={{ color: 'var(--cream)' }}>Match Analysis</h3>
-            <p className="text-xs mb-3" style={{ color: 'var(--slate)' }}>{matchInfo.summary}</p>
+          <div className="mt-5 pt-5" style={{ borderTop: '1px solid #ECEEF2' }}>
+            <h3 className="text-sm font-semibold mb-1" style={{ color: '#1A1D23' }}>Match Analysis</h3>
+            <p className="text-xs mb-3" style={{ color: '#6B7280' }}>{matchInfo.summary}</p>
             <div className="space-y-2">
               {matchInfo.breakdown.map(item => (
                 <div key={item.label} className="flex items-center justify-between text-xs">
                   <div className="flex items-center gap-2 min-w-0">
-                    <i className={`ti ${item.achieved ? 'ti-check' : 'ti-x'}`} style={{ fontSize: '12px', color: item.achieved ? 'var(--green-score)' : 'var(--slate-3)' }} />
-                    <span style={{ color: 'var(--slate)' }}>{item.label}</span>
+                    <i className={`ti ${item.achieved ? 'ti-check' : 'ti-x'}`} style={{ fontSize: '12px', color: item.achieved ? '#1B6B4A' : '#D0D4DE' }} />
+                    <span style={{ color: '#6B7280' }}>{item.label}</span>
                   </div>
-                  <span className="font-medium shrink-0 ml-2" style={{ color: item.achieved ? 'var(--slate)' : 'var(--slate-2)' }}>
+                  <span className="font-medium shrink-0 ml-2" style={{ color: item.achieved ? '#6B7280' : '#AAB0BB' }}>
                     {item.detail}
                   </span>
                 </div>
               ))}
-              <div className="flex items-center justify-between text-xs font-bold pt-2" style={{ borderTop: '1px solid var(--border)' }}>
-                <span style={{ color: 'var(--cream)' }}>Overall Score</span>
-                <span style={{ color: score >= 9 ? 'var(--green-score)' : score >= 8 ? 'var(--amber)' : score >= 7 ? 'var(--yellow-score)' : 'var(--red-score)' }}>{score}/10</span>
+              <div className="flex items-center justify-between text-xs font-bold pt-2" style={{ borderTop: '1px solid #ECEEF2' }}>
+                <span style={{ color: '#1A1D23' }}>Overall Score</span>
+                <span style={{ color: '#1B6B4A' }}>{score}/10</span>
               </div>
             </div>
 
             {/* Skill match */}
             {profile?.skills && profile.skills.length > 0 && (
-              <div className="mt-4 pt-3" style={{ borderTop: '1px solid var(--border)' }}>
-                <div className="text-xs font-semibold mb-2" style={{ color: 'var(--cream)' }}>
+              <div className="mt-4 pt-3" style={{ borderTop: '1px solid #ECEEF2' }}>
+                <div className="text-xs font-semibold mb-2" style={{ color: '#1A1D23' }}>
                   Skill Match: {matchInfo.skillMatch.matched.length}/{lead.skills_required?.length || 0}
                 </div>
                 {matchInfo.skillMatch.matched.length > 0 && (
                   <div className="flex flex-wrap gap-1.5 mb-1.5">
                     {matchInfo.skillMatch.matched.map(s => (
-                      <span key={s} className="text-[10px] px-2 py-0.5 rounded font-medium" style={{ background: 'rgba(61,219,122,0.10)', color: 'var(--green-score)' }}>{s} ✓</span>
+                      <span key={s} className="text-[10px] px-2 py-0.5 rounded font-medium" style={{ background: '#EBF5F0', color: '#1B6B4A' }}>{s} ✓</span>
                     ))}
                   </div>
                 )}
                 {matchInfo.skillMatch.missing.length > 0 && (
                   <div className="flex flex-wrap gap-1.5">
                     {matchInfo.skillMatch.missing.map(s => (
-                      <span key={s} className="text-[10px] px-2 py-0.5 rounded font-medium" style={{ background: 'var(--ink-3)', color: 'var(--slate-2)' }}>{s}</span>
+                      <span key={s} className="text-[10px] px-2 py-0.5 rounded font-medium" style={{ background: '#F2F3F7', color: '#AAB0BB' }}>{s}</span>
                     ))}
                   </div>
                 )}
@@ -287,14 +285,14 @@ export default function LeadDetailPage() {
 
           {/* Outcome logging */}
           {showOutcomePrompt && (
-            <div className="mt-5 pt-5" style={{ borderTop: '1px solid var(--border)' }}>
-              <h3 className="text-sm font-semibold mb-2" style={{ color: 'var(--cream)' }}>Did you get this project?</h3>
-              <p className="text-xs mb-3" style={{ color: 'var(--slate)' }}>Help us improve your matches by telling us what happened.</p>
+            <div className="mt-5 pt-5" style={{ borderTop: '1px solid #ECEEF2' }}>
+              <h3 className="text-sm font-semibold mb-2" style={{ color: '#1A1D23' }}>Did you get this project?</h3>
+              <p className="text-xs mb-3" style={{ color: '#6B7280' }}>Help us improve your matches by telling us what happened.</p>
               <div className="flex flex-wrap gap-2">
                 {[
-                  { outcome: 'won', label: 'Got it!', icon: 'ti-thumb-up', color: 'var(--green-score)', bg: 'rgba(61,219,122,0.12)' },
-                  { outcome: 'lost', label: 'Did not get it', icon: 'ti-thumb-down', color: 'var(--red-score)', bg: 'rgba(245,98,66,0.12)' },
-                  { outcome: 'pending', label: 'Still waiting', icon: 'ti-clock', color: '#F5C842', bg: 'rgba(245,200,66,0.12)' },
+                  { outcome: 'won', label: 'Got it!', icon: 'ti-thumb-up', color: '#1B6B4A', bg: '#EBF5F0' },
+                  { outcome: 'lost', label: 'Did not get it', icon: 'ti-thumb-down', color: '#DC2626', bg: '#FEF2F2' },
+                  { outcome: 'pending', label: 'Still waiting', icon: 'ti-clock', color: '#D97706', bg: '#FEF3E2' },
                 ].map(opt => (
                   <button key={opt.outcome} onClick={async () => {
                     const res = await fetch('/api/applications', {
@@ -318,8 +316,8 @@ export default function LeadDetailPage() {
           )}
 
           {application?.outcome && (
-            <div className="mt-5 pt-5" style={{ borderTop: '1px solid var(--border)' }}>
-              <div className="flex items-center gap-2 text-sm font-medium" style={{ color: application.outcome === 'won' ? 'var(--green-score)' : application.outcome === 'lost' ? 'var(--red-score)' : '#F5C842' }}>
+            <div className="mt-5 pt-5" style={{ borderTop: '1px solid #ECEEF2' }}>
+              <div className="flex items-center gap-2 text-sm font-medium" style={{ color: application.outcome === 'won' ? '#1B6B4A' : application.outcome === 'lost' ? '#DC2626' : '#D97706' }}>
                 <i className={`ti ${application.outcome === 'won' ? 'ti-thumb-up' : application.outcome === 'lost' ? 'ti-thumb-down' : 'ti-clock'}`} style={{ fontSize: '14px' }} />
                 {application.outcome === 'won' ? 'You got this project!' : application.outcome === 'lost' ? 'Did not get this project' : 'Still waiting on this project'}
               </div>
@@ -327,13 +325,13 @@ export default function LeadDetailPage() {
           )}
 
           {/* Actions */}
-          <div className="flex flex-wrap items-center gap-3 mt-6 pt-5" style={{ borderTop: '1px solid var(--border)' }}>
+          <div className="flex flex-wrap items-center gap-3 mt-6 pt-5" style={{ borderTop: '1px solid #ECEEF2' }}>
             {!isFree && lead.source_url && (
               <a
                 href={lead.source_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn-primary gap-2 px-5 py-2.5 text-sm no-underline"
+                className="btn-int on gap-2 px-5 py-2.5 text-sm no-underline"
               >
                 <i className="ti ti-external-link" style={{ fontSize: '14px' }} />
                 Apply on {source.label}
@@ -341,7 +339,7 @@ export default function LeadDetailPage() {
             )}
             <button
               onClick={handleInterested}
-              className={`btn-amber gap-2 px-5 py-2.5 text-sm`}
+              className={`btn-int gap-2 px-5 py-2.5 text-sm ${application?.status === 'interested' || application?.status === 'applied' || application?.status === 'hired' ? 'on' : ''}`}
             >
               <i className="ti ti-send" style={{ fontSize: '14px' }} />
               {application?.status === 'interested' || application?.status === 'applied' || application?.status === 'hired' ? 'Interest Expressed' : 'Express Interest'}
@@ -349,10 +347,10 @@ export default function LeadDetailPage() {
 
             <button
               onClick={handleBookmark}
-              className="btn-s gap-2 px-4 py-2.5 text-sm min-h-[36px]"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all min-h-[36px] hover:bg-gray-100 active:scale-[0.97]"
               style={{
-                background: application?.status === 'saved' ? 'var(--amber-pale)' : 'transparent',
-                color: application?.status === 'saved' ? 'var(--amber)' : 'var(--slate)',
+                background: application?.status === 'saved' ? '#F0EFFE' : '#F2F3F7',
+                color: application?.status === 'saved' ? '#7C3AED' : '#6B7280',
               }}
             >
               <i className={`ti ${application?.status === 'saved' ? 'ti-bookmark-filled' : 'ti-bookmark'}`} style={{ fontSize: '14px' }} />
@@ -362,8 +360,8 @@ export default function LeadDetailPage() {
             {application?.status === 'interested' && (
               <button
                 onClick={() => { updateApplication('applied'); toast.success('Marked as applied') }}
-                className="btn-s gap-2 px-4 py-2.5 text-sm min-h-[36px]"
-                style={{ background: 'rgba(245,200,66,0.12)', color: '#F5C842' }}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium min-h-[36px] transition-all hover:opacity-80 active:scale-[0.97]"
+                style={{ background: '#FEF3E2', color: '#D97706' }}
               >
                 <i className="ti ti-send" style={{ fontSize: '14px' }} /> Mark as Applied
               </button>
@@ -371,8 +369,8 @@ export default function LeadDetailPage() {
             {application?.status === 'applied' && (
               <button
                 onClick={() => { updateApplication('hired'); toast.success('Marked as hired!') }}
-                className="btn-s gap-2 px-4 py-2.5 text-sm min-h-[36px]"
-                style={{ background: 'rgba(61,219,122,0.12)', color: 'var(--green-score)' }}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium min-h-[36px] transition-all hover:opacity-80 active:scale-[0.97]"
+                style={{ background: '#EBF5F0', color: '#1B6B4A' }}
               >
                 <i className="ti ti-trophy" style={{ fontSize: '14px' }} /> Mark as Hired
               </button>

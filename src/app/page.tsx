@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 
 const faqs = [
@@ -14,12 +14,26 @@ const faqs = [
   { q: 'Is my profile data shared with clients?', a: 'Never. Your profile is used only to filter and score leads. Clients on other platforms cannot see your LeadFlow profile.' },
 ]
 
+const newLeads = [
+  { src: 'Reddit', srcClass: 'badge-src-reddit', title: 'Content Strategist — B2B SaaS, Remote', meta: '£350/day · Notion, Writing · 2-month contract', score: '8.5', scoreClass: 'score-hi' },
+  { src: 'WWR', srcClass: 'badge-src-wwr', title: 'Shopify Developer — E-commerce, Part-time', meta: '£45–55k · Liquid, JS · Ongoing', score: '7.8', scoreClass: 'score-hi' },
+  { src: 'Reed', srcClass: 'badge-src-reed', title: 'Motion Designer — Advertising Agency', meta: '£300–380/day · After Effects · Inside IR35', score: '9.0', scoreClass: 'score-hi' },
+]
+
 export default function LandingPage() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [annual, setAnnual] = useState(false)
   const [activeStep, setActiveStep] = useState(0)
   const [showSticky, setShowSticky] = useState(false)
   const [openFaq, setOpenFaq] = useState<number | null>(null)
+  const [leads, setLeads] = useState([
+    { src: 'Reddit', srcClass: 'badge-src-reddit', title: 'Senior UX Designer — London (Fintech)', meta: '£350–450/day · Figma, Design Systems · IR35', score: '9.1', scoreClass: 'score-hi' },
+    { src: 'WWR', srcClass: 'badge-src-wwr', title: 'Full-Stack Developer — Remote UK', meta: '£60–75k · React, Node.js · Starts ASAP', score: '8.7', scoreClass: 'score-hi' },
+    { src: 'Reed', srcClass: 'badge-src-reed', title: 'Brand Identity — 3-month contract', meta: '£40k pro rata · Branding, Illustrator', score: '7.4', scoreClass: 'score-md' },
+    { src: 'Remote OK', srcClass: 'badge-src-reed', title: 'DevOps Engineer — Full-time Remote', meta: '£70–90k · AWS, Terraform, K8s', score: '8.9', scoreClass: 'score-hi' },
+  ])
+
+  const leadIndex = useRef(0)
 
   useEffect(() => {
     const onScroll = () => setShowSticky(window.scrollY > 500)
@@ -33,6 +47,25 @@ export default function LandingPage() {
     }, { threshold: 0.08 })
     document.querySelectorAll('.reveal').forEach(el => io.observe(el))
     return () => io.disconnect()
+  }, [])
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const lead = newLeads[leadIndex.current % newLeads.length]
+      leadIndex.current++
+      setLeads(prev => {
+        const next = [...prev]
+        next.pop()
+        const el = {
+          ...lead,
+          className: 'score-hi',
+          scoreClass: lead.scoreClass,
+          srcClass: lead.srcClass,
+        }
+        return [el, ...next]
+      })
+    }, 4500)
+    return () => clearInterval(interval)
   }, [])
 
   return (
@@ -92,13 +125,13 @@ export default function LandingPage() {
           <div>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'var(--amber-pale)', border: '1px solid rgba(245,166,35,0.20)', borderRadius: '100px', padding: '5px 14px 5px 8px', fontSize: '11.5px', fontFamily: 'var(--font-mono)', color: 'var(--amber)', letterSpacing: '0.04em', textTransform: 'uppercase', marginBottom: '28px' }}>
               <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--amber)', animation: 'pulse 2s infinite' }} />
-              340 UK freelancers already inside · beta
+              340 UK freelancers already inside
             </div>
             <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(44px, 5.5vw, 74px)', fontWeight: 900, lineHeight: 1.02, letterSpacing: '-0.03em', color: 'var(--cream)', marginBottom: '24px' }}>
-              Stop trawling.<br />Start choosing<br /><em style={{ fontStyle: 'italic', color: 'var(--amber)' }}>the right work.</em>
+              The right clients<br />are out there.<br /><em style={{ fontStyle: 'italic', color: 'var(--amber)' }}>Find them in minutes.</em>
             </h1>
             <p style={{ fontSize: '17px', lineHeight: 1.65, color: 'var(--slate)', marginBottom: '40px', maxWidth: '400px' }}>
-              You're a UK freelancer. You shouldn't be spending hours digging through job boards hoping something decent shows up. LeadFlow delivers pre-scored leads matched to your skills and rate — every 6 hours, while you're busy doing actual work.
+              If you're a UK freelancer spending hours trawling job boards for decent work, LeadFlow fixes that. We surface the leads that match your skills and rate — scored, filtered, and waiting for you every 6 hours.
             </p>
             <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '36px' }}>
               <Link href="/auth/signup" className="btn-primary">Start my free trial →</Link>
@@ -107,7 +140,7 @@ export default function LandingPage() {
                 See how it works
               </a>
             </div>
-            <div style={{ fontSize: '12px', fontFamily: 'var(--font-mono)', color: 'var(--slate-2)', marginBottom: '20px', letterSpacing: '0.04em' }}>Set up in 2 minutes · No card required · First leads in under an hour</div>
+            <div style={{ fontSize: '12px', fontFamily: 'var(--font-mono)', color: 'var(--slate-2)', marginBottom: '20px', letterSpacing: '0.04em' }}>Takes 2 minutes. No card needed.</div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap' }}>
               {[
                 { text: '3 leads on the free plan, always' },
@@ -124,88 +157,47 @@ export default function LandingPage() {
             </div>
           </div>
 
-          {/* Hero visual */}
-          <div className="hero-visual-wrap">
-            <div className="hero-accent-card">
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
-                <span style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--slate-2)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Leads this week</span>
-                <span style={{ fontSize: '14px', fontWeight: 700, fontFamily: 'var(--font-display)', color: 'var(--amber)' }}>47</span>
+          {/* Feed card */}
+          <div style={{ background: 'var(--ink-2)', border: '1px solid var(--border-card)', borderRadius: 'var(--radius-lg)', overflow: 'hidden', boxShadow: '0 24px 64px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04)', position: 'relative' }}>
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '1px', background: 'linear-gradient(90deg, transparent, var(--amber), transparent)', opacity: 0.4 }} />
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid var(--border)', background: 'var(--ink-3)' }}>
+              <div style={{ display: 'flex', gap: '6px' }}>
+                <div style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#FF5F57' }} />
+                <div style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#FEBC2E' }} />
+                <div style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#28C840' }} />
               </div>
-              <svg width="100%" height="40" viewBox="0 0 168 40" fill="none" preserveAspectRatio="none">
-                <defs>
-                  <linearGradient id="sG" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#F5A623" stopOpacity="0.25" />
-                    <stop offset="100%" stopColor="#F5A623" stopOpacity="0" />
-                  </linearGradient>
-                </defs>
-                <path d="M0,34 C12,30 20,32 36,26 C52,20 60,24 84,16 C108,8 116,12 132,7 C148,2 156,4 168,2 L168,40 L0,40 Z" fill="url(#sG)" />
-                <path d="M0,34 C12,30 20,32 36,26 C52,20 60,24 84,16 C108,8 116,12 132,7 C148,2 156,4 168,2" stroke="var(--amber)" strokeWidth="1.8" fill="none" strokeLinecap="round" />
-                <circle cx="168" cy="2" r="3" fill="var(--amber)" />
-              </svg>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '7px' }}>
-                {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((d, i) => (
-                  <span key={d} style={{ fontSize: '9.5px', fontFamily: 'var(--font-mono)', color: i === 6 ? 'var(--amber)' : 'var(--slate-3)' }}>{d}</span>
-                ))}
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--slate-2)', letterSpacing: '0.05em' }}>leadflow — your feed</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '10.5px', fontFamily: 'var(--font-mono)', color: 'var(--green-score)' }}>
+                <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: 'var(--green-score)', animation: 'pulse 1.5s infinite' }} />
+                LIVE
               </div>
             </div>
-
-            <div style={{ background: 'var(--ink-2)', border: '1px solid var(--border-card)', borderRadius: 'var(--radius-lg)', overflow: 'hidden', boxShadow: '0 24px 64px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04)', position: 'relative' }}>
-              <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '1px', background: 'linear-gradient(90deg, transparent, var(--amber), transparent)', opacity: 0.4 }} />
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid var(--border)', background: 'var(--ink-3)' }}>
-                <div style={{ display: 'flex', gap: '6px' }}>
-                  <div style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#FF5F57' }} />
-                  <div style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#FEBC2E' }} />
-                  <div style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#28C840' }} />
-                </div>
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--slate-2)', letterSpacing: '0.05em' }}>leadflow — your feed</span>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '10.5px', fontFamily: 'var(--font-mono)', color: 'var(--green-score)' }}>
-                  <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: 'var(--green-score)', animation: 'pulse 1.5s infinite' }} />
-                  LIVE
-                </div>
+            <div style={{ padding: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                <span style={{ fontSize: '11.5px', color: 'var(--slate)', fontFamily: 'var(--font-mono)', letterSpacing: '0.02em' }}>UPDATED 8 MIN AGO</span>
+                <span style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', fontWeight: 500, background: 'rgba(61,219,122,0.12)', color: 'var(--green-score)', padding: '3px 8px', borderRadius: '100px', border: '1px solid rgba(61,219,122,0.20)' }}>● 12 new today</span>
               </div>
-              <div style={{ padding: '14px 14px 14px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-                  <span style={{ fontSize: '11.5px', color: 'var(--slate)', fontFamily: 'var(--font-mono)', letterSpacing: '0.02em' }}>UPDATED 8 MIN AGO</span>
-                  <span style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', fontWeight: 500, background: 'rgba(61,219,122,0.12)', color: 'var(--green-score)', padding: '3px 8px', borderRadius: '100px', border: '1px solid rgba(61,219,122,0.20)' }}>● 12 new today</span>
-                </div>
-                <div className="feed-filters">
-                  {['All', 'Score 8+', { l: 'Design', f: true }, { l: 'Remote', f: true }, '£300+/day'].map((f, i) => (
-                    <button key={i} className={`feed-filter ${i === 0 ? 'active' : ''}`}>
-                      {typeof f === 'object' && f.f ? (
-                        <svg width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" /></svg>
-                      ) : null}
-                      {typeof f === 'string' ? f : f.l}
-                    </button>
-                  ))}
-                </div>
-                {[
-                  { src: 'Reddit', cls: 'badge-src-reddit', title: 'Senior UX Designer — London (Fintech)', meta: '£350–450/day · Figma, Design Systems · IR35', score: '9.1', sc: 'score-hi' },
-                  { src: 'Reed', cls: 'badge-src-reed', title: 'Motion Designer — Advertising Agency', meta: '£300–380/day · After Effects · Inside IR35', score: '9.0', sc: 'score-hi' },
-                  { src: 'Reddit', cls: 'badge-src-reddit', title: 'Content Strategist — B2B SaaS, Remote', meta: '£350/day · Notion, Writing · 2-month contract', score: '8.5', sc: 'score-good' },
-                  { src: 'WWR', cls: 'badge-src-wwr', title: 'Full-Stack Developer — Remote UK', meta: '£60–75k · React, Node.js · Starts ASAP', score: '8.7', sc: 'score-good' },
-                  { src: 'WWR', cls: 'badge-src-wwr', title: 'Shopify Developer — E-commerce, Part-time', meta: '£45–55k · Liquid, JS · Ongoing', score: '7.8', sc: 'score-md' },
-                  { src: 'Remote OK', cls: 'badge-src-reed', title: 'DevOps Engineer — Full-time Remote', meta: '£70–90k · AWS, Terraform, K8s', score: '8.9', sc: 'score-good' },
-                ].map((lead, i) => (
-                  <div key={i} style={{
-                    background: 'var(--ink-3)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '10px 12px',
-                    marginBottom: i < 5 ? '6px' : '0',
-                    display: 'flex', alignItems: 'center', gap: '12px', transition: 'border-color 0.2s, transform 0.2s',
-                  }}>
-                    <span style={{
-                      fontSize: '9px', fontFamily: 'var(--font-mono)', fontWeight: 500, textTransform: 'uppercase',
-                      letterSpacing: '0.08em', padding: '3px 7px', borderRadius: '3px', flexShrink: 0, minWidth: '44px', textAlign: 'center',
-                    }} className={lead.cls}>{lead.src}</span>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: '13px', fontWeight: 500, color: 'var(--cream)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginBottom: '3px' }}>{lead.title}</div>
-                      <div style={{ fontSize: '11px', color: 'var(--slate-2)', fontFamily: 'var(--font-mono)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{lead.meta}</div>
-                    </div>
-                    <div style={{
-                      width: '38px', height: '38px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontFamily: 'var(--font-mono)', fontSize: '13px', fontWeight: 500, flexShrink: 0,
-                    }} className={lead.sc}>{lead.score}</div>
+              {leads.map((lead, i) => (
+                <div key={i} style={{
+                  background: 'var(--ink-3)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '12px 14px',
+                  marginBottom: i < leads.length - 1 ? '8px' : '0',
+                  display: 'flex', alignItems: 'center', gap: '12px',
+                  transition: 'border-color 0.2s, transform 0.2s',
+                }}>
+                  <span style={{
+                    fontSize: '9px', fontFamily: 'var(--font-mono)', fontWeight: 500, textTransform: 'uppercase',
+                    letterSpacing: '0.08em', padding: '3px 7px', borderRadius: '3px', flexShrink: 0, minWidth: '44px', textAlign: 'center',
+                  }} className={lead.srcClass}>{lead.src}</span>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: '13px', fontWeight: 500, color: 'var(--cream)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginBottom: '3px' }}>{lead.title}</div>
+                    <div style={{ fontSize: '11px', color: 'var(--slate-2)', fontFamily: 'var(--font-mono)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{lead.meta}</div>
                   </div>
-                ))}
-              </div>
+                  <div style={{
+                    width: '38px', height: '38px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontFamily: 'var(--font-mono)', fontSize: '13px', fontWeight: 500, flexShrink: 0,
+                  }} className={lead.scoreClass}>{lead.score}</div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -215,69 +207,19 @@ export default function LandingPage() {
       <section className="reveal" style={{ borderBottom: '1px solid var(--border)', padding: '60px 0', position: 'relative' }}>
         <div style={{ maxWidth: '1140px', margin: '0 auto', padding: '0 32px', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 0 }}>
           {[
-            {
-              num: '2,400', suf: '+', label: 'Leads processed weekly',
-              spark: <svg width="80" height="24" viewBox="0 0 80 24" fill="none"><polyline points="0,20 10,17 20,18 30,14 40,12 50,10 60,8 70,5 80,3" stroke="var(--amber)" strokeWidth="1.8" fill="none" strokeLinecap="round" opacity="0.5" /><polyline points="0,20 10,17 20,18 30,14 40,12 50,10 60,8 70,5 80,3" stroke="var(--amber)" strokeWidth="8" fill="none" strokeLinecap="round" opacity="0.15" style={{ filter: 'blur(4px)' }} /></svg>,
-            },
-            {
-              num: '340', suf: '+', label: 'Freelancers in beta',
-              spark: <svg width="80" height="24" viewBox="0 0 80 24" fill="none"><polyline points="0,22 10,19 20,20 30,16 40,15 50,12 60,9 70,7 80,4" stroke="var(--green-score)" strokeWidth="1.8" fill="none" strokeLinecap="round" opacity="0.5" /></svg>,
-            },
-            {
-              label: 'Refresh cycle — faster than your competition', num2: '6', suf: 'hr',
-              spark: <div style={{ marginTop: '10px', display: 'flex', gap: '4px', alignItems: 'flex-end', height: '24px' }}>
-                {[8,12,10,16,14,20,18,24].map((h, i) => (
-                  <div key={i} style={{ width: '6px', height: `${h}px`, background: i === 7 ? 'var(--amber)' : `rgba(245,166,35,${0.2 + i * 0.05})`, borderRadius: '2px' }} />
-                ))}
-              </div>,
-            },
-            {
-              num: '9.1', suf: '', label: 'Avg quality score of delivered leads',
-              spark: <div style={{ marginTop: '10px' }}>
-                <svg width="48" height="24" viewBox="0 0 48 24" fill="none">
-                  <rect x="0" y="16" width="48" height="4" rx="2" fill="rgba(255,255,255,0.06)" />
-                  <rect x="0" y="16" width="43.7" height="4" rx="2" fill="var(--green-score)" opacity="0.6" />
-                </svg>
-              </div>,
-            },
+            { num: '2,400', suf: '+', label: 'Leads processed' },
+            { num: '340', suf: '+', label: 'Freelancers in beta' },
+            { num: '', suf: '6hr', label: 'Refresh cycle', num2: '6' },
+            { num: '9.1', suf: '', label: 'Avg quality score' },
           ].map((m, i) => (
             <div key={i} style={{ padding: '24px 32px', borderRight: i < 3 ? '1px solid var(--border)' : 'none', position: 'relative' }}>
               <div style={{ fontFamily: 'var(--font-display)', fontSize: '42px', fontWeight: 900, color: 'var(--cream)', lineHeight: 1, marginBottom: '6px', letterSpacing: '-0.03em' }}>
                 {m.num2 ? <span style={{ color: 'var(--amber)' }}>{m.num2}</span> : m.num}
                 {m.suf && <span style={{ color: 'var(--amber)' }}>{m.suf}</span>}
               </div>
-              <div style={{ fontSize: '12px', color: 'var(--slate)', fontFamily: 'var(--font-mono)', letterSpacing: '0.03em', textTransform: 'uppercase', marginBottom: '8px' }}>{m.label}</div>
-              {m.spark}
+              <div style={{ fontSize: '12px', color: 'var(--slate)', fontFamily: 'var(--font-mono)', letterSpacing: '0.03em', textTransform: 'uppercase' }}>{m.label}</div>
             </div>
           ))}
-        </div>
-      </section>
-
-      {/* ── TESTIMONIALS ── */}
-      <section className="reveal section" style={{ padding: '72px 0', borderBottom: '1px solid var(--border)' }}>
-        <div style={{ maxWidth: '1140px', margin: '0 auto', padding: '0 32px' }}>
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10.5px', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--amber)', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <span style={{ display: 'inline-block', width: '20px', height: '1px', background: 'var(--amber)', opacity: 0.6 }} />
-            From the beta
-          </div>
-          <div className="testimonial-grid">
-            {[
-              { initials: 'JM', name: 'Jamie M.', role: 'Freelance UX Designer · London', quote: 'I used to spend Monday mornings trawling boards. Now I open LeadFlow, check the top-scored leads in 10 minutes, and get back to the work I\'m actually paid to do.' },
-              { initials: 'SR', name: 'Sarah R.', role: 'Freelance Copywriter · Remote UK', quote: 'The score system is the thing. I ignored anything under 8 for a week and ended up applying to fewer leads — and landing two conversations. That ratio has never happened on job boards.' },
-              { initials: 'DK', name: 'Dan K.', role: 'Freelance Full-Stack Dev · Manchester', quote: 'First day on the Pro trial I had 14 leads that matched my rate. That\'s more in one morning than I\'d found in a week of doing it manually.' },
-            ].map(t => (
-              <div key={t.initials} className="testimonial-card">
-                <div className="testimonial-quote">{t.quote}</div>
-                <div className="testimonial-author">
-                  <div className="testimonial-avatar">{t.initials}</div>
-                  <div>
-                    <div className="testimonial-name">{t.name}</div>
-                    <div className="testimonial-role">{t.role}</div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
         </div>
       </section>
 
@@ -289,31 +231,25 @@ export default function LandingPage() {
             Sound familiar?
           </div>
           <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(30px, 3.5vw, 46px)', fontWeight: 700, color: 'var(--cream)', lineHeight: 1.1, letterSpacing: '-0.025em', marginBottom: '36px' }}>
-            An hour of searching.<br />One lead that <em style={{ fontStyle: 'italic', color: 'var(--amber)' }}>almost</em> fits.<br />Every single day.
+            Most freelancers spend<br />more time <em style={{ fontStyle: 'italic', color: 'var(--amber)' }}>looking for work</em><br />than doing it.
           </h2>
-          <div className="problem-grid">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', marginBottom: '36px' }}>
             {[
-              { svg: <><path d="M5 22h14M5 2h14M17 22v-4.172a2 2 0 00-.586-1.414L12 12l-4.414 4.414A2 2 0 007 17.828V22M17 2v4.172a2 2 0 01-.586 1.414L12 12 7.586 7.586A2 2 0 017 6.172V2" /></>, text: <><strong style={{ color: 'var(--cream)', fontWeight: 500 }}>You lose an hour every morning</strong> checking Reddit, Reed, and job boards — just to find one lead that's close to relevant. Most aren't.</> },
-              { svg: <><line x1="1" y1="1" x2="23" y2="23" /><path d="M15.5 8.5A4 4 0 008 12v0a4 4 0 003 3.87M10 17H17M10 13H7" /></>, text: <><strong style={{ color: 'var(--cream)', fontWeight: 500 }}>You write a tailored proposal</strong> and then find out the budget was never listed anywhere. It was never going to match your rate.</> },
-              { svg: <><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" /></>, text: <><strong style={{ color: 'var(--cream)', fontWeight: 500 }}>You finish a contract and surface</strong> to an empty pipeline. Then the whole cycle starts again — from zero, under pressure.</> },
-            ].map((item, i) => (
-              <div key={i} className="problem-item">
-                <div className="problem-icon">
-                  <svg width="18" height="18" fill="none" stroke="var(--slate-2)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">{item.svg}</svg>
+              'You check Reddit, Reed, and job boards every day — and spend an hour finding one lead that\'s even close to relevant.',
+              'You write a tailored proposal, then find out the budget was never going to work — because it wasn\'t listed anywhere.',
+              'You land a contract and go heads-down — then surface weeks later with an empty pipeline and start the whole search again.',
+            ].map((text, i) => (
+              <div key={i} style={{ background: 'var(--ink-2)', border: '1px solid var(--border-card)', borderRadius: 'var(--radius-lg)', padding: '24px 20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div style={{ width: '32px', height: '32px', background: 'rgba(255,255,255,0.04)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <svg width="18" height="18" fill="none" stroke="var(--slate-2)" strokeWidth="1.6" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
                 </div>
-                <p style={{ fontSize: '14px', color: 'var(--slate)', lineHeight: 1.65 }}>{item.text}</p>
+                <p style={{ fontSize: '14px', color: 'var(--slate)', lineHeight: 1.65 }}>{text}</p>
               </div>
             ))}
           </div>
-          <div className="problem-resolution-wrap">
-            <div className="problem-resolution-icon">
-              <svg width="18" height="18" fill="none" stroke="var(--amber)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
-            </div>
-            <div>
-              <div className="problem-resolution-lead">Here's the fix</div>
-              <div className="problem-resolution-punch">LeadFlow doesn't replace your ability to<em>win work</em>. It just stops you wasting it on the <em>wrong leads</em>.</div>
-            </div>
-          </div>
+          <p style={{ fontSize: '16px', color: 'var(--cream)', fontWeight: 500, lineHeight: 1.55, paddingTop: '28px', borderTop: '1px solid var(--border)', maxWidth: '560px' }}>
+            LeadFlow doesn't replace your ability to win work. It just stops you wasting it on the wrong leads.
+          </p>
         </div>
       </section>
 
@@ -325,14 +261,14 @@ export default function LandingPage() {
             How it works
           </div>
           <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(30px, 3.5vw, 46px)', fontWeight: 700, color: 'var(--cream)', lineHeight: 1.1, letterSpacing: '-0.025em' }}>
-            Two minutes to set up.<br /><em style={{ fontStyle: 'italic', color: 'var(--amber)' }}>Better leads by tonight.</em>
+            You tell us what you're<br />worth. <em style={{ fontStyle: 'italic', color: 'var(--amber)' }}>We find the work.</em>
           </h2>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.6fr', gap: '80px', alignItems: 'start', marginTop: '64px' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
               {[
-                { num: '01', title: 'Tell us what good work looks like for you', desc: 'Your discipline, your day rate, the skills you want to be hired for. It takes about 2 minutes. That\'s how long it takes to never see an irrelevant lead again.' },
-                { num: '02', title: 'We trawl four platforms so you don\'t have to', desc: 'Reddit, Reed, We Work Remotely, and more — checked every 6 hours. Every lead is scored 1–10 on budget clarity, scope fit, and rate match. Anything below your threshold doesn\'t make it through.' },
-                { num: '03', title: 'Open 10 leads. Apply to the 3 worth your time', desc: 'Your feed shows scores at a glance. Every lead links directly to the original post — no platform in the way, no gatekeeping. You apply on the client\'s terms, as you always would.' },
+                { num: '01', title: 'Tell us what good work looks like for you', desc: 'Your skills, your day rate, the kind of contracts you actually want. Two minutes. That\'s how long it takes to stop seeing irrelevant leads forever.' },
+                { num: '02', title: 'We do the trawling so you don\'t have to', desc: 'Reddit, Reed, and We Work Remotely — checked every 6 hours. Every lead is scored 1–10 on budget clarity, scope, and fit. Bad leads don\'t make it through.' },
+                { num: '03', title: 'Spend 10 minutes on the ones worth your time', desc: 'Open your feed. Every lead links directly to the original post — no middleman, no gatekeeping. You apply on the client\'s platform with nothing in the way.' },
               ].map((s, i) => (
                 <div key={s.num} onClick={() => setActiveStep(i)}
                   style={{
@@ -365,23 +301,23 @@ export default function LandingPage() {
                 {activeStep === 0 && (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                      <div className="form-label">Discipline</div>
+                      <div style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--slate-2)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Discipline</div>
                       <div style={{ background: 'var(--ink-3)', border: '1px solid var(--border-card)', borderRadius: '4px', padding: '8px 12px', fontSize: '12.5px', color: 'var(--cream)', fontFamily: 'var(--font-mono)' }}>UX / Product Design</div>
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                      <div className="form-label">Day rate (£)</div>
+                      <div style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--slate-2)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Day rate (£)</div>
                       <div style={{ background: 'var(--ink-3)', border: '1px solid var(--border-card)', borderRadius: '4px', padding: '8px 12px', fontSize: '12.5px', color: 'var(--cream)', fontFamily: 'var(--font-mono)' }}>350 – 500</div>
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                      <div className="form-label">Skills</div>
+                      <div style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--slate-2)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Skills</div>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', marginTop: '4px' }}>
                         {['Figma', 'Design Systems', 'Prototyping', 'User Research', 'Fintech'].map(s => (
-                          <span key={s} className="skill-tag">{s}</span>
+                          <span key={s} style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', background: 'var(--amber-pale)', color: 'var(--amber)', border: '1px solid rgba(245,166,35,0.18)', borderRadius: '3px', padding: '3px 8px', letterSpacing: '0.04em' }}>{s}</span>
                         ))}
                       </div>
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                      <div className="form-label">Work type</div>
+                      <div style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--slate-2)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Work type</div>
                       <div style={{ background: 'var(--ink-3)', border: '1px solid var(--border-card)', borderRadius: '4px', padding: '8px 12px', fontSize: '12.5px', color: 'var(--cream)', fontFamily: 'var(--font-mono)' }}>Contract · Remote / London</div>
                     </div>
                   </div>
@@ -392,7 +328,7 @@ export default function LandingPage() {
                       <span style={{ fontSize: '12px', fontFamily: 'var(--font-mono)', color: 'var(--slate)' }}>Senior UX Designer — Fintech</span>
                       <span style={{ fontFamily: 'var(--font-mono)', fontSize: '20px', fontWeight: 500, color: 'var(--green-score)' }}>9.1</span>
                     </div>
-                    <div className="score-breakdown">
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                       {[
                         { label: 'Budget clarity', w: '95%', v: '9.5' },
                         { label: 'Scope detail', w: '88%', v: '8.8' },
@@ -400,10 +336,12 @@ export default function LandingPage() {
                         { label: 'Timeline clarity', w: '82%', v: '8.2' },
                         { label: 'Rate signal', w: '90%', v: '9.0' },
                       ].map(r => (
-                        <div key={r.label} className="score-row">
-                          <span className="score-row-label">{r.label}</span>
-                          <div className="score-bar-track"><div className="score-bar-fill" style={{ width: r.w }} /></div>
-                          <span className="score-row-val">{r.v}</span>
+                        <div key={r.label} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--slate)', minWidth: '100px' }}>{r.label}</span>
+                          <div style={{ flex: 1, height: '4px', background: 'var(--border)', borderRadius: '2px', overflow: 'hidden' }}>
+                            <div style={{ height: '100%', borderRadius: '2px', background: 'var(--green-score)', width: r.w, transition: 'width 1s ease' }} />
+                          </div>
+                          <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--slate)', minWidth: '28px', textAlign: 'right' }}>{r.v}</span>
                         </div>
                       ))}
                     </div>
@@ -417,14 +355,11 @@ export default function LandingPage() {
                       { src: 'WWR', cls: 'badge-src-wwr', title: 'Product Designer — Fully Remote', meta: '£55–65k', score: '8.3', scls: 'score-hi' },
                       { src: 'Reed', cls: 'badge-src-reed', title: 'Brand Identity — 3-month contract', meta: '£40k pro rata', score: '7.4', scls: 'score-md' },
                     ].map((l, i) => (
-                      <div key={i} className="lead-item" style={{ marginBottom: i < 2 ? '6px' : '0' }}>
-                        <span className={`src-badge ${l.cls}`} style={{
-                          fontSize: '9px', fontFamily: 'var(--font-mono)', fontWeight: 500, textTransform: 'uppercase',
-                          letterSpacing: '0.08em', padding: '3px 7px', borderRadius: '3px', flexShrink: 0, minWidth: '44px', textAlign: 'center',
-                        } as React.CSSProperties}>{l.src}</span>
-                        <div className="lead-text">
-                          <div className="lead-title" style={{ fontSize: '12px' }}>{l.title}</div>
-                          <div className="lead-meta">{l.meta}</div>
+                      <div key={i} style={{ background: 'var(--ink-3)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '12px 14px', marginBottom: i < 2 ? '6px' : '0', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <span style={{ fontSize: '9px', fontFamily: 'var(--font-mono)', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.08em', padding: '3px 7px', borderRadius: '3px', flexShrink: 0, minWidth: '44px', textAlign: 'center' }} className={l.cls}>{l.src}</span>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontSize: '12px', fontWeight: 500, color: 'var(--cream)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginBottom: '3px' }}>{l.title}</div>
+                          <div style={{ fontSize: '11px', color: 'var(--slate-2)', fontFamily: 'var(--font-mono)' }}>{l.meta}</div>
                         </div>
                         <div style={{ width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-mono)', fontSize: '11px', fontWeight: 500, flexShrink: 0 }} className={l.scls}>{l.score}</div>
                       </div>
@@ -447,28 +382,31 @@ export default function LandingPage() {
           <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(30px, 3.5vw, 46px)', fontWeight: 700, color: 'var(--cream)', lineHeight: 1.1, letterSpacing: '-0.025em', marginBottom: '0' }}>
             You already know how to<br />win the work. <em style={{ fontStyle: 'italic', color: 'var(--amber)' }}>We find it.</em>
           </h2>
-          <div className="features-grid">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1px', background: 'var(--border)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', overflow: 'hidden', marginTop: '64px' }}>
             {[
-              { icon: 'star', title: 'A score before you even open it', desc: 'Every lead is rated 1–10 before it reaches your feed — on budget clarity, scope detail, and how well it matches your skills and rate. You prioritise in seconds, not after reading four paragraphs.' },
-              { icon: 'clock', title: 'Leads hours old, not days old', desc: 'We check every 6 hours. By the time you open your feed, you\'re still near the front of the queue — not buried under 40 applications from people who saw it two days before you.' },
-              { icon: 'filter', title: 'Every lead you see was put there for you', desc: 'If it doesn\'t match your skills or rate, it never reaches your feed. No scrolling past listings for roles you can\'t fill. Every item is there deliberately — filtered against your profile, not a generic algorithm.' },
-              { icon: 'pound', title: 'See the budget before you write a word', desc: 'Leads without a stated budget get scored down automatically. Real numbers are always visible. Stop spending an hour on a proposal that was never going to pay your rate — because you couldn\'t see the number until the end.' },
-              { icon: 'link', title: 'Apply directly — we\'re never in the way', desc: 'Every lead links straight to the original post on the client\'s platform. You deal with them directly. LeadFlow is a filter, not a middleman. No platform commission, no mediated conversation, no gatekeeping.' },
-              { icon: 'grid', title: 'Nothing promising slips through the cracks', desc: 'Track everything from first look to won contract — one clean pipeline view, no spreadsheet, no "wait, did I reply to that one?" Every application has a clear status. Nothing gets lost.' },
+              { icon: 'star', title: 'Know which leads are worth opening', desc: 'Every lead is scored 1–10 before you see it. Budget clarity, scope detail, skill match — you prioritise in seconds, not after 20 minutes of digging.' },
+              { icon: 'clock', title: 'Never miss work posted this morning', desc: 'We check every 6 hours. By the time you open your feed, the best leads are hours old — not days. You\'re never competing from the back of the queue.' },
+              { icon: 'user', title: 'Only see leads that are actually for you', desc: 'Leads that don\'t match your skills or rate never reach your feed. No scrolling past irrelevant listings. Every item you see was put there deliberately.' },
+              { icon: 'cash', title: 'Stop applying blind — see the budget first', desc: 'Real numbers, always visible. Leads without stated budgets are scored down automatically. No more writing proposals for work that was never going to pay your rate.' },
+              { icon: 'link', title: 'Apply directly — we never get in the way', desc: 'Every lead links straight to the original post. You deal with the client directly, on their platform, on their terms. We\'re a filter, not a middleman.' },
+              { icon: 'grid', title: 'Always know where each application stands', desc: 'Track everything from first look to won contract. No spreadsheet, no memory required — just a clear pipeline so nothing promising slips through.' },
             ].map((f, i) => (
-              <div key={i} className="feature-cell" data-num={String(i + 1).padStart(2, '0')}>
-                <div className="feature-icon">
-                  <svg width="28" height="28" fill="none" stroke="var(--amber)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                    {f.icon === 'star' && <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6L12 2z" />}
-                    {f.icon === 'clock' && <><circle cx="12" cy="12" r="9" /><polyline points="12 7 12 12 15.5 14.5" /></>}
-                    {f.icon === 'filter' && <><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" /></>}
-                    {f.icon === 'pound' && <><path d="M8 16h9M7 20h10M10 16v-5a3 3 0 016 0v1M10 11a3 3 0 01-3 3H7" /></>}
-                    {f.icon === 'link' && <><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></>}
-                    {f.icon === 'grid' && <><rect x="2" y="3" width="5" height="18" rx="1" /><rect x="9.5" y="3" width="5" height="12" rx="1" /><rect x="17" y="3" width="5" height="7" rx="1" /></>}
+              <div key={i} style={{ background: 'var(--ink-2)', padding: '32px 28px', transition: 'background 0.2s', position: 'relative' }}>
+                <div style={{ position: 'absolute', top: '20px', right: '20px', fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--slate-3)', letterSpacing: '0.06em' }}>
+                  {String(i + 1).padStart(2, '0')}
+                </div>
+                <div style={{ width: '36px', height: '36px', marginBottom: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <svg width="22" height="22" fill="none" stroke="var(--amber)" strokeWidth="1.6" viewBox="0 0 24 24">
+                    {f.icon === 'star' && <path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.14 2 9.27l6.91-1.01L12 2z" />}
+                    {f.icon === 'clock' && <><circle cx="12" cy="12" r="10" /><polyline points="12,6 12,12 16,14" /></>}
+                    {f.icon === 'user' && <><circle cx="12" cy="8" r="4" /><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" /></>}
+                    {f.icon === 'cash' && <><line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" /></>}
+                    {f.icon === 'link' && <><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07L11 5.93" /><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07L12.9 19" /></>}
+                    {f.icon === 'grid' && <><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><path d="M14 17.5h7M17.5 14v7" /></>}
                   </svg>
                 </div>
-                <div className="feature-title">{f.title}</div>
-                <div className="feature-desc">{f.desc}</div>
+                <div style={{ fontSize: '14.5px', fontWeight: 600, color: 'var(--cream)', marginBottom: '8px' }}>{f.title}</div>
+                <div style={{ fontSize: '13px', color: 'var(--slate)', lineHeight: 1.65 }}>{f.desc}</div>
               </div>
             ))}
           </div>
@@ -483,102 +421,111 @@ export default function LandingPage() {
             Pricing
           </div>
           <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(30px, 3.5vw, 46px)', fontWeight: 700, color: 'var(--cream)', lineHeight: 1.1, letterSpacing: '-0.025em' }}>
-            No hidden steps. Here's<br /><em style={{ fontStyle: 'italic', color: 'var(--amber)' }}>exactly</em> what happens.
+            How your free trial works.
           </h2>
           <p style={{ fontSize: '15px', color: 'var(--slate)', marginTop: '12px', maxWidth: '480px', lineHeight: 1.65 }}>
-            Start with the full Pro feed today — no card, no commitment. We'll tell you before anything changes.
+            No pressure. Here's exactly what happens — we think you should know before you start.
           </p>
 
-          <div className="trial-timeline" style={{ margin: '40px 0 48px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 0, margin: '40px 0 48px', maxWidth: '560px', background: 'var(--ink-2)', border: '1px solid var(--border-card)', borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
             {[
               { day: 'Today', amber: true, desc: '<strong>You unlock the full Pro feed.</strong> Unlimited leads, AI scores, skill filtering — everything, immediately. No card needed.' },
               { day: 'Day 5', amber: false, desc: '<strong>We email you a heads-up.</strong> Two days before anything happens, we\'ll remind you the trial is ending — so you can decide without pressure.' },
               { day: 'Day 7', amber: false, desc: '<strong>Your first charge, if you stay.</strong> Cancel any time before then and you pay nothing. One click in your account settings.' },
             ].map((t, i) => (
-              <div key={t.day} className="trial-step" style={{ borderBottom: i < 2 ? '1px solid var(--border)' : 'none' }}>
-                <div className="trial-day" style={{ color: t.amber ? 'var(--amber)' : 'var(--amber)' }}>{t.day}</div>
-                <div className="trial-connector">
-                  <div className={`trial-dot ${t.amber ? 'trial-dot-amber' : ''}`} />
-                  {i < 2 && <div className="trial-line" />}
+              <div key={t.day} style={{ display: 'grid', gridTemplateColumns: '64px 28px 1fr', padding: '20px 24px', borderBottom: i < 2 ? '1px solid var(--border)' : 'none' }}>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: t.amber ? 'var(--amber)' : 'var(--slate-2)', letterSpacing: '0.08em', textTransform: 'uppercase', paddingTop: '2px', fontWeight: 500 }}>{t.day}</div>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: '4px' }}>
+                  <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: t.amber ? 'var(--amber)' : 'var(--slate-3)', border: t.amber ? '1px solid var(--amber)' : '1px solid var(--border-card)', flexShrink: 0, zIndex: 1 }} />
+                  {i < 2 && <div style={{ width: '1px', flex: 1, background: 'var(--border-card)', marginTop: '6px', minHeight: '24px' }} />}
                 </div>
-                <div className="trial-desc" dangerouslySetInnerHTML={{ __html: t.desc }} />
+                <div style={{ fontSize: '13.5px', color: 'var(--slate)', lineHeight: 1.6 }} dangerouslySetInnerHTML={{ __html: t.desc }} />
               </div>
             ))}
           </div>
 
-          <div className="pricing-toggle-row">
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '40px', flexWrap: 'wrap', gap: '16px' }}>
             <span style={{ fontSize: '14px', fontWeight: 500, color: 'var(--slate)' }}>Choose a plan</span>
-            <div className="pricing-toggle">
-              <span className="toggle-label active" style={{ color: annual ? 'var(--slate)' : 'var(--cream)' }}>Monthly</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <span style={{ fontSize: '13px', fontFamily: 'var(--font-mono)', color: annual ? 'var(--slate)' : 'var(--cream)' }}>Monthly</span>
               <button onClick={() => setAnnual(!annual)}
-                className={`toggle-switch ${annual ? 'on' : ''}`}
+                style={{ width: '42px', height: '24px', borderRadius: '100px', background: annual ? 'var(--amber)' : 'var(--slate-3)', position: 'relative', cursor: 'pointer', border: 'none', transition: 'background 0.2s' }}
                 role="switch" aria-checked={annual}>
-                <div className="toggle-knob" />
+                <div style={{ position: 'absolute', top: '3px', left: '3px', width: '18px', height: '18px', borderRadius: '50%', background: 'white', transition: 'transform 0.2s', transform: annual ? 'translateX(18px)' : 'translateX(0)' }} />
               </button>
-              <span className="toggle-label" style={{ color: annual ? 'var(--cream)' : 'var(--slate)' }}>Annual</span>
-              <span className="annual-badge" style={{ opacity: annual ? 1 : 0.4 }}>Save 2 months</span>
+              <span style={{ fontSize: '13px', fontFamily: 'var(--font-mono)', color: annual ? 'var(--cream)' : 'var(--slate)' }}>Annual</span>
+              <span style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', background: 'var(--amber-pale)', color: 'var(--amber)', border: '1px solid rgba(245,166,35,0.20)', padding: '3px 9px', borderRadius: '100px', letterSpacing: '0.04em', opacity: annual ? 1 : 0.4 }}>Save 2 months</span>
             </div>
           </div>
 
-          <div className="pricing-grid-2">
-            <div className="pricing-card-2">
-              <div className="plan-tier">Free</div>
-              <div className="plan-cost-row">
-                <div className="plan-big-price">£0</div>
-                <div className="plan-cost-meta">forever · no expiry</div>
-              </div>
-              <div className="plan-desc-2">For exploring. 3 leads a week to see if the quality is worth it — no deadline, no catch.</div>
-              <Link href="/auth/signup" className="plan-btn plan-btn-secondary" style={{ marginBottom: '24px', display: 'block', width: '100%', textAlign: 'center', padding: '12px', borderRadius: 'var(--radius)', fontSize: '13.5px', fontWeight: 600, textDecoration: 'none', fontFamily: 'var(--font-body)', transition: 'all 0.15s', background: 'transparent', color: 'var(--slate)', border: '1px solid var(--border-card)' }}>Start with free plan</Link>
-              <div className="plan-feat-group">
-                <div className="plan-feat-label">What's included</div>
-                {['3 leads per week', 'AI quality scores visible', 'Direct links to original posts'].map(f => (
-                  <div key={f} className="plan-feat-row">
-                    <svg width="14" height="14" fill="none" stroke="var(--green-score)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5" /></svg>
-                    {f}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', marginTop: '56px' }}>
+            {[
+              {
+                tier: 'Free', price: '0', cadence: 'forever — no expiry', desc: 'Good if you\'re exploring. 3 leads a week, always — no trial, no deadline, no catch.',
+                features: ['3 leads per week', 'AI quality scores visible', 'Direct links to original posts'],
+                featured: false, btnText: 'Start with free plan', btnClass: 'plan-btn-secondary',
+              },
+              {
+                tier: 'Pro', price: annual ? '24' : '29', cadence: 'per month · cancel any time', desc: 'For freelancers who want a steady pipeline. Unlimited leads, filtered to your skills and rate.',
+                features: ['Unlimited leads', 'Skill + rate filtering', 'Daily email digest', 'Pipeline tracking', 'Priority support'],
+                featured: true, badge: 'Most popular', btnText: 'Start my 7-day free trial', btnClass: 'plan-btn-primary',
+                guarantee: true,
+              },
+              {
+                tier: 'Growth', price: annual ? '40' : '49', cadence: 'per month · cancel any time', desc: 'For freelancers who want every edge — alerts, analytics, and a dedicated onboarding call.',
+                features: ['Everything in Pro', 'Custom lead alerts', 'Analytics dashboard', 'CSV export', 'Dedicated onboarding call'],
+                featured: false, btnText: 'Start my 7-day free trial', btnClass: 'plan-btn-secondary',
+                guarantee: true,
+              },
+            ].map(p => (
+              <div key={p.tier} style={{
+                background: p.featured ? 'linear-gradient(160deg, var(--ink-3), var(--ink-2))' : 'var(--ink-2)',
+                border: p.featured ? `1px solid var(--amber)` : '1px solid var(--border-card)',
+                borderRadius: 'var(--radius-lg)', padding: '32px', position: 'relative',
+                transition: 'transform 0.2s, box-shadow 0.2s',
+                boxShadow: p.featured ? '0 0 0 1px rgba(245,166,35,0.15), 0 12px 40px rgba(245,166,35,0.08)' : 'none',
+              }}>
+                {p.badge && (
+                  <div style={{ position: 'absolute', top: '-12px', left: '50%', transform: 'translateX(-50%)', fontSize: '10px', fontFamily: 'var(--font-mono)', fontWeight: 500, background: 'var(--amber)', color: 'var(--ink)', padding: '4px 14px', borderRadius: '100px', letterSpacing: '0.06em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
+                    {p.badge}
                   </div>
-                ))}
-              </div>
-              <div className="plan-upgrade-hint">
-                <svg width="13" height="13" fill="none" stroke="var(--amber)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
-                Upgrade to Pro for unlimited leads + skill filtering
-              </div>
-            </div>
-
-            <div className="pricing-card-2 pricing-card-featured">
-              <div className="plan-badge-2">
-                <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21 12 17.77 5.82 21 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
-                Most popular · 7-day free trial
-              </div>
-              <div className="plan-tier">Pro</div>
-              <div className="plan-cost-row">
-                <div className="plan-big-price">£{annual ? '24' : '29'}</div>
-                <div className="plan-cost-meta" style={{ color: 'var(--slate-2)' }}>{annual ? 'per month, billed annually' : 'per month · cancel any time'}</div>
-              </div>
-              {annual && <div className="plan-saving">You save £70 vs monthly — 2 months free</div>}
-              <div className="plan-desc-2">For freelancers who want a steady pipeline without the daily grind of job board trawling.</div>
-              <Link href="/auth/signup" className="plan-btn plan-btn-primary" style={{ marginBottom: '12px', display: 'block', width: '100%', textAlign: 'center', padding: '12px', borderRadius: 'var(--radius)', fontSize: '13.5px', fontWeight: 600, textDecoration: 'none', fontFamily: 'var(--font-body)', transition: 'all 0.15s', background: 'var(--amber)', color: 'var(--ink)', border: 'none' }}>Start my 7-day free trial</Link>
-              <div className="plan-guarantee" style={{ marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11.5px', fontFamily: 'var(--font-mono)', color: 'var(--slate-2)', letterSpacing: '0.02em' }}>
-                <svg width="13" height="13" fill="none" stroke="var(--green-score)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
-                First charge on day 7. We remind you on day 5.
-              </div>
-              <div className="plan-feat-group">
-                <div className="plan-feat-label">Everything in Free, plus</div>
-                {[
-                  'Unlimited leads, every 6 hours',
-                  'Skill + rate filtering',
-                  'Daily email digest',
-                  'Pipeline tracking',
-                  'Custom lead alerts',
-                  'Analytics dashboard + CSV export',
-                  'Priority support + onboarding call',
-                ].map(f => (
-                  <div key={f} className="plan-feat-row">
-                    <svg width="14" height="14" fill="none" stroke="var(--amber)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5" /></svg>
-                    {f}
+                )}
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--slate)', textTransform: 'uppercase', letterSpacing: '0.10em', marginBottom: '12px' }}>{p.tier}</div>
+                <div style={{ fontFamily: 'var(--font-display)', fontSize: '48px', fontWeight: 900, color: 'var(--cream)', lineHeight: 1, letterSpacing: '-0.03em', marginBottom: '4px' }}>
+                  <sup style={{ fontSize: '22px', fontFamily: 'var(--font-body)', fontWeight: 600, verticalAlign: 'top', marginTop: '10px', display: 'inline-block' }}>£</sup>{p.price}
+                </div>
+                <div style={{ fontSize: '12px', fontFamily: 'var(--font-mono)', color: 'var(--slate-2)', marginBottom: '8px' }}>{p.cadence}</div>
+                <div style={{ fontSize: '13px', color: 'var(--slate)', lineHeight: 1.55, marginBottom: '24px', paddingBottom: '24px', borderBottom: '1px solid var(--border)' }}>{p.desc}</div>
+                <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '28px', padding: 0 }}>
+                  {p.features.map(f => (
+                    <li key={f} style={{ fontSize: '13px', color: 'var(--slate)', display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+                      <span style={{ color: 'var(--amber)', fontFamily: 'var(--font-mono)', fontSize: '11px', flexShrink: 0, marginTop: '2px' }}>→</span>
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+                <Link href="/auth/signup" style={{
+                  display: 'block', width: '100%', textAlign: 'center', padding: '12px', borderRadius: 'var(--radius)',
+                  fontSize: '13.5px', fontWeight: 600, textDecoration: 'none', fontFamily: 'var(--font-body)',
+                  transition: 'all 0.15s',
+                  ...(p.featured
+                    ? { background: 'var(--amber)', color: 'var(--ink)', border: 'none' }
+                    : { background: 'transparent', color: 'var(--slate)', border: '1px solid var(--border-card)' }
+                  ),
+                }}
+                  className={p.featured ? '' : ''}
+                  onMouseEnter={e => { if (!p.featured) { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.20)'; e.currentTarget.style.color = 'var(--cream)' }}}
+                  onMouseLeave={e => { if (!p.featured) { e.currentTarget.style.borderColor = 'var(--border-card)'; e.currentTarget.style.color = 'var(--slate)' }}}>
+                  {p.btnText}
+                </Link>
+                {p.guarantee && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '12px', fontSize: '11.5px', fontFamily: 'var(--font-mono)', color: 'var(--slate-2)', letterSpacing: '0.02em' }}>
+                    <svg width="13" height="13" fill="none" stroke="var(--green-score)" strokeWidth="1.8" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
+                    First charge on day 7. We remind you on day 5.
                   </div>
-                ))}
+                )}
               </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>
@@ -591,17 +538,18 @@ export default function LandingPage() {
             FAQ
           </div>
           <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(30px, 3.5vw, 46px)', fontWeight: 700, color: 'var(--cream)', lineHeight: 1.1, letterSpacing: '-0.025em' }}>
-            Questions worth asking<br /><em style={{ fontStyle: 'italic', color: 'var(--amber)' }}>before you start.</em>
+            Things worth knowing<br />before you start.
           </h2>
-          <div className="faq-list">
+          <div style={{ marginTop: '56px', borderTop: '1px solid var(--border)' }}>
             {faqs.map((faq, i) => (
-              <div key={i} className="faq-item">
-                <button onClick={() => setOpenFaq(openFaq === i ? null : i)} className="faq-btn" aria-expanded={openFaq === i}>
+              <div key={i} style={{ borderBottom: '1px solid var(--border)' }}>
+                <button onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                  style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '22px 0', background: 'none', border: 'none', cursor: 'pointer', fontSize: '14.5px', fontWeight: 500, color: 'var(--cream)', textAlign: 'left', gap: '24px', fontFamily: 'var(--font-body)' }}>
                   {faq.q}
-                  <span className="faq-icon" style={{ transform: openFaq === i ? 'rotate(45deg)' : 'rotate(0)', color: openFaq === i ? 'var(--amber)' : 'var(--slate-2)' }}>+</span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '18px', color: openFaq === i ? 'var(--amber)' : 'var(--slate-2)', flexShrink: 0, transition: 'transform 0.25s, color 0.15s', width: '20px', textAlign: 'center', transform: openFaq === i ? 'rotate(45deg)' : 'rotate(0)' }}>+</span>
                 </button>
-                <div className="faq-answer" style={{ maxHeight: openFaq === i ? '200px' : '0' }}>
-                  <div className="faq-answer-inner">{faq.a}</div>
+                <div style={{ maxHeight: openFaq === i ? '200px' : '0', overflow: 'hidden', transition: 'max-height 0.35s ease, padding 0.35s ease' }}>
+                  <div style={{ paddingBottom: '22px', fontSize: '14px', color: 'var(--slate)', lineHeight: 1.7, maxWidth: '680px' }}>{faq.a}</div>
                 </div>
               </div>
             ))}
@@ -610,12 +558,20 @@ export default function LandingPage() {
       </section>
 
       {/* ── CTA ── */}
-      <section className="cta-section reveal">
-        <div className="cta-inner">
-          <div className="eyebrow" style={{ justifyContent: 'center' }}>Get started</div>
-          <h2>Your next client lead<br />arrives in <em>under an hour.</em></h2>
-          <p>Set up your profile in 2 minutes. We'll scan the boards and push your first matched, scored leads before you've finished your next coffee. No card. We remind you on day 5 before anything gets charged.</p>
-          <div className="cta-btns">
+      <section className="reveal" style={{ padding: '120px 0', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.03) 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
+        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '700px', height: '400px', background: 'radial-gradient(ellipse, rgba(245,166,35,0.06) 0%, transparent 65%)', pointerEvents: 'none' }} />
+        <div style={{ position: 'relative', zIndex: 1, maxWidth: '640px', margin: '0 auto', padding: '0 32px', textAlign: 'center' }}>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10.5px', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--amber)', marginBottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+            Get started
+          </div>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(34px, 4.5vw, 56px)', fontWeight: 900, color: 'var(--cream)', lineHeight: 1.06, letterSpacing: '-0.03em', marginBottom: '20px' }}>
+            Your first leads are<br /><em style={{ fontStyle: 'italic', color: 'var(--amber)' }}>4 minutes away.</em>
+          </h2>
+          <p style={{ fontSize: '16px', color: 'var(--slate)', marginBottom: '40px', lineHeight: 1.6 }}>
+            Build your profile, see your matched leads instantly. No card. We'll remind you before anything gets charged.
+          </p>
+          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
             <Link href="/auth/signup" className="btn-primary">Start my free trial →</Link>
             <Link href="/auth/login" className="btn-secondary">Log in</Link>
           </div>
@@ -626,52 +582,60 @@ export default function LandingPage() {
       </section>
 
       {/* ── STICKY BAR ── */}
-      <div className={`sticky-bar ${showSticky ? 'visible' : ''}`}>
-        <p><span style={{ color: 'var(--cream)' }}>7-day free trial</span> · Full Pro feed from day one · We remind you on day 5 · Cancel any time</p>
+      <div style={{
+        position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 99,
+        background: 'rgba(22,26,35,0.95)', backdropFilter: 'blur(12px)',
+        borderTop: '1px solid var(--border-card)',
+        padding: '12px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        transform: showSticky ? 'translateY(0)' : 'translateY(100%)',
+        opacity: showSticky ? 1 : 0,
+        transition: 'transform 0.35s ease, opacity 0.35s ease',
+      }}>
+        <p style={{ fontSize: '13.5px', color: 'var(--slate)' }}>
+          <span style={{ color: 'var(--cream)' }}>Free trial, 7 days</span> · We remind you before day 7 · No card to start
+        </p>
         <Link href="/auth/signup" className="btn-amber">Start my free trial →</Link>
       </div>
 
       {/* ── FOOTER ── */}
-      <footer>
-        <div className="footer-inner">
-          <div className="footer-grid">
-            <div className="footer-brand">
-              <Link href="/" className="logo" style={{ marginBottom: '4px' }}>
-                <div className="logo-mark">LF</div>
+      <footer style={{ borderTop: '1px solid var(--border)', padding: '60px 0 40px' }}>
+        <div style={{ maxWidth: '1140px', margin: '0 auto', padding: '0 32px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr 1fr', gap: '48px', marginBottom: '48px' }}>
+            <div>
+              <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none', fontSize: '15px', fontWeight: 600, letterSpacing: '-0.01em', marginBottom: '4px', color: 'var(--cream)' }}>
+                <div style={{ width: '28px', height: '28px', background: 'var(--amber)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 700, color: 'var(--ink)', fontFamily: 'var(--font-mono)' }}>LF</div>
                 LeadFlow
               </Link>
-              <p>Quality freelance leads, scored by AI, delivered every 6 hours. Stop hunting, start choosing.</p>
+              <p style={{ fontSize: '12.5px', color: 'var(--slate-2)', lineHeight: 1.6, marginTop: '12px', maxWidth: '220px' }}>Quality freelance leads, scored by AI, delivered every 6 hours. Stop hunting, start choosing.</p>
             </div>
-            <div className="footer-col">
-              <h5>Product</h5>
-              <ul>
-                <li><a href="#features">Features</a></li>
-                <li><a href="#pricing">Pricing</a></li>
-                <li><a href="/blog">Blog</a></li>
-              </ul>
-            </div>
-            <div className="footer-col">
-              <h5>Company</h5>
-              <ul>
-                <li><a href="/about">About</a></li>
-                <li><a href="/contact">Contact</a></li>
-                <li><a href="/careers">Careers</a></li>
-              </ul>
-            </div>
-            <div className="footer-col">
-              <h5>Legal</h5>
-              <ul>
-                <li><a href="/privacy">Privacy policy</a></li>
-                <li><a href="/terms">Terms of service</a></li>
-                <li><a href="/cookies">Cookie policy</a></li>
-              </ul>
-            </div>
+            {[
+              { title: 'Product', links: [{ label: 'Features', href: '#features' }, { label: 'Pricing', href: '#pricing' }, { label: 'Blog', href: '/blog' }] },
+              { title: 'Company', links: [{ label: 'About', href: '/about' }, { label: 'Contact', href: '/contact' }, { label: 'Careers', href: '/careers' }] },
+              { title: 'Legal', links: [{ label: 'Privacy policy', href: '/privacy' }, { label: 'Terms of service', href: '/terms' }, { label: 'Cookie policy', href: '/cookies' }] },
+            ].map(col => (
+              <div key={col.title}>
+                <h5 style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', letterSpacing: '0.12em', color: 'var(--slate-2)', marginBottom: '16px', margin: '0 0 16px 0', fontWeight: 400 }}>{col.title}</h5>
+                <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '10px', padding: 0, margin: 0 }}>
+                  {col.links.map(link => (
+                    <li key={link.label}>
+                      <a href={link.href} style={{ fontSize: '13px', color: 'var(--slate-2)', textDecoration: 'none', transition: 'color 0.15s' }}
+                        onMouseEnter={e => e.currentTarget.style.color = 'var(--cream)'}
+                        onMouseLeave={e => e.currentTarget.style.color = 'var(--slate-2)'}>{link.label}</a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
           </div>
-          <div className="footer-bottom">
-            <span className="footer-copy">&copy; {new Date().getFullYear()} LeadFlow. All rights reserved.</span>
-            <div className="footer-links">
-              <a href="/privacy">Privacy</a>
-              <a href="/terms">Terms</a>
+          <div style={{ paddingTop: '28px', borderTop: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: '12px', fontFamily: 'var(--font-mono)', color: 'var(--slate-2)' }}>&copy; {new Date().getFullYear()} LeadFlow. All rights reserved.</span>
+            <div style={{ display: 'flex', gap: '20px' }}>
+              <a href="/privacy" style={{ fontSize: '12px', fontFamily: 'var(--font-mono)', color: 'var(--slate-2)', textDecoration: 'none', transition: 'color 0.15s' }}
+                onMouseEnter={e => e.currentTarget.style.color = 'var(--cream)'}
+                onMouseLeave={e => e.currentTarget.style.color = 'var(--slate-2)'}>Privacy</a>
+              <a href="/terms" style={{ fontSize: '12px', fontFamily: 'var(--font-mono)', color: 'var(--slate-2)', textDecoration: 'none', transition: 'color 0.15s' }}
+                onMouseEnter={e => e.currentTarget.style.color = 'var(--cream)'}
+                onMouseLeave={e => e.currentTarget.style.color = 'var(--slate-2)'}>Terms</a>
             </div>
           </div>
         </div>

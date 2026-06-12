@@ -18,7 +18,7 @@ function scorePassword(pw: string) {
 }
 
 const strengthLabels = ['Weak', 'Fair', 'Strong', 'Very strong']
-const strengthColors = ['var(--red-score)', 'var(--yellow-score)', 'var(--amber)', 'var(--green-score)']
+const strengthColors = ['#DC2626', '#E8A020', '#166B42', '#166B42']
 
 const roles = [
   { id: 'developer', icon: 'ti-code', label: 'Developer' },
@@ -64,15 +64,15 @@ export default function SignupPage() {
   return (
     <div className="min-h-screen flex">
       {/* Left panel */}
-      <div className="hidden lg:flex w-[40%] flex-col justify-between p-12" style={{ background: 'var(--ink-2)' }}>
-        <div className="flex items-center gap-2 text-sm font-bold" style={{ color: 'var(--cream)' }}>
-          <span className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold" style={{ background: 'var(--amber)', color: 'var(--ink)' }}>LF</span>
+      <div className="hidden lg:flex w-[40%] flex-col justify-between p-12" style={{ background: 'var(--green-900)' }}>
+        <div className="flex items-center gap-2 text-white text-sm font-bold">
+          <span className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-xs font-bold" style={{ background: 'var(--amber-500)' }}>LF</span>
           LeadFlow
         </div>
         <div>
-          <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold mb-4" style={{ background: 'var(--amber)', color: 'var(--ink)' }}>MJ</div>
-          <p className="text-sm leading-relaxed" style={{ color: 'var(--slate)' }}>&ldquo;Got my first client within 48 hours of signing up. The match scoring saved me from wasting time on bad leads.&rdquo;</p>
-          <p className="text-xs mt-3" style={{ color: 'var(--slate-2)' }}>Marcus J. — Full-Stack Developer</p>
+          <div className="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold mb-4" style={{ background: 'var(--amber-500)' }}>MJ</div>
+          <p className="text-sm leading-relaxed text-white/80">&ldquo;Got my first client within 48 hours of signing up. The match scoring saved me from wasting time on bad leads.&rdquo;</p>
+          <p className="text-xs mt-3" style={{ color: 'var(--green-200)' }}>Marcus J. — Full-Stack Developer</p>
         </div>
       </div>
 
@@ -80,19 +80,19 @@ export default function SignupPage() {
       <div className="flex-1 flex items-center justify-center px-6 py-12">
         <div className="w-full max-w-sm animate-fade-in">
           <div className="text-center mb-8">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-4" style={{ background: 'var(--amber)' }}>
-              <span className="text-sm font-bold" style={{ color: 'var(--ink)' }}>LF</span>
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-4" style={{ background: 'var(--amber-500)' }}>
+              <span className="text-white text-sm font-bold">LF</span>
             </div>
-            <h1 className="text-2xl font-bold tracking-tight" style={{ color: 'var(--cream)' }}>
+            <h1 className="text-2xl font-bold tracking-tight" style={{ color: 'var(--base-900)' }}>
               {step === 0 ? "What do you do?" : 'Create your account'}
             </h1>
-            <p className="mt-1.5 text-sm" style={{ color: 'var(--slate)' }}>
+            <p className="mt-1.5 text-sm" style={{ color: 'var(--base-600)' }}>
               {step === 0 ? 'Pick your role to get started' : 'Start finding clients in minutes'}
             </p>
             {step > 0 && (
               <div className="flex gap-1.5 mt-4 justify-center">
                 {[1,2,3].map(i => (
-                  <div key={i} className="w-6 h-1 rounded-full transition-all" style={{ background: i <= step ? 'var(--amber)' : 'var(--slate-3)' }} />
+                  <div key={i} className="w-6 h-1 rounded-full transition-all" style={{ background: i <= step ? 'var(--green-600)' : 'var(--base-300)' }} />
                 ))}
               </div>
             )}
@@ -102,19 +102,19 @@ export default function SignupPage() {
             <div className="space-y-2.5">
               {roles.map(r => (
                 <button key={r.id} onClick={() => { setRole(r.id); setStep(1) }}
-                  className="w-full flex items-center gap-3 p-3.5 rounded-xl border-2 text-left transition-all duration-150 cursor-pointer active:scale-[0.98]"
-                  style={{ borderColor: role === r.id ? 'var(--amber)' : 'var(--border-card)', background: role === r.id ? 'var(--amber-pale)' : 'var(--ink-2)' }}>
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center text-base transition-colors" style={{ background: role === r.id ? 'var(--amber)' : 'var(--ink-3)', color: role === r.id ? 'var(--ink)' : 'var(--amber)' }}>
+                  className="w-full flex items-center gap-3 p-3.5 rounded-xl border-2 text-left transition-all duration-150 cursor-pointer hover:border-[var(--green-300)] hover:bg-[var(--green-50)] active:scale-[0.98] active:border-[var(--green-600)]"
+                  style={{ borderColor: role === r.id ? 'var(--green-500)' : 'var(--base-300)', background: role === r.id ? 'var(--green-50)' : 'white' }}>
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center text-base transition-colors" style={{ background: role === r.id ? 'var(--green-600)' : 'var(--green-100)', color: role === r.id ? 'white' : 'var(--green-600)' }}>
                     <i className={`ti ${r.icon}`} />
                   </div>
                   <div className="flex-1">
-                    <span className="text-sm font-semibold" style={{ color: 'var(--cream)' }}>{r.label}</span>
+                    <span className="text-sm font-semibold" style={{ color: 'var(--base-900)' }}>{r.label}</span>
                   </div>
-                  <i className="ti ti-chevron-right text-base" style={{ color: role === r.id ? 'var(--amber)' : 'var(--slate-2)' }} />
+                  <i className="ti ti-chevron-right text-base" style={{ color: role === r.id ? 'var(--green-600)' : 'var(--base-400)' }} />
                 </button>
               ))}
               <p className="text-center text-sm mt-4">
-                <Link href="/auth/login" className="font-medium hover:underline" style={{ color: 'var(--amber)' }}>
+                <Link href="/auth/login" className="font-medium hover:underline" style={{ color: 'var(--green-600)' }}>
                   Already have an account? Sign in
                 </Link>
               </p>
@@ -125,7 +125,7 @@ export default function SignupPage() {
             <form onSubmit={handleSignup} className="space-y-4">
               {step === 1 && (
                 <div className="space-y-1">
-                  <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--slate-2)' }}>Full name</label>
+                  <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--base-700)' }}>Full name</label>
                   <input type="text" required value={fullName} onChange={e => setFullName(e.target.value)}
                     className="input" placeholder="Your name" autoFocus />
                   <button type="button" onClick={() => setStep(2)} disabled={!fullName.trim()} className="btn-p w-full justify-center mt-4 hover:translate-y-[-1px]">
@@ -135,7 +135,7 @@ export default function SignupPage() {
               )}
               {step === 2 && (
                 <div className="space-y-1">
-                  <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--slate-2)' }}>Email</label>
+                  <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--base-700)' }}>Email</label>
                   <input type="email" required value={email} onChange={e => setEmail(e.target.value)}
                     className="input" placeholder="you@example.com" autoFocus />
                   <button type="button" onClick={() => setStep(3)} disabled={!email.trim()} className="btn-p w-full justify-center mt-4 hover:translate-y-[-1px]">
@@ -146,14 +146,14 @@ export default function SignupPage() {
               {step === 3 && (
                 <>
                   <div>
-                    <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--slate-2)' }}>Password</label>
+                    <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--base-700)' }}>Password</label>
                     <input type="password" required minLength={6} value={password} onChange={e => setPassword(e.target.value)}
                       className="input" placeholder="At least 6 characters" autoFocus />
                     {password && (
                       <div className="mt-2">
                         <div className="flex gap-1 mb-1">
                           {[0,1,2,3].map(i => (
-                            <div key={i} className="flex-1 h-1 rounded-full transition-all" style={{ background: i <= pwScore ? pwColor : 'var(--slate-3)' }} />
+                            <div key={i} className="flex-1 h-1 rounded-full transition-all" style={{ background: i <= pwScore ? pwColor : 'var(--base-300)' }} />
                           ))}
                         </div>
                         <div className="text-xs" style={{ color: pwColor }}>{pwLabel}</div>
@@ -162,13 +162,13 @@ export default function SignupPage() {
                   </div>
                   <div className="flex items-start gap-2">
                     <input type="checkbox" checked={agreed} onChange={e => setAgreed(e.target.checked)}
-                      className="mt-0.5 w-4 h-4 rounded" style={{ accentColor: 'var(--amber)' }} />
-                    <label className="text-xs" style={{ color: 'var(--slate)' }}>I agree to the <a href="#" className="underline" style={{ color: 'var(--amber)' }}>Terms</a> and <a href="#" className="underline" style={{ color: 'var(--amber)' }}>Privacy Policy</a></label>
+                      className="mt-0.5 w-4 h-4 rounded border-gray-300" style={{ accentColor: 'var(--green-600)' }} />
+                    <label className="text-xs" style={{ color: 'var(--base-600)' }}>I agree to the <a href="#" className="underline">Terms</a> and <a href="#" className="underline">Privacy Policy</a></label>
                   </div>
                   <button type="submit" disabled={loading} className="btn-p w-full justify-center">
                     {loading ? 'Creating account...' : 'Create account'}
                   </button>
-                  <button type="button" onClick={() => setStep(2)} className="btn-s w-full justify-center text-xs">Back</button>
+                  <button type="button" onClick={() => setStep(2)} className="btn-g w-full justify-center text-xs">Back</button>
                 </>
               )}
             </form>

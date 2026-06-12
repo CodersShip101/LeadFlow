@@ -58,14 +58,14 @@ export default function ProfilePage() {
 
   return (
     <div className="flex-1 px-4 md:px-8 pt-6 pb-20 md:pb-8 max-w-xl">
-      <h1 className="text-lg font-bold" style={{ color: 'var(--cream)' }}>Settings</h1>
+      <h1 className="text-lg font-bold" style={{ color: 'var(--base-900)' }}>Settings</h1>
 
       {/* Tabs */}
-      <div className="flex gap-4 border-b mt-4 mb-6" style={{ borderColor: 'var(--border)' }}>
+      <div className="flex gap-4 border-b mt-4 mb-6" style={{ borderColor: 'var(--base-300)' }}>
         {(['profile', 'account'] as const).map(t => (
           <button key={t} onClick={() => setTab(t)}
             className="pb-2 text-sm font-medium capitalize transition-all"
-            style={{ color: tab === t ? 'var(--amber)' : 'var(--slate)', borderBottom: tab === t ? '2px solid var(--amber)' : '2px solid transparent' }}>
+            style={{ color: tab === t ? 'var(--green-600)' : 'var(--base-500)', borderBottom: tab === t ? '2px solid var(--green-600)' : '2px solid transparent' }}>
             {t}
           </button>
         ))}
@@ -73,33 +73,33 @@ export default function ProfilePage() {
 
       {tab === 'profile' && (
         <div className="space-y-4">
-          <div><label className="text-sm font-medium mb-1.5 block" style={{ color: 'var(--slate-2)' }}>Full name</label>
+          <div><label className="text-sm font-medium mb-1.5 block" style={{ color: 'var(--base-700)' }}>Full name</label>
             <input value={fullName} onChange={e => setFullName(e.target.value)} className="input" /></div>
-          <div><label className="text-sm font-medium mb-1.5 block" style={{ color: 'var(--slate-2)' }}>Location</label>
+          <div><label className="text-sm font-medium mb-1.5 block" style={{ color: 'var(--base-700)' }}>Location</label>
             <input value={location} onChange={e => setLocation(e.target.value)} className="input" placeholder="e.g. London, UK" /></div>
-          <div><label className="text-sm font-medium mb-1.5 block" style={{ color: 'var(--slate-2)' }}>Hourly rate (£)</label>
+          <div><label className="text-sm font-medium mb-1.5 block" style={{ color: 'var(--base-700)' }}>Hourly rate (£)</label>
             <input value={rate} onChange={e => setRate(e.target.value)} type="number" className="input" /></div>
-          <div><label className="text-sm font-medium mb-1.5 block" style={{ color: 'var(--slate-2)' }}>Experience level</label>
+          <div><label className="text-sm font-medium mb-1.5 block" style={{ color: 'var(--base-700)' }}>Experience level</label>
             <select value={exp} onChange={e => setExp(e.target.value)} className="input">
               <option value="">Select...</option>
               {['Junior (0-2 years)','Mid (2-5)','Senior (5-10)','Expert (10+)'].map(o => <option key={o} value={o}>{o}</option>)}
             </select></div>
-          <div><label className="text-sm font-medium mb-1.5 block" style={{ color: 'var(--slate-2)' }}>Availability</label>
+          <div><label className="text-sm font-medium mb-1.5 block" style={{ color: 'var(--base-700)' }}>Availability</label>
             <select value={avail} onChange={e => setAvail(e.target.value)} className="input">
               <option value="">Select...</option>
               <option value="now">Available now</option>
               <option value="soon">Available from [date]</option>
               <option value="no">Not currently available</option>
             </select></div>
-          <div><label className="text-sm font-medium mb-1.5 block" style={{ color: 'var(--slate-2)' }}>Portfolio URL</label>
+          <div><label className="text-sm font-medium mb-1.5 block" style={{ color: 'var(--base-700)' }}>Portfolio URL</label>
             <input value={portfolio} onChange={e => setPortfolio(e.target.value)} className="input" placeholder="https://..." /></div>
           <div>
-            <label className="text-sm font-medium mb-1.5 block" style={{ color: 'var(--slate-2)' }}>Skills</label>
-            <div className="flex flex-wrap gap-1.5 max-h-48 overflow-y-auto p-2 rounded-lg border" style={{ borderColor: 'var(--border-card)' }}>
+            <label className="text-sm font-medium mb-1.5 block" style={{ color: 'var(--base-700)' }}>Skills</label>
+            <div className="flex flex-wrap gap-1.5 max-h-48 overflow-y-auto p-2 rounded-lg border" style={{ borderColor: 'var(--base-300)' }}>
               {skillOptions.map(sk => (
                 <button key={sk} onClick={() => toggleSkill(sk)}
                   className="badge transition-all active:scale-[0.95] cursor-pointer"
-                  style={{ background: skills.includes(sk) ? 'var(--amber)' : 'var(--ink-3)', color: skills.includes(sk) ? 'var(--ink)' : 'var(--slate)', border: skills.includes(sk) ? 'none' : '1px solid var(--border-card)' }}>
+                  style={{ background: skills.includes(sk) ? 'var(--green-600)' : 'var(--base-200)', color: skills.includes(sk) ? 'white' : 'var(--base-600)', border: skills.includes(sk) ? 'none' : '1px solid var(--base-300)' }}>
                   {sk}
                 </button>
               ))}
@@ -114,12 +114,12 @@ export default function ProfilePage() {
       {tab === 'account' && (
         <div className="space-y-4">
           <div className="card">
-            <p className="text-sm font-medium" style={{ color: 'var(--cream)' }}>Email</p>
-            <p className="text-xs mt-1" style={{ color: 'var(--slate)' }}>{profile?.email || '—'}</p>
+            <p className="text-sm font-medium" style={{ color: 'var(--base-900)' }}>Email</p>
+            <p className="text-xs mt-1" style={{ color: 'var(--base-500)' }}>{profile?.email || '—'}</p>
           </div>
           <div className="card">
-            <p className="text-sm font-medium" style={{ color: 'var(--cream)' }}>Plan</p>
-            <p className="text-xs mt-1 capitalize" style={{ color: 'var(--slate)' }}>{profile?.subscription_status || 'free'}</p>
+            <p className="text-sm font-medium" style={{ color: 'var(--base-900)' }}>Plan</p>
+            <p className="text-xs mt-1 capitalize" style={{ color: 'var(--base-500)' }}>{profile?.subscription_status || 'free'}</p>
           </div>
           <button onClick={async () => { await supabase.auth.signOut(); router.push('/') }}
             className="btn-d px-6">Sign out</button>
