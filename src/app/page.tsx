@@ -87,50 +87,51 @@ export default function LandingPage() {
       </nav>
 
       {/* ── HERO ── */}
-      <section style={{ padding: '130px 0 100px', background: 'var(--base-100)', borderBottom: '1px solid var(--base-400)' }}>
+      <section style={{ padding: '140px 0 120px', background: 'var(--base-100)', borderBottom: '1px solid var(--base-400)', position: 'relative' }}>
         <div className="max-w-[1100px] mx-auto px-8">
-          <div className="grid md:grid-cols-2 gap-12 lg:gap-16 items-center">
+          <div className="grid md:grid-cols-2 gap-16 lg:gap-20 items-center">
             {/* Left: text */}
             <div>
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold tracking-wide uppercase mb-6" style={{ background: 'var(--green-50)', border: '1px solid var(--green-100)', color: 'var(--green-600)' }}>
-                <span className="w-1.5 h-1.5 rounded-full animate-pulse-dot" style={{ background: 'var(--green-400)' }} />
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold tracking-wide uppercase mb-6" style={{ background: 'linear-gradient(135deg, var(--green-50), var(--green-100))', border: '1px solid var(--green-200)', color: 'var(--green-700)' }}>
+                <span className="w-1.5 h-1.5 rounded-full animate-pulse-dot" style={{ background: 'var(--green-500)' }} />
                 <span>340 freelancers already inside</span>
               </div>
 
               <h1 style={{
                 fontFamily: 'var(--font-instrument-serif)',
-                fontSize: 'clamp(36px, 4.5vw, 64px)',
-                lineHeight: 1.08, letterSpacing: '-0.025em',
-                color: 'var(--base-900)', marginBottom: '22px',
+                fontSize: 'clamp(42px, 5vw, 68px)',
+                lineHeight: 1.08, letterSpacing: '-0.03em',
+                color: 'var(--base-900)', marginBottom: '24px',
+                fontWeight: 700,
               }}>
                 Stop chasing leads.<br />
                 <em style={{ fontStyle: 'italic', color: 'var(--green-600)' }}>Start choosing them.</em>
               </h1>
 
               <p style={{
-                fontSize: '18px', lineHeight: 1.65, color: 'var(--base-500)',
-                marginBottom: '32px',
+                fontSize: '18px', lineHeight: 1.7, color: 'var(--base-500)',
+                marginBottom: '36px',
               }}>
                 Quality freelance leads, delivered every 6 hours. Matched to your skills. No noise.
               </p>
 
-              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                <Link href="/auth/signup" className="btn-p" style={{ padding: '13px 26px', fontSize: '15px', fontWeight: 500 }}>
+              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '32px' }}>
+                <Link href="/auth/signup" className="btn-p" style={{ padding: '14px 28px', fontSize: '15px', fontWeight: 500, boxShadow: '0 4px 12px rgba(22,107,66,0.20)' }}>
                   Get started free <i className="ti ti-arrow-right" />
                 </Link>
-                <a href="#how-it-works" className="btn-s" style={{ padding: '13px 26px', fontSize: '15px', fontWeight: 500 }}>
+                <a href="#how-it-works" className="btn-s" style={{ padding: '14px 28px', fontSize: '15px', fontWeight: 500 }}>
                   <i className="ti ti-player-play" /> See how it works
                 </a>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '22px', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '24px', flexWrap: 'wrap' }}>
                 {[
                   { icon: 'ti ti-circle-check', text: 'No credit card' },
                   { icon: 'ti ti-circle-check', text: '3 free leads' },
                   { icon: 'ti ti-circle-check', text: 'Cancel anytime' },
                 ].map((t, i) => (
-                  <span key={i} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: 'var(--base-500)' }}>
-                    <i className={t.icon} style={{ color: 'var(--green-500)', fontSize: '14px' }} /> {t.text}
+                  <span key={i} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '14px', color: 'var(--base-600)' }}>
+                    <i className={t.icon} style={{ color: 'var(--green-500)', fontSize: '16px' }} /> {t.text}
                   </span>
                 ))}
               </div>
@@ -139,9 +140,10 @@ export default function LandingPage() {
             {/* Right: mockup */}
             <div style={{
               background: 'white', border: '1px solid var(--base-400)',
-              borderRadius: 'var(--radius-xl)', boxShadow: 'var(--shadow-lg)', overflow: 'hidden',
-            }}>
-              <div style={{ background: 'var(--green-900)', padding: '13px 18px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+              borderRadius: 'var(--radius-xl)', boxShadow: 'var(--shadow-lg), 0 8px 24px rgba(0,0,0,0.06)', overflow: 'hidden',
+              transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+            }} className="group">
+              <div style={{ background: 'var(--green-900)', padding: '14px 20px', display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <div style={{ display: 'flex', gap: '6px' }}>
                   <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#ff5f57' }} />
                   <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#febc2e' }} />
@@ -169,7 +171,8 @@ export default function LandingPage() {
                     borderRadius: 'var(--radius-md)', padding: '14px 16px',
                     marginBottom: i < 3 ? '8px' : '0',
                     display: 'flex', alignItems: 'center', gap: '14px',
-                  }}>
+                    transition: 'all 0.2s ease',
+                  }} className="group-hover:shadow-sm">
                     <span style={{
                       fontSize: '10px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em',
                       padding: '4px 8px', borderRadius: 'var(--radius-sm)', flexShrink: 0,
@@ -193,17 +196,17 @@ export default function LandingPage() {
 
       {/* ── SOCIAL PROOF ── */}
       <section style={{ background: 'var(--green-900)' }}>
-        <div className="max-w-5xl mx-auto px-4 sm:px-8 py-10">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-0 text-center">
+        <div className="max-w-5xl mx-auto px-4 sm:px-8 py-12">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-0 text-center">
             {[
               { value: '2,400+', label: 'Leads posted' },
               { value: '340+', label: 'Freelancers in beta' },
               { value: '6h', label: 'Refresh interval' },
               { value: '9.1', label: 'Avg quality score' },
             ].map((s, i) => (
-              <div key={s.label} className="md:border-r last:border-r-0 md:px-6" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
+              <div key={s.label} className="md:border-r last:border-r-0 md:px-8" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
                 <div className="text-2xl md:text-3xl font-bold text-white">{s.value}</div>
-                <div className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.5)' }}>{s.label}</div>
+                <div className="text-sm mt-2" style={{ color: 'rgba(255,255,255,0.6)' }}>{s.label}</div>
               </div>
             ))}
           </div>
@@ -213,13 +216,13 @@ export default function LandingPage() {
 
 
       {/* ── HOW IT WORKS ── */}
-      <section id="how-it-works" className="py-24 scroll-reveal" style={{ background: 'var(--base-100)' }}>
+      <section id="how-it-works" className="py-28 scroll-reveal" style={{ background: 'var(--base-50)' }}>
         <div className="max-w-5xl mx-auto px-4 sm:px-8">
           <div className="text-center">
             <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: 'var(--green-500)' }}>How it works</p>
-            <h2 className="text-3xl font-bold tracking-tight mb-12" style={{ color: 'var(--base-900)' }}>Up and running in minutes</h2>
+            <h2 className="text-3xl font-bold tracking-tight mb-16" style={{ color: 'var(--base-900)' }}>Up and running in minutes</h2>
           </div>
-          <div className="grid md:grid-cols-3 gap-10 relative">
+          <div className="grid md:grid-cols-3 gap-12 relative">
               <div className="hidden md:block absolute top-6 left-[16%] right-[16%] h-[2px]" style={{ background: 'var(--base-400)' }} />
             {[
               { num: '01', icon: 'ti-user-check', title: 'Create your profile', desc: 'Tell us your skills, day rate, and the kind of work you want. Takes under two minutes.' },
@@ -227,7 +230,7 @@ export default function LandingPage() {
               { num: '03', icon: 'ti-briefcase', title: 'Land the work', desc: 'Browse your personal lead feed, express interest, and apply directly on the original platform.' },
             ].map(s => (
               <div key={s.num} className="text-center relative">
-                <div className="w-11 h-11 rounded-full flex items-center justify-center mx-auto mb-5 relative z-10 text-sm font-bold" style={{ background: 'white', border: '1px solid var(--base-200)', color: 'var(--green-600)' }}>
+                <div className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-6 relative z-10 text-sm font-bold" style={{ background: 'white', border: '1px solid var(--base-300)', color: 'var(--green-700)' }}>
                   {s.num}
                 </div>
                 <h3 className="text-[15px] font-semibold mb-2" style={{ color: 'var(--base-800)' }}>{s.title}</h3>
@@ -239,13 +242,13 @@ export default function LandingPage() {
       </section>
 
       {/* ── FEATURES ── */}
-      <section id="features" className="py-24 scroll-reveal" style={{ background: 'white' }}>
+      <section id="features" className="py-28 scroll-reveal" style={{ background: 'white' }}>
         <div className="max-w-5xl mx-auto px-4 sm:px-8">
           <div className="text-center">
             <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: 'var(--green-500)' }}>Features</p>
-            <h2 className="text-3xl font-bold tracking-tight mb-10" style={{ color: 'var(--base-900)' }}>Everything you need, nothing you don't</h2>
+            <h2 className="text-3xl font-bold tracking-tight mb-12" style={{ color: 'var(--base-900)' }}>Everything you need, nothing you don't</h2>
           </div>
-          <div className="grid md:grid-cols-3 gap-px rounded-xl overflow-hidden" style={{ border: '1px solid var(--base-400)', background: 'var(--base-100)' }}>
+          <div className="grid md:grid-cols-3 gap-px rounded-xl overflow-hidden" style={{ border: '1px solid var(--base-400)', background: 'var(--base-50)' }}>
             {[
               { icon: 'ti-star', title: 'AI quality scoring', desc: 'Every lead rated 1-10 so you prioritise the best opportunities first.' },
               { icon: 'ti-refresh', title: '6-hour refresh', desc: 'Always fresh. New leads appear within minutes of being posted on any platform.' },
@@ -254,11 +257,11 @@ export default function LandingPage() {
               { icon: 'ti-link', title: 'Direct source links', desc: 'Apply on the original platform. Full transparency — we never gate-keep the lead.' },
               { icon: 'ti-send', title: 'Pipeline tracking', desc: 'Follow applications from interested to won. Never lose track of where a lead stands.' },
             ].map(f => (
-              <div key={f.title} className="p-7 transition-colors hover:bg-[var(--base-100)]" style={{ background: 'white' }}>
-                <div className="w-[38px] h-[38px] rounded-lg flex items-center justify-center mb-3.5" style={{ background: 'var(--green-50)', border: '1px solid var(--green-200)', color: 'var(--green-700)' }}>
-                  <i className={`ti ${f.icon}`} />
+              <div key={f.title} className="p-8 transition-all hover:bg-[var(--base-100)] hover:shadow-md" style={{ background: 'white' }}>
+                <div className="w-[38px] h-[38px] rounded-lg flex items-center justify-center mb-4" style={{ background: 'var(--green-50)', border: '1px solid var(--green-200)', color: 'var(--green-700)' }}>
+                  <i className={`ti ${f.icon}`} style={{ fontSize: '18px' }} />
                 </div>
-                <h3 className="text-sm font-semibold mb-1.5" style={{ color: 'var(--base-800)' }}>{f.title}</h3>
+                <h3 className="text-sm font-semibold mb-2" style={{ color: 'var(--base-800)' }}>{f.title}</h3>
                 <p className="text-xs leading-relaxed" style={{ color: 'var(--base-600)' }}>{f.desc}</p>
               </div>
             ))}
@@ -369,17 +372,17 @@ export default function LandingPage() {
       </section>
 
       {/* ── FINAL CTA ── */}
-      <section style={{ background: 'var(--green-900)' }} className="py-24">
+      <section style={{ background: 'var(--green-900)' }} className="py-28">
         <div className="max-w-3xl mx-auto px-4 sm:px-8 text-center">
           <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight mb-[14px]">
             Join 340+ freelancers
           </h2>
-          <p className="text-sm mb-8" style={{ color: 'rgba(255,255,255,0.5)' }}>Get your first leads in minutes. No credit card needed.</p>
-          <div className="flex items-center justify-center gap-3 flex-wrap">
-            <Link href="/auth/signup" className="btn-p" style={{ padding: '14px 28px', fontSize: '15px' }}>
+          <p className="text-sm mb-10" style={{ color: 'rgba(255,255,255,0.5)' }}>Get your first leads in minutes. No credit card needed.</p>
+          <div className="flex items-center justify-center gap-4 flex-wrap">
+            <Link href="/auth/signup" className="btn-p" style={{ padding: '14px 32px', fontSize: '15px', fontWeight: 500, boxShadow: '0 4px 14px rgba(22,107,66,0.25)' }}>
               Get started free <i className="ti ti-arrow-right" />
             </Link>
-            <Link href="/auth/login" className="btn-ghost">
+            <Link href="/auth/login" className="btn-ghost" style={{ padding: '14px 28px', fontSize: '15px', fontWeight: 500 }}>
               Log in
             </Link>
           </div>
@@ -389,9 +392,9 @@ export default function LandingPage() {
       {/* ── STICKY BAR ── */}
       <div className={`fixed bottom-0 left-0 right-0 z-50 border-t transition-all duration-300 ${showSticky ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'}`}
         style={{ background: 'white', borderColor: 'var(--base-300)', boxShadow: '0 -4px 20px rgba(0,0,0,0.06)' }}>
-        <div className="max-w-[1100px] mx-auto px-8 h-14 flex items-center justify-between">
-          <span className="text-sm" style={{ color: 'var(--base-600)' }}>Free to start &middot; 3 leads included</span>
-          <Link href="/auth/signup" className="btn-p" style={{ padding: '8px 18px', fontSize: '13px', fontWeight: 500 }}>
+        <div className="max-w-[1100px] mx-auto px-8 h-16 flex items-center justify-between">
+          <span className="text-sm font-medium" style={{ color: 'var(--base-700)' }}>Free to start &middot; 3 leads included</span>
+          <Link href="/auth/signup" className="btn-p" style={{ padding: '10px 24px', fontSize: '14px', fontWeight: 500, boxShadow: '0 2px 8px rgba(22,107,66,0.15)' }}>
             Get started free <i className="ti ti-arrow-right" />
           </Link>
         </div>
