@@ -197,7 +197,7 @@ export default function LandingPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-0 text-center">
             {[
               { value: '2,400+', label: 'Leads posted' },
-              { value: '340+', label: 'Freelancers in beta' },
+              { value: '340', label: 'Freelancers already inside' },
               { value: '6h', label: 'Refresh interval' },
               { value: '9.1', label: 'Avg quality score' },
             ].map((s, i) => (
@@ -220,7 +220,7 @@ export default function LandingPage() {
             <h2 className="text-3xl font-bold tracking-tight mb-12" style={{ color: 'var(--base-900)' }}>Up and running in minutes</h2>
           </div>
           <div className="grid md:grid-cols-3 gap-10 relative">
-              <div className="hidden md:block absolute top-6 left-[16%] right-[16%] h-[2px]" style={{ background: 'var(--base-300)' }} />
+              <div className="hidden md:block absolute top-6 left-[16%] right-[16%] h-[2px]" style={{ background: 'var(--base-400)' }} />
             {[
               { num: '01', icon: 'ti-user-check', title: 'Create your profile', desc: 'Tell us your skills, day rate, and the kind of work you want. Takes under two minutes.' },
               { num: '02', icon: 'ti-search', title: 'We find and score leads', desc: 'AI scans Reddit, Reed, and We Work Remotely every 6 hours. Only quality leads make it through.' },
@@ -230,8 +230,8 @@ export default function LandingPage() {
                 <div className="w-11 h-11 rounded-full flex items-center justify-center mx-auto mb-5 relative z-10 text-sm font-bold" style={{ background: 'white', border: '1px solid var(--base-200)', color: 'var(--green-600)' }}>
                   {s.num}
                 </div>
-                <h3 className="text-[15px] font-semibold mb-2" style={{ color: 'var(--base-700)' }}>{s.title}</h3>
-                <p className="text-sm max-w-xs mx-auto leading-relaxed" style={{ color: 'var(--base-500)' }}>{s.desc}</p>
+                <h3 className="text-[15px] font-semibold mb-2" style={{ color: 'var(--base-800)' }}>{s.title}</h3>
+                <p className="text-sm max-w-xs mx-auto leading-relaxed" style={{ color: 'var(--base-600)' }}>{s.desc}</p>
               </div>
             ))}
           </div>
@@ -245,7 +245,7 @@ export default function LandingPage() {
             <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: 'var(--green-500)' }}>Features</p>
             <h2 className="text-3xl font-bold tracking-tight mb-10" style={{ color: 'var(--base-900)' }}>Everything you need, nothing you don't</h2>
           </div>
-          <div className="grid md:grid-cols-3 gap-px rounded-xl overflow-hidden" style={{ border: '1px solid var(--base-300)', background: 'var(--base-300)' }}>
+          <div className="grid md:grid-cols-3 gap-px rounded-xl overflow-hidden" style={{ border: '1px solid var(--base-400)', background: 'var(--base-100)' }}>
             {[
               { icon: 'ti-star', title: 'AI quality scoring', desc: 'Every lead rated 1-10 so you prioritise the best opportunities first.' },
               { icon: 'ti-refresh', title: '6-hour refresh', desc: 'Always fresh. New leads appear within minutes of being posted on any platform.' },
@@ -255,11 +255,11 @@ export default function LandingPage() {
               { icon: 'ti-send', title: 'Pipeline tracking', desc: 'Follow applications from interested to won. Never lose track of where a lead stands.' },
             ].map(f => (
               <div key={f.title} className="p-7 transition-colors hover:bg-[var(--base-100)]" style={{ background: 'white' }}>
-                <div className="w-[38px] h-[38px] rounded-lg flex items-center justify-center mb-3.5" style={{ background: 'var(--green-50)', border: '1px solid var(--green-100)', color: 'var(--green-600)' }}>
+                <div className="w-[38px] h-[38px] rounded-lg flex items-center justify-center mb-3.5" style={{ background: 'var(--green-50)', border: '1px solid var(--green-200)', color: 'var(--green-700)' }}>
                   <i className={`ti ${f.icon}`} />
                 </div>
-                <h3 className="text-sm font-semibold mb-1.5" style={{ color: 'var(--base-700)' }}>{f.title}</h3>
-                <p className="text-xs leading-relaxed" style={{ color: 'var(--base-500)' }}>{f.desc}</p>
+                <h3 className="text-sm font-semibold mb-1.5" style={{ color: 'var(--base-800)' }}>{f.title}</h3>
+                <p className="text-xs leading-relaxed" style={{ color: 'var(--base-600)' }}>{f.desc}</p>
               </div>
             ))}
           </div>
