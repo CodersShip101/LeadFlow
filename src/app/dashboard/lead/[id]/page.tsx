@@ -201,23 +201,27 @@ export default function LeadDetailPage() {
           )}
 
           <div className="mt-5 pt-5" style={{ borderTop: '1px solid var(--slate-200)' }}>
-            <h3 className="text-sm font-semibold mb-1" style={{ color: 'var(--ink-900)' }}>Match Analysis</h3>
-            <p className="text-xs mb-3" style={{ color: 'var(--slate-500)' }}>{matchInfo.summary}</p>
-            <div className="space-y-2">
-              {matchInfo.breakdown.map(item => (
-                <div key={item.label} className="flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-2 min-w-0">
-                    <i className={`ti ${item.achieved ? 'ti-check' : 'ti-x'}`} style={{ fontSize: '12px', color: item.achieved ? 'var(--green-score)' : 'var(--slate-300)' }} />
-                    <span style={{ color: 'var(--slate-500)' }}>{item.label}</span>
+            <div className="flex items-center justify-between mb-1">
+              <h3 className="text-sm font-semibold" style={{ color: 'var(--ink-900)' }}>Why this score?</h3>
+              <span className="font-mono font-bold text-sm" style={{ color: score >= 8 ? 'var(--green-score)' : score >= 5 ? 'var(--amber)' : 'var(--slate-500)' }}>{score}/10</span>
+            </div>
+            <p className="text-xs mb-3" style={{ color: 'var(--slate-500)' }}>{matchInfo.why}</p>
+            <div className="space-y-3">
+              {matchInfo.subScores.map(s => (
+                <div key={s.label} className="flex items-start gap-2.5 text-xs">
+                  <i className={`ti ti-${s.icon}`} style={{ fontSize: '14px', color: 'var(--slate-400)', marginTop: '1px' }} />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between">
+                      <span className="font-semibold" style={{ color: 'var(--ink-800)' }}>{s.label}</span>
+                      <span className="font-mono font-semibold" style={{ color: 'var(--slate-600)' }}>{s.value}/10 <span style={{ color: 'var(--slate-400)', fontWeight: 400 }}>· {Math.round(s.weight * 100)}%</span></span>
+                    </div>
+                    <div className="score-bar mt-1"><span className={s.value >= 7 ? '' : s.value >= 4 ? 'warn' : 'weak'} style={{ width: `${s.value * 10}%` }} /></div>
+                    <p className="mt-1" style={{ color: 'var(--slate-500)', fontSize: '11px' }}>{s.detail}</p>
                   </div>
-                  <span className="font-medium shrink-0 ml-2" style={{ color: item.achieved ? 'var(--slate-500)' : 'var(--slate-400)' }}>{item.detail}</span>
                 </div>
               ))}
-              <div className="flex items-center justify-between text-xs font-bold pt-2" style={{ borderTop: '1px solid var(--slate-200)' }}>
-                <span style={{ color: 'var(--ink-900)' }}>Overall Score</span>
-                <span style={{ color: score >= 8 ? 'var(--green-score)' : score >= 5 ? 'var(--amber)' : 'var(--slate-500)' }}>{score}/10</span>
-              </div>
             </div>
+            <p className="text-xs mt-3 pt-3" style={{ color: 'var(--slate-500)', borderTop: '1px solid var(--slate-200)' }}>{matchInfo.summary}</p>
 
             {profile?.skills && profile.skills.length > 0 && (
               <div className="mt-4 pt-3" style={{ borderTop: '1px solid var(--slate-200)' }}>

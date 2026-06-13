@@ -115,7 +115,7 @@ export default function LoginPage() {
               </div>
             </div>
             <div className="auth-remember-row">
-              <input type="checkbox" id="remember" />
+              <input type="checkbox" id="remember" defaultChecked />
               <label htmlFor="remember">Keep me logged in for 30 days</label>
             </div>
             <button type="submit" className="btn-p btn-full" disabled={loading}>
@@ -124,16 +124,13 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <div className="auth-divider"><hr /><span>or</span><hr /></div>
-
-          <button className="auth-btn-ghost-light" onClick={() => router.push('/auth/magic-link')}>
-            <i className="ti ti-mail" aria-hidden="true"></i>
-            Send me a magic link instead
-          </button>
+          <p className="auth-magic-line">
+            Prefer no password?{' '}
+            <button type="button" className="auth-magic-link" onClick={() => router.push('/auth/magic-link')}>Email me a magic link</button>
+          </p>
 
           <div className="auth-signup-nudge">
-            <p>Don&apos;t have an account?</p>
-            <Link href="/auth/signup" className="auth-cta-link">Start for free →</Link>
+            <p>No account? <Link href="/auth/signup" className="auth-cta-link">Sign up free →</Link></p>
           </div>
         </div>
       </main>
