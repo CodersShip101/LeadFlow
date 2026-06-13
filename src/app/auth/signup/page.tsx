@@ -67,9 +67,9 @@ export default function SignupPage() {
         return next
       })
       count++
-      if (count < 3) burst.push(window.setTimeout(rotate, 900))
+      if (count < 3) burst.push(window.setTimeout(rotate, 1500))
     }
-    burst.push(window.setTimeout(rotate, 800))
+    burst.push(window.setTimeout(rotate, 1000))
     const interval = window.setInterval(rotate, 4500)
     return () => {
       burst.forEach(window.clearTimeout)

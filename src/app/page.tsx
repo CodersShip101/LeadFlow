@@ -167,9 +167,9 @@ export default function HomePage() {
         return next
       })
       count++
-      if (count < 3) burstTimers.push(window.setTimeout(rotate, 800))
+      if (count < 3) burstTimers.push(window.setTimeout(rotate, 1500))
     }
-    burstTimers.push(window.setTimeout(rotate, 800))
+    burstTimers.push(window.setTimeout(rotate, 1000))
     const interval = window.setInterval(rotate, 4500)
     return () => {
       burstTimers.forEach(window.clearTimeout)
