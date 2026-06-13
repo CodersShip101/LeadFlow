@@ -332,7 +332,6 @@ button { font-family: inherit; cursor: pointer; }
 
 /* ── AUTH PAGES (login / signup / forgot / reset) ── */
 .auth-body { position: fixed; inset: 0; z-index: 50; display: grid; grid-template-columns: 1fr 1fr; overflow: hidden; }
-.panel-left, .panel-right { overflow-y: auto; }
 .panel-left {
   background: var(--ink-950); padding: 48px 52px; display: flex; flex-direction: column;
   justify-content: space-between; position: relative; overflow: hidden; border-right: 1px solid var(--ink-700);

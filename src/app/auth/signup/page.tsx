@@ -189,13 +189,13 @@ export default function SignupPage() {
                   <button key={d} type="button" className={`auth-skill-pill${disciplines.includes(d) ? ' selected' : ''}`} onClick={() => toggleDiscipline(d)}>{d}</button>
                 ))}
               </div>
-              <div className="auth-field-hint">These power your AI score \u2014 leads are ranked against your discipline</div>
+              <div className="auth-field-hint">These power your AI score — leads are ranked against your discipline</div>
             </div>
 
             <div className="auth-field">
               <label htmlFor="day-rate">Your day rate (optional)</label>
               <div className="auth-input-prefix">
-                <span className="auth-prefix-symbol">\u00A3</span>
+                <span className="auth-prefix-symbol">£</span>
                 <input type="text" id="day-rate" className="auth-input" placeholder="350" inputMode="numeric" value={dayRate} onChange={e => setDayRate(e.target.value)} />
               </div>
               <div className="auth-field-hint">Used to filter out leads below your rate. Skip if you&apos;re flexible.</div>
@@ -211,7 +211,7 @@ export default function SignupPage() {
             </p>
           </form>
 
-          <div className="auth-login-link">Already have an account? <Link href="/auth/login">Log in \u2192</Link></div>
+          <div className="auth-login-link">Already have an account? <Link href="/auth/login">Log in →</Link></div>
         </div>
       </main>
     </div>

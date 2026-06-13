@@ -133,7 +133,7 @@ export default function LoginPage() {
 
           <div className="auth-signup-nudge">
             <p>Don&apos;t have an account?</p>
-            <Link href="/auth/signup" className="auth-cta-link">Start for free \u2192</Link>
+            <Link href="/auth/signup" className="auth-cta-link">Start for free →</Link>
           </div>
         </div>
       </main>
