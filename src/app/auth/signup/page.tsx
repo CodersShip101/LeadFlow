@@ -6,8 +6,6 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase-client'
 import toast from 'react-hot-toast'
 
-const disciplineOptions = ['Design', 'Development', 'Writing', 'Marketing', 'Consulting', 'Finance', 'DevOps', 'Other']
-
 function scorePassword(pw: string) {
   const len = pw.length
   const hasUpper = /[A-Z]/.test(pw)
@@ -33,12 +31,11 @@ const signalPool = [
 ]
 
 export default function SignupPage() {
-  const [firstName, setFirstName] = useState('')
-  const [lastName, setLastName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [disciplines, setDisciplines] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
+  const [sent, setSent] = useState(false)
+  const [resending, setResending] = useState(false)
   const [signals, setSignals] = useState(signalPool.slice(0, 3))
   const [paused, setPaused] = useState(false)
   const siRef = useRef(3)
@@ -46,10 +43,6 @@ export default function SignupPage() {
   const supabase = createClient()
 
   const pwScore = scorePassword(password)
-
-  const toggleDiscipline = (d: string) => {
-    setDisciplines(prev => prev.includes(d) ? prev.filter(x => x !== d) : [...prev, d])
-  }
 
   useEffect(() => {
     const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -77,24 +70,28 @@ export default function SignupPage() {
     }
   }, [paused])
 
+  const emailRedirectTo = typeof window !== 'undefined'
+    ? `${window.location.origin}/auth/callback?next=/dashboard/onboarding`
+    : undefined
+
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-    const fullName = `${firstName} ${lastName}`.trim()
-    const { data, error } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signUp({
       email, password,
-      options: { data: { full_name: fullName, role: disciplines[0] || 'other' } },
+      options: { emailRedirectTo },
     })
     if (error) { toast.error(error.message); setLoading(false); return }
-    if (data.user) {
-      await supabase.from('profiles').upsert({
-        id: data.user.id, email: data.user.email, full_name: fullName,
-        skills: disciplines.map(d => d.toLowerCase()),
-        subscription_status: 'free',
-      })
-    }
-    toast.success('Account created! Check your email for confirmation.')
-    router.push('/dashboard/onboarding')
+    setLoading(false)
+    setSent(true)
+  }
+
+  const handleResend = async () => {
+    setResending(true)
+    const { error } = await supabase.auth.resend({ type: 'signup', email, options: { emailRedirectTo } })
+    setResending(false)
+    if (error) { toast.error(error.message); return }
+    toast.success('Confirmation email resent.')
   }
 
   return (
@@ -170,10 +167,31 @@ export default function SignupPage() {
       </aside>
 
       <main className="panel-right">
+        {sent ? (
+          <div className="auth-sent-card">
+            <div className="card">
+              <div className="auth-sent-icon"><i className="ti ti-mail-fast" aria-hidden="true"></i></div>
+              <h1>Check your inbox</h1>
+              <p>We&apos;ve sent a confirmation link to</p>
+              <p className="auth-sent-email">{email}</p>
+              <p style={{ marginTop: 10 }}>Click it to verify your email and start setting up your feed. The link expires in 1 hour.</p>
+              <div className="auth-sent-actions">
+                <button className="btn-p" onClick={handleResend} disabled={resending}>
+                  <i className="ti ti-refresh" aria-hidden="true"></i>
+                  {resending ? 'Resending...' : 'Resend email'}
+                </button>
+                <button className="auth-magic-link" onClick={() => setSent(false)}>Use a different email</button>
+              </div>
+              <p className="auth-legal" style={{ marginTop: 22 }}>
+                Wrong address or didn&apos;t arrive? Check spam, or <Link href="/auth/login">log in</Link> if you already confirmed.
+              </p>
+            </div>
+          </div>
+        ) : (
         <div className="auth-form-wrap">
           <div className="auth-form-eyebrow">Create your account</div>
           <h1>Get started free</h1>
-          <p className="auth-tagline">Set up in 2 minutes. First leads within the hour.</p>
+          <p className="auth-tagline">Just an email and password — we&apos;ll set up your feed next.</p>
 
           <div className="auth-trial-strip" role="note" style={{ marginBottom: 18, padding: '10px 14px' }}>
             <i className="ti ti-gift" aria-hidden="true"></i>
@@ -183,27 +201,16 @@ export default function SignupPage() {
           <div className="auth-step-row" style={{ marginBottom: 18 }}>
             <span className="auth-step-dot" aria-hidden="true"></span>
             <span className="auth-step-dot inactive" aria-hidden="true"></span>
-            <span className="auth-step-label">Step 1 of 2 · Account details</span>
+            <span className="auth-step-label">Step 1 of 3 · Create account</span>
           </div>
 
           <form onSubmit={handleSignup}>
-            <div className="auth-field-row">
-              <div className="auth-field" style={{ marginBottom: 12 }}>
-                <label htmlFor="first-name">First name</label>
-                <input type="text" id="first-name" className="auth-input" placeholder="Alex" autoComplete="given-name" required value={firstName} onChange={e => setFirstName(e.target.value)} />
-              </div>
-              <div className="auth-field" style={{ marginBottom: 12 }}>
-                <label htmlFor="last-name">Last name</label>
-                <input type="text" id="last-name" className="auth-input" placeholder="Morgan" autoComplete="family-name" required value={lastName} onChange={e => setLastName(e.target.value)} />
-              </div>
-            </div>
-
-            <div className="auth-field" style={{ marginBottom: 12 }}>
-              <label htmlFor="email">Work email</label>
+            <div className="auth-field" style={{ marginBottom: 14 }}>
+              <label htmlFor="email">Email</label>
               <input type="email" id="email" className="auth-input" placeholder="alex@yoursite.co.uk" autoComplete="email" required value={email} onChange={e => setEmail(e.target.value)} />
             </div>
 
-            <div className="auth-field" style={{ marginBottom: 12 }}>
+            <div className="auth-field" style={{ marginBottom: 14 }}>
               <label htmlFor="password">Password</label>
               <div className="auth-pw-field">
                 <input type="password" id="password" className="auth-input" placeholder="8+ characters" autoComplete="new-password" required minLength={8} value={password} onChange={e => setPassword(e.target.value)} />
@@ -222,16 +229,6 @@ export default function SignupPage() {
               </div>
             </div>
 
-            <div className="auth-field" style={{ marginBottom: 12 }}>
-              <label>What do you do? <span style={{ fontWeight: 400, color: 'var(--slate-500)' }}>(pick all that apply)</span></label>
-              <div className="auth-skills-grid" role="group" aria-label="Select your disciplines">
-                {disciplineOptions.map(d => (
-                  <button key={d} type="button" className={`auth-skill-pill${disciplines.includes(d) ? ' selected' : ''}`} onClick={() => toggleDiscipline(d)}>{d}</button>
-                ))}
-              </div>
-              <div className="auth-field-hint" style={{ fontSize: '.68rem' }}>These power your AI score — leads are ranked against your discipline</div>
-            </div>
-
             <button type="submit" className="btn-p btn-full" disabled={loading} style={{ marginTop: 4 }}>
               <i className="ti ti-arrow-right" aria-hidden="true"></i>
               {loading ? 'Creating account\u2026' : 'Create my account \u2192'}
@@ -244,6 +241,7 @@ export default function SignupPage() {
 
           <div className="auth-login-link" style={{ marginTop: 12, fontSize: '.82rem' }}>Already have an account? <Link href="/auth/login">Log in →</Link></div>
         </div>
+        )}
       </main>
     </div>
   )

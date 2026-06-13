@@ -1,11 +1,12 @@
 'use client'
 
-import { useEffect, useState, useRef, useMemo } from 'react'
+import { useEffect, useState, useRef, useMemo, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-client'
 import type { Lead, Profile, Application } from '@/types'
 import { computeMatchExplanation } from '@/types'
 import { getSourceInfo, formatBudgetGBP, timeAgo, isNewLead } from '@/lib/utils'
+import { ALL_SKILLS } from '@/lib/skills'
 import ScoreGauge from '@/components/ScoreGauge'
 import toast from 'react-hot-toast'
 
@@ -50,9 +51,30 @@ export default function DashboardPage() {
   const [newCount, setNewCount] = useState(0)
   const [viewed, setViewed] = useState<Set<string>>(new Set())
   const [limitReached, setLimitReached] = useState(false)
+  const [searchFocused, setSearchFocused] = useState(false)
+  const [recentSearches, setRecentSearches] = useState<string[]>([])
+  const [isFirstSession, setIsFirstSession] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
+  const searchRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
   const supabase = createClient()
+
+  const appCount = applications.filter(a => a.status !== 'saved').length
+
+  useEffect(() => {
+    try {
+      setRecentSearches(JSON.parse(localStorage.getItem('recentSearches') || '[]'))
+      setIsFirstSession(!localStorage.getItem('firstSessionDone'))
+    } catch { /* ignore */ }
+  }, [])
+
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(e.target as Node)) setSearchFocused(false)
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [])
 
   useEffect(() => {
     const load = async () => {
@@ -60,9 +82,7 @@ export default function DashboardPage() {
       if (!user) { router.push('/auth/login'); return }
       const { data: prof } = await supabase.from('profiles').select('*').eq('id', user.id).single()
       setProfile(prof)
-      if (prof && (!prof.skills || prof.skills.length === 0)) router.push('/dashboard/onboarding')
 
-      const lastSeen = parseInt(localStorage.getItem('lastSeen') || '0')
       try { setViewed(new Set(JSON.parse(localStorage.getItem('viewedLeads') || '[]'))) } catch { /* ignore */ }
 
       const res = await fetch('/api/applications')
@@ -72,14 +92,25 @@ export default function DashboardPage() {
       const { data: leadsData } = await supabase.from('leads').select('*').eq('status', 'active').gte('posted_date', new Date(Date.now() - 7 * 86400000).toISOString()).order('posted_date', { ascending: false })
       setLeads(leadsData || [])
 
+      const lastSeen = parseInt(localStorage.getItem('lastSeen') || '0')
       if (lastSeen > 0) {
         setNewCount((leadsData || []).filter(l => new Date(l.posted_date).getTime() > lastSeen).length)
       }
       setLoading(false)
       localStorage.setItem('lastSeen', Date.now().toString())
+      localStorage.setItem('firstSessionDone', '1')
     }
     load()
   }, [supabase, router])
+
+  const searchSubmit = useCallback((q: string) => {
+    setSearch(q)
+    setSearchFocused(false)
+    if (!q.trim()) return
+    const next = [q, ...recentSearches.filter(s => s !== q)].slice(0, 5)
+    setRecentSearches(next)
+    localStorage.setItem('recentSearches', JSON.stringify(next))
+  }, [recentSearches])
 
   const appMap = useMemo(() => new Map(applications.map(a => [a.lead_id, a])), [applications])
 
@@ -155,14 +186,37 @@ export default function DashboardPage() {
   return (
     <div className="flex-1 flex flex-col md:flex-row min-h-0">
       <div ref={containerRef} className="flex-1 overflow-y-auto dash-page">
-        {/* Greeting */}
+        {/* Greeting — stage-aware */}
         <div className="dash-greet">
-          <h1>Good to see you, {firstName} 👋</h1>
-          <p>
-            {newCount > 0
-              ? <><span className="hl">{newCount} new lead{newCount > 1 ? 's' : ''}</span> since your last visit.</>
-              : 'You\u2019re all caught up \u2014 here\u2019s your ranked feed.'}
-          </p>
+          {leads.length === 0 && profile?.onboarding_completed ? (
+            <>
+              <h1>Your feed is being built, {firstName} 🚀</h1>
+              <p>We&apos;re scanning Reddit, Reed, We Work Remotely, and Remote OK. Your first leads land within 30 minutes.</p>
+            </>
+          ) : isFirstSession && leads.length > 0 ? (
+            <>
+              <h1>Welcome, {firstName} 👋</h1>
+              <p>We found <span className="hl">{leads.length} leads</span> for you this week — ranked by how well they match your skills.</p>
+            </>
+          ) : appCount > 3 ? (
+            <>
+              <h1>Back at it, {firstName} 💪</h1>
+              <p>
+                {newCount > 0
+                  ? <><span className="hl">{newCount} new</span> since your last visit. {appCount} in your pipeline.</>
+                  : `${appCount} applications in your pipeline — keep going!`}
+              </p>
+            </>
+          ) : (
+            <>
+              <h1>Good to see you, {firstName}</h1>
+              <p>
+                {newCount > 0
+                  ? <><span className="hl">{newCount} new lead{newCount > 1 ? 's' : ''}</span> since your last visit.</>
+                  : 'You\u2019re all caught up \u2014 here\u2019s your ranked feed.'}
+              </p>
+            </>
+          )}
         </div>
 
         {/* Stat tiles */}
@@ -204,10 +258,48 @@ export default function DashboardPage() {
           ))}
         </div>
 
-        {/* Search */}
-        <div className="relative mb-4">
+        {/* Smarter search */}
+        <div className="relative mb-4" ref={searchRef}>
           <i className="ti ti-search absolute left-3 top-1/2 -translate-y-1/2 text-sm" style={{ color: 'var(--slate-2)', pointerEvents: 'none' }} />
-          <input value={search} onChange={e => setSearch(e.target.value)} className="input pl-9" placeholder="Search leads\u2026" />
+          <input value={search} onChange={e => setSearch(e.target.value)}
+            onFocus={() => setSearchFocused(true)}
+            onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); searchSubmit(search) } }}
+            className="input pl-9" placeholder="Search leads\u2026" />
+          {search && (
+            <button onClick={() => { setSearch(''); setSearchFocused(true) }} className="absolute right-3 top-1/2 -translate-y-1/2 text-sm"
+              style={{ color: 'var(--slate-2)' }}><i className="ti ti-x" /></button>
+          )}
+          {searchFocused && !search && (
+            <div className="ob-search-dropdown">
+              {recentSearches.length > 0 && (
+                <div className="ob-search-section">
+                  <div className="ob-search-section-label">Recent <i className="ti ti-clock" /></div>
+                  {recentSearches.map(q => (
+                    <button key={q} type="button" className="ob-search-suggestion" onClick={() => searchSubmit(q)}>
+                      <i className="ti ti-history" />{q}
+                    </button>
+                  ))}
+                </div>
+              )}
+              <div className="ob-search-section">
+                <div className="ob-search-section-label">Popular skills <i className="ti ti-trending-up" /></div>
+                <div className="ob-search-pills">
+                  {ALL_SKILLS.slice(0, 12).map(s => (
+                    <button key={s} type="button" className="ob-search-pill" onClick={() => searchSubmit(s)}>{s}</button>
+                  ))}
+                </div>
+              </div>
+              <div className="ob-search-section">
+                <div className="ob-search-section-label">Quick filters</div>
+                <div className="ob-search-pills">
+                  <button className="ob-search-pill" onClick={() => { setScoreFilter('Score 8+'); setSearchFocused(false) }}>Score 8+</button>
+                  <button className="ob-search-pill" onClick={() => { setSourceFilter('Reddit'); setSearchFocused(false) }}>Reddit</button>
+                  <button className="ob-search-pill" onClick={() => { setSourceFilter('Remote OK'); setSearchFocused(false) }}>Remote OK</button>
+                  <button className="ob-search-pill" onClick={() => { setScoreFilter('New'); setSearchFocused(false) }}>New today</button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* First-run empty state */}

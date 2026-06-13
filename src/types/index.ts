@@ -3,11 +3,14 @@ export interface Profile {
   full_name: string | null;
   email: string | null;
   skills: string[] | null;
+  disciplines: string[] | null;
   experience_level: string | null;
   hourly_rate: number | null;
   location: string | null;
+  timezone: string | null;
   portfolio_url: string | null;
   availability: string | null;
+  onboarding_completed: boolean;
   subscription_status: 'free' | 'pro';
   created_at: string;
 }

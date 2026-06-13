@@ -31,12 +31,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const pathname = usePathname() || ''
   const supabase = createClient()
 
+  const isOnboarding = pathname === '/dashboard/onboarding'
+
   useEffect(() => {
     const load = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/auth/login'); return }
       const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single()
       setProfile(data)
+      // Single onboarding gate: incomplete profiles are funnelled to the wizard
+      if ((!data || !data.onboarding_completed) && pathname !== '/dashboard/onboarding') {
+        router.push('/dashboard/onboarding')
+        return
+      }
       const lastSeen = parseInt(localStorage.getItem('lastSeen') || '0')
       if (lastSeen > 0) {
         const { count } = await supabase.from('leads').select('id', { count: 'exact', head: true }).eq('status', 'active').gte('posted_date', new Date(lastSeen).toISOString())
@@ -45,9 +52,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       localStorage.setItem('lastSeen', String(Date.now()))
     }
     load()
-  }, [supabase, router])
+  }, [supabase, router, pathname])
 
   useEffect(() => { setMenuOpen(false) }, [pathname])
+
+  // Onboarding is a full-screen wizard — render it without the dashboard chrome.
+  if (isOnboarding) return <>{children}</>
 
   const isActive = (href: string) => {
     if (href === '/dashboard') return pathname === '/dashboard' || pathname.startsWith('/dashboard/lead')
@@ -120,14 +130,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <span className="sb-logo-name">LeadFlow</span>
         </div>
 
-        {/* Profile warning banner */}
-        {profile && (!profile.skills || profile.skills.length === 0 || !profile.hourly_rate) && (
+        {/* Profile warning banner — fine-tuning prompt for completed profiles missing a rate */}
+        {profile && profile.onboarding_completed && !profile.hourly_rate && (
           <div className="flex items-center gap-2.5 px-4 md:px-8 py-2.5 text-xs font-medium animate-fadeIn"
             style={{ background: 'var(--mid-bg)', borderBottom: '1px solid #F0D9A0' }}>
             <i className="ti ti-alert-triangle" style={{ color: 'var(--mid)' }} />
-            <span style={{ color: '#7A5A12' }}>Complete your profile to get matched leads.</span>
+            <span style={{ color: '#7A5A12' }}>Add your rate to sharpen your match scores.</span>
             <button onClick={() => router.push('/dashboard/profile')}
-              className="underline font-semibold ml-auto" style={{ color: '#5E4609' }}>Add skills &rarr;</button>
+              className="underline font-semibold ml-auto" style={{ color: '#5E4609' }}>Update profile &rarr;</button>
           </div>
         )}
 
