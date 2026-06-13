@@ -16,12 +16,19 @@ const statusConfig: Record<string, { label: string, color: string, bg: string }>
   hired:      { label: 'Won', color: 'var(--hi)', bg: 'var(--hi-bg)' },
 }
 
+function barColor(v: number) {
+  if (v >= 8) return 'var(--hi)'
+  if (v >= 5) return 'var(--mid)'
+  return 'var(--slate)'
+}
+
 export default function LeadDetailPage() {
   const { id } = useParams<{ id: string }>()
   const [lead, setLead] = useState<Lead | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
   const [application, setApplication] = useState<Application | null>(null)
   const [loading, setLoading] = useState(true)
+  const [showFullDesc, setShowFullDesc] = useState(false)
   const router = useRouter()
   const supabase = createClient()
 
@@ -71,32 +78,32 @@ export default function LeadDetailPage() {
     }
   }, [id])
 
-  const handleBookmark = () => {
-    if (application?.status === 'saved') {
-      updateApplication('remove')
-      toast.success('Lead removed from saved')
-    } else if (application?.status === 'interested' || application?.status === 'applied' || application?.status === 'hired') {
-      updateApplication('saved')
-      toast.success('Lead saved for later')
+  const handlePrimaryAction = () => {
+    const isAlreadyInPipeline = application && application.status !== 'saved'
+    if (isAlreadyInPipeline) {
+      router.push('/dashboard/applied')
+    } else if (application?.status === 'saved') {
+      updateApplication('interested')
+      toast.success('Added to pipeline')
     } else {
-      updateApplication('saved')
-      toast.success('Lead saved for later')
+      updateApplication('interested')
+      toast.success('Added to pipeline')
     }
   }
 
-  const handleInterested = () => {
-    if (application?.status === 'interested' || application?.status === 'applied' || application?.status === 'hired') {
+  const toggleSave = () => {
+    if (application?.status === 'saved') {
       updateApplication('remove')
-      toast.success('Removed from applications')
+      toast('Removed from saved')
     } else {
-      updateApplication('interested')
-      toast.success('Added to your applications')
+      updateApplication('saved')
+      toast.success('Saved')
     }
   }
 
   if (loading) return (
     <div className="flex items-center justify-center min-h-screen" style={{ background: 'var(--paper)' }}>
-      <div className="flex items-center gap-3" style={{ color: 'var(--slate-500)' }}>
+      <div className="flex items-center gap-3" style={{ color: 'var(--slate)' }}>
         <div className="w-2.5 h-2.5 rounded-full animate-pulse" style={{ background: 'var(--lime)' }} />
         <span className="text-sm">Loading&hellip;</span>
       </div>
@@ -110,6 +117,9 @@ export default function LeadDetailPage() {
   const matchInfo = computeMatchExplanation(lead, profile)
   const score = matchInfo.score
   const budget = formatBudgetGBP(lead.budget_min, lead.budget_max)
+  const isInPipeline = application && application.status !== 'saved'
+  const isSaved = application?.status === 'saved'
+  const descShort = (lead.description || '').length > 350
 
   const daysSince = application ? Math.floor((Date.now() - new Date(application.created_at).getTime()) / 86400000) : 0
   const showOutcomePrompt = application && daysSince >= 14 && !application.outcome
@@ -117,139 +127,106 @@ export default function LeadDetailPage() {
   return (
     <div className="flex-1 pb-20 md:pb-0" style={{ background: 'var(--paper)' }}>
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6 md:py-8">
-        <button onClick={() => router.push('/dashboard')} className="btn-line btn-sm mb-4">
+        <button onClick={() => router.push('/dashboard')} className="btn-line btn-sm mb-5">
           <i className="ti ti-arrow-left" /> Back to leads
         </button>
 
         <div className="card p-6 md:p-8 !shadow-none">
-            <div className="flex items-start justify-between gap-4">
-            <div className="flex items-center gap-3 min-w-0">
-              <button onClick={() => { if (!isFree && lead.source_url) window.open(lead.source_url, '_blank', 'noopener,noreferrer') }}
-                className="text-xs font-semibold px-2.5 py-1 rounded-lg shrink-0 transition-opacity hover:opacity-80"
-                style={{ background: source.bg, color: source.color }}>{source.label}</button>
-              {isNewLead(lead.posted_date) && <span className="lead-state st-new text-[10px] px-2 py-0.5 rounded-lg">New</span>}
-              <div className="min-w-0">
-                <h1 className="text-xl md:text-2xl font-bold truncate" style={{ color: 'var(--ink)' }}>{lead.title}</h1>
-                <div className="flex items-center gap-2 mt-0.5 text-xs" style={{ color: 'var(--slate-2)' }}>
-                  {lead.project_type && <span className="capitalize">{lead.project_type}</span>}
-                  {lead.client_location && <><i className="ti ti-briefcase" style={{ fontSize: '10px' }} /><span>{lead.client_location}</span></>}
-                </div>
+          {/* Header — source + title + score */}
+          <div className="flex items-start gap-4">
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-xs font-semibold px-2.5 py-1 rounded-lg"
+                  style={{ background: source.bg, color: source.color }}>{source.label}</span>
+                {isNewLead(lead.posted_date) && <span className="lead-state st-new text-[10px]">New</span>}
+                {isInPipeline && <span className="lead-state" style={{ background: statusConfig[application!.status]?.bg, color: statusConfig[application!.status]?.color }}>{statusConfig[application!.status]?.label}</span>}
               </div>
+              <h1 className="text-xl md:text-2xl font-bold leading-tight" style={{ color: 'var(--ink)' }}>{lead.title}</h1>
             </div>
             <ScoreGauge score={score} />
           </div>
 
-          <div className="flex flex-wrap items-center gap-2 mt-4">
-            {budget && <span className="lead-state" style={{ background: 'var(--hi-bg)', color: 'var(--hi)' }}>{budget}</span>}
-            {lead.project_type && <span className="lead-state">{lead.project_type}</span>}
-            {lead.client_location && <span className="lead-state flex items-center gap-1">
-              <i className="ti ti-map-pin" style={{ fontSize: '12px' }} /> {lead.client_location}
-            </span>}
+          {/* Meta strip */}
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-3 text-xs" style={{ color: 'var(--slate)' }}>
+            {budget && <span className="font-semibold font-mono" style={{ color: 'var(--lime-ink)' }}>{budget}</span>}
+            {lead.client_location && <span><i className="ti ti-map-pin" style={{ fontSize: 11 }} /> {lead.client_location}</span>}
+            {lead.project_type && <span className="capitalize">{lead.project_type}</span>}
+            <span><i className="ti ti-calendar" style={{ fontSize: 11 }} /> Posted {formatDate(lead.posted_date)}</span>
           </div>
 
+          {/* Actions — single primary + secondary save */}
+          <div className="flex items-center gap-3 mt-5">
+            <button onClick={handlePrimaryAction} className="btn btn-primary">
+              <i className={`ti ${isInPipeline ? 'ti-send-2' : 'ti-send'}`} />
+              {isInPipeline ? 'View in pipeline' : 'Apply & track'}
+            </button>
+            <button onClick={toggleSave} className={`btn-icon ${isSaved ? 'on' : ''}`} title={isSaved ? 'Saved' : 'Save'}>
+              <i className={`ti ti-bookmark${isSaved ? '-filled' : ''}`} />
+            </button>
+            {!isFree && lead.source_url && (
+              <a href={lead.source_url} target="_blank" rel="noopener noreferrer" className="btn btn-ghost">
+                <i className="ti ti-external-link" /> Source
+              </a>
+            )}
+          </div>
+
+          {/* Description */}
           <div className="mt-6">
-            <h3 className="text-sm font-semibold mb-2" style={{ color: 'var(--ink)' }}>Description</h3>
-            <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: 'var(--ink-2)' }}>{lead.description}</p>
+            <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: 'var(--ink-2)' }}>
+              {showFullDesc || !descShort ? lead.description : `${lead.description?.slice(0, 350)}...`}
+            </p>
+            {descShort && (
+              <button onClick={() => setShowFullDesc(v => !v)} className="text-xs font-semibold mt-1"
+                style={{ color: 'var(--lime-deep)' }}>
+                {showFullDesc ? 'Show less' : 'Read more'}
+              </button>
+            )}
           </div>
 
+          {/* Skills — single unified row */}
           {lead.skills_required && lead.skills_required.length > 0 && (
-            <div className="mt-6">
-              <h3 className="text-sm font-semibold mb-2" style={{ color: 'var(--ink)' }}>Skills Required</h3>
+            <div className="mt-5">
               <div className="flex flex-wrap gap-2">
-                {lead.skills_required.map(skill => (
-                  <span key={skill} className="badge-skill">{skill}</span>
-                ))}
+                {lead.skills_required.map(sk => {
+                  const matched = profile?.skills?.some(ps => ps.toLowerCase() === sk.toLowerCase())
+                  return (
+                    <span key={sk} className={`skill ${matched ? 'match' : ''}`}>
+                      {matched && <i className="ti ti-check" style={{ fontSize: 10 }} />}{sk}
+                    </span>
+                  )
+                })}
               </div>
             </div>
           )}
 
-          <div className="flex flex-wrap gap-4 mt-6 text-xs" style={{ color: 'var(--slate)' }}>
-            <span className="flex items-center gap-1">
-              <i className="ti ti-calendar" style={{ fontSize: '12px' }} />
-              Posted {new Date(lead.posted_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
-            </span>
-            {lead.expiry_date && (
-              <span className="flex items-center gap-1">
-                <i className="ti ti-calendar" style={{ fontSize: '12px' }} />
-                Expires {new Date(lead.expiry_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
-              </span>
-            )}
-          </div>
-
-          {lead.source_url && (
-            <div className="mt-5 pt-5" style={{ borderTop: '1px solid var(--line)' }}>
-              <h3 className="text-sm font-semibold mb-2" style={{ color: 'var(--ink)' }}>Source</h3>
-              {isFree ? (
-                <div className="lock-card">
-                  <i className="ti ti-lock text-2xl" style={{ color: 'var(--slate)', display: 'block', margin: '0 auto 8px' }} />
-                  <p className="text-xs font-medium" style={{ color: 'var(--ink-2)' }}>Source URL hidden</p>
-                  <p className="text-xs mt-1" style={{ color: 'var(--slate)' }}>Upgrade to Pro to see where this lead came from and apply directly.</p>
-                  <button onClick={() => router.push('/dashboard/billing')} className="btn btn-primary btn-sm mt-3">Upgrade to Pro &mdash; &pound;49/month</button>
-                </div>
-              ) : (
-                <a href={lead.source_url} target="_blank" rel="noopener noreferrer"
-                  className="text-sm hover:underline inline-flex items-center gap-1" style={{ color: 'var(--lime)' }}>
-                  {lead.source_url} <i className="ti ti-external-link" style={{ fontSize: '12px' }} />
-                </a>
-              )}
-            </div>
-          )}
-
+          {/* Score breakdown — compact 4-row */}
           <div className="mt-5 pt-5" style={{ borderTop: '1px solid var(--line)' }}>
-            <div className="flex items-center justify-between mb-1">
-              <h3 className="text-sm font-semibold" style={{ color: 'var(--ink)' }}>Why this score?</h3>
-              <span className="font-mono font-bold text-sm" style={{ color: score >= 8 ? 'var(--hi)' : score >= 5 ? 'var(--mid)' : 'var(--slate)' }}>{score}/10</span>
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-xs font-semibold" style={{ color: 'var(--ink)' }}>Match breakdown</span>
+              <span className="font-mono font-bold text-xs" style={{ color: 'var(--slate)' }}>{matchInfo.why}</span>
             </div>
-            <p className="text-xs mb-3" style={{ color: 'var(--slate)' }}>{matchInfo.why}</p>
-            <div className="space-y-3">
+            <div className="flex flex-col gap-2.5">
               {matchInfo.subScores.map(s => (
-                <div key={s.label} className="flex items-start gap-2.5 text-xs">
-                  <i className={`ti ti-${s.icon}`} style={{ fontSize: '14px', color: 'var(--slate)', marginTop: '1px' }} />
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center justify-between">
-                      <span className="font-semibold" style={{ color: 'var(--ink)' }}>{s.label}</span>
-                      <span className="font-mono font-semibold" style={{ color: 'var(--ink-2)' }}>{s.value}/10 <span style={{ color: 'var(--slate)', fontWeight: 400 }}>· {Math.round(s.weight * 100)}%</span></span>
-                    </div>
-                    <div className="score-bar mt-1"><span className={s.value >= 7 ? '' : s.value >= 4 ? 'warn' : 'weak'} style={{ width: `${s.value * 10}%` }} /></div>
-                    <p className="mt-1" style={{ color: 'var(--slate)', fontSize: '11px' }}>{s.detail}</p>
+                <div key={s.label} className="flex items-center gap-3">
+                  <span className="text-xs font-medium min-w-[72px]" style={{ color: 'var(--ink-2)' }}>{s.label}</span>
+                  <div className="flex-1 h-1.5 rounded-full" style={{ background: 'var(--line)' }}>
+                    <div className="h-full rounded-full" style={{ width: `${s.value * 10}%`, background: barColor(s.value) }} />
                   </div>
+                  <span className="font-mono text-xs font-semibold min-w-[28px] text-right" style={{ color: s.value >= 8 ? 'var(--hi)' : s.value >= 5 ? 'var(--mid)' : 'var(--slate)' }}>{s.value}</span>
                 </div>
               ))}
             </div>
-            <p className="text-xs mt-3 pt-3" style={{ color: 'var(--slate)', borderTop: '1px solid var(--line)' }}>{matchInfo.summary}</p>
-
-            {profile?.skills && profile.skills.length > 0 && (
-              <div className="mt-4 pt-3" style={{ borderTop: '1px solid var(--line)' }}>
-                <div className="text-xs font-semibold mb-2" style={{ color: 'var(--ink)' }}>
-                  Skill Match: {matchInfo.skillMatch.matched.length}/{lead.skills_required?.length || 0}
-                </div>
-                {matchInfo.skillMatch.matched.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5 mb-1.5">
-                    {matchInfo.skillMatch.matched.map(s => (
-                      <span key={s} className="badge-skill text-[10px]" style={{ background: 'var(--hi-bg)', color: 'var(--hi)' }}>{s} &check;</span>
-                    ))}
-                  </div>
-                )}
-                {matchInfo.skillMatch.missing.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5">
-                    {matchInfo.skillMatch.missing.map(s => (
-                      <span key={s} className="text-[10px] px-2 py-0.5 rounded font-medium" style={{ background: 'var(--paper-2)', color: 'var(--slate)' }}>{s}</span>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
           </div>
 
+          {/* Outcome prompt */}
           {showOutcomePrompt && (
             <div className="mt-5 pt-5" style={{ borderTop: '1px solid var(--line)' }}>
-              <h3 className="text-sm font-semibold mb-2" style={{ color: 'var(--ink)' }}>Did you get this project?</h3>
-              <p className="text-xs mb-3" style={{ color: 'var(--slate)' }}>Help us improve your matches by telling us what happened.</p>
-              <div className="flex flex-wrap gap-2">
+              <p className="text-xs font-medium mb-3" style={{ color: 'var(--ink)' }}>How did it go?</p>
+              <div className="flex gap-2">
                 {[
-                  { outcome: 'won', label: 'Got it!', icon: 'ti-thumb-up', color: 'var(--hi)', bg: 'var(--hi-bg)' },
-                  { outcome: 'lost', label: 'Did not get it', icon: 'ti-thumb-down', color: 'var(--coral)', bg: 'rgba(229,87,61,.1)' },
-                  { outcome: 'pending', label: 'Still waiting', icon: 'ti-clock', color: 'var(--mid)', bg: 'var(--mid-bg)' },
+                  { outcome: 'won' as const, label: 'Got it!', icon: 'ti-thumb-up', color: 'var(--hi)', bg: 'var(--hi-bg)' },
+                  { outcome: 'lost' as const, label: 'No', icon: 'ti-thumb-down', color: 'var(--coral)', bg: 'rgba(229,87,61,.1)' },
+                  { outcome: 'pending' as const, label: 'Still waiting', icon: 'ti-clock', color: 'var(--mid)', bg: 'var(--mid-bg)' },
                 ].map(opt => (
                   <button key={opt.outcome} onClick={async () => {
                     const res = await fetch('/api/applications', {
@@ -257,80 +234,27 @@ export default function LeadDetailPage() {
                       headers: { 'Content-Type': 'application/json' },
                       body: JSON.stringify({ lead_id: id, outcome: opt.outcome }),
                     })
-                    if (res.ok) {
-                      const app = await res.json()
-                      setApplication(app)
-                      toast.success('Saved!')
-                    }
+                    if (res.ok) { setApplication(await res.json()); toast.success('Saved!') }
                   }}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all hover:opacity-80 min-h-[36px]"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all hover:opacity-80"
                     style={{ background: opt.bg, color: opt.color }}>
-                    <i className={`ti ${opt.icon}`} style={{ fontSize: '12px' }} /> {opt.label}
+                    <i className={`ti ${opt.icon}`} style={{ fontSize: 12 }} /> {opt.label}
                   </button>
                 ))}
               </div>
             </div>
           )}
 
+          {/* Outcome display */}
           {application?.outcome && (
             <div className="mt-5 pt-5" style={{ borderTop: '1px solid var(--line)' }}>
               <div className="flex items-center gap-2 text-sm font-medium"
                 style={{ color: application.outcome === 'won' ? 'var(--hi)' : application.outcome === 'lost' ? 'var(--coral)' : 'var(--mid)' }}>
-                <i className={`ti ${application.outcome === 'won' ? 'ti-thumb-up' : application.outcome === 'lost' ? 'ti-thumb-down' : 'ti-clock'}`} style={{ fontSize: '14px' }} />
-                {application.outcome === 'won' ? 'You got this project!' : application.outcome === 'lost' ? 'Did not get this project' : 'Still waiting on this project'}
+                <i className={`ti ${application.outcome === 'won' ? 'ti-thumb-up' : application.outcome === 'lost' ? 'ti-thumb-down' : 'ti-clock'}`} style={{ fontSize: 14 }} />
+                {application.outcome === 'won' ? 'You got this project' : application.outcome === 'lost' ? 'Did not get it' : 'Still waiting'}
               </div>
             </div>
           )}
-
-          <div className="flex flex-wrap items-center gap-3 mt-6 pt-5" style={{ borderTop: '1px solid var(--line)' }}>
-            {!isFree && lead.source_url && (
-              <a href={lead.source_url} target="_blank" rel="noopener noreferrer"
-                className="btn btn-primary !px-5 !py-2.5 text-sm no-underline">
-                <i className="ti ti-external-link" style={{ fontSize: '14px' }} />
-                Apply on {source.label}
-              </a>
-            )}
-            <button onClick={handleInterested}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition-all min-h-[36px]"
-              style={{
-                background: application?.status === 'interested' || application?.status === 'applied' || application?.status === 'hired' ? 'var(--lime-dim)' : 'var(--paper-2)',
-                color: application?.status === 'interested' || application?.status === 'applied' || application?.status === 'hired' ? 'var(--lime-ink)' : 'var(--ink-2)',
-              }}>
-              <i className="ti ti-send" style={{ fontSize: '14px' }} />
-              {application?.status === 'interested' || application?.status === 'applied' || application?.status === 'hired' ? 'Interest Expressed' : 'Express Interest'}
-            </button>
-
-            <button onClick={handleBookmark}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all min-h-[36px] active:scale-[0.97]"
-              style={{
-                background: application?.status === 'saved' ? 'var(--lime-dim)' : 'var(--paper-2)',
-                color: application?.status === 'saved' ? 'var(--lime-ink)' : 'var(--slate)',
-              }}>
-              <i className={`ti ${application?.status === 'saved' ? 'ti-bookmark-filled' : 'ti-bookmark'}`} style={{ fontSize: '14px' }} />
-              {application?.status === 'saved' ? 'Saved' : 'Save for later'}
-            </button>
-
-            {application?.status === 'interested' && (
-              <button onClick={() => { updateApplication('applied'); toast.success('Marked as applied') }}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium min-h-[36px] transition-all hover:opacity-80 active:scale-[0.97]"
-                style={{ background: 'var(--mid-bg)', color: 'var(--mid)' }}>
-                <i className="ti ti-send" style={{ fontSize: '14px' }} /> Mark as Applied
-              </button>
-            )}
-            {application?.status === 'applied' && (
-              <button onClick={() => { updateApplication('hired'); toast.success('Marked as hired!') }}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium min-h-[36px] transition-all hover:opacity-80 active:scale-[0.97]"
-                style={{ background: 'var(--hi-bg)', color: 'var(--hi)' }}>
-                <i className="ti ti-trophy" style={{ fontSize: '14px' }} /> Mark as Hired
-              </button>
-            )}
-
-            {application?.status && application.status !== 'saved' && (
-              <span className="lead-state" style={{ background: statusConfig[application.status]?.bg, color: statusConfig[application.status]?.color }}>
-                {statusConfig[application.status]?.label || application.status}
-              </span>
-            )}
-          </div>
         </div>
       </div>
     </div>

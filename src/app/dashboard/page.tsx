@@ -392,73 +392,69 @@ export default function DashboardPage() {
             const src = getSourceInfo(selected.source_url)
             const srcCls = SRC_CLS[src.label.toLowerCase().replace(/\s+/g, '').replace('remoteok', 'rok')] || 'sb-reddit'
             const isFree = profile?.subscription_status === 'free'
+            const isInPipeline = appMap.get(selected.id) && appMap.get(selected.id)!.status !== 'saved'
+            const isSaved = appMap.get(selected.id)?.status === 'saved'
             return (
               <aside className="detail-panel">
                 <div className="dp-head">
                   <span className={`src-badge ${srcCls}`}>{src.label.toUpperCase()}</span>
+                  {isInPipeline && <span className="lead-state st-applied" style={{ fontSize: 9 }}>Active</span>}
                   <ScoreGauge score={m.score} size="sm" />
                   <button className="dp-close" onClick={() => setSelected(null)}><i className="ti ti-x" /></button>
                 </div>
                 <div className="dp-body">
                   <div className="dp-title">{selected.title}</div>
                   <div className="dp-sub">
-                    <i className="ti ti-map-pin" style={{ fontSize: 14 }} />
                     {selected.client_location} &middot; {selected.project_type} &middot; {timeAgo(selected.posted_date)}
                   </div>
 
                   {formatBudgetGBP(selected.budget_min, selected.budget_max) && (
-                    <span className="budget">{formatBudgetGBP(selected.budget_min, selected.budget_max)}</span>
+                    <span className="budget" style={{ display: 'inline-block', marginBottom: 14 }}>{formatBudgetGBP(selected.budget_min, selected.budget_max)}</span>
                   )}
 
-                  <div className="dp-section-label">Why this score</div>
-                  <div className="dp-why">
-                    <div className="dp-why-expl">{m.why}</div>
-                    <div className="subscore-full">
-                      {m.subScores.map(s => {
-                        const pct = s.value * 10
-                        const barCls = s.value >= 7 ? '' : s.value >= 4 ? 'warn' : 'weak'
-                        return (
-                          <div key={s.label}>
-                            <div className="ssf-head">
-                              <span className="ssf-label">{s.label}<span className="ssf-weight">{Math.round(s.weight * 100)}%</span></span>
-                              <span className="ssf-score" style={{ color: barColor(s.value) }}>{s.value}/10</span>
-                            </div>
-                            <div className="ssf-bar"><div className={`ssf-fill ${barCls}`} style={{ width: `${pct}%`, background: barColor(s.value) }} /></div>
-                            <div className="ssf-detail">{s.detail}</div>
-                          </div>
-                        )
-                      })}
+                  {/* Score — compact 4 bars */}
+                  {m.subScores.map(s => (
+                    <div key={s.label} className="flex items-center gap-2 mb-2 last:mb-0">
+                      <span className="text-[10px] font-medium min-w-[60px]" style={{ color: 'var(--slate)' }}>{s.label}</span>
+                      <div className="flex-1 h-1 rounded-full" style={{ background: 'var(--line)' }}>
+                        <div className="h-full rounded-full" style={{ width: `${s.value * 10}%`, background: barColor(s.value) }} />
+                      </div>
+                      <span className="font-mono text-[10px] font-semibold min-w-[18px] text-right" style={{ color: s.value >= 8 ? 'var(--hi)' : s.value >= 5 ? 'var(--mid)' : 'var(--slate)' }}>{s.value}</span>
                     </div>
-                  </div>
+                  ))}
 
-                  <div className="dp-section-label">Skill match</div>
-                  <div className="skill-detail">
-                    {m.skillMatch.matched.map(s => <span key={s} className="skill-yes"><i className="ti ti-check" />{s}</span>)}
-                    {m.skillMatch.missing.map(s => <span key={s} className="skill-no">{s}</span>)}
-                  </div>
+                  {/* Skills — compact */}
+                  {m.skillMatch.matched.length + m.skillMatch.missing.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 mt-4 pt-4" style={{ borderTop: '1px solid var(--line-2)' }}>
+                      {m.skillMatch.matched.map(s => <span key={s} className="skill match text-[10px] !px-2 !py-1"><i className="ti ti-check" style={{ fontSize: 9 }} />{s}</span>)}
+                      {m.skillMatch.missing.map(s => <span key={s} className="skill text-[10px] !px-2 !py-1" style={{ opacity: .65 }}>{s}</span>)}
+                    </div>
+                  )}
 
-                  <div className="dp-section-label">Description</div>
-                  <p className="dp-desc">{selected.description?.slice(0, 500)}</p>
+                  {/* Description — short preview */}
+                  <p className="text-xs mt-4 pt-4 leading-relaxed" style={{ color: 'var(--ink-2)', borderTop: '1px solid var(--line-2)' }}>
+                    {selected.description?.slice(0, 250)}...
+                  </p>
 
-                  <div className="dp-section-label">Source</div>
+                  {/* Source */}
                   {isFree ? (
-                    <div className="lock-card">
+                    <div className="lock-card" style={{ marginTop: 12 }}>
                       <div className="lk-icon"><i className="ti ti-lock" /></div>
-                      <div><h4>Source hidden on Free</h4><p>Upgrade to apply directly at the source.</p></div>
+                      <div><h4>Source hidden on Free</h4><p>Upgrade to apply directly.</p></div>
                     </div>
                   ) : selected.source_url ? (
-                    <a href={selected.source_url} target="_blank" rel="noopener noreferrer" className="btn btn-ghost" style={{ width: '100%' }}>
-                      <i className="ti ti-external-link" /> Open original listing
+                    <a href={selected.source_url} target="_blank" rel="noopener noreferrer" className="btn btn-ghost" style={{ width: '100%', marginTop: 12 }}>
+                      <i className="ti ti-external-link" /> Open source
                     </a>
                   ) : null}
                 </div>
                 <div className="dp-actions">
                   <button onClick={() => handleApply(selected)} className="btn btn-primary" style={{ width: '100%' }}>
-                    <i className="ti ti-send" /> Apply & track
+                    <i className="ti ti-send" /> {isInPipeline ? 'View in pipeline' : 'Apply & track'}
                   </button>
                   <button onClick={() => handleSave(selected)} className="btn btn-ghost" style={{ width: '100%' }}>
-                    <i className={`ti ti-bookmark${appMap.get(selected.id)?.status === 'saved' ? '-filled' : ''}`} />
-                    {appMap.get(selected.id)?.status === 'saved' ? 'Saved' : 'Save for later'}
+                    <i className={`ti ti-bookmark${isSaved ? '-filled' : ''}`} />
+                    {isSaved ? 'Saved' : 'Save for later'}
                   </button>
                 </div>
               </aside>
