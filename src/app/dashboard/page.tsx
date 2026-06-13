@@ -222,13 +222,13 @@ export default function DashboardPage() {
         {/* Stat tiles */}
         <div className="dash-stats">
           {[
-            { label: 'This week', value: leads.length.toString(), color: 'var(--lime-deep)' },
-            { label: 'Scored 7+', value: score7plus.toString(), color: 'var(--hi)' },
-            { label: 'Top score', value: topScore > 0 ? `${topScore}` : '\u2014', color: 'var(--mid)' },
-            { label: 'Saved', value: applications.filter(a => a.status === 'saved').length.toString(), color: 'var(--slate)' },
+            { label: 'This week', value: leads.length.toString(), color: 'var(--lime-deep)', icon: 'ti-radar-2' },
+            { label: 'Scored 7+', value: score7plus.toString(), color: 'var(--hi)', icon: 'ti-arrows-up' },
+            { label: 'Top score', value: topScore > 0 ? `${topScore}` : '\u2014', color: 'var(--mid)', icon: 'ti-crown' },
+            { label: 'Saved', value: applications.filter(a => a.status === 'saved').length.toString(), color: 'var(--slate)', icon: 'ti-bookmark' },
           ].map(s => (
             <div key={s.label} className="dash-stat">
-              <div className="dash-stat-label">{s.label}</div>
+              <div className="dash-stat-label"><i className={`ti ${s.icon}`} />{s.label}</div>
               <div className="dash-stat-value" style={{ color: s.color }}>{s.value}</div>
             </div>
           ))}
@@ -237,11 +237,11 @@ export default function DashboardPage() {
         {/* Source status strip */}
         <div className="src-strip">
           {sourceStatus.map(s => (
-            <div key={s.key} className="src-tile">
-              <span className={`src-dot ${s.status}`} />
+            <div key={s.key} className={`src-tile ${s.status === 'down' ? 'idle' : ''}`}>
+              <span className={`src-dot ${s.status === 'down' ? 'idle' : s.status}`} />
               <div className="src-tile-body">
                 <div className="src-tile-name">{s.key}</div>
-                <div className="src-tile-meta">Last scan: {s.text}</div>
+                <div className="src-tile-meta">{s.text === 'awaiting first scan' ? 'Waiting for first data' : `Last scan: ${s.text}`}</div>
               </div>
             </div>
           ))}
@@ -356,7 +356,7 @@ export default function DashboardPage() {
                       const m = profile?.skills?.some(ps => ps.toLowerCase() === sk.toLowerCase())
                       return <span key={sk} className={`skill ${m ? 'match' : ''}`}>{sk}</span>
                     })}
-                    {(lead.skills_required?.length || 0) > 3 && <span className="skill">+{lead.skills_required!.length - 3}</span>}
+                    {(lead.skills_required?.length || 0) > 3 && <span className="skill skill-overflow">+{lead.skills_required!.length - 3}</span>}
                   </div>
 
                   <div className="lc-actions" onClick={e => e.stopPropagation()}>
@@ -466,12 +466,17 @@ export default function DashboardPage() {
           })()}
         </div>
 
-        {/* Limit / upgrade banners */}
+        {/* Pro upgrade banner — value prop, not a wall */}
         {profile?.subscription_status === 'free' && filtered.length > limit && (
-          <div className="empty" style={{ padding: '30px 20px' }}>
-            <h3>{filtered.length - limit} more leads behind Pro</h3>
-            <p>Upgrade to see every scored lead with direct source links.</p>
-            <button onClick={() => router.push('/dashboard/billing')} className="btn btn-primary" style={{ display: 'inline-flex' }}>View Plans</button>
+          <div className="upgrade-card">
+            <div className="upgrade-icon"><i className="ti ti-sparkles" /></div>
+            <div className="upgrade-body">
+              <h3>{filtered.length - limit} more leads scored for you</h3>
+              <p>Upgrade to see every match with direct source links, unlimited applications, and weekly analytics.</p>
+            </div>
+            <button onClick={() => router.push('/dashboard/billing')} className="btn btn-primary upgrade-btn">
+              View plans <i className="ti ti-arrow-right" />
+            </button>
           </div>
         )}
 
@@ -479,10 +484,10 @@ export default function DashboardPage() {
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-4" onClick={() => setLimitReached(false)}>
             <div className="section-card p-6 max-w-sm w-full text-center" style={{ animation: 'scaleIn .2s var(--ease)' }} onClick={e => e.stopPropagation()}>
               <div className="empty-icon" style={{ marginBottom: 16 }}><i className="ti ti-bolt" /></div>
-              <h3 style={{ fontSize: 20 }}>Application limit reached</h3>
-              <p style={{ marginTop: 8 }}>Upgrade to Pro for unlimited applications and source links.</p>
+              <h3 style={{ fontSize: 20 }}>Applications used up</h3>
+              <p style={{ marginTop: 8 }}>Pro gives you unlimited applications, source links, and a fuller feed.</p>
               <button onClick={() => { setLimitReached(false); router.push('/dashboard/billing') }} className="btn btn-primary" style={{ width: '100%', marginTop: 16 }}>Upgrade to Pro</button>
-              <button onClick={() => setLimitReached(false)} className="btn btn-ghost" style={{ width: '100%', marginTop: 8 }}>Dismiss</button>
+              <button onClick={() => setLimitReached(false)} className="btn btn-ghost" style={{ width: '100%', marginTop: 8 }}>Maybe later</button>
             </div>
           </div>
         )}
