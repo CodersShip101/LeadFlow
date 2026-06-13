@@ -47,21 +47,21 @@ export default function BillingPage() {
 
   if (loading) return (
     <div className="flex-1 flex items-center justify-center pt-16">
-      <div className="flex items-center gap-2" style={{ color: 'var(--base-500)' }}>
-        <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: 'var(--green-500)' }} /> Loading...
+      <div className="flex items-center gap-2" style={{ color: 'var(--slate-500)' }}>
+        <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: 'var(--lime)' }} /> Loading...
       </div>
     </div>
   )
 
   return (
     <div className="flex-1 px-4 md:px-8 pt-6 pb-20 md:pb-8 max-w-3xl">
-      <h1 className="text-lg font-bold" style={{ color: 'var(--base-900)' }}>Billing</h1>
+      <h1 className="text-lg font-bold" style={{ color: 'var(--ink-900)' }}>Billing</h1>
 
-      <div className="flex gap-4 border-b mt-4 mb-6" style={{ borderColor: 'var(--base-300)' }}>
+      <div className="flex gap-4 border-b mt-4 mb-6" style={{ borderColor: 'var(--slate-200)' }}>
         {(['plans', 'usage'] as const).map(t => (
           <button key={t} onClick={() => setTab(t)}
             className="pb-2 text-sm font-medium capitalize transition-all"
-            style={{ color: tab === t ? 'var(--green-600)' : 'var(--base-500)', borderBottom: tab === t ? '2px solid var(--green-600)' : '2px solid transparent' }}>
+            style={{ color: tab === t ? 'var(--lime-deep)' : 'var(--slate-500)', borderBottom: tab === t ? '2px solid var(--lime-deep)' : '2px solid transparent' }}>
             {t}
           </button>
         ))}
@@ -75,20 +75,20 @@ export default function BillingPage() {
 
       {tab === 'usage' && (
         <div className="space-y-4">
-          <div className="card">
+          <div className="p-4 rounded-xl" style={{ background: 'var(--paper-card)', border: '1px solid var(--slate-200)' }}>
             <div className="flex items-center justify-between mb-2">
-              <p className="text-sm font-medium" style={{ color: 'var(--base-900)' }}>Applications used</p>
-              <span className="text-xs font-semibold" style={{ color: 'var(--green-600)' }}>{profile?.subscription_status === 'free' ? '0/5' : 'Unlimited'}</span>
+              <p className="text-sm font-medium" style={{ color: 'var(--ink-900)' }}>Applications used</p>
+              <span className="text-xs font-semibold" style={{ color: 'var(--lime-deep)' }}>{profile?.subscription_status === 'free' ? '0/5' : 'Unlimited'}</span>
             </div>
-            <div className="h-2 rounded-full" style={{ background: 'var(--base-200)' }}>
-              <div className="h-2 rounded-full" style={{ width: profile?.subscription_status === 'free' ? '0%' : '100%', background: 'var(--green-500)', transition: 'width 0.4s ease' }} />
+            <div className="h-2 rounded-full" style={{ background: 'var(--slate-200)' }}>
+              <div className="h-2 rounded-full" style={{ width: profile?.subscription_status === 'free' ? '0%' : '100%', background: 'var(--lime)', transition: 'width 0.4s ease' }} />
             </div>
           </div>
-          <div className="card">
-            <p className="text-sm font-medium" style={{ color: 'var(--base-900)' }}>Current plan</p>
-            <p className="text-xs mt-1 capitalize" style={{ color: 'var(--base-500)' }}>{profile?.subscription_status || 'Free'}</p>
+          <div className="p-4 rounded-xl" style={{ background: 'var(--paper-card)', border: '1px solid var(--slate-200)' }}>
+            <p className="text-sm font-medium" style={{ color: 'var(--ink-900)' }}>Current plan</p>
+            <p className="text-xs mt-1 capitalize" style={{ color: 'var(--slate-500)' }}>{profile?.subscription_status || 'Free'}</p>
             {profile?.subscription_status === 'free' && (
-              <button onClick={() => setTab('plans')} className="btn-p text-xs mt-3">Upgrade</button>
+              <button onClick={() => setTab('plans')} className="mt-3 px-5 py-2 rounded-lg text-xs font-semibold" style={{ background: 'var(--lime)', color: 'var(--ink-950)' }}>Upgrade</button>
             )}
           </div>
         </div>

@@ -17,9 +17,9 @@ interface Column {
 }
 
 const columns: Column[] = [
-  { key: 'interested', label: 'Interested', icon: 'ti ti-heart', accent: '#1B6B4A', bg: '#F0FDF7', border: '#BBE0CE' },
-  { key: 'applied', label: 'Applied', icon: 'ti ti-send', accent: '#D97706', bg: '#FEF3E2', border: '#FCD68A' },
-  { key: 'hired', label: 'Won', icon: 'ti ti-trophy', accent: '#059669', bg: '#ECFDF5', border: '#A7F3D0' },
+  { key: 'interested', label: 'Interested', icon: 'ti ti-heart', accent: 'var(--lime-deep)', bg: 'rgba(196,240,0,.12)', border: 'rgba(196,240,0,.25)' },
+  { key: 'applied', label: 'Applied', icon: 'ti ti-send', accent: 'var(--amber)', bg: 'rgba(255,176,32,.1)', border: 'rgba(255,176,32,.25)' },
+  { key: 'hired', label: 'Won', icon: 'ti ti-trophy', accent: 'var(--green-score)', bg: 'rgba(61,219,122,.1)', border: 'rgba(61,219,122,.25)' },
 ]
 
 export default function PipelinePage() {
@@ -84,56 +84,60 @@ export default function PipelinePage() {
   }, [])
 
   if (loading) return (
-    <div className="flex items-center justify-center min-h-screen" style={{ background: '#F2F3F7' }}>
-      <div className="animate-spin h-8 w-8 border-4 rounded-full" style={{ borderColor: '#1B6B4A', borderTopColor: 'transparent' }} />
+    <div className="flex items-center justify-center min-h-screen" style={{ background: 'var(--paper)' }}>
+      <div className="flex items-center gap-2" style={{ color: 'var(--slate-500)' }}>
+        <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: 'var(--lime)' }} /> Loading...
+      </div>
     </div>
   )
 
   return (
-    <div className="flex-1 pb-20 md:pb-0" style={{ background: '#F2F3F7' }}>
+    <div className="flex-1 pb-20 md:pb-0" style={{ background: 'var(--paper)' }}>
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 md:py-8">
-        <button onClick={() => router.push('/dashboard')} className="btn-back mb-4">
+        <button onClick={() => router.push('/dashboard')}
+          className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg mb-4 transition-all"
+          style={{ background: 'var(--slate-100)', color: 'var(--slate-600)' }}>
           <i className="ti ti-arrow-left" /> Dashboard
         </button>
 
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-xl font-bold" style={{ color: '#1A1D23' }}>Pipeline</h1>
-            <p className="text-xs mt-0.5" style={{ color: '#AAB0BB' }}>{totalActive} active lead{totalActive !== 1 ? 's' : ''}</p>
+            <h1 className="text-xl font-bold" style={{ color: 'var(--ink-900)' }}>Pipeline</h1>
+            <p className="text-xs mt-0.5" style={{ color: 'var(--slate-500)' }}>{totalActive} active lead{totalActive !== 1 ? 's' : ''}</p>
           </div>
           {wonCount > 0 && (
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg" style={{ background: '#ECFDF5' }}>
-              <i className="ti ti-trophy" style={{ fontSize: '14px', color: '#059669' }} />
-              <span className="text-xs font-semibold" style={{ color: '#059669' }}>{wonCount} won</span>
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg" style={{ background: 'rgba(61,219,122,.1)' }}>
+              <i className="ti ti-trophy" style={{ fontSize: '14px', color: 'var(--green-score)' }} />
+              <span className="text-xs font-semibold" style={{ color: 'var(--green-score)' }}>{wonCount} won</span>
             </div>
           )}
         </div>
 
         {totalActive === 0 ? (
-          <div className="text-center py-20" style={{ color: '#AAB0BB' }}>
-            <i className="ti ti-send" style={{ fontSize: '28px', color: '#AAB0BB', display: 'block', margin: '0 auto 12px' }} />
-            <div className="text-sm font-medium">No leads in your pipeline yet</div>
-            <div className="text-xs mt-1">Browse the feed and click Interested on leads you like</div>
-            <button onClick={() => router.push('/dashboard')} className="btn-int on text-sm px-4 py-2 mt-4">Go to feed</button>
+          <div className="text-center py-20">
+            <i className="ti ti-send" style={{ fontSize: '28px', color: 'var(--slate-300)', display: 'block', margin: '0 auto 12px' }} />
+            <div className="text-sm font-medium" style={{ color: 'var(--slate-500)' }}>No leads in your pipeline yet</div>
+            <div className="text-xs mt-1" style={{ color: 'var(--slate-500)' }}>Browse the feed and click Interested on leads you like</div>
+            <button onClick={() => router.push('/dashboard')} className="mt-4 px-5 py-2 rounded-lg text-sm font-semibold" style={{ background: 'var(--lime)', color: 'var(--ink-950)' }}>Go to feed</button>
           </div>
         ) : (
           <div className="grid md:grid-cols-3 gap-4" style={{ alignItems: 'start' }}>
             {columns.map(col => {
               const colLeads = grouped[col.key] || []
               return (
-                <div key={col.key} className="rounded-xl bg-white overflow-hidden" style={{ border: '1px solid #ECEEF2' }}>
+                <div key={col.key} className="rounded-xl overflow-hidden" style={{ background: 'var(--paper-card)', border: '1px solid var(--slate-200)' }}>
                   {/* Column header */}
                   <div className="flex items-center gap-2 px-4 py-2.5 border-b" style={{ borderColor: col.border, background: col.bg }}>
                     <i className={col.icon} style={{ fontSize: '14px', color: col.accent }} />
                     <span className="text-xs font-semibold" style={{ color: col.accent }}>{col.label}</span>
-                    <span className="ml-auto text-[10px] font-medium px-1.5 py-0.5 rounded-full" style={{ background: 'white', color: col.accent }}>{colLeads.length}</span>
+                    <span className="ml-auto text-[10px] font-medium px-1.5 py-0.5 rounded-full" style={{ background: 'var(--paper-card)', color: col.accent }}>{colLeads.length}</span>
                   </div>
 
                   {/* Cards */}
                   <div className="p-2.5 space-y-2 min-h-[120px]">
                     {colLeads.length === 0 ? (
-                      <div className="text-center py-8 text-[11px]" style={{ color: '#C0C6D2' }}>No leads yet</div>
+                      <div className="text-center py-8 text-[11px]" style={{ color: 'var(--slate-400)' }}>No leads yet</div>
                     ) : (
                       colLeads.map(lead => {
                         const source = getSourceInfo(lead.source_url)
@@ -142,7 +146,7 @@ export default function PipelinePage() {
                           <div
                             key={lead.id}
                             className="rounded-lg px-3 py-2.5 cursor-pointer transition-all hover:shadow-sm active:scale-[0.99]"
-                            style={{ border: '1px solid #ECEEF2', background: '#FFFFFF' }}
+                            style={{ border: '1px solid var(--slate-100)', background: 'var(--paper-card)' }}
                             onClick={() => router.push(`/dashboard/lead/${lead.id}`)}
                           >
                             <div className="flex items-center gap-1.5 mb-1.5">
@@ -153,33 +157,33 @@ export default function PipelinePage() {
                                 title={`View on ${source.label}`}
                               >{source.label}</button>
                               {isNewLead(lead.posted_date) && (
-                                <span className="text-[8px] font-semibold px-1.5 py-0.5 rounded shrink-0" style={{ background: '#EBF5F0', color: '#1B6B4A' }}>New</span>
+                                <span className="text-[8px] font-semibold px-1.5 py-0.5 rounded shrink-0" style={{ background: 'rgba(196,240,0,.15)', color: 'var(--lime-deep)' }}>New</span>
                               )}
-                              <span className="ml-auto text-[9px]" style={{ color: '#AAB0BB' }}>{timeAgo(lead.posted_date)}</span>
+                              <span className="ml-auto text-[9px]" style={{ color: 'var(--slate-400)' }}>{timeAgo(lead.posted_date)}</span>
                             </div>
-                            <div className="text-xs font-semibold leading-snug line-clamp-1" style={{ color: '#1A1D23' }}>{lead.title}</div>
+                            <div className="text-xs font-semibold leading-snug line-clamp-1" style={{ color: 'var(--ink-900)' }}>{lead.title}</div>
                             {formatBudgetGBP(lead.budget_min, lead.budget_max) && (
-                              <div className="text-[10px] font-medium mt-1" style={{ color: '#6B7280' }}>{formatBudgetGBP(lead.budget_min, lead.budget_max)}</div>
+                              <div className="text-[10px] font-medium mt-1" style={{ color: 'var(--slate-500)' }}>{formatBudgetGBP(lead.budget_min, lead.budget_max)}</div>
                             )}
                             <div className="flex flex-wrap gap-1 mt-1.5">
                               {lead.skills_required?.slice(0, 2).map(s => (
-                                <span key={s} className="text-[8px] px-1 py-0.5 rounded" style={{ background: '#F5F5F7', color: '#AAB0BB' }}>{s}</span>
+                                <span key={s} className="text-[8px] px-1 py-0.5 rounded" style={{ background: 'var(--slate-100)', color: 'var(--slate-400)' }}>{s}</span>
                               ))}
                             </div>
                             {/* Action button */}
-                            <div className="mt-2 pt-2 border-t" style={{ borderColor: '#F2F3F7' }}>
+                            <div className="mt-2 pt-2 border-t" style={{ borderColor: 'var(--slate-100)' }}>
                               {col.key === 'interested' && (
                                 <button onClick={e => { e.stopPropagation(); updateApplication(lead.id, 'applied') }}
                                   className="w-full text-[10px] font-medium min-h-[36px] py-1.5 rounded transition-all hover:opacity-80 active:scale-[0.97]"
-                                  style={{ background: '#FEF3E2', color: '#D97706' }}>Mark as Applied</button>
+                                  style={{ background: 'rgba(255,176,32,.1)', color: 'var(--amber)' }}>Mark as Applied</button>
                               )}
                               {col.key === 'applied' && (
                                 <button onClick={e => { e.stopPropagation(); updateApplication(lead.id, 'hired') }}
                                   className="w-full text-[10px] font-medium min-h-[36px] py-1.5 rounded transition-all hover:opacity-80 active:scale-[0.97]"
-                                  style={{ background: '#ECFDF5', color: '#059669' }}>Mark as Won</button>
+                                  style={{ background: 'rgba(61,219,122,.1)', color: 'var(--green-score)' }}>Mark as Won</button>
                               )}
                               {col.key === 'hired' && (
-                                <div className="flex items-center gap-1.5 justify-center text-[10px] font-medium py-1" style={{ color: '#059669' }}>
+                                <div className="flex items-center gap-1.5 justify-center text-[10px] font-medium py-1" style={{ color: 'var(--green-score)' }}>
                                   <i className="ti ti-check" style={{ fontSize: '11px' }} /> Won
                                 </div>
                               )}

@@ -6,12 +6,16 @@ import { BarChart3 } from 'lucide-react'
 export default function AnalyticsPage() {
   const router = useRouter()
   return (
-    <div className="flex-1 flex items-center justify-center pb-20 md:pb-0" style={{ background: '#F2F3F7' }}>
+    <div className="flex-1 flex items-center justify-center pb-20 md:pb-0" style={{ background: 'var(--paper)' }}>
       <div className="text-center">
-        <BarChart3 size={36} className="mx-auto mb-3" color="#AAB0BB" />
-        <h1 className="text-xl font-bold mb-2" style={{ color: '#1A1D23' }}>Analytics</h1>
-        <p className="text-sm mb-4" style={{ color: '#6B7280' }}>Stats over time — coming soon</p>
-        <button onClick={() => router.push('/dashboard')} className="btn-back">
+        <div className="w-14 h-14 rounded-xl flex items-center justify-center mx-auto mb-4" style={{ background: 'rgba(196,240,0,.15)' }}>
+          <BarChart3 size={24} style={{ color: 'var(--lime-deep)' }} />
+        </div>
+        <h1 className="text-xl font-bold mb-2" style={{ color: 'var(--ink-900)' }}>Analytics</h1>
+        <p className="text-sm mb-4" style={{ color: 'var(--slate-500)' }}>Stats over time &mdash; coming soon</p>
+        <button onClick={() => router.push('/dashboard')}
+          className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg mx-auto transition-all"
+          style={{ background: 'var(--slate-100)', color: 'var(--slate-600)' }}>
           <i className="ti ti-arrow-left" /> Back to Dashboard
         </button>
       </div>

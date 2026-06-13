@@ -6,16 +6,18 @@ import { CalendarDays } from 'lucide-react'
 export default function CalendarPage() {
   const router = useRouter()
   return (
-    <div className="flex-1 flex items-center justify-center px-4 pb-20 md:pb-0" style={{ minHeight: 'calc(100vh - 56px)' }}>
+    <div className="flex-1 flex items-center justify-center px-4 pb-20 md:pb-0" style={{ minHeight: 'calc(100vh - 56px)', background: 'var(--paper)' }}>
       <div className="text-center">
-        <div className="w-14 h-14 rounded-xl flex items-center justify-center mx-auto mb-4" style={{ background: '#EBF1FC' }}>
-          <CalendarDays size={24} style={{ color: '#2563EB' }} />
+        <div className="w-14 h-14 rounded-xl flex items-center justify-center mx-auto mb-4" style={{ background: 'rgba(196,240,0,.15)' }}>
+          <CalendarDays size={24} style={{ color: 'var(--lime-deep)' }} />
         </div>
-        <h2 className="text-base font-bold mb-1" style={{ color: '#1A1D23' }}>Calendar</h2>
-        <p className="text-xs mb-5 max-w-[280px]" style={{ color: '#6B7280' }}>
+        <h2 className="text-base font-bold mb-1" style={{ color: 'var(--ink-900)' }}>Calendar</h2>
+        <p className="text-xs mb-5 max-w-[280px]" style={{ color: 'var(--slate-500)' }}>
           A full calendar view with deadlines, interviews, and milestones is on the way.
         </p>
-        <button onClick={() => router.push('/dashboard')} className="btn-back">
+        <button onClick={() => router.push('/dashboard')}
+          className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg mx-auto transition-all"
+          style={{ background: 'var(--slate-100)', color: 'var(--slate-600)' }}>
           <i className="ti ti-arrow-left" /> Back to feed
         </button>
       </div>

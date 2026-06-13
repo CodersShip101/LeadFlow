@@ -86,8 +86,8 @@ export default function DashboardPage() {
 
   if (loading) return (
     <div className="flex-1 flex items-center justify-center">
-      <div className="flex items-center gap-2" style={{ color: 'var(--base-500)' }}>
-        <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: 'var(--green-500)' }} /> Loading leads...
+      <div className="flex items-center gap-2" style={{ color: 'var(--slate-500)' }}>
+        <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: 'var(--lime)' }} /> Loading leads...
       </div>
     </div>
   )
@@ -99,13 +99,13 @@ export default function DashboardPage() {
         {/* Stats */}
         <div className="flex gap-3 mb-4 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
           {[
-            { label: 'Total Leads', value: leads.length.toString(), color: 'var(--green-600)' },
-            { label: 'Applied', value: applications.filter(a => a.status !== 'saved').length.toString(), color: 'var(--amber-500)' },
-            { label: 'Saved', value: applications.filter(a => a.status === 'saved').length.toString(), color: 'var(--base-600)' },
-            { label: 'New', value: newCount.toString(), color: 'var(--green-500)' },
+            { label: 'Total Leads', value: leads.length.toString(), color: 'var(--lime)' },
+            { label: 'Applied', value: applications.filter(a => a.status !== 'saved').length.toString(), color: 'var(--amber)' },
+            { label: 'Saved', value: applications.filter(a => a.status === 'saved').length.toString(), color: 'var(--slate-500)' },
+            { label: 'New', value: newCount.toString(), color: 'var(--green-score)' },
           ].map(s => (
-            <div key={s.label} className="card shrink-0 min-w-[120px] flex-1">
-              <p className="text-xs font-medium" style={{ color: 'var(--base-500)' }}>{s.label}</p>
+            <div key={s.label} className="shrink-0 min-w-[120px] flex-1 p-4 rounded-xl" style={{ background: 'var(--paper-card)', border: '1px solid var(--slate-200)' }}>
+              <p className="text-xs font-medium" style={{ color: 'var(--slate-500)' }}>{s.label}</p>
               <p className="text-xl font-bold mt-1" style={{ color: s.color }}>{s.value}</p>
             </div>
           ))}
@@ -113,27 +113,30 @@ export default function DashboardPage() {
 
         {/* Scrape status */}
         {leads.length === 0 && (
-          <div className="card mb-4 flex items-center gap-3" style={{ background: 'var(--warning-bg)', border: '1px solid var(--amber-200)' }}>
-            <i className="ti ti-alert-triangle" style={{ color: 'var(--amber-500)' }} />
+          <div className="flex items-center gap-3 p-4 rounded-xl mb-4" style={{ background: 'rgba(255,176,32,.1)', border: '1px solid rgba(255,176,32,.25)' }}>
+            <i className="ti ti-alert-triangle" style={{ color: 'var(--amber)' }} />
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium" style={{ color: 'var(--warning-text)' }}>No leads found</p>
-              <p className="text-xs mt-0.5" style={{ color: 'var(--warning-text)', opacity: 0.8 }}>Leads are currently refreshing. Check back soon.</p>
+              <p className="text-sm font-medium" style={{ color: 'var(--slate-700)' }}>No leads found</p>
+              <p className="text-xs mt-0.5" style={{ color: 'var(--slate-500)' }}>Leads are currently refreshing. Check back soon.</p>
             </div>
-            <button onClick={async () => { toast.success('Refreshing...'); setLoading(true); router.refresh() }} className="btn-g text-xs">Refresh</button>
+            <button onClick={async () => { toast.success('Refreshing...'); setLoading(true); router.refresh() }}
+              className="px-4 py-2 rounded-lg text-xs font-semibold" style={{ background: 'var(--lime)', color: 'var(--ink-950)' }}>Refresh</button>
           </div>
         )}
 
         {/* Search + source filters */}
         <div className="flex gap-2 items-center mb-3 flex-wrap">
           <div className="relative flex-1 min-w-[200px] max-w-md">
-            <i className="ti ti-search absolute left-3 top-1/2 -translate-y-1/2 text-sm" style={{ color: 'var(--base-400)', pointerEvents: 'none' }} />
-            <input value={search} onChange={e => setSearch(e.target.value)} className="input pl-9" placeholder="Search leads..." />
+            <i className="ti ti-search absolute left-3 top-1/2 -translate-y-1/2 text-sm" style={{ color: 'var(--slate-400)', pointerEvents: 'none' }} />
+            <input value={search} onChange={e => setSearch(e.target.value)}
+              className="w-full pl-9 pr-3 py-2.5 rounded-lg text-sm" style={{ background: 'var(--paper-card)', border: '1.5px solid var(--slate-200)', color: 'var(--ink-900)' }}
+              placeholder="Search leads..." />
           </div>
           <div className="flex gap-1.5">
             {sourceFilters.map(f => (
               <button key={f} onClick={() => setSourceFilter(f)}
                 className="text-xs px-2.5 py-1.5 rounded-lg font-medium transition-all active:scale-[0.95] whitespace-nowrap"
-                style={{ background: sourceFilter === f ? 'var(--green-600)' : 'var(--base-200)', color: sourceFilter === f ? 'white' : 'var(--base-600)' }}>
+                style={{ background: sourceFilter === f ? 'var(--lime)' : 'var(--slate-100)', color: sourceFilter === f ? 'var(--ink-950)' : 'var(--slate-600)' }}>
                 {f}
               </button>
             ))}
@@ -143,36 +146,38 @@ export default function DashboardPage() {
         {/* Lead feed */}
         <div className="space-y-2.5">
           {filtered.slice(0, limit).map(lead => (
-            <div key={lead.id} onClick={() => setSelected(lead)} className="card-hover px-4 py-3 cursor-pointer">
+            <div key={lead.id} onClick={() => setSelected(lead)}
+              className="px-4 py-3 cursor-pointer rounded-xl transition-all" style={{ background: 'var(--paper-card)', border: '1px solid var(--slate-200)' }}>
               <div className="flex items-start gap-3">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5 mb-1.5">
                     <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded" style={{ background: getSourceInfo(lead.source_url).bg, color: getSourceInfo(lead.source_url).color }}>
                       {getSourceInfo(lead.source_url).label}
                     </span>
-                    {isNewLead(lead.posted_date) && <span className="badge-hi text-[9px] px-1.5 py-0.5">New</span>}
-                    <span className="text-[10px] ml-auto" style={{ color: 'var(--base-500)' }}>{timeAgo(lead.posted_date)}</span>
+                    {isNewLead(lead.posted_date) && <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded" style={{ background: 'rgba(196,240,0,.15)', color: 'var(--lime-deep)' }}>New</span>}
+                    <span className="text-[10px] ml-auto" style={{ color: 'var(--slate-500)' }}>{timeAgo(lead.posted_date)}</span>
                   </div>
-                  <h3 className="text-sm font-semibold leading-snug line-clamp-1" style={{ color: 'var(--base-900)' }}>{lead.title}</h3>
+                  <h3 className="text-sm font-semibold leading-snug line-clamp-1" style={{ color: 'var(--ink-900)' }}>{lead.title}</h3>
                   <div className="flex items-center gap-2 mt-1">
                     {formatBudgetGBP(lead.budget_min, lead.budget_max) && (
-                      <span className="text-xs font-medium" style={{ color: 'var(--green-600)' }}>{formatBudgetGBP(lead.budget_min, lead.budget_max)}</span>
+                      <span className="text-xs font-medium" style={{ color: 'var(--lime-deep)' }}>{formatBudgetGBP(lead.budget_min, lead.budget_max)}</span>
                     )}
-                    {lead.client_location && <span className="text-[10px]" style={{ color: 'var(--base-500)' }}>{lead.client_location}</span>}
+                    {lead.client_location && <span className="text-[10px]" style={{ color: 'var(--slate-500)' }}>{lead.client_location}</span>}
                   </div>
                 </div>
                 <div className="flex flex-col gap-1.5 shrink-0">
                   {appMap.has(lead.id) && appMap.get(lead.id)!.status !== 'saved' ? (
-                    <span className="text-[10px] font-medium px-2 py-1 rounded" style={{ background: 'var(--green-50)', color: 'var(--green-600)' }}>
+                    <span className="text-[10px] font-medium px-2 py-1 rounded" style={{ background: 'rgba(196,240,0,.12)', color: 'var(--lime-deep)' }}>
                       {appMap.get(lead.id)!.status === 'hired' ? 'Won' : appMap.get(lead.id)!.status}
                     </span>
                   ) : (
                     <button onClick={e => { e.stopPropagation(); handleApply(lead) }}
-                      className="btn-p text-[11px] px-3 py-1.5 min-h-[32px]">Apply</button>
+                      className="text-[11px] px-3 py-1.5 min-h-[32px] rounded-lg font-semibold"
+                      style={{ background: 'var(--lime)', color: 'var(--ink-950)' }}>Apply</button>
                   )}
                   <button onClick={e => { e.stopPropagation(); handleSave(lead) }}
-                    className="btn-g text-[11px] px-2 py-1 min-h-[32px] min-w-[32px] flex items-center justify-center"
-                    style={{ color: appMap.get(lead.id)?.status === 'saved' ? 'var(--green-600)' : 'var(--base-500)' }}>
+                    className="text-[11px] px-2 py-1 min-h-[32px] min-w-[32px] rounded-lg flex items-center justify-center font-semibold"
+                    style={{ background: 'var(--slate-100)', color: appMap.get(lead.id)?.status === 'saved' ? 'var(--lime-deep)' : 'var(--slate-500)' }}>
                     <i className={`ti ${appMap.get(lead.id)?.status === 'saved' ? 'ti-bookmark-filled' : 'ti-bookmark'}`} style={{ fontSize: '14px' }} />
                   </button>
                 </div>
@@ -181,56 +186,64 @@ export default function DashboardPage() {
           ))}
         </div>
 
-        {filtered.length === 0 && <div className="text-center py-12"><i className="ti ti-search text-2xl" style={{ color: 'var(--base-300)' }} /><p className="text-sm mt-2" style={{ color: 'var(--base-500)' }}>No leads match your filters.</p></div>}
+        {filtered.length === 0 && <div className="text-center py-12"><i className="ti ti-search text-2xl" style={{ color: 'var(--slate-300)' }} /><p className="text-sm mt-2" style={{ color: 'var(--slate-500)' }}>No leads match your filters.</p></div>}
 
         {/* Limit banner */}
         {profile?.subscription_status === 'free' && leads.length >= limit && (
-          <div className="card mt-4 text-center py-4" style={{ background: 'var(--base-200)' }}>
-            <p className="text-sm font-medium" style={{ color: 'var(--base-900)' }}>You&apos;ve used your free preview</p>
-            <p className="text-xs mt-1" style={{ color: 'var(--base-600)' }}>Upgrade to see all leads</p>
-            <button onClick={() => router.push('/dashboard/billing')} className="btn-p text-sm mt-3 px-6">View Plans</button>
+          <div className="p-4 rounded-xl mt-4 text-center" style={{ background: 'var(--slate-100)' }}>
+            <p className="text-sm font-medium" style={{ color: 'var(--ink-900)' }}>You&apos;ve used your free preview</p>
+            <p className="text-xs mt-1" style={{ color: 'var(--slate-600)' }}>Upgrade to see all leads</p>
+            <button onClick={() => router.push('/dashboard/billing')} className="text-sm mt-3 px-6 py-2.5 rounded-lg font-semibold" style={{ background: 'var(--lime)', color: 'var(--ink-950)' }}>View Plans</button>
           </div>
         )}
 
         {/* Limit modal */}
         {limitReached && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-4" onClick={() => setLimitReached(false)}>
-            <div className="card p-6 max-w-sm w-full text-center animate-scale-in" onClick={e => e.stopPropagation()}>
-              <i className="ti ti-lock text-2xl" style={{ color: 'var(--amber-500)' }} />
-              <h3 className="text-lg font-bold mt-2" style={{ color: 'var(--base-900)' }}>Application limit reached</h3>
-              <p className="text-xs mt-2" style={{ color: 'var(--base-600)' }}>Free plan limit exceeded. Upgrade to Pro.</p>
-              <button onClick={() => router.push('/dashboard/billing')} className="btn-amber mt-4 w-full justify-center">Upgrade</button>
-              <button onClick={() => setLimitReached(false)} className="btn-g w-full justify-center mt-2">Dismiss</button>
+            <div className="max-w-sm w-full text-center p-6 rounded-xl animate-scale-in" style={{ background: 'var(--paper-card)', border: '1px solid var(--slate-200)' }} onClick={e => e.stopPropagation()}>
+              <i className="ti ti-lock text-2xl" style={{ color: 'var(--amber)' }} />
+              <h3 className="text-lg font-bold mt-2" style={{ color: 'var(--ink-900)' }}>Application limit reached</h3>
+              <p className="text-xs mt-2" style={{ color: 'var(--slate-600)' }}>Free plan limit exceeded. Upgrade to Pro.</p>
+              <button onClick={() => router.push('/dashboard/billing')} className="mt-4 w-full py-2.5 rounded-lg font-semibold justify-center flex items-center gap-2" style={{ background: 'var(--amber)', color: 'var(--ink-950)' }}>Upgrade</button>
+              <button onClick={() => setLimitReached(false)} className="mt-2 w-full py-2.5 rounded-lg font-semibold justify-center flex items-center gap-2" style={{ background: 'var(--slate-100)', color: 'var(--slate-600)' }}>Dismiss</button>
             </div>
           </div>
         )}
 
         {/* Upgrade banner */}
         {profile?.subscription_status === 'free' && (
-          <div className="card mt-4" style={{ background: 'linear-gradient(135deg, var(--green-900), #0a3d24)', border: 'none' }}>
+          <div className="p-4 rounded-xl mt-4" style={{ background: 'linear-gradient(135deg, var(--ink-900), var(--ink-800))' }}>
             <p className="text-sm font-medium text-white">Upgrade to Pro</p>
-            <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.7)' }}>Unlimited applications and advanced insights.</p>
-            <button onClick={() => router.push('/dashboard/billing')} className="btn-amber text-sm mt-3 px-5">See Plans</button>
+            <p className="text-xs mt-1" style={{ color: 'var(--slate-300)' }}>Unlimited applications and advanced insights.</p>
+            <button onClick={() => router.push('/dashboard/billing')} className="text-sm mt-3 px-5 py-2 rounded-lg font-semibold" style={{ background: 'var(--lime)', color: 'var(--ink-950)' }}>See Plans</button>
           </div>
         )}
       </div>
 
       {/* Right panel */}
       {selected && (
-        <aside className="hidden md:block w-[280px] lg:w-[320px] shrink-0 overflow-y-auto border-l px-4 py-4" style={{ borderColor: 'var(--base-300)' }}>
-          <button onClick={() => setSelected(null)} className="btn-g text-xs mb-4"><i className="ti ti-x" /> Close</button>
-          <h2 className="text-sm font-semibold" style={{ color: 'var(--base-900)' }}>{selected.title}</h2>
-          {selected.client_location && <p className="text-xs mt-1" style={{ color: 'var(--base-500)' }}>{selected.client_location}</p>}
-          <p className="text-xs mt-1" style={{ color: 'var(--base-500)' }}>{getSourceInfo(selected.source_url).label} · {new Date(selected.posted_date).toLocaleDateString()}</p>
+        <aside className="hidden md:block w-[280px] lg:w-[320px] shrink-0 overflow-y-auto border-l px-4 py-4" style={{ borderColor: 'var(--slate-200)' }}>
+          <button onClick={() => setSelected(null)}
+            className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg mb-4 transition-all"
+            style={{ background: 'var(--slate-100)', color: 'var(--slate-600)' }}><i className="ti ti-x" /> Close</button>
+          <h2 className="text-sm font-semibold" style={{ color: 'var(--ink-900)' }}>{selected.title}</h2>
+          {selected.client_location && <p className="text-xs mt-1" style={{ color: 'var(--slate-500)' }}>{selected.client_location}</p>}
+          <p className="text-xs mt-1" style={{ color: 'var(--slate-500)' }}>{getSourceInfo(selected.source_url).label} &middot; {new Date(selected.posted_date).toLocaleDateString()}</p>
           {formatBudgetGBP(selected.budget_min, selected.budget_max) && (
-            <p className="text-sm font-semibold mt-3" style={{ color: 'var(--green-600)' }}>{formatBudgetGBP(selected.budget_min, selected.budget_max)}</p>
+            <p className="text-sm font-semibold mt-3" style={{ color: 'var(--lime-deep)' }}>{formatBudgetGBP(selected.budget_min, selected.budget_max)}</p>
           )}
-          <p className="text-xs mt-3 leading-relaxed" style={{ color: 'var(--base-600)' }}>{selected.description?.slice(0, 500)}</p>
+          <p className="text-xs mt-3 leading-relaxed" style={{ color: 'var(--slate-600)' }}>{selected.description?.slice(0, 500)}</p>
           {selected.skills_required && selected.skills_required.length > 0 && (
-            <div className="flex flex-wrap gap-1 mt-3">{selected.skills_required.map(sk => <span key={sk} className="badge-skill">{sk}</span>)}</div>
+            <div className="flex flex-wrap gap-1 mt-3">
+              {selected.skills_required.map(sk => (
+                <span key={sk} className="text-[10px] px-2 py-0.5 rounded font-medium" style={{ background: 'rgba(196,240,0,.12)', color: 'var(--lime-dim)' }}>{sk}</span>
+              ))}
+            </div>
           )}
           {selected.source_url && (
-            <a href={selected.source_url} target="_blank" rel="noopener noreferrer" className="btn-g text-xs mt-4 w-full justify-center">
+            <a href={selected.source_url} target="_blank" rel="noopener noreferrer"
+              className="flex items-center justify-center gap-1.5 text-xs font-semibold mt-4 px-4 py-2 rounded-lg"
+              style={{ background: 'var(--slate-100)', color: 'var(--slate-600)' }}>
               <i className="ti ti-external-link" /> View Original
             </a>
           )}
