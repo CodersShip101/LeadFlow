@@ -23,7 +23,6 @@ const bottomItems = [
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [newCount, setNewCount] = useState(0)
-  const [menuOpen, setMenuOpen] = useState(false)
   const router = useRouter()
   const pathname = usePathname() || ''
   const supabase = createClient()
@@ -86,7 +85,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {/* Main */}
       <div className="flex-1 flex flex-col min-w-0 max-w-full" style={{ background: 'var(--paper)' }}>
         {profile && (!profile.skills || profile.skills.length === 0 || !profile.hourly_rate) && (
-          <div className="flex items-center gap-2.5 px-4 md:px-8 py-2.5 text-xs font-medium animate-fade-in" style={{ background: 'rgba(255,176,32,.1)', borderBottom: '1px solid rgba(255,176,32,.25)' }}>
+          <div className="flex items-center gap-2.5 px-4 md:px-8 py-2.5 text-xs font-medium animate-fadeIn" style={{ background: 'rgba(255,176,32,.1)', borderBottom: '1px solid rgba(255,176,32,.25)' }}>
             <i className="ti ti-alert-triangle" style={{ color: 'var(--amber)' }} />
             <span style={{ color: 'var(--slate-700)' }}>Complete your profile to get matched leads.</span>
             <button onClick={() => router.push('/dashboard/profile')} className="underline font-semibold ml-auto" style={{ color: 'var(--slate-700)' }}>Add skills &rarr;</button>

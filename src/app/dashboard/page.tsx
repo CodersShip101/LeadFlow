@@ -18,7 +18,6 @@ export default function DashboardPage() {
   const [selected, setSelected] = useState<Lead | null>(null)
   const [applications, setApplications] = useState<Application[]>([])
   const [newCount, setNewCount] = useState(0)
-  const [lastSeenDate, setLastSeenDate] = useState<number>(0)
   const [limitReached, setLimitReached] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
@@ -33,8 +32,6 @@ export default function DashboardPage() {
       if (prof && (!prof.skills || prof.skills.length === 0)) router.push('/dashboard/onboarding')
 
       const lastSeen = parseInt(localStorage.getItem('lastSeen') || '0')
-      setLastSeenDate(lastSeen)
-
       const res = await fetch('/api/applications')
       const apps: Application[] = res.ok ? await res.json() : []
       setApplications(apps)
@@ -86,57 +83,53 @@ export default function DashboardPage() {
 
   if (loading) return (
     <div className="flex-1 flex items-center justify-center">
-      <div className="flex items-center gap-2" style={{ color: 'var(--slate-500)' }}>
-        <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: 'var(--lime)' }} /> Loading leads...
+      <div className="flex items-center gap-3" style={{ color: 'var(--slate-500)' }}>
+        <div className="w-2.5 h-2.5 rounded-full animate-pulse" style={{ background: 'var(--lime)' }} />
+        <span className="text-sm">Loading leads&hellip;</span>
       </div>
     </div>
   )
 
   return (
     <div className="flex-1 flex flex-col md:flex-row min-h-0">
-      {/* Feed */}
-      <div ref={containerRef} className="flex-1 overflow-y-auto px-4 md:px-8 pt-4 pb-20 md:pb-8">
+      <div ref={containerRef} className="flex-1 overflow-y-auto dash-page">
         {/* Stats */}
-        <div className="flex gap-3 mb-4 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
+        <div className="dash-stats">
           {[
-            { label: 'Total Leads', value: leads.length.toString(), color: 'var(--lime)' },
+            { label: 'Total Leads', value: leads.length.toString(), color: 'var(--lime-deep)' },
             { label: 'Applied', value: applications.filter(a => a.status !== 'saved').length.toString(), color: 'var(--amber)' },
             { label: 'Saved', value: applications.filter(a => a.status === 'saved').length.toString(), color: 'var(--slate-500)' },
             { label: 'New', value: newCount.toString(), color: 'var(--green-score)' },
           ].map(s => (
-            <div key={s.label} className="shrink-0 min-w-[120px] flex-1 p-4 rounded-xl" style={{ background: 'var(--paper-card)', border: '1px solid var(--slate-200)' }}>
-              <p className="text-xs font-medium" style={{ color: 'var(--slate-500)' }}>{s.label}</p>
-              <p className="text-xl font-bold mt-1" style={{ color: s.color }}>{s.value}</p>
+            <div key={s.label} className="dash-stat">
+              <div className="dash-stat-label">{s.label}</div>
+              <div className="dash-stat-value" style={{ color: s.color }}>{s.value}</div>
             </div>
           ))}
         </div>
 
-        {/* Scrape status */}
+        {/* Empty state */}
         {leads.length === 0 && (
-          <div className="flex items-center gap-3 p-4 rounded-xl mb-4" style={{ background: 'rgba(255,176,32,.1)', border: '1px solid rgba(255,176,32,.25)' }}>
+          <div className="card flex items-center gap-3 p-4 mb-4" style={{ background: 'rgba(255,176,32,.08)', borderColor: 'rgba(255,176,32,.25)' }}>
             <i className="ti ti-alert-triangle" style={{ color: 'var(--amber)' }} />
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium" style={{ color: 'var(--slate-700)' }}>No leads found</p>
               <p className="text-xs mt-0.5" style={{ color: 'var(--slate-500)' }}>Leads are currently refreshing. Check back soon.</p>
             </div>
-            <button onClick={async () => { toast.success('Refreshing...'); setLoading(true); router.refresh() }}
-              className="px-4 py-2 rounded-lg text-xs font-semibold" style={{ background: 'var(--lime)', color: 'var(--ink-950)' }}>Refresh</button>
+            <button onClick={async () => { toast.success('Refreshing&hellip;'); router.refresh() }} className="btn-p btn-sm">Refresh</button>
           </div>
         )}
 
         {/* Search + source filters */}
-        <div className="flex gap-2 items-center mb-3 flex-wrap">
-          <div className="relative flex-1 min-w-[200px] max-w-md">
+        <div className="dash-toolbar">
+          <div className="relative flex-1 min-w-[200px] max-w-sm">
             <i className="ti ti-search absolute left-3 top-1/2 -translate-y-1/2 text-sm" style={{ color: 'var(--slate-400)', pointerEvents: 'none' }} />
-            <input value={search} onChange={e => setSearch(e.target.value)}
-              className="w-full pl-9 pr-3 py-2.5 rounded-lg text-sm" style={{ background: 'var(--paper-card)', border: '1.5px solid var(--slate-200)', color: 'var(--ink-900)' }}
-              placeholder="Search leads..." />
+            <input value={search} onChange={e => setSearch(e.target.value)} className="input pl-9" placeholder="Search leads&hellip;" />
           </div>
           <div className="flex gap-1.5">
             {sourceFilters.map(f => (
               <button key={f} onClick={() => setSourceFilter(f)}
-                className="text-xs px-2.5 py-1.5 rounded-lg font-medium transition-all active:scale-[0.95] whitespace-nowrap"
-                style={{ background: sourceFilter === f ? 'var(--lime)' : 'var(--slate-100)', color: sourceFilter === f ? 'var(--ink-950)' : 'var(--slate-600)' }}>
+                className={`dash-filter ${sourceFilter === f ? 'active' : 'inactive'}`}>
                 {f}
               </button>
             ))}
@@ -144,40 +137,37 @@ export default function DashboardPage() {
         </div>
 
         {/* Lead feed */}
-        <div className="space-y-2.5">
+        <div className="space-y-3">
           {filtered.slice(0, limit).map(lead => (
-            <div key={lead.id} onClick={() => setSelected(lead)}
-              className="px-4 py-3 cursor-pointer rounded-xl transition-all" style={{ background: 'var(--paper-card)', border: '1px solid var(--slate-200)' }}>
+            <div key={lead.id} onClick={() => setSelected(lead)} className="dash-lead">
               <div className="flex items-start gap-3">
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-1.5 mb-1.5">
+                  <div className="flex items-center gap-1.5 mb-1">
                     <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded" style={{ background: getSourceInfo(lead.source_url).bg, color: getSourceInfo(lead.source_url).color }}>
                       {getSourceInfo(lead.source_url).label}
                     </span>
-                    {isNewLead(lead.posted_date) && <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded" style={{ background: 'rgba(196,240,0,.15)', color: 'var(--lime-deep)' }}>New</span>}
-                    <span className="text-[10px] ml-auto" style={{ color: 'var(--slate-500)' }}>{timeAgo(lead.posted_date)}</span>
+                    {isNewLead(lead.posted_date) && <span className="dash-badge-new text-[9px] px-1.5 py-0.5 rounded">New</span>}
+                    <span className="text-[10px] ml-auto" style={{ color: 'var(--slate-400)' }}>{timeAgo(lead.posted_date)}</span>
                   </div>
                   <h3 className="text-sm font-semibold leading-snug line-clamp-1" style={{ color: 'var(--ink-900)' }}>{lead.title}</h3>
                   <div className="flex items-center gap-2 mt-1">
                     {formatBudgetGBP(lead.budget_min, lead.budget_max) && (
-                      <span className="text-xs font-medium" style={{ color: 'var(--lime-deep)' }}>{formatBudgetGBP(lead.budget_min, lead.budget_max)}</span>
+                      <span className="dash-badge-status" style={{ background: 'rgba(196,240,0,.12)', color: 'var(--lime-deep)' }}>{formatBudgetGBP(lead.budget_min, lead.budget_max)}</span>
                     )}
                     {lead.client_location && <span className="text-[10px]" style={{ color: 'var(--slate-500)' }}>{lead.client_location}</span>}
                   </div>
                 </div>
                 <div className="flex flex-col gap-1.5 shrink-0">
                   {appMap.has(lead.id) && appMap.get(lead.id)!.status !== 'saved' ? (
-                    <span className="text-[10px] font-medium px-2 py-1 rounded" style={{ background: 'rgba(196,240,0,.12)', color: 'var(--lime-deep)' }}>
+                    <span className="dash-badge-status text-center" style={{ background: 'rgba(196,240,0,.12)', color: 'var(--lime-deep)' }}>
                       {appMap.get(lead.id)!.status === 'hired' ? 'Won' : appMap.get(lead.id)!.status}
                     </span>
                   ) : (
-                    <button onClick={e => { e.stopPropagation(); handleApply(lead) }}
-                      className="text-[11px] px-3 py-1.5 min-h-[32px] rounded-lg font-semibold"
-                      style={{ background: 'var(--lime)', color: 'var(--ink-950)' }}>Apply</button>
+                    <button onClick={e => { e.stopPropagation(); handleApply(lead) }} className="btn-p btn-sm !px-4 !py-1.5 text-[11px]">Apply</button>
                   )}
                   <button onClick={e => { e.stopPropagation(); handleSave(lead) }}
-                    className="text-[11px] px-2 py-1 min-h-[32px] min-w-[32px] rounded-lg flex items-center justify-center font-semibold"
-                    style={{ background: 'var(--slate-100)', color: appMap.get(lead.id)?.status === 'saved' ? 'var(--lime-deep)' : 'var(--slate-500)' }}>
+                    className="flex items-center justify-center text-[11px] p-1.5 rounded-lg transition-all min-h-[30px] min-w-[30px]"
+                    style={{ background: appMap.get(lead.id)?.status === 'saved' ? 'rgba(196,240,0,.12)' : 'var(--slate-100)', color: appMap.get(lead.id)?.status === 'saved' ? 'var(--lime-deep)' : 'var(--slate-500)' }}>
                     <i className={`ti ${appMap.get(lead.id)?.status === 'saved' ? 'ti-bookmark-filled' : 'ti-bookmark'}`} style={{ fontSize: '14px' }} />
                   </button>
                 </div>
@@ -186,64 +176,76 @@ export default function DashboardPage() {
           ))}
         </div>
 
-        {filtered.length === 0 && <div className="text-center py-12"><i className="ti ti-search text-2xl" style={{ color: 'var(--slate-300)' }} /><p className="text-sm mt-2" style={{ color: 'var(--slate-500)' }}>No leads match your filters.</p></div>}
+        {filtered.length === 0 && leads.length > 0 && (
+          <div className="text-center py-16">
+            <i className="ti ti-search text-3xl" style={{ color: 'var(--slate-300)' }} />
+            <p className="text-sm mt-2 font-medium" style={{ color: 'var(--slate-500)' }}>No leads match your filters.</p>
+            <button onClick={() => { setSearch(''); setSourceFilter('All') }} className="btn-line btn-sm mt-3">Clear filters</button>
+          </div>
+        )}
 
         {/* Limit banner */}
         {profile?.subscription_status === 'free' && leads.length >= limit && (
-          <div className="p-4 rounded-xl mt-4 text-center" style={{ background: 'var(--slate-100)' }}>
-            <p className="text-sm font-medium" style={{ color: 'var(--ink-900)' }}>You&apos;ve used your free preview</p>
-            <p className="text-xs mt-1" style={{ color: 'var(--slate-600)' }}>Upgrade to see all leads</p>
-            <button onClick={() => router.push('/dashboard/billing')} className="text-sm mt-3 px-6 py-2.5 rounded-lg font-semibold" style={{ background: 'var(--lime)', color: 'var(--ink-950)' }}>View Plans</button>
+          <div className="card p-5 mt-4 text-center" style={{ background: 'var(--slate-100)', borderColor: 'var(--slate-200)' }}>
+            <p className="text-sm font-semibold" style={{ color: 'var(--ink-900)' }}>You&apos;ve used your free preview</p>
+            <p className="text-xs mt-1" style={{ color: 'var(--slate-500)' }}>Upgrade to see all leads</p>
+            <button onClick={() => router.push('/dashboard/billing')} className="btn-p btn-sm mt-3 !px-6">View Plans</button>
           </div>
         )}
 
         {/* Limit modal */}
         {limitReached && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-4" onClick={() => setLimitReached(false)}>
-            <div className="max-w-sm w-full text-center p-6 rounded-xl animate-scale-in" style={{ background: 'var(--paper-card)', border: '1px solid var(--slate-200)' }} onClick={e => e.stopPropagation()}>
+            <div className="card p-6 max-w-sm w-full text-center animate-scaleIn" onClick={e => e.stopPropagation()}>
               <i className="ti ti-lock text-2xl" style={{ color: 'var(--amber)' }} />
               <h3 className="text-lg font-bold mt-2" style={{ color: 'var(--ink-900)' }}>Application limit reached</h3>
-              <p className="text-xs mt-2" style={{ color: 'var(--slate-600)' }}>Free plan limit exceeded. Upgrade to Pro.</p>
-              <button onClick={() => router.push('/dashboard/billing')} className="mt-4 w-full py-2.5 rounded-lg font-semibold justify-center flex items-center gap-2" style={{ background: 'var(--amber)', color: 'var(--ink-950)' }}>Upgrade</button>
-              <button onClick={() => setLimitReached(false)} className="mt-2 w-full py-2.5 rounded-lg font-semibold justify-center flex items-center gap-2" style={{ background: 'var(--slate-100)', color: 'var(--slate-600)' }}>Dismiss</button>
+              <p className="text-xs mt-2" style={{ color: 'var(--slate-500)' }}>Free plan limit exceeded. Upgrade to Pro.</p>
+              <button onClick={() => router.push('/dashboard/billing')} className="btn-amber mt-4 w-full justify-center">Upgrade</button>
+              <button onClick={() => setLimitReached(false)} className="btn-line mt-2 w-full justify-center">Dismiss</button>
             </div>
           </div>
         )}
 
         {/* Upgrade banner */}
         {profile?.subscription_status === 'free' && (
-          <div className="p-4 rounded-xl mt-4" style={{ background: 'linear-gradient(135deg, var(--ink-900), var(--ink-800))' }}>
-            <p className="text-sm font-medium text-white">Upgrade to Pro</p>
+          <div className="card p-5 mt-4" style={{ background: 'linear-gradient(135deg, var(--ink-900), var(--ink-800))', border: 'none' }}>
+            <p className="text-sm font-semibold text-white">Upgrade to Pro</p>
             <p className="text-xs mt-1" style={{ color: 'var(--slate-300)' }}>Unlimited applications and advanced insights.</p>
-            <button onClick={() => router.push('/dashboard/billing')} className="text-sm mt-3 px-5 py-2 rounded-lg font-semibold" style={{ background: 'var(--lime)', color: 'var(--ink-950)' }}>See Plans</button>
+            <button onClick={() => router.push('/dashboard/billing')} className="btn-p btn-sm mt-3">See Plans</button>
           </div>
         )}
       </div>
 
       {/* Right panel */}
       {selected && (
-        <aside className="hidden md:block w-[280px] lg:w-[320px] shrink-0 overflow-y-auto border-l px-4 py-4" style={{ borderColor: 'var(--slate-200)' }}>
+        <aside className="hidden md:block w-[300px] shrink-0 overflow-y-auto border-l px-5 py-5" style={{ borderColor: 'var(--slate-200)' }}>
           <button onClick={() => setSelected(null)}
-            className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg mb-4 transition-all"
-            style={{ background: 'var(--slate-100)', color: 'var(--slate-600)' }}><i className="ti ti-x" /> Close</button>
-          <h2 className="text-sm font-semibold" style={{ color: 'var(--ink-900)' }}>{selected.title}</h2>
+            className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg mb-4 transition-all btn-line btn-sm"
+            style={{ background: 'var(--slate-100)', color: 'var(--slate-600)', border: 'none' }}>
+            <i className="ti ti-x" /> Close
+          </button>
+          <div className="space-y-1 mb-3">
+            <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded" style={{ background: getSourceInfo(selected.source_url).bg, color: getSourceInfo(selected.source_url).color }}>
+              {getSourceInfo(selected.source_url).label}
+            </span>
+            {isNewLead(selected.posted_date) && <span className="dash-badge-new text-[9px] px-1.5 py-0.5 rounded">New</span>}
+          </div>
+          <h2 className="text-sm font-semibold leading-snug" style={{ color: 'var(--ink-900)' }}>{selected.title}</h2>
           {selected.client_location && <p className="text-xs mt-1" style={{ color: 'var(--slate-500)' }}>{selected.client_location}</p>}
-          <p className="text-xs mt-1" style={{ color: 'var(--slate-500)' }}>{getSourceInfo(selected.source_url).label} &middot; {new Date(selected.posted_date).toLocaleDateString()}</p>
+          <p className="text-xs mt-1" style={{ color: 'var(--slate-400)' }}>{getSourceInfo(selected.source_url).label} &middot; {new Date(selected.posted_date).toLocaleDateString()}</p>
           {formatBudgetGBP(selected.budget_min, selected.budget_max) && (
-            <p className="text-sm font-semibold mt-3" style={{ color: 'var(--lime-deep)' }}>{formatBudgetGBP(selected.budget_min, selected.budget_max)}</p>
+            <p className="dash-badge-status mt-3" style={{ background: 'rgba(196,240,0,.12)', color: 'var(--lime-deep)' }}>{formatBudgetGBP(selected.budget_min, selected.budget_max)}</p>
           )}
-          <p className="text-xs mt-3 leading-relaxed" style={{ color: 'var(--slate-600)' }}>{selected.description?.slice(0, 500)}</p>
+          <div className="mt-4 text-xs leading-relaxed" style={{ color: 'var(--slate-600)', maxHeight: '240px', overflowY: 'auto' }}>{selected.description?.slice(0, 500)}</div>
           {selected.skills_required && selected.skills_required.length > 0 && (
-            <div className="flex flex-wrap gap-1 mt-3">
+            <div className="flex flex-wrap gap-1.5 mt-3">
               {selected.skills_required.map(sk => (
-                <span key={sk} className="text-[10px] px-2 py-0.5 rounded font-medium" style={{ background: 'rgba(196,240,0,.12)', color: 'var(--lime-dim)' }}>{sk}</span>
+                <span key={sk} className="badge-skill text-[10px]">{sk}</span>
               ))}
             </div>
           )}
           {selected.source_url && (
-            <a href={selected.source_url} target="_blank" rel="noopener noreferrer"
-              className="flex items-center justify-center gap-1.5 text-xs font-semibold mt-4 px-4 py-2 rounded-lg"
-              style={{ background: 'var(--slate-100)', color: 'var(--slate-600)' }}>
+            <a href={selected.source_url} target="_blank" rel="noopener noreferrer" className="btn-line btn-sm mt-4 w-full justify-center">
               <i className="ti ti-external-link" /> View Original
             </a>
           )}

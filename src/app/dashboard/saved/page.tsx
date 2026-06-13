@@ -37,43 +37,49 @@ export default function SavedPage() {
 
   if (loading) return (
     <div className="flex-1 flex items-center justify-center pt-16">
-      <div className="flex items-center gap-2" style={{ color: 'var(--slate-500)' }}>
-        <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: 'var(--lime)' }} /> Loading...
+      <div className="flex items-center gap-3" style={{ color: 'var(--slate-500)' }}>
+        <div className="w-2.5 h-2.5 rounded-full animate-pulse" style={{ background: 'var(--lime)' }} />
+        <span className="text-sm">Loading&hellip;</span>
       </div>
     </div>
   )
 
   return (
-    <div className="flex-1 px-4 md:px-8 pt-6 pb-20 md:pb-8">
-      <h1 className="text-lg font-bold" style={{ color: 'var(--ink-900)' }}>Saved Leads</h1>
-      <p className="text-xs mt-1 mb-4" style={{ color: 'var(--slate-500)' }}>Bookmarked for later review</p>
+    <div className="flex-1 dash-page">
+      <div className="dash-header">
+        <div>
+          <h1>Saved Leads</h1>
+          <p className="text-xs mt-1" style={{ color: 'var(--slate-500)' }}>Bookmarked for later review</p>
+        </div>
+      </div>
+
       {leads.length === 0 ? (
-        <div className="text-center py-16">
-          <i className="ti ti-bookmark text-2xl" style={{ color: 'var(--slate-300)' }} />
-          <p className="text-sm mt-2" style={{ color: 'var(--slate-500)' }}>No saved leads yet</p>
-          <button onClick={() => router.push('/dashboard')} className="mt-4 px-6 py-2.5 rounded-lg text-sm font-semibold" style={{ background: 'var(--lime)', color: 'var(--ink-950)' }}>Browse leads</button>
+        <div className="text-center py-20">
+          <i className="ti ti-bookmark text-3xl" style={{ color: 'var(--slate-300)' }} />
+          <p className="text-sm mt-2 font-medium" style={{ color: 'var(--slate-500)' }}>No saved leads yet</p>
+          <button onClick={() => router.push('/dashboard')} className="btn-p btn-sm mt-4">Browse leads</button>
         </div>
       ) : (
-        <div className="space-y-2">
+        <div className="space-y-2.5">
           {leads.map(lead => (
             <div key={lead.id} onClick={() => router.push(`/dashboard/lead/${lead.id}`)}
-              className="px-4 py-3 cursor-pointer rounded-xl flex items-center gap-3 transition-all" style={{ background: 'var(--paper-card)', border: '1px solid var(--slate-200)' }}>
+              className="dash-lead flex items-center gap-3">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5 mb-1">
                   <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded" style={{ background: getSourceInfo(lead.source_url).bg, color: getSourceInfo(lead.source_url).color }}>
                     {getSourceInfo(lead.source_url).label}
                   </span>
-                  {isNewLead(lead.posted_date) && <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded" style={{ background: 'rgba(196,240,0,.15)', color: 'var(--lime-deep)' }}>New</span>}
-                  <span className="text-[10px] ml-auto" style={{ color: 'var(--slate-500)' }}>{timeAgo(lead.posted_date)}</span>
+                  {isNewLead(lead.posted_date) && <span className="dash-badge-new text-[9px] px-1.5 py-0.5 rounded">New</span>}
+                  <span className="text-[10px] ml-auto" style={{ color: 'var(--slate-400)' }}>{timeAgo(lead.posted_date)}</span>
                 </div>
                 <h3 className="text-sm font-semibold line-clamp-1" style={{ color: 'var(--ink-900)' }}>{lead.title}</h3>
                 {formatBudgetGBP(lead.budget_min, lead.budget_max) && (
-                  <span className="text-xs font-medium" style={{ color: 'var(--lime-deep)' }}>{formatBudgetGBP(lead.budget_min, lead.budget_max)}</span>
+                  <span className="dash-badge-status mt-1" style={{ background: 'rgba(196,240,0,.12)', color: 'var(--lime-deep)' }}>{formatBudgetGBP(lead.budget_min, lead.budget_max)}</span>
                 )}
               </div>
               <button onClick={e => { e.stopPropagation(); unsave(lead.id) }}
-                className="text-xs min-h-[36px] min-w-[36px] flex items-center justify-center shrink-0 px-2.5 py-1.5 rounded-lg font-semibold"
-                style={{ background: 'var(--slate-100)', color: 'var(--coral)' }}>
+                className="flex items-center justify-center min-h-[36px] min-w-[36px] p-2 rounded-lg transition-all"
+                style={{ background: 'rgba(255,107,94,.1)', color: 'var(--coral)' }}>
                 <i className="ti ti-trash" style={{ fontSize: '14px' }} />
               </button>
             </div>

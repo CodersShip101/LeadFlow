@@ -47,17 +47,20 @@ export default function BillingPage() {
 
   if (loading) return (
     <div className="flex-1 flex items-center justify-center pt-16">
-      <div className="flex items-center gap-2" style={{ color: 'var(--slate-500)' }}>
-        <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: 'var(--lime)' }} /> Loading...
+      <div className="flex items-center gap-3" style={{ color: 'var(--slate-500)' }}>
+        <div className="w-2.5 h-2.5 rounded-full animate-pulse" style={{ background: 'var(--lime)' }} />
+        <span className="text-sm">Loading&hellip;</span>
       </div>
     </div>
   )
 
   return (
-    <div className="flex-1 px-4 md:px-8 pt-6 pb-20 md:pb-8 max-w-3xl">
-      <h1 className="text-lg font-bold" style={{ color: 'var(--ink-900)' }}>Billing</h1>
+    <div className="flex-1 dash-page">
+      <div className="dash-header">
+        <h1>Billing</h1>
+      </div>
 
-      <div className="flex gap-4 border-b mt-4 mb-6" style={{ borderColor: 'var(--slate-200)' }}>
+      <div className="flex gap-4 border-b mb-6" style={{ borderColor: 'var(--slate-200)' }}>
         {(['plans', 'usage'] as const).map(t => (
           <button key={t} onClick={() => setTab(t)}
             className="pb-2 text-sm font-medium capitalize transition-all"
@@ -68,27 +71,29 @@ export default function BillingPage() {
       </div>
 
       {tab === 'plans' && (
-        <div className="grid md:grid-cols-2 gap-4">
+        <div className="grid md:grid-cols-2 gap-5 max-w-2xl">
           {tiers.map(tier => <PricingCard key={tier.name} tier={tier} />)}
         </div>
       )}
 
       {tab === 'usage' && (
-        <div className="space-y-4">
-          <div className="p-4 rounded-xl" style={{ background: 'var(--paper-card)', border: '1px solid var(--slate-200)' }}>
+        <div className="space-y-4 max-w-lg">
+          <div className="card p-5">
             <div className="flex items-center justify-between mb-2">
-              <p className="text-sm font-medium" style={{ color: 'var(--ink-900)' }}>Applications used</p>
-              <span className="text-xs font-semibold" style={{ color: 'var(--lime-deep)' }}>{profile?.subscription_status === 'free' ? '0/5' : 'Unlimited'}</span>
+              <p className="text-sm font-semibold" style={{ color: 'var(--ink-900)' }}>Applications used</p>
+              <span className="dash-badge-status" style={{ background: 'rgba(196,240,0,.12)', color: 'var(--lime-deep)' }}>
+                {profile?.subscription_status === 'free' ? '0/5' : 'Unlimited'}
+              </span>
             </div>
             <div className="h-2 rounded-full" style={{ background: 'var(--slate-200)' }}>
-              <div className="h-2 rounded-full" style={{ width: profile?.subscription_status === 'free' ? '0%' : '100%', background: 'var(--lime)', transition: 'width 0.4s ease' }} />
+              <div className="h-2 rounded-full transition-all duration-500" style={{ width: profile?.subscription_status === 'free' ? '0%' : '100%', background: 'var(--lime)' }} />
             </div>
           </div>
-          <div className="p-4 rounded-xl" style={{ background: 'var(--paper-card)', border: '1px solid var(--slate-200)' }}>
-            <p className="text-sm font-medium" style={{ color: 'var(--ink-900)' }}>Current plan</p>
+          <div className="card p-5">
+            <p className="text-sm font-semibold" style={{ color: 'var(--ink-900)' }}>Current plan</p>
             <p className="text-xs mt-1 capitalize" style={{ color: 'var(--slate-500)' }}>{profile?.subscription_status || 'Free'}</p>
             {profile?.subscription_status === 'free' && (
-              <button onClick={() => setTab('plans')} className="mt-3 px-5 py-2 rounded-lg text-xs font-semibold" style={{ background: 'var(--lime)', color: 'var(--ink-950)' }}>Upgrade</button>
+              <button onClick={() => setTab('plans')} className="btn-p btn-sm mt-3">Upgrade</button>
             )}
           </div>
         </div>

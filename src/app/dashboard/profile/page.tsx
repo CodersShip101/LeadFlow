@@ -57,11 +57,12 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="flex-1 px-4 md:px-8 pt-6 pb-20 md:pb-8 max-w-xl">
-      <h1 className="text-lg font-bold" style={{ color: 'var(--ink-900)' }}>Settings</h1>
+    <div className="flex-1 dash-page max-w-2xl">
+      <div className="dash-header">
+        <h1>Settings</h1>
+      </div>
 
-      {/* Tabs */}
-      <div className="flex gap-4 border-b mt-4 mb-6" style={{ borderColor: 'var(--slate-200)' }}>
+      <div className="flex gap-4 border-b mb-6" style={{ borderColor: 'var(--slate-200)' }}>
         {(['profile', 'account'] as const).map(t => (
           <button key={t} onClick={() => setTab(t)}
             className="pb-2 text-sm font-medium capitalize transition-all"
@@ -72,63 +73,64 @@ export default function ProfilePage() {
       </div>
 
       {tab === 'profile' && (
-        <div className="space-y-4">
-          <div><label className="text-sm font-medium mb-1.5 block" style={{ color: 'var(--ink-700)' }}>Full name</label>
-            <input value={fullName} onChange={e => setFullName(e.target.value)}
-              className="w-full px-3 py-2.5 rounded-lg text-sm" style={{ background: 'var(--paper-card)', border: '1.5px solid var(--slate-200)', color: 'var(--ink-900)' }} /></div>
-          <div><label className="text-sm font-medium mb-1.5 block" style={{ color: 'var(--ink-700)' }}>Location</label>
-            <input value={location} onChange={e => setLocation(e.target.value)}
-              className="w-full px-3 py-2.5 rounded-lg text-sm" style={{ background: 'var(--paper-card)', border: '1.5px solid var(--slate-200)', color: 'var(--ink-900)' }}
-              placeholder="e.g. London, UK" /></div>
-          <div><label className="text-sm font-medium mb-1.5 block" style={{ color: 'var(--ink-700)' }}>Hourly rate (£)</label>
-            <input value={rate} onChange={e => setRate(e.target.value)} type="number"
-              className="w-full px-3 py-2.5 rounded-lg text-sm" style={{ background: 'var(--paper-card)', border: '1.5px solid var(--slate-200)', color: 'var(--ink-900)' }} /></div>
-          <div><label className="text-sm font-medium mb-1.5 block" style={{ color: 'var(--ink-700)' }}>Experience level</label>
-            <select value={exp} onChange={e => setExp(e.target.value)}
-              className="w-full px-3 py-2.5 rounded-lg text-sm" style={{ background: 'var(--paper-card)', border: '1.5px solid var(--slate-200)', color: 'var(--ink-900)' }}>
-              <option value="">Select...</option>
+        <div className="space-y-5">
+          <div className="auth-field">
+            <label>Full name</label>
+            <input value={fullName} onChange={e => setFullName(e.target.value)} className="input" />
+          </div>
+          <div className="auth-field">
+            <label>Location</label>
+            <input value={location} onChange={e => setLocation(e.target.value)} className="input" placeholder="e.g. London, UK" />
+          </div>
+          <div className="auth-field">
+            <label>Hourly rate (&pound;)</label>
+            <input value={rate} onChange={e => setRate(e.target.value)} type="number" className="input" />
+          </div>
+          <div className="auth-field">
+            <label>Experience level</label>
+            <select value={exp} onChange={e => setExp(e.target.value)} className="input">
+              <option value="">Select&hellip;</option>
               {['Junior (0-2 years)','Mid (2-5)','Senior (5-10)','Expert (10+)'].map(o => <option key={o} value={o}>{o}</option>)}
-            </select></div>
-          <div><label className="text-sm font-medium mb-1.5 block" style={{ color: 'var(--ink-700)' }}>Availability</label>
-            <select value={avail} onChange={e => setAvail(e.target.value)}
-              className="w-full px-3 py-2.5 rounded-lg text-sm" style={{ background: 'var(--paper-card)', border: '1.5px solid var(--slate-200)', color: 'var(--ink-900)' }}>
-              <option value="">Select...</option>
+            </select>
+          </div>
+          <div className="auth-field">
+            <label>Availability</label>
+            <select value={avail} onChange={e => setAvail(e.target.value)} className="input">
+              <option value="">Select&hellip;</option>
               <option value="now">Available now</option>
               <option value="soon">Available from [date]</option>
               <option value="no">Not currently available</option>
-            </select></div>
-          <div><label className="text-sm font-medium mb-1.5 block" style={{ color: 'var(--ink-700)' }}>Portfolio URL</label>
-            <input value={portfolio} onChange={e => setPortfolio(e.target.value)}
-              className="w-full px-3 py-2.5 rounded-lg text-sm" style={{ background: 'var(--paper-card)', border: '1.5px solid var(--slate-200)', color: 'var(--ink-900)' }}
-              placeholder="https://..." /></div>
-          <div>
-            <label className="text-sm font-medium mb-1.5 block" style={{ color: 'var(--ink-700)' }}>Skills</label>
-            <div className="flex flex-wrap gap-1.5 max-h-48 overflow-y-auto p-2 rounded-lg" style={{ border: '1.5px solid var(--slate-200)' }}>
+            </select>
+          </div>
+          <div className="auth-field">
+            <label>Portfolio URL</label>
+            <input value={portfolio} onChange={e => setPortfolio(e.target.value)} className="input" placeholder="https://&hellip;" />
+          </div>
+          <div className="auth-field">
+            <label>Skills</label>
+            <div className="auth-skills-grid max-h-48 overflow-y-auto p-2 rounded-lg border" style={{ borderColor: 'var(--slate-200)' }}>
               {skillOptions.map(sk => (
                 <button key={sk} onClick={() => toggleSkill(sk)}
-                  className="text-xs font-semibold px-2.5 py-1 rounded-full transition-all active:scale-[0.95] cursor-pointer"
-                  style={{ background: skills.includes(sk) ? 'var(--lime)' : 'var(--slate-100)', color: skills.includes(sk) ? 'var(--ink-950)' : 'var(--slate-600)' }}>
+                  className={`auth-skill-pill ${skills.includes(sk) ? 'selected' : ''}`}>
                   {sk}
                 </button>
               ))}
             </div>
           </div>
-          <button onClick={handleSave} disabled={saving}
-            className="px-8 py-2.5 rounded-lg text-sm font-semibold transition-all"
-            style={{ background: 'var(--lime)', color: 'var(--ink-950)', opacity: saving ? 0.45 : 1 }}>
-            {saving ? 'Saving...' : 'Save'}
+          <button onClick={handleSave} disabled={saving} className="btn-p px-8">
+            {saving ? 'Saving&hellip;' : 'Save'}
           </button>
         </div>
       )}
 
       {tab === 'account' && (
         <div className="space-y-4">
-          <div className="p-4 rounded-xl" style={{ background: 'var(--paper-card)', border: '1px solid var(--slate-200)' }}>
-            <p className="text-sm font-medium" style={{ color: 'var(--ink-900)' }}>Email</p>
-            <p className="text-xs mt-1" style={{ color: 'var(--slate-500)' }}>{profile?.email || '—'}</p>
+          <div className="card p-5">
+            <p className="text-sm font-semibold" style={{ color: 'var(--ink-900)' }}>Email</p>
+            <p className="text-xs mt-1" style={{ color: 'var(--slate-500)' }}>{profile?.email || '\u2014'}</p>
           </div>
-          <div className="p-4 rounded-xl" style={{ background: 'var(--paper-card)', border: '1px solid var(--slate-200)' }}>
-            <p className="text-sm font-medium" style={{ color: 'var(--ink-900)' }}>Plan</p>
+          <div className="card p-5">
+            <p className="text-sm font-semibold" style={{ color: 'var(--ink-900)' }}>Plan</p>
             <p className="text-xs mt-1 capitalize" style={{ color: 'var(--slate-500)' }}>{profile?.subscription_status || 'free'}</p>
           </div>
           <button onClick={async () => { await supabase.auth.signOut(); router.push('/') }}
