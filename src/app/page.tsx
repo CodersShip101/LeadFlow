@@ -11,6 +11,17 @@ const incomingSignals = [
   { src: 'REMOTE OK', c: 'rgba(196,240,0,.16)', t: 'var(--lime)', title: 'UI Designer — Healthtech Startup', meta: '£400/day · Figma · 6-week sprint', score: '9.3', cls: 'score-a' },
 ]
 
+const incomingDashboard = [
+  { src: 'REDDIT', c: 'rgba(255,140,66,.14)', t: '#ff9c5b', title: 'Senior UX Designer — London', meta: '£350–450/day · Figma', score: '9.2', cls: 'score-a', dot: 'var(--lime)' },
+  { src: 'WWR', c: 'rgba(110,168,212,.16)', t: '#7fb6e6', title: 'Full-Stack Developer — Remote', meta: '£500–700/day · React', score: '8.4', cls: 'score-a', dot: 'var(--lime)' },
+  { src: 'REED', c: 'rgba(176,138,219,.16)', t: '#c4a3ec', title: 'Brand Identity — Contract', meta: '£2,800/mo · Branding', score: '8.1', cls: 'score-b', dot: 'var(--amber)' },
+  { src: 'REMOTE OK', c: 'rgba(196,240,0,.16)', t: 'var(--lime)', title: 'DevOps Engineer — Full-time', meta: '£70–90k · AWS, Terraform', score: '9.0', cls: 'score-a', dot: 'var(--lime)' },
+  { src: 'REDDIT', c: 'rgba(255,140,66,.14)', t: '#ff9c5b', title: 'Freelance Copywriter — Fintech', meta: '£200–280/day · Content', score: '8.7', cls: 'score-a', dot: 'var(--lime)' },
+  { src: 'REED', c: 'rgba(176,138,219,.16)', t: '#c4a3ec', title: 'Product Designer — EdTech', meta: '£300–400/day · Figma', score: '7.9', cls: 'score-b', dot: 'var(--amber)' },
+  { src: 'WWR', c: 'rgba(110,168,212,.16)', t: '#7fb6e6', title: 'UI/UX Designer — Healthcare', meta: '£350–450/day · Prototyping', score: '9.4', cls: 'score-a', dot: 'var(--lime)' },
+  { src: 'REMOTE OK', c: 'rgba(196,240,0,.16)', t: 'var(--lime)', title: 'Front-End Dev — SaaS Startup', meta: '£400–550/day · Vue, TS', score: '8.6', cls: 'score-a', dot: 'var(--lime)' },
+]
+
 const initialSignals = [
   { src: 'REDDIT', c: 'rgba(255,140,66,.14)', t: '#ff9c5b', title: 'Senior UX Designer — London (Fintech)', meta: '£350–450/day · Figma · Inside IR35', score: '9.1', cls: 'score-a' },
   { src: 'WWR', c: 'rgba(110,168,212,.16)', t: '#7fb6e6', title: 'Full-Stack Developer — Remote UK', meta: '£60–75k · React, Node · ASAP', score: '8.7', cls: 'score-a' },
@@ -86,6 +97,12 @@ export default function HomePage() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [signals, setSignals] = useState(initialSignals)
   const [paused, setPaused] = useState(false)
+  const [dashboardRows, setDashboardRows] = useState([
+    { src: 'REDDIT', c: 'rgba(255,140,66,.14)', t: '#ff9c5b', title: 'Senior UX Designer — London', meta: '£350–450/day · Figma', score: '9.2', cls: 'score-a', dot: 'var(--lime)' },
+    { src: 'WWR', c: 'rgba(110,168,212,.16)', t: '#7fb6e6', title: 'Full-Stack Developer — Remote', meta: '£500–700/day · React', score: '8.4', cls: 'score-a', dot: 'var(--lime)' },
+    { src: 'REED', c: 'rgba(176,138,219,.16)', t: '#c4a3ec', title: 'Brand Identity — Contract', meta: '£2,800/mo · Branding', score: '8.1', cls: 'score-b', dot: 'var(--amber)' },
+  ])
+  const dbRef = useRef(0)
   const [annual, setAnnual] = useState(false)
   const [openFaq, setOpenFaq] = useState<number | null>(null)
   const [stickyVisible, setStickyVisible] = useState(false)
@@ -133,6 +150,23 @@ export default function HomePage() {
     }, 4200)
     return () => clearInterval(interval)
   }, [paused])
+
+  useEffect(() => {
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (reduced) return
+    const interval = setInterval(() => {
+      if (document.hidden) return
+      const d = incomingDashboard[dbRef.current % incomingDashboard.length]
+      dbRef.current++
+      setDashboardRows(prev => {
+        const next = [...prev]
+        next.pop()
+        next.unshift(d)
+        return next
+      })
+    }, 4500)
+    return () => clearInterval(interval)
+  }, [])
 
   return (
     <>
@@ -412,21 +446,25 @@ export default function HomePage() {
                       <span className="dash-chip" style={{ background: 'rgba(196,240,0,.12)', color: 'var(--lime)', border: '1px solid rgba(196,240,0,.25)' }}>score 8+</span>
                     </span>
                   </div>
-                  {[
-                    { src: 'REDDIT', c: 'rgba(255,140,66,.14)', t: '#ff9c5b', title: 'Senior UX Designer — London', meta: '£350–450/day · Figma', score: '9.2', cls: 'score-a', dot: 'var(--lime)' },
-                    { src: 'WWR', c: 'rgba(110,168,212,.16)', t: '#7fb6e6', title: 'Full-Stack Developer — Remote', meta: '£500–700/day · React', score: '8.4', cls: 'score-a', dot: 'var(--lime)' },
-                    { src: 'REED', c: 'rgba(176,138,219,.16)', t: '#c4a3ec', title: 'Brand Identity — Contract', meta: '£2,800/mo · Branding', score: '8.1', cls: 'score-b', dot: 'var(--amber)' },
-                  ].map((d, i) => (
-                    <div key={i} className="dash-row">
-                      <span style={{ width: 6, height: 6, borderRadius: '50%', background: d.dot, flexShrink: 0 }} aria-hidden="true"></span>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ marginBottom: 3 }}><span className="sig-src" style={{ background: d.c, color: d.t }}>{d.src}</span></div>
-                        <div className="sig-title">{d.title}</div>
-                        <div className="sig-meta">{d.meta}</div>
+                  {(() => {
+                    const maxScore = Math.max(...dashboardRows.map(r => parseFloat(r.score)))
+                    const bestIdx = dashboardRows.findIndex(r => parseFloat(r.score) === maxScore)
+                    return dashboardRows.map((d, i) => (
+                      <div key={d.title} className="dash-row" style={i === 0 ? { animation: 'newFlash .8s ease-out' } : undefined}>
+                        <span style={{ width: 6, height: 6, borderRadius: '50%', background: d.dot, flexShrink: 0 }} aria-hidden="true"></span>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ marginBottom: 3, display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <span className="sig-src" style={{ background: d.c, color: d.t }}>{d.src}</span>
+                            {i === 0 && <span className="dash-badge dash-badge-new">new</span>}
+                            {i === bestIdx && i !== 0 && <span className="dash-badge dash-badge-rec"><i className="ti ti-star-filled" style={{ fontSize: 9 }} aria-hidden="true"></i> recommended</span>}
+                          </div>
+                          <div className="sig-title">{d.title}</div>
+                          <div className="sig-meta">{d.meta}</div>
+                        </div>
+                        <div className={`sig-score ${d.cls}`}><span className="v">{d.score}</span></div>
                       </div>
-                      <div className={`sig-score ${d.cls}`}><span className="v">{d.score}</span></div>
-                    </div>
-                  ))}
+                    ))
+                  })()}
                 </div>
               </div>
             </div>

@@ -11,72 +11,132 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [showPw, setShowPw] = useState(false)
+  const [error, setError] = useState('')
   const router = useRouter()
   const supabase = createClient()
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
+    setError('')
+    if (!email || !password) { setError('Please fill in both fields.'); return }
     setLoading(true)
     const { error } = await supabase.auth.signInWithPassword({ email, password })
-    if (error) { toast.error(error.message); setLoading(false); return }
+    if (error) { setError(error.message); setLoading(false); return }
     toast.success('Welcome back!')
     router.push('/dashboard')
   }
 
   return (
-    <div className="min-h-screen flex">
-      {/* LEFT: brand panel */}
-      <div className="hidden lg:flex w-[40%] flex-col justify-between p-12" style={{ background: 'var(--green-900)' }}>
-        <div className="flex items-center gap-2 text-white text-sm font-bold">
-          <span className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-xs font-bold" style={{ background: 'var(--green-500)' }}>LF</span>
-          LeadFlow
-        </div>
-        <div>
-          <div className="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold mb-4" style={{ background: 'var(--amber-500)' }}>SK</div>
-          <p className="text-sm leading-relaxed text-white/80">&ldquo;I was spending 3 hours a day on job boards. Now I open LeadFlow once and have 5 curated leads waiting.&rdquo;</p>
-          <p className="text-xs mt-3" style={{ color: 'var(--green-200)' }}>Sarah K. — Freelance UX Designer</p>
-        </div>
-      </div>
-
-      {/* RIGHT: form */}
-      <div className="flex-1 flex items-center justify-center px-6 py-12">
-        <div className="w-full max-w-sm animate-fade-in">
-          <div className="text-center mb-8">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-4" style={{ background: 'var(--green-600)' }}>
-              <span className="text-white text-sm font-bold">LF</span>
-            </div>
-            <h1 className="text-2xl font-bold tracking-tight" style={{ color: 'var(--base-900)' }}>Welcome back</h1>
-            <p className="mt-1.5 text-sm" style={{ color: 'var(--base-600)' }}>Sign in to your LeadFlow account</p>
+    <body className="auth-body">
+      <aside className="panel-left">
+        <div className="panel-bg" aria-hidden="true"></div>
+        <div className="panel-glow" aria-hidden="true"></div>
+        <div className="panel-content">
+          <div className="auth-logo">
+            <span className="auth-logo-mark"><span>LF</span></span>
+            <span className="auth-logo-name">LeadFlow</span>
           </div>
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--base-700)' }}>Email</label>
-              <input type="email" required value={email} onChange={e => setEmail(e.target.value)}
-                className="input" placeholder="you@example.com" />
+          <div className="panel-hero">
+            <div className="panel-eyebrow">Your lead feed is waiting</div>
+            <h2 className="panel-heading">New work matched<br />to you every 6 hours.</h2>
+            <p className="panel-sub">While you&apos;ve been away, we&apos;ve been scanning and scoring. Log back in to see what&apos;s matched.</p>
+            <div className="auth-stats-row">
+              <div className="auth-stat-item">
+                <span className="auth-stat-num" aria-label="47 new leads today"><span>47</span></span>
+                <span className="auth-stat-label">New leads today</span>
+              </div>
+              <div className="auth-stat-item">
+                <span className="auth-stat-num"><span>9.1</span></span>
+                <span className="auth-stat-label">Top score today</span>
+              </div>
+              <div className="auth-stat-item">
+                <span className="auth-stat-num"><span>4</span></span>
+                <span className="auth-stat-label">Sources scanned</span>
+              </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--base-700)' }}>Password</label>
-              <div className="relative">
-                <input type={showPw ? 'text' : 'password'} required value={password} onChange={e => setPassword(e.target.value)}
-                  className="input pr-10" placeholder="Your password" />
-                <button type="button" onClick={() => setShowPw(!showPw)} className="absolute right-3 top-1/2 -translate-y-1/2 text-xs" style={{ color: 'var(--base-500)' }}>
-                  <i className={`ti ${showPw ? 'ti-eye-off' : 'ti-eye'}`} />
+            <div className="auth-ticker">
+              <span className="radar-mini" aria-hidden="true"></span>
+              <div className="auth-ticker-text">
+                Feed updated <strong>8 minutes ago</strong> — 12 new leads since your last visit
+              </div>
+              <span className="auth-ticker-dot" aria-hidden="true"></span>
+            </div>
+            <div className="auth-sources-section">
+              <div className="auth-sources-label">Scanning now from</div>
+              <div className="auth-source-pills">
+                <span className="auth-source-pill"><i className="ti ti-brand-reddit" aria-hidden="true"></i> Reddit</span>
+                <span className="auth-source-pill"><i className="ti ti-briefcase" aria-hidden="true"></i> Reed.co.uk</span>
+                <span className="auth-source-pill"><i className="ti ti-world" aria-hidden="true"></i> We Work Remotely</span>
+                <span className="auth-source-pill"><i className="ti ti-device-laptop" aria-hidden="true"></i> Remote OK</span>
+              </div>
+            </div>
+          </div>
+          <div className="auth-testimonial">
+            <p>Landed a £380/day Fintech contract through a Reddit lead I&apos;d never have found manually. LeadFlow sent it before anyone else saw it.</p>
+            <div className="auth-testimonial-author">
+              <div className="auth-author-av" aria-hidden="true">JK</div>
+              <div className="auth-author-info">
+                <div className="auth-author-name">James K.</div>
+                <div className="auth-author-role">Freelance UX Designer · London</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <main className="panel-right">
+        <div className="auth-form-wrap">
+          <div className="auth-form-eyebrow">Welcome back</div>
+          <h1>Log in to LeadFlow</h1>
+          <p className="auth-tagline">Your leads are ready.</p>
+
+          {error && (
+            <div className="auth-alert-error visible" role="alert" aria-live="polite">
+              <i className="ti ti-alert-circle" aria-hidden="true"></i>
+              <span>{error}</span>
+            </div>
+          )}
+
+          <form onSubmit={handleLogin}>
+            <div className="auth-field">
+              <label htmlFor="email">Email</label>
+              <input type="email" id="email" className="auth-input" placeholder="alex@yoursite.co.uk" autoComplete="email" required value={email} onChange={e => setEmail(e.target.value)} />
+            </div>
+            <div className="auth-field">
+              <div className="auth-label-row">
+                <label htmlFor="password">Password</label>
+                <Link href="/auth/reset-password" className="auth-forgot-link">Forgot password?</Link>
+              </div>
+              <div className="auth-pw-field">
+                <input type={showPw ? 'text' : 'password'} id="password" className="auth-input" placeholder="Your password" autoComplete="current-password" required value={password} onChange={e => setPassword(e.target.value)} />
+                <button type="button" className="auth-pw-toggle" aria-label={showPw ? 'Hide password' : 'Show password'} onClick={() => setShowPw(!showPw)}>
+                  <i className={`ti ${showPw ? 'ti-eye-off' : 'ti-eye'}`} aria-hidden="true"></i>
                 </button>
               </div>
             </div>
-            <div className="flex items-center justify-end">
-              <Link href="/auth/reset-password" className="text-xs font-medium hover:underline" style={{ color: 'var(--green-500)' }}>Forgot password?</Link>
+            <div className="auth-remember-row">
+              <input type="checkbox" id="remember" />
+              <label htmlFor="remember">Keep me logged in for 30 days</label>
             </div>
-            <button type="submit" disabled={loading} className="btn-p w-full justify-center">
-              {loading ? 'Signing in...' : 'Sign in'}
+            <button type="submit" className="btn-p btn-full" disabled={loading}>
+              <i className="ti ti-arrow-right" aria-hidden="true"></i>
+              {loading ? 'Logging in\u2026' : 'Log in to my feed \u2192'}
             </button>
           </form>
-          <div className="mt-6 text-center text-xs" style={{ color: 'var(--base-500)' }}>
-            Don&apos;t have an account?{' '}
-            <Link href="/auth/signup" className="font-semibold hover:underline" style={{ color: 'var(--green-500)' }}>Sign up →</Link>
+
+          <div className="auth-divider"><hr /><span>or</span><hr /></div>
+
+          <button className="auth-btn-ghost-light" onClick={() => router.push('/auth/magic-link')}>
+            <i className="ti ti-mail" aria-hidden="true"></i>
+            Send me a magic link instead
+          </button>
+
+          <div className="auth-signup-nudge">
+            <p>Don&apos;t have an account?</p>
+            <Link href="/auth/signup" className="auth-cta-link">Start for free \u2192</Link>
           </div>
         </div>
-      </div>
-    </div>
+      </main>
+    </body>
   )
 }

@@ -17,7 +17,6 @@ export default function ResetPasswordPage() {
   const supabase = createClient()
 
   useEffect(() => {
-    // Check if user came from reset link (has access_token in URL)
     const hash = typeof window !== 'undefined' ? window.location.hash : ''
     if (hash.includes('access_token') || hash.includes('type=recovery')) {
       setStep('reset')
@@ -50,83 +49,177 @@ export default function ResetPasswordPage() {
     router.push('/auth/login')
   }
 
-  if (step === 'sent') {
-    return (
-      <div className="min-h-screen flex items-center justify-center px-4 py-12" style={{ background: 'var(--base-100)' }}>
-        <div className="w-full max-w-sm text-center animate-fade-in">
-          <div className="card p-8">
-            <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4 animate-scale-in" style={{ background: 'var(--green-100)' }}>
-              <i className="ti ti-mail text-xl" style={{ color: 'var(--green-600)' }} />
+  const sentPanel = () => (
+    <body className="auth-body">
+      <aside className="panel-left">
+        <div className="panel-bg" aria-hidden="true"></div>
+        <div className="panel-glow" aria-hidden="true"></div>
+        <div className="panel-content">
+          <div className="auth-logo">
+            <span className="auth-logo-mark"><span>LF</span></span>
+            <span className="auth-logo-name">LeadFlow</span>
+          </div>
+          <div className="panel-hero">
+            <div className="panel-eyebrow">Check your inbox</div>
+            <h2 className="panel-heading">We&apos;ve sent the link.<br />One click and you&apos;re back.</h2>
+            <p className="panel-sub">The reset link expires in 1 hour. If you don&apos;t see it, check your spam folder or try again.</p>
+          </div>
+          <div className="auth-testimonial">
+            <p>Best decision I made for my freelance business. The quality of leads is unmatched.</p>
+            <div className="auth-testimonial-author">
+              <div className="auth-author-av" aria-hidden="true">SM</div>
+              <div className="auth-author-info">
+                <div className="auth-author-name">Sarah M.</div>
+                <div className="auth-author-role">Freelance Copywriter · Manchester</div>
+              </div>
             </div>
-            <h1 className="text-xl font-bold" style={{ color: 'var(--base-900)' }}>Check your inbox</h1>
-            <p className="text-sm mt-2" style={{ color: 'var(--base-600)' }}>We sent a link to <strong>{email}</strong></p>
-            <p className="text-xs mt-6" style={{ color: 'var(--base-500)' }}>
-              Didn&apos;t receive it?{' '}
+          </div>
+        </div>
+      </aside>
+      <main className="panel-right">
+        <div className="auth-sent-card">
+          <div className="card">
+            <div className="auth-sent-icon">
+              <i className="ti ti-mail" aria-hidden="true"></i>
+            </div>
+            <h1>Check your inbox</h1>
+            <p>We sent a reset link to</p>
+            <p className="auth-sent-email">{email}</p>
+            <div className="auth-sent-actions">
               {countdown > 0 ? (
-                <span>Resend in {countdown}s</span>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '.78rem', color: 'var(--slate-500)' }}>Resend in {countdown}s</p>
               ) : (
-                <button onClick={handleSendEmail} className="font-medium hover:underline" style={{ color: 'var(--green-500)' }}>Resend email</button>
+                <button className="btn-p" onClick={handleSendEmail}>
+                  <i className="ti ti-arrow-right" aria-hidden="true"></i>
+                  Resend email
+                </button>
               )}
-            </p>
-            <Link href="/auth/login" className="btn-g mt-6 justify-center w-full">Back to sign in</Link>
+              <Link href="/auth/login" className="auth-cta-link">Back to sign in</Link>
+            </div>
           </div>
         </div>
-      </div>
-    )
-  }
+      </main>
+    </body>
+  )
 
-  if (step === 'reset') {
-    return (
-      <div className="min-h-screen flex items-center justify-center px-4 py-12" style={{ background: 'var(--base-100)' }}>
-        <div className="w-full max-w-sm animate-fade-in">
-          <div className="card p-8">
-            <h1 className="text-xl font-bold text-center" style={{ color: 'var(--base-900)' }}>Set new password</h1>
-            <p className="text-sm text-center mt-2" style={{ color: 'var(--base-600)' }}>Enter your new password below.</p>
-            <form onSubmit={handleReset} className="mt-6 space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--base-700)' }}>New password</label>
-                <input type="password" required minLength={6} value={password} onChange={e => setPassword(e.target.value)}
-                  className="input" placeholder="At least 6 characters" />
+  const resetPanel = () => (
+    <body className="auth-body">
+      <aside className="panel-left">
+        <div className="panel-bg" aria-hidden="true"></div>
+        <div className="panel-glow" aria-hidden="true"></div>
+        <div className="panel-content">
+          <div className="auth-logo">
+            <span className="auth-logo-mark"><span>LF</span></span>
+            <span className="auth-logo-name">LeadFlow</span>
+          </div>
+          <div className="panel-hero">
+            <div className="panel-eyebrow">Almost there</div>
+            <h2 className="panel-heading">Set your new password.<br />Then get back to winning.</h2>
+            <p className="panel-sub">Make it strong — you&apos;ll use this to access your lead feed from now on.</p>
+          </div>
+          <div className="auth-testimonial">
+            <p>Had a mini panic when I couldn&apos;t log in, but the reset took less than a minute. Solid experience.</p>
+            <div className="auth-testimonial-author">
+              <div className="auth-author-av" aria-hidden="true">TP</div>
+              <div className="auth-author-info">
+                <div className="auth-author-name">Tom P.</div>
+                <div className="auth-author-role">Freelance Developer · Bristol</div>
               </div>
-              <div>
-                <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--base-700)' }}>Confirm password</label>
-                <input type="password" required minLength={6} value={confirm} onChange={e => setConfirm(e.target.value)}
-                  className="input" placeholder="Repeat password" />
-              </div>
-              <button type="submit" disabled={loading} className="btn-p w-full justify-center">
-                {loading ? 'Updating...' : 'Update Password'}
-              </button>
-            </form>
+            </div>
           </div>
         </div>
-      </div>
-    )
-  }
-
-  return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-12" style={{ background: 'var(--base-100)' }}>
-      <div className="w-full max-w-sm animate-fade-in">
-        <div className="card p-8">
-          <div className="text-center mb-6">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-3" style={{ background: 'var(--green-600)' }}>
-              <span className="text-white text-sm font-bold">LF</span>
+      </aside>
+      <main className="panel-right">
+        <div className="auth-form-wrap">
+          <div className="auth-form-eyebrow">New password</div>
+          <h1>Set new password</h1>
+          <p className="auth-tagline">Enter your new password below.</p>
+          <form onSubmit={handleReset}>
+            <div className="auth-field">
+              <label htmlFor="password">New password</label>
+              <div className="auth-pw-field">
+                <input type="password" id="password" className="auth-input" placeholder="At least 6 characters" autoComplete="new-password" required minLength={6} value={password} onChange={e => setPassword(e.target.value)} />
+              </div>
             </div>
-            <h1 className="text-xl font-bold" style={{ color: 'var(--base-900)' }}>Reset your password</h1>
-            <p className="text-sm mt-1" style={{ color: 'var(--base-600)' }}>Enter your email and we'll send a reset link.</p>
-          </div>
-          <form onSubmit={handleSendEmail} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--base-700)' }}>Email</label>
-              <input type="email" required value={email} onChange={e => setEmail(e.target.value)}
-                className="input" placeholder="you@example.com" />
+            <div className="auth-field">
+              <label htmlFor="confirm">Confirm password</label>
+              <div className="auth-pw-field">
+                <input type="password" id="confirm" className="auth-input" placeholder="Repeat password" autoComplete="new-password" required minLength={6} value={confirm} onChange={e => setConfirm(e.target.value)} />
+              </div>
             </div>
-            <button type="submit" disabled={loading} className="btn-p w-full justify-center">
-              {loading ? 'Sending...' : 'Send Reset Link'}
+            <button type="submit" className="btn-p btn-full" disabled={loading}>
+              <i className="ti ti-arrow-right" aria-hidden="true"></i>
+              {loading ? 'Updating\u2026' : 'Update Password \u2192'}
             </button>
           </form>
-          <Link href="/auth/login" className="btn-g mt-4 justify-center w-full">Back to sign in</Link>
+          <div className="auth-signup-nudge">
+            <Link href="/auth/login" className="auth-cta-link">Back to sign in</Link>
+          </div>
         </div>
-      </div>
-    </div>
+      </main>
+    </body>
+  )
+
+  if (step === 'sent') return sentPanel()
+  if (step === 'reset') return resetPanel()
+
+  return (
+    <body className="auth-body">
+      <aside className="panel-left">
+        <div className="panel-bg" aria-hidden="true"></div>
+        <div className="panel-glow" aria-hidden="true"></div>
+        <div className="panel-content">
+          <div className="auth-logo">
+            <span className="auth-logo-mark"><span>LF</span></span>
+            <span className="auth-logo-name">LeadFlow</span>
+          </div>
+          <div className="panel-hero">
+            <div className="panel-eyebrow">Forgot your password?</div>
+            <h2 className="panel-heading">No problem.<br />We&apos;ll get you back in.</h2>
+            <p className="panel-sub">Enter the email you use for LeadFlow and we&apos;ll send a reset link. Takes 10 seconds.</p>
+            <div className="auth-stats-row">
+              <div className="auth-stat-item">
+                <span className="auth-stat-num"><span>2,400+</span></span>
+                <span className="auth-stat-label">Active freelancers</span>
+              </div>
+              <div className="auth-stat-item">
+                <span className="auth-stat-num"><span>98%</span></span>
+                <span className="auth-stat-label">Reset success rate</span>
+              </div>
+            </div>
+          </div>
+          <div className="auth-testimonial">
+            <p>Had a mini panic when I couldn&apos;t log in, but the reset took less than a minute. Solid experience.</p>
+            <div className="auth-testimonial-author">
+              <div className="auth-author-av" aria-hidden="true">TP</div>
+              <div className="auth-author-info">
+                <div className="auth-author-name">Tom P.</div>
+                <div className="auth-author-role">Freelance Developer · Bristol</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </aside>
+      <main className="panel-right">
+        <div className="auth-form-wrap">
+          <div className="auth-form-eyebrow">Reset password</div>
+          <h1>Find your account</h1>
+          <p className="auth-tagline">Enter your email and we&apos;ll send a reset link.</p>
+          <form onSubmit={handleSendEmail}>
+            <div className="auth-field">
+              <label htmlFor="email">Email</label>
+              <input type="email" id="email" className="auth-input" placeholder="alex@yoursite.co.uk" autoComplete="email" required value={email} onChange={e => setEmail(e.target.value)} />
+            </div>
+            <button type="submit" className="btn-p btn-full" disabled={loading}>
+              <i className="ti ti-arrow-right" aria-hidden="true"></i>
+              {loading ? 'Sending\u2026' : 'Send Reset Link \u2192'}
+            </button>
+          </form>
+          <div className="auth-signup-nudge">
+            <Link href="/auth/login" className="auth-cta-link">Back to sign in</Link>
+          </div>
+        </div>
+      </main>
+    </body>
   )
 }

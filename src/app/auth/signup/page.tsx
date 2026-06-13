@@ -6,55 +6,52 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase-client'
 import toast from 'react-hot-toast'
 
+const disciplineOptions = ['Design', 'Development', 'Writing', 'Marketing', 'Consulting', 'Finance', 'DevOps', 'Other']
+
 function scorePassword(pw: string) {
+  const len = pw.length
+  const hasUpper = /[A-Z]/.test(pw)
+  const hasNum = /[0-9]/.test(pw)
+  const hasSym = /[^A-Za-z0-9]/.test(pw)
   let score = 0
-  if (pw.length >= 6) score++
-  if (pw.length >= 10) score++
-  if (/[a-z]/.test(pw)) score++
-  if (/[A-Z]/.test(pw)) score++
-  if (/[0-9]/.test(pw)) score++
-  if (/[^a-zA-Z0-9]/.test(pw)) score++
+  if (len >= 8) score++
+  if (len >= 12) score++
+  if (hasNum || hasUpper) score++
+  if (hasSym) score++
   return score
 }
 
-const strengthLabels = ['Weak', 'Fair', 'Strong', 'Very strong']
-const strengthColors = ['#DC2626', '#E8A020', '#166B42', '#166B42']
-
-const roles = [
-  { id: 'developer', icon: 'ti-code', label: 'Developer' },
-  { id: 'designer', icon: 'ti-palette', label: 'Designer' },
-  { id: 'writer', icon: 'ti-edit', label: 'Writer' },
-  { id: 'marketer', icon: 'ti-trending-up', label: 'Marketer' },
-  { id: 'other', icon: 'ti-user', label: 'Other' },
-]
-
 export default function SignupPage() {
-  const [step, setStep] = useState(0)
-  const [role, setRole] = useState('')
-  const [fullName, setFullName] = useState('')
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [agreed, setAgreed] = useState(false)
+  const [disciplines, setDisciplines] = useState<string[]>([])
+  const [dayRate, setDayRate] = useState('')
   const [loading, setLoading] = useState(false)
   const router = useRouter()
   const supabase = createClient()
 
   const pwScore = scorePassword(password)
-  const pwLabel = strengthLabels[Math.min(pwScore, 3)]
-  const pwColor = strengthColors[Math.min(pwScore, 3)]
+
+  const toggleDiscipline = (d: string) => {
+    setDisciplines(prev => prev.includes(d) ? prev.filter(x => x !== d) : [...prev, d])
+  }
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!agreed) { toast.error('Please agree to the terms'); return }
     setLoading(true)
+    const fullName = `${firstName} ${lastName}`.trim()
     const { data, error } = await supabase.auth.signUp({
       email, password,
-      options: { data: { full_name: fullName, role } },
+      options: { data: { full_name: fullName, role: disciplines[0] || 'other' } },
     })
     if (error) { toast.error(error.message); setLoading(false); return }
     if (data.user) {
       await supabase.from('profiles').upsert({
-        id: data.user.id, email: data.user.email, full_name: fullName, subscription_status: 'free',
+        id: data.user.id, email: data.user.email, full_name: fullName,
+        skills: disciplines.map(d => d.toLowerCase()), hourly_rate: dayRate ? parseInt(dayRate) : null,
+        subscription_status: 'free',
       })
     }
     toast.success('Account created! Check your email for confirmation.')
@@ -62,119 +59,161 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen flex">
-      {/* Left panel */}
-      <div className="hidden lg:flex w-[40%] flex-col justify-between p-12" style={{ background: 'var(--green-900)' }}>
-        <div className="flex items-center gap-2 text-white text-sm font-bold">
-          <span className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-xs font-bold" style={{ background: 'var(--amber-500)' }}>LF</span>
-          LeadFlow
-        </div>
-        <div>
-          <div className="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold mb-4" style={{ background: 'var(--amber-500)' }}>MJ</div>
-          <p className="text-sm leading-relaxed text-white/80">&ldquo;Got my first client within 48 hours of signing up. The match scoring saved me from wasting time on bad leads.&rdquo;</p>
-          <p className="text-xs mt-3" style={{ color: 'var(--green-200)' }}>Marcus J. — Full-Stack Developer</p>
-        </div>
-      </div>
+    <body className="auth-body">
+      <aside className="panel-left">
+        <div className="panel-bg" aria-hidden="true"></div>
+        <div className="panel-glow" aria-hidden="true"></div>
+        <div className="panel-content">
+          <div className="auth-logo">
+            <span className="auth-logo-mark"><span>LF</span></span>
+            <span className="auth-logo-name">LeadFlow</span>
+          </div>
+          <div>
+            <div className="panel-eyebrow">AI-Scored Freelance Leads</div>
+            <h2 className="panel-heading">Stop searching.<br />Let the <span className="hl">right leads</span><br />find you.</h2>
+            <p className="panel-sub">We scan Reddit, Reed, We Work Remotely, and Remote OK every 6 hours — scoring every post against your skills before it reaches you.</p>
 
-      {/* Right panel */}
-      <div className="flex-1 flex items-center justify-center px-6 py-12">
-        <div className="w-full max-w-sm animate-fade-in">
-          <div className="text-center mb-8">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-4" style={{ background: 'var(--amber-500)' }}>
-              <span className="text-white text-sm font-bold">LF</span>
-            </div>
-            <h1 className="text-2xl font-bold tracking-tight" style={{ color: 'var(--base-900)' }}>
-              {step === 0 ? "What do you do?" : 'Create your account'}
-            </h1>
-            <p className="mt-1.5 text-sm" style={{ color: 'var(--base-600)' }}>
-              {step === 0 ? 'Pick your role to get started' : 'Start finding clients in minutes'}
-            </p>
-            {step > 0 && (
-              <div className="flex gap-1.5 mt-4 justify-center">
-                {[1,2,3].map(i => (
-                  <div key={i} className="w-6 h-1 rounded-full transition-all" style={{ background: i <= step ? 'var(--green-600)' : 'var(--base-300)' }} />
-                ))}
+            <div className="auth-mini-console" role="img" aria-label="Example of the live lead feed">
+              <div className="auth-mini-bar">
+                <span className="radar-mini" aria-hidden="true"></span>
+                <span className="auth-mini-bar-label">Your lead feed</span>
+                <span className="auth-mini-live"><span className="dot"></span> live</span>
               </div>
-            )}
+              <div className="auth-mini-signals">
+                <div className="auth-mini-signal" style={{ animationDelay: '.05s' }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ marginBottom: 4 }}><span className="auth-msig-src" style={{ background: 'rgba(255,140,66,.14)', color: '#ff9c5b' }}>REDDIT</span></div>
+                    <div className="auth-msig-title">Senior UX Designer — Fintech</div>
+                    <div className="auth-msig-meta">£350–450/day · Figma · IR35</div>
+                  </div>
+                  <div className="auth-msig-score score-a"><span className="v">9.1</span><span className="l">SCORE</span></div>
+                </div>
+                <div className="auth-mini-signal" style={{ animationDelay: '.18s' }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ marginBottom: 4 }}><span className="auth-msig-src" style={{ background: 'rgba(196,240,0,.16)', color: 'var(--lime)' }}>REMOTE OK</span></div>
+                    <div className="auth-msig-title">Full-Stack Dev — Remote UK</div>
+                    <div className="auth-msig-meta">£60–75k · React, Node · ASAP</div>
+                  </div>
+                  <div className="msig-score score-a"><span className="v">8.7</span><span className="l">SCORE</span></div>
+                </div>
+                <div className="auth-mini-signal" style={{ animationDelay: '.31s' }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ marginBottom: 4 }}><span className="auth-msig-src" style={{ background: 'rgba(176,138,219,.16)', color: '#c4a3ec' }}>REED</span></div>
+                    <div className="auth-msig-title">Brand Identity — 3-month</div>
+                    <div className="auth-msig-meta">£40k pro rata · Branding</div>
+                  </div>
+                  <div className="msig-score score-b"><span className="v">7.4</span><span className="l">SCORE</span></div>
+                </div>
+              </div>
+            </div>
+
+            <div className="auth-trust-badges">
+              <div className="auth-trust-item"><i className="ti ti-circle-check" aria-hidden="true"></i> No card required — free forever plan available</div>
+              <div className="auth-trust-item"><i className="ti ti-circle-check" aria-hidden="true"></i> First leads delivered within 1 hour of setup</div>
+              <div className="auth-trust-item"><i className="ti ti-circle-check" aria-hidden="true"></i> You apply on the original platform — zero commission</div>
+            </div>
           </div>
 
-          {step === 0 && (
-            <div className="space-y-2.5">
-              {roles.map(r => (
-                <button key={r.id} onClick={() => { setRole(r.id); setStep(1) }}
-                  className="w-full flex items-center gap-3 p-3.5 rounded-xl border-2 text-left transition-all duration-150 cursor-pointer hover:border-[var(--green-300)] hover:bg-[var(--green-50)] active:scale-[0.98] active:border-[var(--green-600)]"
-                  style={{ borderColor: role === r.id ? 'var(--green-500)' : 'var(--base-300)', background: role === r.id ? 'var(--green-50)' : 'white' }}>
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center text-base transition-colors" style={{ background: role === r.id ? 'var(--green-600)' : 'var(--green-100)', color: role === r.id ? 'white' : 'var(--green-600)' }}>
-                    <i className={`ti ${r.icon}`} />
-                  </div>
-                  <div className="flex-1">
-                    <span className="text-sm font-semibold" style={{ color: 'var(--base-900)' }}>{r.label}</span>
-                  </div>
-                  <i className="ti ti-chevron-right text-base" style={{ color: role === r.id ? 'var(--green-600)' : 'var(--base-400)' }} />
-                </button>
-              ))}
-              <p className="text-center text-sm mt-4">
-                <Link href="/auth/login" className="font-medium hover:underline" style={{ color: 'var(--green-600)' }}>
-                  Already have an account? Sign in
-                </Link>
-              </p>
+          <div className="auth-social-proof">
+            <div className="auth-avatar-stack" aria-hidden="true">
+              <div className="avatar" style={{ background: 'var(--lime)' }}>JK</div>
+              <div className="avatar" style={{ background: 'var(--amber)' }}>SM</div>
+              <div className="avatar" style={{ background: '#7fb6e6' }}>AR</div>
+              <div className="avatar" style={{ background: '#c4a3ec' }}>PL</div>
             </div>
-          )}
-
-          {step > 0 && (
-            <form onSubmit={handleSignup} className="space-y-4">
-              {step === 1 && (
-                <div className="space-y-1">
-                  <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--base-700)' }}>Full name</label>
-                  <input type="text" required value={fullName} onChange={e => setFullName(e.target.value)}
-                    className="input" placeholder="Your name" autoFocus />
-                  <button type="button" onClick={() => setStep(2)} disabled={!fullName.trim()} className="btn-p w-full justify-center mt-4 hover:translate-y-[-1px]">
-                    Next <i className="ti ti-arrow-right" />
-                  </button>
-                </div>
-              )}
-              {step === 2 && (
-                <div className="space-y-1">
-                  <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--base-700)' }}>Email</label>
-                  <input type="email" required value={email} onChange={e => setEmail(e.target.value)}
-                    className="input" placeholder="you@example.com" autoFocus />
-                  <button type="button" onClick={() => setStep(3)} disabled={!email.trim()} className="btn-p w-full justify-center mt-4 hover:translate-y-[-1px]">
-                    Next <i className="ti ti-arrow-right" />
-                  </button>
-                </div>
-              )}
-              {step === 3 && (
-                <>
-                  <div>
-                    <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--base-700)' }}>Password</label>
-                    <input type="password" required minLength={6} value={password} onChange={e => setPassword(e.target.value)}
-                      className="input" placeholder="At least 6 characters" autoFocus />
-                    {password && (
-                      <div className="mt-2">
-                        <div className="flex gap-1 mb-1">
-                          {[0,1,2,3].map(i => (
-                            <div key={i} className="flex-1 h-1 rounded-full transition-all" style={{ background: i <= pwScore ? pwColor : 'var(--base-300)' }} />
-                          ))}
-                        </div>
-                        <div className="text-xs" style={{ color: pwColor }}>{pwLabel}</div>
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <input type="checkbox" checked={agreed} onChange={e => setAgreed(e.target.checked)}
-                      className="mt-0.5 w-4 h-4 rounded border-gray-300" style={{ accentColor: 'var(--green-600)' }} />
-                    <label className="text-xs" style={{ color: 'var(--base-600)' }}>I agree to the <a href="#" className="underline">Terms</a> and <a href="#" className="underline">Privacy Policy</a></label>
-                  </div>
-                  <button type="submit" disabled={loading} className="btn-p w-full justify-center">
-                    {loading ? 'Creating account...' : 'Create account'}
-                  </button>
-                  <button type="button" onClick={() => setStep(2)} className="btn-g w-full justify-center text-xs">Back</button>
-                </>
-              )}
-            </form>
-          )}
+            <div className="auth-proof-text">
+              <strong>340+ UK freelancers</strong>
+              Finding better work, faster
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
+      </aside>
+
+      <main className="panel-right">
+        <div className="auth-form-wrap">
+          <div className="auth-form-eyebrow">Create your account</div>
+          <h1>Get started free</h1>
+          <p className="auth-tagline">Set up in 2 minutes. First leads within the hour.</p>
+
+          <div className="auth-trial-strip" role="note">
+            <i className="ti ti-gift" aria-hidden="true"></i>
+            <p><strong>7-day Pro trial included.</strong> Unlimited leads, skill filtering, daily digest. No card needed — ever.</p>
+          </div>
+
+          <div className="auth-step-row" aria-label="Step 1 of 2: Account details">
+            <span className="auth-step-dot" aria-hidden="true"></span>
+            <span className="auth-step-dot inactive" aria-hidden="true"></span>
+            <span className="auth-step-label">Step 1 of 2 · Account details</span>
+          </div>
+
+          <form onSubmit={handleSignup}>
+            <div className="auth-field-row">
+              <div className="auth-field">
+                <label htmlFor="first-name">First name</label>
+                <input type="text" id="first-name" className="auth-input" placeholder="Alex" autoComplete="given-name" required value={firstName} onChange={e => setFirstName(e.target.value)} />
+              </div>
+              <div className="auth-field">
+                <label htmlFor="last-name">Last name</label>
+                <input type="text" id="last-name" className="auth-input" placeholder="Morgan" autoComplete="family-name" required value={lastName} onChange={e => setLastName(e.target.value)} />
+              </div>
+            </div>
+
+            <div className="auth-field">
+              <label htmlFor="email">Work email</label>
+              <input type="email" id="email" className="auth-input" placeholder="alex@yoursite.co.uk" autoComplete="email" required value={email} onChange={e => setEmail(e.target.value)} />
+            </div>
+
+            <div className="auth-field">
+              <label htmlFor="password">Password</label>
+              <div className="auth-pw-field">
+                <input type="password" id="password" className="auth-input" placeholder="8+ characters" autoComplete="new-password" required minLength={8} value={password} onChange={e => setPassword(e.target.value)} />
+              </div>
+              <div className="auth-pw-strength" aria-hidden="true">
+                {[0, 1, 2, 3].map(i => (
+                  <div key={i} className={`auth-pw-bar${i < pwScore ? (pwScore <= 1 ? ' weak' : pwScore <= 2 ? ' medium' : ' strong') : ''}`}></div>
+                ))}
+              </div>
+              <div className="auth-field-hint" id="pw-hint">
+                {pwScore === 0 && 'Use 8+ characters for a stronger password'}
+                {pwScore === 1 && 'Weak \u2014 try adding numbers or symbols'}
+                {pwScore === 2 && 'OK \u2014 a little longer or more variety helps'}
+                {pwScore === 3 && 'Good password'}
+                {pwScore >= 4 && 'Strong password \u2713'}
+              </div>
+            </div>
+
+            <div className="auth-field">
+              <label>What do you do? <span style={{ fontWeight: 400, color: 'var(--slate-500)' }}>(pick all that apply)</span></label>
+              <div className="auth-skills-grid" role="group" aria-label="Select your disciplines">
+                {disciplineOptions.map(d => (
+                  <button key={d} type="button" className={`auth-skill-pill${disciplines.includes(d) ? ' selected' : ''}`} onClick={() => toggleDiscipline(d)}>{d}</button>
+                ))}
+              </div>
+              <div className="auth-field-hint">These power your AI score \u2014 leads are ranked against your discipline</div>
+            </div>
+
+            <div className="auth-field">
+              <label htmlFor="day-rate">Your day rate (optional)</label>
+              <div className="auth-input-prefix">
+                <span className="auth-prefix-symbol">\u00A3</span>
+                <input type="text" id="day-rate" className="auth-input" placeholder="350" inputMode="numeric" value={dayRate} onChange={e => setDayRate(e.target.value)} />
+              </div>
+              <div className="auth-field-hint">Used to filter out leads below your rate. Skip if you&apos;re flexible.</div>
+            </div>
+
+            <button type="submit" className="btn-p btn-full" disabled={loading}>
+              <i className="ti ti-arrow-right" aria-hidden="true"></i>
+              {loading ? 'Creating account\u2026' : 'Create my account \u2192'}
+            </button>
+
+            <p className="auth-legal">
+              By continuing you agree to our <a href="/terms">Terms of Service</a> and <a href="/privacy">Privacy Policy</a>. No card needed. Cancel any time.
+            </p>
+          </form>
+
+          <div className="auth-login-link">Already have an account? <Link href="/auth/login">Log in \u2192</Link></div>
+        </div>
+      </main>
+    </body>
   )
 }
