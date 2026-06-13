@@ -88,20 +88,20 @@ export default function OnboardingPage() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { router.push('/auth/login'); return }
 
-    const { error } = await supabase.from('profiles').upsert({
-      id: user.id,
-      email: user.email,
-      full_name: fullName,
-      disciplines,
-      skills,
-      hourly_rate: rate,
-      experience_level: exp || null,
-      availability: avail || null,
-      timezone: tz || null,
-      onboarding_completed: true,
-      subscription_status: 'free',
+    const res = await fetch('/api/onboarding', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        full_name: fullName,
+        disciplines,
+        skills,
+        hourly_rate: rate,
+        experience_level: exp || null,
+        availability: avail || null,
+        timezone: tz || null,
+      }),
     })
-    if (error) { toast.error(error.message); setSaving(false); return }
+    if (!res.ok) { const j = await res.json(); toast.error(j.error || 'Failed to save'); setSaving(false); return }
 
     // Instant win: pull active leads and score them against the new profile
     const { data: leadsData } = await supabase
