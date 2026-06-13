@@ -27,7 +27,7 @@ export default function LoginPage() {
   }
 
   return (
-    <body className="auth-body">
+    <div className="auth-body">
       <aside className="panel-left">
         <div className="panel-bg" aria-hidden="true"></div>
         <div className="panel-glow" aria-hidden="true"></div>
@@ -137,6 +137,6 @@ export default function LoginPage() {
           </div>
         </div>
       </main>
-    </body>
+    </div>
   )
 }

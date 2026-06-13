@@ -50,7 +50,7 @@ export default function ResetPasswordPage() {
   }
 
   const sentPanel = () => (
-    <body className="auth-body">
+    <div className="auth-body">
       <aside className="panel-left">
         <div className="panel-bg" aria-hidden="true"></div>
         <div className="panel-glow" aria-hidden="true"></div>
@@ -99,11 +99,11 @@ export default function ResetPasswordPage() {
           </div>
         </div>
       </main>
-    </body>
+    </div>
   )
 
   const resetPanel = () => (
-    <body className="auth-body">
+    <div className="auth-body">
       <aside className="panel-left">
         <div className="panel-bg" aria-hidden="true"></div>
         <div className="panel-glow" aria-hidden="true"></div>
@@ -157,14 +157,14 @@ export default function ResetPasswordPage() {
           </div>
         </div>
       </main>
-    </body>
+    </div>
   )
 
   if (step === 'sent') return sentPanel()
   if (step === 'reset') return resetPanel()
 
   return (
-    <body className="auth-body">
+    <div className="auth-body">
       <aside className="panel-left">
         <div className="panel-bg" aria-hidden="true"></div>
         <div className="panel-glow" aria-hidden="true"></div>
@@ -220,6 +220,6 @@ export default function ResetPasswordPage() {
           </div>
         </div>
       </main>
-    </body>
+    </div>
   )
 }

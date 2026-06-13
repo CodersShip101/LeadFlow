@@ -154,7 +154,9 @@ export default function HomePage() {
   useEffect(() => {
     const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches
     if (reduced) return
-    const interval = setInterval(() => {
+    const burstTimers: number[] = []
+    let count = 0
+    const rotate = () => {
       if (document.hidden) return
       const d = incomingDashboard[dbRef.current % incomingDashboard.length]
       dbRef.current++
@@ -164,8 +166,15 @@ export default function HomePage() {
         next.unshift(d)
         return next
       })
-    }, 4500)
-    return () => clearInterval(interval)
+      count++
+      if (count < 3) burstTimers.push(window.setTimeout(rotate, 800))
+    }
+    burstTimers.push(window.setTimeout(rotate, 800))
+    const interval = window.setInterval(rotate, 4500)
+    return () => {
+      burstTimers.forEach(window.clearTimeout)
+      window.clearInterval(interval)
+    }
   }, [])
 
   return (

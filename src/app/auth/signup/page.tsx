@@ -59,7 +59,7 @@ export default function SignupPage() {
   }
 
   return (
-    <body className="auth-body">
+    <div className="auth-body">
       <aside className="panel-left">
         <div className="panel-bg" aria-hidden="true"></div>
         <div className="panel-glow" aria-hidden="true"></div>
@@ -94,7 +94,7 @@ export default function SignupPage() {
                     <div className="auth-msig-title">Full-Stack Dev — Remote UK</div>
                     <div className="auth-msig-meta">£60–75k · React, Node · ASAP</div>
                   </div>
-                  <div className="msig-score score-a"><span className="v">8.7</span><span className="l">SCORE</span></div>
+                  <div className="auth-msig-score score-a"><span className="v">8.7</span><span className="l">SCORE</span></div>
                 </div>
                 <div className="auth-mini-signal" style={{ animationDelay: '.31s' }}>
                   <div style={{ flex: 1, minWidth: 0 }}>
@@ -102,7 +102,7 @@ export default function SignupPage() {
                     <div className="auth-msig-title">Brand Identity — 3-month</div>
                     <div className="auth-msig-meta">£40k pro rata · Branding</div>
                   </div>
-                  <div className="msig-score score-b"><span className="v">7.4</span><span className="l">SCORE</span></div>
+                  <div className="auth-msig-score score-b"><span className="v">7.4</span><span className="l">SCORE</span></div>
                 </div>
               </div>
             </div>
@@ -214,6 +214,6 @@ export default function SignupPage() {
           <div className="auth-login-link">Already have an account? <Link href="/auth/login">Log in \u2192</Link></div>
         </div>
       </main>
-    </body>
+    </div>
   )
 }
