@@ -1,678 +1,637 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
+import Script from 'next/script'
 
-const faqs = [
-  { q: 'How does LeadFlow find leads?', a: 'We scan Reddit (r/forhire, r/freelance, r/hiring), Reed.co.uk, and We Work Remotely every 6 hours. Every lead is then processed by our AI scoring model before appearing in your feed.' },
-  { q: 'How does the quality score work?', a: 'Scores are based on budget clarity, scope specificity, response rate signals, and how well the lead matches your profile. A 9+ lead typically has a clear brief, a stated budget, and a hiring decision within two weeks.' },
-  { q: 'Can I apply directly, or does LeadFlow intermediate?', a: 'We never intermediate. Every lead includes a direct link to the original post. You apply on the client\'s terms, on their platform.' },
-  { q: 'How is this different from job boards?', a: 'Job boards surface everything. LeadFlow only surfaces what matches your profile, with quality scores so you can prioritise. Ten minutes on the best leads instead of an hour trawling noise.' },
-  { q: 'What happens when my trial ends?', a: 'You move to the Free plan (3 leads/week) unless you upgrade. We\'ll remind you 48 hours before. No card required to start.' },
-  { q: 'Can I cancel at any time?', a: 'Always. Cancel from your account settings at any time. You keep access until the end of your billing period. No fees, no friction.' },
-  { q: 'What kinds of freelancers does LeadFlow work for?', a: 'Design, development, copywriting, marketing, and consulting. Our scoring model is tuned specifically for UK and remote freelance markets.' },
-  { q: 'Is my profile data shared with clients?', a: 'Never. Your profile is used only to filter and score leads. Clients on other platforms cannot see your LeadFlow profile.' },
+const incomingSignals = [
+  { src: 'REDDIT', c: 'rgba(255,140,66,.14)', t: '#ff9c5b', title: 'Content Strategist — B2B SaaS, Remote', meta: '£350/day · Notion, Writing · 2-month', score: '8.5', cls: 'score-a' },
+  { src: 'WWR', c: 'rgba(110,168,212,.16)', t: '#7fb6e6', title: 'Shopify Developer — E-commerce', meta: '£45–55k · Liquid, JS · Ongoing', score: '7.8', cls: 'score-b' },
+  { src: 'REED', c: 'rgba(176,138,219,.16)', t: '#c4a3ec', title: 'Motion Designer — Ad Agency', meta: '£300–380/day · After Effects · IR35', score: '9.0', cls: 'score-a' },
+  { src: 'REMOTE OK', c: 'rgba(196,240,0,.16)', t: 'var(--lime)', title: 'UI Designer — Healthtech Startup', meta: '£400/day · Figma · 6-week sprint', score: '9.3', cls: 'score-a' },
 ]
 
-export default function LandingPage() {
-  const [menuOpen, setMenuOpen] = useState(false)
+const initialSignals = [
+  { src: 'REDDIT', c: 'rgba(255,140,66,.14)', t: '#ff9c5b', title: 'Senior UX Designer — London (Fintech)', meta: '£350–450/day · Figma · Inside IR35', score: '9.1', cls: 'score-a' },
+  { src: 'WWR', c: 'rgba(110,168,212,.16)', t: '#7fb6e6', title: 'Full-Stack Developer — Remote UK', meta: '£60–75k · React, Node · ASAP', score: '8.7', cls: 'score-a' },
+  { src: 'REED', c: 'rgba(176,138,219,.16)', t: '#c4a3ec', title: 'Brand Identity — 3-month contract', meta: '£40k pro rata · Branding', score: '7.4', cls: 'score-b' },
+  { src: 'REMOTE OK', c: 'rgba(196,240,0,.16)', t: 'var(--lime)', title: 'DevOps Engineer — Full-time Remote', meta: '£70–90k · AWS, Terraform, K8s', score: '8.9', cls: 'score-a' },
+]
+
+const faqData = [
+  { q: 'Where does LeadFlow find leads?', a: 'We continuously monitor Reddit (r/forhire, r/freelance, r/hiring), Reed.co.uk, and We Work Remotely. Everything is scored by our AI model before it reaches your feed — so you only see what\'s worth your time.' },
+  { q: 'What does the 1–10 score mean?', a: 'The score weighs budget clarity, scope detail, response-rate signals, and how well a lead matches your profile. A 9+ usually has a clear brief, a stated budget, and a hiring decision within two weeks.' },
+  { q: 'Do you take a cut of my contract?', a: 'Never. Every lead links straight to the original post. You apply on the client\'s terms, on the original platform. No middleman, no markup, no commission.' },
+  { q: 'How is this different from a job board?', a: 'Job boards show you everything. LeadFlow shows you only what fits your profile, ranked by score, so you act on the best leads in minutes instead of searching for an hour.' },
+  { q: 'What happens when my trial ends?', a: 'You move to the free plan unless you upgrade. We remind you 48 hours before. No card is required to start.' },
+  { q: 'Can I cancel whenever I want?', a: 'Yes. Cancel from settings anytime and keep access until your billing period ends. No fees, no friction.' },
+  { q: 'Which freelancers is this built for?', a: 'Designers, developers, writers, marketers and consultants. The scoring model is tuned for UK and remote markets.' },
+  { q: 'Is my profile shared with clients?', a: 'No. Your profile only powers filtering and scoring. Clients never see your LeadFlow profile.' },
+]
+
+function SignalCard({ s, flash }: { s: typeof initialSignals[0], flash?: boolean }) {
+  return (
+    <div className={`signal${flash ? ' flash' : ''}`}>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ marginBottom: 5 }}><span className="sig-src" style={{ background: s.c, color: s.t }}>{s.src}</span></div>
+        <div className="sig-title">{s.title}</div>
+        <div className="sig-meta">{s.meta}</div>
+      </div>
+      <div className={`sig-score ${s.cls}`}><span className="v">{s.score}</span><span className="l">SCORE</span></div>
+    </div>
+  )
+}
+
+function Sparkline() {
+  return (
+    <svg width="100%" height="38" viewBox="0 0 156 38" fill="none" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="spark" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#C4F000" stopOpacity="0.28" />
+          <stop offset="100%" stopColor="#C4F000" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <path d="M0,32 C11,28 19,30 33,24 C48,18 56,22 78,15 C100,8 108,11 122,6 C138,2 146,4 156,2 L156,38 L0,38 Z" fill="url(#spark)" />
+      <path d="M0,32 C11,28 19,30 33,24 C48,18 56,22 78,15 C100,8 108,11 122,6 C138,2 146,4 156,2" stroke="#C4F000" strokeWidth="1.8" fill="none" strokeLinecap="round" />
+      <circle cx="156" cy="2" r="3" fill="#C4F000" />
+    </svg>
+  )
+}
+
+function Chevron() {
+  return (
+    <svg className="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
+      <path d="M6 9l6 6 6-6" />
+    </svg>
+  )
+}
+
+function CheckIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true">
+      <rect x="0.5" y="0.5" width="21" height="21" rx="7" fill="rgba(196,240,0,.16)" />
+      <path d="M7 11l3 3 5-5" stroke="#C4F000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+function FaqCheck() {
+  return (
+    <li className="pf"><i className="ti ti-check" aria-hidden="true"></i></li>
+  )
+}
+
+export default function HomePage() {
+  const [scrolled, setScrolled] = useState(false)
+  const [mobileOpen, setMobileOpen] = useState(false)
+  const [signals, setSignals] = useState(initialSignals)
+  const [paused, setPaused] = useState(false)
   const [annual, setAnnual] = useState(false)
-  const [activeStep, setActiveStep] = useState(0)
-  const [showSticky, setShowSticky] = useState(false)
   const [openFaq, setOpenFaq] = useState<number | null>(null)
+  const [stickyVisible, setStickyVisible] = useState(false)
+  const fiRef = useRef(0)
+  const obsRef = useRef<IntersectionObserver | null>(null)
 
   useEffect(() => {
-    const onScroll = () => setShowSticky(window.scrollY > 500)
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
+    const onScroll = () => {
+      setScrolled(window.scrollY > 20)
+      setStickyVisible(window.scrollY > 620)
+    }
+    addEventListener('scroll', onScroll, { passive: true })
+    return () => removeEventListener('scroll', onScroll)
   }, [])
 
   useEffect(() => {
-    const io = new IntersectionObserver(entries => {
-      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible') })
-    }, { threshold: 0.08 })
-    document.querySelectorAll('.reveal').forEach(el => io.observe(el))
-    return () => io.disconnect()
+    obsRef.current = new IntersectionObserver(
+      (entries) => {
+        entries.forEach(e => {
+          if (e.isIntersecting) {
+            e.target.classList.add('visible')
+            obsRef.current?.unobserve(e.target)
+          }
+        })
+      },
+      { threshold: 0.08, rootMargin: '0px 0px -40px 0px' }
+    )
+    document.querySelectorAll('.sr').forEach(el => obsRef.current?.observe(el))
+    return () => obsRef.current?.disconnect()
   }, [])
+
+  useEffect(() => {
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (reduced) return
+    const interval = setInterval(() => {
+      if (paused || document.hidden) return
+      const d = incomingSignals[fiRef.current % incomingSignals.length]
+      fiRef.current++
+      setSignals(prev => {
+        const next = [...prev]
+        next.pop()
+        next.unshift(d)
+        return next
+      })
+    }, 4200)
+    return () => clearInterval(interval)
+  }, [paused])
 
   return (
     <>
-      {/* ── NAV ── */}
-      <nav style={{
-        position: 'sticky', top: 0, zIndex: 100, height: '58px',
-        display: 'flex', alignItems: 'center',
-        borderBottom: '1px solid var(--border)',
-        background: 'rgba(13,15,20,0.88)',
-        backdropFilter: 'blur(16px)',
-        WebkitBackdropFilter: 'blur(16px)',
-      }}>
-        <div style={{ width: '100%', maxWidth: '1140px', margin: '0 auto', padding: '0 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none', color: 'var(--cream)', fontSize: '15px', fontWeight: 600, letterSpacing: '-0.01em' }}>
-            <div style={{ width: '28px', height: '28px', background: 'var(--amber)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 700, color: 'var(--ink)', fontFamily: 'var(--font-mono)' }}>LF</div>
-            LeadFlow
-          </Link>
-          <ul style={{ display: 'flex', alignItems: 'center', gap: '2px', listStyle: 'none', margin: 0 }}>
-            {['How it works', 'Features', 'Pricing'].map(item => (
-              <li key={item}>
-                <a href={`#${item.toLowerCase().replace(/\s+/g, '-')}`}
-                  style={{ color: 'var(--slate)', textDecoration: 'none', fontSize: '13.5px', fontWeight: 500, padding: '6px 14px', borderRadius: '4px', transition: 'color 0.15s, background 0.15s' }}
-                  className="hover-target">{item}</a>
-              </li>
-            ))}
-          </ul>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Link href="/auth/login" className="btn-ghost-sm">Log in</Link>
-            <Link href="/auth/signup" className="btn-amber">Start free trial →</Link>
-          </div>
-          <button onClick={() => setMenuOpen(!menuOpen)} aria-label="Open menu" aria-expanded={menuOpen}
-            style={{ display: 'none', background: 'none', border: 'none', color: 'var(--slate)', cursor: 'pointer', padding: '6px' }}
-            className="md-hamburger">
-            <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
-              <line x1="4" y1="7" x2="20" y2="7" /><line x1="4" y1="12" x2="20" y2="12" /><line x1="4" y1="17" x2="20" y2="17" />
-            </svg>
-          </button>
-        </div>
-      </nav>
-      {menuOpen && (
-        <div style={{ display: 'none', background: 'var(--ink-2)', borderBottom: '1px solid var(--border)', padding: '16px 32px 20px', flexDirection: 'column', gap: '4px' }} className="md-mobile-menu">
-          {['How it works', 'Features', 'Pricing'].map(item => (
-            <a key={item} href={`#${item.toLowerCase().replace(/\s+/g, '-')}`} onClick={() => setMenuOpen(false)}
-              style={{ color: 'var(--slate)', textDecoration: 'none', fontSize: '14px', fontWeight: 500, padding: '10px 0', borderBottom: '1px solid var(--border)' }}>{item}</a>
-          ))}
-          <Link href="/auth/login" style={{ color: 'var(--slate)', textDecoration: 'none', fontSize: '14px', fontWeight: 500, padding: '10px 0', borderBottom: '1px solid var(--border)' }} onClick={() => setMenuOpen(false)}>Log in</Link>
-          <Link href="/auth/signup" style={{ color: 'var(--amber)', textDecoration: 'none', fontSize: '14px', fontWeight: 500, padding: '10px 0' }} onClick={() => setMenuOpen(false)}>Start free trial →</Link>
-        </div>
-      )}
+      <Script id="ld-json-app" type="application/ld+json" dangerouslySetInnerHTML={{
+        __html: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "SoftwareApplication",
+          "name": "LeadFlow",
+          "applicationCategory": "BusinessApplication",
+          "operatingSystem": "Web",
+          "description": "LeadFlow finds and scores freelance leads, then delivers the best matches to your inbox every 6 hours.",
+          "url": "https://lead-flow-gpyj.vercel.app/",
+          "offers": [
+            { "@type": "Offer", "name": "Free", "price": "0", "priceCurrency": "GBP" },
+            { "@type": "Offer", "name": "Pro", "price": "29", "priceCurrency": "GBP", "description": "Per month. 7-day free trial, no card required." }
+          ],
+          "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.9", "ratingCount": "87" }
+        })
+      }} />
+      <Script id="ld-json-faq" type="application/ld+json" dangerouslySetInnerHTML={{
+        __html: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          "mainEntity": faqData.map(f => ({
+            "@type": "Question",
+            "name": f.q,
+            "acceptedAnswer": { "@type": "Answer", "text": f.a }
+          }))
+        })
+      }} />
 
-      {/* ── HERO ── */}
-      <section style={{ position: 'relative', padding: '120px 0 100px', overflow: 'hidden', borderBottom: '1px solid var(--border)' }}>
-        <div style={{ position: 'absolute', top: '-200px', right: '-100px', width: '600px', height: '600px', background: 'radial-gradient(ellipse, rgba(245,166,35,0.07) 0%, transparent 65%)', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px)', backgroundSize: '28px 28px', pointerEvents: 'none' }} />
-        <div className="noise-overlay" style={{ position: 'relative', zIndex: 1, maxWidth: '1140px', margin: '0 auto', padding: '0 32px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '80px', alignItems: 'center' }}>
-          <div>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'var(--amber-pale)', border: '1px solid rgba(245,166,35,0.20)', borderRadius: '100px', padding: '5px 14px 5px 8px', fontSize: '11.5px', fontFamily: 'var(--font-mono)', color: 'var(--amber)', letterSpacing: '0.04em', textTransform: 'uppercase', marginBottom: '28px' }}>
-              <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--amber)', animation: 'pulse 2s infinite' }} />
-              340 UK freelancers already inside · beta
+      {/* ═══ NAVBAR ═══ */}
+      <header>
+        <nav id="navbar" className={scrolled ? 'scrolled' : ''} aria-label="Main navigation">
+          <div className="nav-inner">
+            <Link href="/" className="nav-logo" aria-label="LeadFlow home">
+              <span className="nav-logo-mark"><span>LF</span></span>
+              LeadFlow
+            </Link>
+            <div className="nav-desktop" style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
+              <a href="#how" className="nav-link">How it works</a>
+              <a href="#features" className="nav-link">Features</a>
+              <a href="#pricing" className="nav-link">Pricing</a>
+              <a href="#faq" className="nav-link">FAQ</a>
             </div>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(44px, 5.5vw, 74px)', fontWeight: 900, lineHeight: 1.02, letterSpacing: '-0.03em', color: 'var(--cream)', marginBottom: '24px' }}>
-              Stop trawling.<br />Start choosing<br /><em style={{ fontStyle: 'italic', color: 'var(--amber)' }}>the right work.</em>
-            </h1>
-            <p style={{ fontSize: '17px', lineHeight: 1.65, color: 'var(--slate)', marginBottom: '40px', maxWidth: '400px' }}>
-              You're a UK freelancer. You shouldn't be spending hours digging through job boards hoping something decent shows up. LeadFlow delivers pre-scored leads matched to your skills and rate — every 6 hours, while you're busy doing actual work.
-            </p>
-            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '36px' }}>
-              <Link href="/auth/signup" className="btn-primary">Start my free trial →</Link>
-              <a href="#how-it-works" className="btn-secondary">
-                <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21" /></svg>
-                See how it works
-              </a>
+            <div className="nav-desktop" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <Link href="/auth/login" className="nav-link">Log in</Link>
+              <Link href="/auth/signup" className="btn-p btn-sm">Start free</Link>
             </div>
-            <div style={{ fontSize: '12px', fontFamily: 'var(--font-mono)', color: 'var(--slate-2)', marginBottom: '20px', letterSpacing: '0.04em' }}>Set up in 2 minutes · No card required · First leads in under an hour</div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap' }}>
-              {[
-                { text: '3 leads on the free plan, always' },
-                { text: 'We remind you before any charge' },
-                { text: 'Cancel in one click, anytime' },
-              ].map((t, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '7px', fontSize: '13px', color: 'var(--slate-2)' }}>
-                  <div style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(61,219,122,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <svg width="9" height="9" fill="none" viewBox="0 0 12 12"><path d="M2 6l3 3 5-5" stroke="#3DDB7A" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                  </div>
-                  {t.text}
+            <button id="hamburger" aria-label="Toggle menu" aria-expanded={mobileOpen} onClick={() => setMobileOpen(!mobileOpen)}>
+              <i className="ti ti-menu-2" style={{ fontSize: '22px' }} aria-hidden="true"></i>
+            </button>
+          </div>
+          <div id="mobile-menu" className={mobileOpen ? 'open' : ''} role="menu">
+            <a href="#how" onClick={() => setMobileOpen(false)}>How it works</a>
+            <a href="#features" onClick={() => setMobileOpen(false)}>Features</a>
+            <a href="#pricing" onClick={() => setMobileOpen(false)}>Pricing</a>
+            <a href="#faq" onClick={() => setMobileOpen(false)}>FAQ</a>
+            <div style={{ height: '1px', background: 'rgba(255,255,255,.08)', margin: '6px 0' }}></div>
+            <Link href="/auth/login" onClick={() => setMobileOpen(false)}>Log in</Link>
+            <Link href="/auth/signup" onClick={() => setMobileOpen(false)} style={{ background: 'var(--lime)', color: 'var(--ink-950)', fontWeight: 700, textAlign: 'center' }}>Start free →</Link>
+          </div>
+        </nav>
+      </header>
+
+      <main>
+        {/* ═══ HERO ═══ */}
+        <section className="hero" aria-label="Hero">
+          <div className="hero-bg" aria-hidden="true"></div>
+          <div className="hero-glow" aria-hidden="true"></div>
+          <div className="container">
+            <div className="hero-grid">
+              <div className="sr">
+                <div className="tag tag-onink tag-bracket" style={{ marginBottom: 24 }}>
+                  <span style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--lime)', animation: 'pingDot 2s infinite', display: 'inline-block' }}></span>
+                  Trusted by 340+ UK freelancers
                 </div>
+                <h1 className="display">
+                  Stop searching for work.<br />
+                  Let the <span className="hl">right leads</span> find you.
+                </h1>
+                <p className="hero-sub">
+                  LeadFlow finds freelance opportunities across Reddit, Reed and We Work Remotely, scores each one against your skills and rate, and delivers the best matches to your inbox every 6 hours.
+                </p>
+                <div className="hero-cta-row">
+                  <Link href="/auth/signup" className="btn-p btn-lg">Get started free →</Link>
+                  <a href="#how" className="btn-ghost btn-lg"><i className="ti ti-player-play" style={{ fontSize: 16 }} aria-hidden="true"></i> See how it works</a>
+                </div>
+                <ul className="hero-trust" aria-label="Trust points">
+                  <li><i className="ti ti-circle-check" aria-hidden="true"></i> no card required</li>
+                  <li><i className="ti ti-circle-check" aria-hidden="true"></i> 2-minute setup</li>
+                  <li><i className="ti ti-circle-check" aria-hidden="true"></i> first leads within the hour</li>
+                </ul>
+              </div>
+
+              <div className="sr sr-d2">
+                <div className="console-wrap">
+                  <div className="accent-card" aria-hidden="true">
+                    <div className="ac-top">
+                      <span className="ac-lbl">Leads this week</span>
+                      <span className="ac-val">47</span>
+                    </div>
+                    <Sparkline />
+                    <div className="ac-days"><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span className="on">S</span></div>
+                  </div>
+                  <div className="console" role="img" aria-label="Live feed of incoming freelance leads with AI scores">
+                    <div className="console-bar">
+                      <span className="radar-mini" aria-hidden="true"></span>
+                      <span className="console-title">Your lead feed</span>
+                      <span className="console-live"><span className="dot"></span> live</span>
+                    </div>
+                    <div className="feed-head">
+                      <span className="fh-l">updated 8 min ago</span>
+                      <span className="fh-new">● 12 new today</span>
+                    </div>
+                    <div className="feed-filters" aria-hidden="true">
+                      <span className="feed-chip on">All</span>
+                      <span className="feed-chip">Score 8+</span>
+                      <span className="feed-chip">Design</span>
+                      <span className="feed-chip">Remote</span>
+                      <span className="feed-chip">£300+/day</span>
+                    </div>
+                    <div className="feed" id="feed" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)}>
+                      {signals.map((s, i) => <SignalCard key={`${s.title}-${i}`} s={s} flash={i === 0 && fiRef.current > 0} />)}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ═══ SOURCES STRIP ═══ */}
+        <section className="sources-strip" aria-label="Sources we monitor">
+          <div className="container">
+            <div className="sources-inner">
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '.72rem', letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--slate-600)' }}>Sourcing from:</span>
+              <span className="source-item"><i className="ti ti-brand-reddit" aria-hidden="true"></i> Reddit</span>
+              <span className="source-item"><i className="ti ti-briefcase" aria-hidden="true"></i> Reed.co.uk</span>
+              <span className="source-item"><i className="ti ti-world" aria-hidden="true"></i> We Work Remotely</span>
+              <span className="source-item"><i className="ti ti-device-laptop" aria-hidden="true"></i> Remote OK</span>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '.72rem', color: 'var(--lime-deep)' }}>+ more added weekly</span>
+            </div>
+          </div>
+        </section>
+
+        {/* ═══ PROBLEM ═══ */}
+        <section className="section-py paper" aria-labelledby="problem-h">
+          <div className="container">
+            <div className="section-head sr">
+              <div className="tag tag-lime tag-bracket">the problem</div>
+              <h2 id="problem-h">Job boards waste your time</h2>
+              <p>Endless listings, hidden budgets, and proposals that go nowhere. The work worth having is buried under hours of searching.</p>
+            </div>
+            <div className="grid-3">
+              <article className="card sr sr-d1" style={{ padding: '34px 30px' }}>
+                <div className="icon-box" style={{ background: 'rgba(255,107,94,.1)' }}><i className="ti ti-clock-x" style={{ fontSize: 23, color: 'var(--coral)' }} aria-hidden="true"></i></div>
+                <h3 className="display" style={{ fontSize: '1.18rem', marginBottom: 10 }}>Hours of searching</h3>
+                <p style={{ fontSize: '.94rem', color: 'var(--slate-500)', lineHeight: 1.65 }}>Filtering noise, applying blind, refreshing tabs. Time that should be billed, spent looking for work.</p>
+              </article>
+              <article className="card sr sr-d2" style={{ padding: '34px 30px' }}>
+                <div className="icon-box" style={{ background: 'rgba(255,176,32,.12)' }}><i className="ti ti-eye-off" style={{ fontSize: 23, color: 'var(--amber)' }} aria-hidden="true"></i></div>
+                <h3 className="display" style={{ fontSize: '1.18rem', marginBottom: 10 }}>Hidden budgets</h3>
+                <p style={{ fontSize: '.94rem', color: 'var(--slate-500)', lineHeight: 1.65 }}>No rate, no scope, no reply. You pitch, you call, you wait — and hear nothing back.</p>
+              </article>
+              <article className="card sr sr-d3" style={{ padding: '34px 30px' }}>
+                <div className="icon-box" style={{ background: 'rgba(196,240,0,.16)' }}><i className="ti ti-wave-saw-tool" style={{ fontSize: 23, color: 'var(--lime-deep)' }} aria-hidden="true"></i></div>
+                <h3 className="display" style={{ fontSize: '1.18rem', marginBottom: 10 }}>Feast or famine</h3>
+                <p style={{ fontSize: '.94rem', color: 'var(--slate-500)', lineHeight: 1.65 }}>Land a project, stop looking, go dark. The cycle breaks when good leads arrive on schedule.</p>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        {/* ═══ HOW IT WORKS ═══ */}
+        <section className="section-py paper-2" id="how" aria-labelledby="how-h">
+          <div className="container">
+            <div className="section-head sr">
+              <div className="tag tag-lime tag-bracket">how it works</div>
+              <h2 id="how-h">Up and running in minutes</h2>
+              <p>Set it up once. LeadFlow runs in the background and surfaces only what&apos;s worth your attention.</p>
+            </div>
+            <div className="steps sr">
+              <div className="step">
+                <div className="step-rule" aria-hidden="true"></div>
+                <div className="step-num">STEP 01</div>
+                <h3>Set your profile</h3>
+                <p>Tell us your skills, day rate, and the work you want. Two minutes, no CV upload.</p>
+              </div>
+              <div className="step">
+                <div className="step-rule" aria-hidden="true"></div>
+                <div className="step-num">STEP 02</div>
+                <h3>We find &amp; score</h3>
+                <p>Our model reviews every new post across the web and scores it 1–10 against your profile.</p>
+              </div>
+              <div className="step">
+                <div className="step-rule" aria-hidden="true"></div>
+                <div className="step-num">STEP 03</div>
+                <h3>Apply &amp; win</h3>
+                <p>Your best matches arrive every 6 hours. Apply directly on the original platform.</p>
+              </div>
+            </div>
+            <div style={{ textAlign: 'center', marginTop: 54 }} className="sr">
+              <Link href="/auth/signup" className="btn-line btn-lg">Create your free profile →</Link>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '.76rem', color: 'var(--slate-400)', marginTop: 14 }}>first leads arrive within the hour · no card required</p>
+            </div>
+          </div>
+        </section>
+
+        {/* ═══ STATS BAND ═══ */}
+        <section className="stats-band" aria-label="Platform statistics">
+          <div className="hero-bg" aria-hidden="true"></div>
+          <div className="container" style={{ paddingTop: 60, paddingBottom: 60, position: 'relative', zIndex: 2 }}>
+            <div className="grid-stats sr">
+              <div className="stat"><div className="v">2,400+</div><div className="l">leads scored</div></div>
+              <div className="stat"><div className="v">340+</div><div className="l">freelancers using it</div></div>
+              <div className="stat"><div className="v">6h</div><div className="l">delivery interval</div></div>
+              <div className="stat"><div className="v">9.1</div><div className="l">avg top-match score</div></div>
+            </div>
+          </div>
+        </section>
+
+        {/* ═══ FEATURES ═══ */}
+        <section className="section-py paper" id="features" aria-labelledby="feat-h">
+          <div className="container">
+            <div className="section-head sr">
+              <div className="tag tag-lime tag-bracket">features</div>
+              <h2 id="feat-h">Everything you need, nothing you don&apos;t</h2>
+              <p>Built for working freelancers, not procurement teams or recruiters.</p>
+            </div>
+            <div className="grid-3">
+              {[
+                { icon: 'ti-brain', title: 'AI quality scoring', desc: 'Every lead ranked 1–10 so you focus on the best ones first. Stop guessing which are worth applying to.' },
+                { icon: 'ti-clock-bolt', title: 'Delivered every 6 hours', desc: 'Fresh matches four times a day. You reply while the client is still reading applications.' },
+                { icon: 'ti-target-arrow', title: 'Skill-matched', desc: 'Only leads that fit your skills and rate reach your feed. No irrelevant listings.' },
+                { icon: 'ti-currency-pound', title: 'Budgets upfront', desc: 'Real numbers before you pitch. Never burn a call discovering the rate doesn\'t work.' },
+                { icon: 'ti-link', title: 'Direct links, no commission', desc: 'Apply on the original platform. We never sit between you and the client or take a cut of your work.' },
+                { icon: 'ti-route', title: 'Pipeline tracking', desc: 'Follow each lead from interested to won. Never lose the thread on a live opportunity.' },
+              ].map((f, i) => (
+                <article key={f.title} className={`card sr ${i < 3 ? 'sr-d1' : i < 5 ? 'sr-d2' : 'sr-d3'}`} style={{ padding: 30 }}>
+                  <div className="icon-box" style={{ background: 'rgba(196,240,0,.16)' }}><i className={`ti ${f.icon}`} style={{ fontSize: 23, color: 'var(--lime-deep)' }} aria-hidden="true"></i></div>
+                  <h3 className="display" style={{ fontSize: '1.12rem', marginBottom: 8 }}>{f.title}</h3>
+                  <p style={{ fontSize: '.9rem', color: 'var(--slate-500)', lineHeight: 1.62 }}>{f.desc}</p>
+                </article>
               ))}
             </div>
           </div>
+        </section>
 
-          {/* Hero visual */}
-          <div className="hero-visual-wrap">
-            <div className="hero-accent-card">
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
-                <span style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--slate-2)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Leads this week</span>
-                <span style={{ fontSize: '14px', fontWeight: 700, fontFamily: 'var(--font-display)', color: 'var(--amber)' }}>47</span>
+        {/* ═══ DASHBOARD PREVIEW ═══ */}
+        <section className="section-py" style={{ background: 'var(--ink-850)', color: '#fff' }} aria-labelledby="dash-h">
+          <div className="container">
+            <div className="grid-2">
+              <div className="sr">
+                <div className="tag tag-onink tag-bracket" style={{ marginBottom: 16 }}>your dashboard</div>
+                <h2 className="display" style={{ fontSize: 'clamp(1.9rem, 4vw, 2.7rem)', marginBottom: 16 }}>One feed. Ranked. Ready to act.</h2>
+                <p style={{ fontSize: '1.04rem', color: 'var(--slate-300)', lineHeight: 1.66, marginBottom: 32 }}>No tabs, no searching. Filter by score, source or budget and go from new lead to application sent in under a minute.</p>
+                <ul style={{ display: 'flex', flexDirection: 'column', gap: 13, marginBottom: 38, listStyle: 'none' }}>
+                  {['Filter by source, score, budget or skill', 'Save a lead in one tap', 'Top 5 emailed to you each morning', 'Track pipeline from interest to won'].map(t => (
+                    <li key={t} style={{ display: 'flex', alignItems: 'center', gap: 11 }}>
+                      <span style={{ width: 22, height: 22, borderRadius: 7, background: 'rgba(196,240,0,.16)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <i className="ti ti-check" style={{ fontSize: 13, color: 'var(--lime)' }} aria-hidden="true"></i>
+                      </span>
+                      <span style={{ fontSize: '.95rem', color: 'var(--slate-200)' }}>{t}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Link href="/auth/signup" className="btn-p btn-lg">Try it free →</Link>
               </div>
-              <svg width="100%" height="40" viewBox="0 0 168 40" fill="none" preserveAspectRatio="none">
-                <defs>
-                  <linearGradient id="sG" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#F5A623" stopOpacity="0.25" />
-                    <stop offset="100%" stopColor="#F5A623" stopOpacity="0" />
-                  </linearGradient>
-                </defs>
-                <path d="M0,34 C12,30 20,32 36,26 C52,20 60,24 84,16 C108,8 116,12 132,7 C148,2 156,4 168,2 L168,40 L0,40 Z" fill="url(#sG)" />
-                <path d="M0,34 C12,30 20,32 36,26 C52,20 60,24 84,16 C108,8 116,12 132,7 C148,2 156,4 168,2" stroke="var(--amber)" strokeWidth="1.8" fill="none" strokeLinecap="round" />
-                <circle cx="168" cy="2" r="3" fill="var(--amber)" />
-              </svg>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '7px' }}>
-                {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((d, i) => (
-                  <span key={d} style={{ fontSize: '9.5px', fontFamily: 'var(--font-mono)', color: i === 6 ? 'var(--amber)' : 'var(--slate-3)' }}>{d}</span>
-                ))}
-              </div>
-            </div>
-
-            <div style={{ background: 'var(--ink-2)', border: '1px solid var(--border-card)', borderRadius: 'var(--radius-lg)', overflow: 'hidden', boxShadow: '0 24px 64px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04)', position: 'relative' }}>
-              <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '1px', background: 'linear-gradient(90deg, transparent, var(--amber), transparent)', opacity: 0.4 }} />
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid var(--border)', background: 'var(--ink-3)' }}>
-                <div style={{ display: 'flex', gap: '6px' }}>
-                  <div style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#FF5F57' }} />
-                  <div style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#FEBC2E' }} />
-                  <div style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#28C840' }} />
-                </div>
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--slate-2)', letterSpacing: '0.05em' }}>leadflow — your feed</span>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '10.5px', fontFamily: 'var(--font-mono)', color: 'var(--green-score)' }}>
-                  <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: 'var(--green-score)', animation: 'pulse 1.5s infinite' }} />
-                  LIVE
-                </div>
-              </div>
-              <div style={{ padding: '14px 14px 14px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-                  <span style={{ fontSize: '11.5px', color: 'var(--slate)', fontFamily: 'var(--font-mono)', letterSpacing: '0.02em' }}>UPDATED 8 MIN AGO</span>
-                  <span style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', fontWeight: 500, background: 'rgba(61,219,122,0.12)', color: 'var(--green-score)', padding: '3px 8px', borderRadius: '100px', border: '1px solid rgba(61,219,122,0.20)' }}>● 12 new today</span>
-                </div>
-                <div className="feed-filters">
-                  {['All', 'Score 8+', { l: 'Design', f: true }, { l: 'Remote', f: true }, '£300+/day'].map((f, i) => (
-                    <button key={i} className={`feed-filter ${i === 0 ? 'active' : ''}`}>
-                      {typeof f === 'object' && f.f ? (
-                        <svg width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" /></svg>
-                      ) : null}
-                      {typeof f === 'string' ? f : f.l}
-                    </button>
+              <div className="sr sr-d2">
+                <div className="dash" role="img" aria-label="LeadFlow dashboard preview, filtered to high-scoring leads">
+                  <div className="dash-bar">
+                    <span className="radar-mini" aria-hidden="true"></span>
+                    <span className="console-title">Dashboard</span>
+                    <span style={{ marginLeft: 'auto', display: 'flex', gap: 6 }}>
+                      <span className="dash-chip" style={{ background: 'rgba(255,255,255,.06)', color: 'var(--slate-400)' }}>all</span>
+                      <span className="dash-chip" style={{ background: 'rgba(196,240,0,.12)', color: 'var(--lime)', border: '1px solid rgba(196,240,0,.25)' }}>score 8+</span>
+                    </span>
+                  </div>
+                  {[
+                    { src: 'REDDIT', c: 'rgba(255,140,66,.14)', t: '#ff9c5b', title: 'Senior UX Designer — London', meta: '£350–450/day · Figma', score: '9.2', cls: 'score-a', dot: 'var(--lime)' },
+                    { src: 'WWR', c: 'rgba(110,168,212,.16)', t: '#7fb6e6', title: 'Full-Stack Developer — Remote', meta: '£500–700/day · React', score: '8.4', cls: 'score-a', dot: 'var(--lime)' },
+                    { src: 'REED', c: 'rgba(176,138,219,.16)', t: '#c4a3ec', title: 'Brand Identity — Contract', meta: '£2,800/mo · Branding', score: '8.1', cls: 'score-b', dot: 'var(--amber)' },
+                  ].map((d, i) => (
+                    <div key={i} className="dash-row">
+                      <span style={{ width: 6, height: 6, borderRadius: '50%', background: d.dot, flexShrink: 0 }} aria-hidden="true"></span>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ marginBottom: 3 }}><span className="sig-src" style={{ background: d.c, color: d.t }}>{d.src}</span></div>
+                        <div className="sig-title">{d.title}</div>
+                        <div className="sig-meta">{d.meta}</div>
+                      </div>
+                      <div className={`sig-score ${d.cls}`}><span className="v">{d.score}</span></div>
+                    </div>
                   ))}
                 </div>
-                {[
-                  { src: 'Reddit', cls: 'badge-src-reddit', title: 'Senior UX Designer — London (Fintech)', meta: '£350–450/day · Figma, Design Systems · IR35', score: '9.1', sc: 'score-hi' },
-                  { src: 'Reed', cls: 'badge-src-reed', title: 'Motion Designer — Advertising Agency', meta: '£300–380/day · After Effects · Inside IR35', score: '9.0', sc: 'score-hi' },
-                  { src: 'Reddit', cls: 'badge-src-reddit', title: 'Content Strategist — B2B SaaS, Remote', meta: '£350/day · Notion, Writing · 2-month contract', score: '8.5', sc: 'score-good' },
-                  { src: 'WWR', cls: 'badge-src-wwr', title: 'Full-Stack Developer — Remote UK', meta: '£60–75k · React, Node.js · Starts ASAP', score: '8.7', sc: 'score-good' },
-                  { src: 'WWR', cls: 'badge-src-wwr', title: 'Shopify Developer — E-commerce, Part-time', meta: '£45–55k · Liquid, JS · Ongoing', score: '7.8', sc: 'score-md' },
-                  { src: 'Remote OK', cls: 'badge-src-reed', title: 'DevOps Engineer — Full-time Remote', meta: '£70–90k · AWS, Terraform, K8s', score: '8.9', sc: 'score-good' },
-                ].map((lead, i) => (
-                  <div key={i} style={{
-                    background: 'var(--ink-3)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '10px 12px',
-                    marginBottom: i < 5 ? '6px' : '0',
-                    display: 'flex', alignItems: 'center', gap: '12px', transition: 'border-color 0.2s, transform 0.2s',
-                  }}>
-                    <span style={{
-                      fontSize: '9px', fontFamily: 'var(--font-mono)', fontWeight: 500, textTransform: 'uppercase',
-                      letterSpacing: '0.08em', padding: '3px 7px', borderRadius: '3px', flexShrink: 0, minWidth: '44px', textAlign: 'center',
-                    }} className={lead.cls}>{lead.src}</span>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: '13px', fontWeight: 500, color: 'var(--cream)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginBottom: '3px' }}>{lead.title}</div>
-                      <div style={{ fontSize: '11px', color: 'var(--slate-2)', fontFamily: 'var(--font-mono)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{lead.meta}</div>
-                    </div>
-                    <div style={{
-                      width: '38px', height: '38px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontFamily: 'var(--font-mono)', fontSize: '13px', fontWeight: 500, flexShrink: 0,
-                    }} className={lead.sc}>{lead.score}</div>
-                  </div>
-                ))}
               </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* ── METRICS ── */}
-      <section className="reveal" style={{ borderBottom: '1px solid var(--border)', padding: '60px 0', position: 'relative' }}>
-        <div style={{ maxWidth: '1140px', margin: '0 auto', padding: '0 32px', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 0 }}>
-          {[
-            {
-              num: '2,400', suf: '+', label: 'Leads processed weekly',
-              spark: <svg width="80" height="24" viewBox="0 0 80 24" fill="none"><polyline points="0,20 10,17 20,18 30,14 40,12 50,10 60,8 70,5 80,3" stroke="var(--amber)" strokeWidth="1.8" fill="none" strokeLinecap="round" opacity="0.5" /><polyline points="0,20 10,17 20,18 30,14 40,12 50,10 60,8 70,5 80,3" stroke="var(--amber)" strokeWidth="8" fill="none" strokeLinecap="round" opacity="0.15" style={{ filter: 'blur(4px)' }} /></svg>,
-            },
-            {
-              num: '340', suf: '+', label: 'Freelancers in beta',
-              spark: <svg width="80" height="24" viewBox="0 0 80 24" fill="none"><polyline points="0,22 10,19 20,20 30,16 40,15 50,12 60,9 70,7 80,4" stroke="var(--green-score)" strokeWidth="1.8" fill="none" strokeLinecap="round" opacity="0.5" /></svg>,
-            },
-            {
-              label: 'Refresh cycle — faster than your competition', num2: '6', suf: 'hr',
-              spark: <div style={{ marginTop: '10px', display: 'flex', gap: '4px', alignItems: 'flex-end', height: '24px' }}>
-                {[8,12,10,16,14,20,18,24].map((h, i) => (
-                  <div key={i} style={{ width: '6px', height: `${h}px`, background: i === 7 ? 'var(--amber)' : `rgba(245,166,35,${0.2 + i * 0.05})`, borderRadius: '2px' }} />
-                ))}
-              </div>,
-            },
-            {
-              num: '9.1', suf: '', label: 'Avg quality score of delivered leads',
-              spark: <div style={{ marginTop: '10px' }}>
-                <svg width="48" height="24" viewBox="0 0 48 24" fill="none">
-                  <rect x="0" y="16" width="48" height="4" rx="2" fill="rgba(255,255,255,0.06)" />
-                  <rect x="0" y="16" width="43.7" height="4" rx="2" fill="var(--green-score)" opacity="0.6" />
-                </svg>
-              </div>,
-            },
-          ].map((m, i) => (
-            <div key={i} style={{ padding: '24px 32px', borderRight: i < 3 ? '1px solid var(--border)' : 'none', position: 'relative' }}>
-              <div style={{ fontFamily: 'var(--font-display)', fontSize: '42px', fontWeight: 900, color: 'var(--cream)', lineHeight: 1, marginBottom: '6px', letterSpacing: '-0.03em' }}>
-                {m.num2 ? <span style={{ color: 'var(--amber)' }}>{m.num2}</span> : m.num}
-                {m.suf && <span style={{ color: 'var(--amber)' }}>{m.suf}</span>}
-              </div>
-              <div style={{ fontSize: '12px', color: 'var(--slate)', fontFamily: 'var(--font-mono)', letterSpacing: '0.03em', textTransform: 'uppercase', marginBottom: '8px' }}>{m.label}</div>
-              {m.spark}
+        {/* ═══ TESTIMONIALS ═══ */}
+        <section className="section-py paper-2" aria-labelledby="test-h">
+          <div className="container">
+            <div className="section-head sr">
+              <div className="tag tag-lime tag-bracket">testimonials</div>
+              <h2 id="test-h">Freelancers who made the switch</h2>
             </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ── TESTIMONIALS ── */}
-      <section className="reveal section" style={{ padding: '72px 0', borderBottom: '1px solid var(--border)' }}>
-        <div style={{ maxWidth: '1140px', margin: '0 auto', padding: '0 32px' }}>
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10.5px', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--amber)', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <span style={{ display: 'inline-block', width: '20px', height: '1px', background: 'var(--amber)', opacity: 0.6 }} />
-            From the beta
-          </div>
-          <div className="testimonial-grid">
-            {[
-              { initials: 'JM', name: 'Jamie M.', role: 'Freelance UX Designer · London', quote: 'I used to spend Monday mornings trawling boards. Now I open LeadFlow, check the top-scored leads in 10 minutes, and get back to the work I\'m actually paid to do.' },
-              { initials: 'SR', name: 'Sarah R.', role: 'Freelance Copywriter · Remote UK', quote: 'The score system is the thing. I ignored anything under 8 for a week and ended up applying to fewer leads — and landing two conversations. That ratio has never happened on job boards.' },
-              { initials: 'DK', name: 'Dan K.', role: 'Freelance Full-Stack Dev · Manchester', quote: 'First day on the Pro trial I had 14 leads that matched my rate. That\'s more in one morning than I\'d found in a week of doing it manually.' },
-            ].map(t => (
-              <div key={t.initials} className="testimonial-card">
-                <div className="testimonial-quote">{t.quote}</div>
-                <div className="testimonial-author">
-                  <div className="testimonial-avatar">{t.initials}</div>
-                  <div>
-                    <div className="testimonial-name">{t.name}</div>
-                    <div className="testimonial-role">{t.role}</div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── PROBLEM ── */}
-      <section className="reveal section" style={{ borderBottom: '1px solid var(--border)' }}>
-        <div style={{ maxWidth: '820px', margin: '0 auto', padding: '0 32px' }}>
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10.5px', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--amber)', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <span style={{ display: 'inline-block', width: '20px', height: '1px', background: 'var(--amber)', opacity: 0.6 }} />
-            Sound familiar?
-          </div>
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(30px, 3.5vw, 46px)', fontWeight: 700, color: 'var(--cream)', lineHeight: 1.1, letterSpacing: '-0.025em', marginBottom: '36px' }}>
-            An hour of searching.<br />One lead that <em style={{ fontStyle: 'italic', color: 'var(--amber)' }}>almost</em> fits.<br />Every single day.
-          </h2>
-          <div className="problem-grid">
-            {[
-              { svg: <><path d="M5 22h14M5 2h14M17 22v-4.172a2 2 0 00-.586-1.414L12 12l-4.414 4.414A2 2 0 007 17.828V22M17 2v4.172a2 2 0 01-.586 1.414L12 12 7.586 7.586A2 2 0 017 6.172V2" /></>, text: <><strong style={{ color: 'var(--cream)', fontWeight: 500 }}>You lose an hour every morning</strong> checking Reddit, Reed, and job boards — just to find one lead that's close to relevant. Most aren't.</> },
-              { svg: <><line x1="1" y1="1" x2="23" y2="23" /><path d="M15.5 8.5A4 4 0 008 12v0a4 4 0 003 3.87M10 17H17M10 13H7" /></>, text: <><strong style={{ color: 'var(--cream)', fontWeight: 500 }}>You write a tailored proposal</strong> and then find out the budget was never listed anywhere. It was never going to match your rate.</> },
-              { svg: <><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" /></>, text: <><strong style={{ color: 'var(--cream)', fontWeight: 500 }}>You finish a contract and surface</strong> to an empty pipeline. Then the whole cycle starts again — from zero, under pressure.</> },
-            ].map((item, i) => (
-              <div key={i} className="problem-item">
-                <div className="problem-icon">
-                  <svg width="18" height="18" fill="none" stroke="var(--slate-2)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">{item.svg}</svg>
-                </div>
-                <p style={{ fontSize: '14px', color: 'var(--slate)', lineHeight: 1.65 }}>{item.text}</p>
-              </div>
-            ))}
-          </div>
-          <div className="problem-resolution-wrap">
-            <div className="problem-resolution-icon">
-              <svg width="18" height="18" fill="none" stroke="var(--amber)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
-            </div>
-            <div>
-              <div className="problem-resolution-lead">Here's the fix</div>
-              <div className="problem-resolution-punch">LeadFlow doesn't replace your ability to<em>win work</em>. It just stops you wasting it on the <em>wrong leads</em>.</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── HOW IT WORKS ── */}
-      <section id="how-it-works" className="reveal section">
-        <div style={{ maxWidth: '1140px', margin: '0 auto', padding: '0 32px' }}>
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10.5px', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--amber)', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <span style={{ display: 'inline-block', width: '20px', height: '1px', background: 'var(--amber)', opacity: 0.6 }} />
-            How it works
-          </div>
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(30px, 3.5vw, 46px)', fontWeight: 700, color: 'var(--cream)', lineHeight: 1.1, letterSpacing: '-0.025em' }}>
-            Two minutes to set up.<br /><em style={{ fontStyle: 'italic', color: 'var(--amber)' }}>Better leads by tonight.</em>
-          </h2>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.6fr', gap: '80px', alignItems: 'start', marginTop: '64px' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+            <div className="grid-3">
               {[
-                { num: '01', title: 'Tell us what good work looks like for you', desc: 'Your discipline, your day rate, the skills you want to be hired for. It takes about 2 minutes. That\'s how long it takes to never see an irrelevant lead again.' },
-                { num: '02', title: 'We trawl four platforms so you don\'t have to', desc: 'Reddit, Reed, We Work Remotely, and more — checked every 6 hours. Every lead is scored 1–10 on budget clarity, scope fit, and rate match. Anything below your threshold doesn\'t make it through.' },
-                { num: '03', title: 'Open 10 leads. Apply to the 3 worth your time', desc: 'Your feed shows scores at a glance. Every lead links directly to the original post — no platform in the way, no gatekeeping. You apply on the client\'s terms, as you always would.' },
-              ].map((s, i) => (
-                <div key={s.num} onClick={() => setActiveStep(i)}
-                  style={{
-                    padding: '28px 0', borderTop: i === 0 ? 'none' : '1px solid var(--border)',
-                    display: 'flex', gap: '24px', cursor: 'pointer', transition: 'all 0.2s',
-                    opacity: activeStep === i ? 1 : 0.6,
-                  }}>
-                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: activeStep === i ? 'var(--amber)' : 'var(--slate-2)', paddingTop: '3px', letterSpacing: '0.05em', flexShrink: 0, width: '28px', transition: 'color 0.2s' }}>{s.num}</div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: '15px', fontWeight: 600, color: activeStep === i ? 'var(--cream)' : 'var(--slate)', marginBottom: '8px', transition: 'color 0.2s' }}>{s.title}</div>
-                    <div style={{ fontSize: '13.5px', color: 'var(--slate-2)', lineHeight: 1.65 }}>{s.desc}</div>
+                { initials: 'SJ', name: 'Sarah J.', role: 'UX Designer · London', text: '"Landed a £2,400 contract in my first week. I ignored anything under 8 and applied to three. Two replied. The score sorts the list for you."' },
+                { initials: 'MT', name: 'Marcus T.', role: 'Full-Stack Dev · Manchester', text: '"Sunday afternoons used to vanish into job boards. Now it\'s 10 minutes on Monday. Made back the Pro plan in a single contract."' },
+                { initials: 'PK', name: 'Priya K.', role: 'Brand Designer · Edinburgh', text: '"The budget filter alone earns its keep. I stopped chasing leads that can\'t pay my rate. Healthiest pipeline I\'ve had in three years."' },
+              ].map((t, i) => (
+                <figure key={t.name} className={`quote-card sr ${i === 0 ? 'sr-d1' : i === 1 ? 'sr-d2' : 'sr-d3'}`}>
+                  <div className="quote-stars" aria-label="5 out of 5">★★★★★</div>
+                  <blockquote style={{ fontSize: '.96rem', color: 'var(--slate-700)', lineHeight: 1.7, marginBottom: 22, border: 'none' }}>{t.text}</blockquote>
+                  <figcaption style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <span className="avatar" aria-hidden="true">{t.initials}</span>
+                    <span>
+                      <span style={{ display: 'block', fontWeight: 600, fontSize: '.88rem' }}>{t.name}</span>
+                      <span style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: '.76rem', color: 'var(--slate-500)' }}>{t.role}</span>
+                    </span>
+                  </figcaption>
+                </figure>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ═══ PRICING ═══ */}
+        <section className="section-py paper" id="pricing" aria-labelledby="price-h">
+          <div className="container">
+            <div className="section-head sr" style={{ marginBottom: 40 }}>
+              <div className="tag tag-lime tag-bracket">pricing</div>
+              <h2 id="price-h">Simple pricing, no surprises</h2>
+              <p>Start with the full Pro experience today — no card, no commitment. We&apos;ll always tell you before anything changes.</p>
+            </div>
+
+            <div className="trial-timeline sr">
+              <div className="trial-step">
+                <div className="trial-day">Today</div>
+                <div className="trial-rail" aria-hidden="true"><span className="trial-dot amber"></span><span className="trial-line"></span></div>
+                <p className="trial-desc"><strong>You unlock everything in Pro.</strong> Unlimited leads, AI scores, skill filtering — all of it, immediately. No card needed.</p>
+              </div>
+              <div className="trial-step">
+                <div className="trial-day">Day 5</div>
+                <div className="trial-rail" aria-hidden="true"><span className="trial-dot lime"></span><span className="trial-line"></span></div>
+                <p className="trial-desc hl"><strong>We email you a reminder — before any charge.</strong> Two full days before the trial ends, so you can decide on your own terms. We&apos;d rather remind you than surprise you.</p>
+              </div>
+              <div className="trial-step">
+                <div className="trial-day">Day 7</div>
+                <div className="trial-rail" aria-hidden="true"><span className="trial-dot"></span></div>
+                <p className="trial-desc"><strong>Your first charge, only if you stay.</strong> Cancel any time before then and you pay nothing. One click in your account settings.</p>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 14, marginBottom: 36 }} className="sr">
+              <span style={{ fontSize: '.94rem', fontWeight: annual ? 500 : 600, color: annual ? 'var(--slate-500)' : 'var(--ink-900)' }}>Monthly</span>
+              <div className={`toggle${annual ? ' on' : ''}`} role="switch" aria-checked={annual} aria-label="Toggle annual billing" tabIndex={0} onClick={() => setAnnual(!annual)} onKeyDown={e => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); setAnnual(!annual) } }}>
+                <div className="toggle-knob"></div>
+              </div>
+              <span style={{ fontSize: '.94rem', display: 'flex', alignItems: 'center', gap: 8, color: annual ? 'var(--ink-900)' : 'var(--slate-500)', fontWeight: annual ? 600 : 500 }}>
+                Annual <span style={{ background: 'var(--lime)', color: 'var(--ink-950)', fontFamily: 'var(--font-mono)', fontSize: '.66rem', fontWeight: 700, padding: '2px 9px', borderRadius: 'var(--r-pill)', opacity: annual ? 1 : .45, transition: 'opacity .2s' }}>SAVE 2 MONTHS</span>
+              </span>
+            </div>
+
+            <div className="pricing-2 sr">
+              <article className="price-card">
+                <div className="plan-name">Free</div>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 12 }}><span className="price-amt">£0</span><span className="price-per">forever · no expiry</span></div>
+                <p className="plan-desc">For getting started. 3 leads a week to see if the quality is worth it — no deadline, no catch.</p>
+                <Link href="/auth/signup" className="btn-line btn-full" style={{ justifyContent: 'center', marginBottom: 24 }}>Get started free</Link>
+                <div className="feat-label">What&apos;s included</div>
+                <ul style={{ listStyle: 'none' }}>
+                  <li className="pf"><i className="ti ti-check" aria-hidden="true"></i>3 leads per week</li>
+                  <li className="pf"><i className="ti ti-check" aria-hidden="true"></i>AI quality scores visible</li>
+                  <li className="pf"><i className="ti ti-check" aria-hidden="true"></i>Direct links to original posts</li>
+                </ul>
+                <div className="upgrade-hint"><i className="ti ti-arrow-right" aria-hidden="true"></i>Upgrade to Pro for unlimited leads + filtering</div>
+              </article>
+
+              <article className="price-card feat">
+                <div className="feat-pill">Most popular · 7-day free trial</div>
+                <div className="plan-name">Pro</div>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 12 }}>
+                  <span className="price-amt"><span className="price-num" data-m="29" data-a="24">£{annual ? '24' : '29'}</span></span>
+                  <span className="price-per price-suf">{annual ? '/mo, billed yearly' : '/mo · cancel any time'}</span>
+                </div>
+                <div className="plan-anchor">Less than one hour of your day rate. Pays for itself on the first lead you land.</div>
+                <div className="plan-saving" style={{ display: annual ? 'inline-block' : 'none' }}>You save £60/yr — 2 months free</div>
+                <p className="plan-desc">For freelancers who want a steady pipeline without the daily grind of searching job boards.</p>
+                <Link href="/auth/signup" className="btn-p btn-full" style={{ justifyContent: 'center', marginBottom: 12 }}>Start my 7-day free trial</Link>
+                <div className="plan-guarantee"><i className="ti ti-shield-check" aria-hidden="true"></i>First charge on day 7. We remind you on day 5.</div>
+                <div className="feat-label">Everything in Free, plus</div>
+                <ul style={{ listStyle: 'none' }}>
+                  <li className="pf"><i className="ti ti-check" aria-hidden="true"></i>Unlimited leads, every 6 hours</li>
+                  <li className="pf"><i className="ti ti-check" aria-hidden="true"></i>Skill + rate filtering</li>
+                  <li className="pf"><i className="ti ti-check" aria-hidden="true"></i>Daily email digest</li>
+                  <li className="pf"><i className="ti ti-check" aria-hidden="true"></i>Pipeline tracking</li>
+                  <li className="pf"><i className="ti ti-check" aria-hidden="true"></i>Custom lead alerts</li>
+                  <li className="pf"><i className="ti ti-check" aria-hidden="true"></i>Analytics dashboard + CSV export</li>
+                  <li className="pf"><i className="ti ti-check" aria-hidden="true"></i>Priority support + onboarding call</li>
+                </ul>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        {/* ═══ FAQ ═══ */}
+        <section className="section-py paper-2" id="faq" aria-labelledby="faq-h">
+          <div className="container">
+            <div className="section-head sr">
+              <div className="tag tag-lime tag-bracket">faq</div>
+              <h2 id="faq-h">Questions, answered</h2>
+            </div>
+            <div style={{ maxWidth: 720, margin: '0 auto', background: 'var(--paper-card)', border: '1px solid var(--slate-200)', borderRadius: 'var(--r-xl)', padding: '4px 32px' }} className="sr">
+              {faqData.map((f, i) => (
+                <div key={i} className={`faq-item${openFaq === i ? ' open' : ''}`}>
+                  <button className="faq-q" onClick={() => setOpenFaq(openFaq === i ? null : i)} aria-expanded={openFaq === i}>
+                    {f.q}
+                    <Chevron />
+                  </button>
+                  <div className="faq-body" style={{ maxHeight: openFaq === i ? 200 : 0 }}>
+                    <p className="faq-body-inner">{f.a}</p>
                   </div>
                 </div>
               ))}
             </div>
-            <div style={{ background: 'var(--ink-2)', border: '1px solid var(--border-card)', borderRadius: 'var(--radius-lg)', overflow: 'hidden', minHeight: '300px', position: 'sticky', top: '80px', display: 'flex', flexDirection: 'column' }}>
-              <div style={{ display: 'flex', borderBottom: '1px solid var(--border)', padding: '0 16px', background: 'var(--ink-3)' }}>
-                {['Profile', 'Scoring', 'Feed'].map((tab, i) => (
-                  <button key={tab} onClick={() => setActiveStep(i)}
-                    style={{
-                      fontSize: '11.5px', fontFamily: 'var(--font-mono)', color: activeStep === i ? 'var(--amber)' : 'var(--slate-2)',
-                      padding: '11px 14px', borderBottom: activeStep === i ? '2px solid var(--amber)' : '2px solid transparent',
-                      cursor: 'pointer', transition: 'color 0.15s', background: 'none', borderTop: 'none', borderLeft: 'none', borderRight: 'none',
-                    }}>
-                    {tab}
-                  </button>
-                ))}
-              </div>
-              <div style={{ padding: '20px', flex: 1 }}>
-                {activeStep === 0 && (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                      <div className="form-label">Discipline</div>
-                      <div style={{ background: 'var(--ink-3)', border: '1px solid var(--border-card)', borderRadius: '4px', padding: '8px 12px', fontSize: '12.5px', color: 'var(--cream)', fontFamily: 'var(--font-mono)' }}>UX / Product Design</div>
-                    </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                      <div className="form-label">Day rate (£)</div>
-                      <div style={{ background: 'var(--ink-3)', border: '1px solid var(--border-card)', borderRadius: '4px', padding: '8px 12px', fontSize: '12.5px', color: 'var(--cream)', fontFamily: 'var(--font-mono)' }}>350 – 500</div>
-                    </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                      <div className="form-label">Skills</div>
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', marginTop: '4px' }}>
-                        {['Figma', 'Design Systems', 'Prototyping', 'User Research', 'Fintech'].map(s => (
-                          <span key={s} className="skill-tag">{s}</span>
-                        ))}
-                      </div>
-                    </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                      <div className="form-label">Work type</div>
-                      <div style={{ background: 'var(--ink-3)', border: '1px solid var(--border-card)', borderRadius: '4px', padding: '8px 12px', fontSize: '12.5px', color: 'var(--cream)', fontFamily: 'var(--font-mono)' }}>Contract · Remote / London</div>
-                    </div>
-                  </div>
-                )}
-                {activeStep === 1 && (
-                  <div>
-                    <div style={{ marginBottom: '14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                      <span style={{ fontSize: '12px', fontFamily: 'var(--font-mono)', color: 'var(--slate)' }}>Senior UX Designer — Fintech</span>
-                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: '20px', fontWeight: 500, color: 'var(--green-score)' }}>9.1</span>
-                    </div>
-                    <div className="score-breakdown">
-                      {[
-                        { label: 'Budget clarity', w: '95%', v: '9.5' },
-                        { label: 'Scope detail', w: '88%', v: '8.8' },
-                        { label: 'Skill match', w: '100%', v: '10' },
-                        { label: 'Timeline clarity', w: '82%', v: '8.2' },
-                        { label: 'Rate signal', w: '90%', v: '9.0' },
-                      ].map(r => (
-                        <div key={r.label} className="score-row">
-                          <span className="score-row-label">{r.label}</span>
-                          <div className="score-bar-track"><div className="score-bar-fill" style={{ width: r.w }} /></div>
-                          <span className="score-row-val">{r.v}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                {activeStep === 2 && (
-                  <div>
-                    <div style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--slate-2)', marginBottom: '12px' }}>SHOWING 4 OF 16 LEADS · SORTED BY SCORE</div>
-                    {[
-                      { src: 'Reddit', cls: 'badge-src-reddit', title: 'Senior UX Designer — London', meta: '£350–450/day', score: '9.1', scls: 'score-hi' },
-                      { src: 'WWR', cls: 'badge-src-wwr', title: 'Product Designer — Fully Remote', meta: '£55–65k', score: '8.3', scls: 'score-hi' },
-                      { src: 'Reed', cls: 'badge-src-reed', title: 'Brand Identity — 3-month contract', meta: '£40k pro rata', score: '7.4', scls: 'score-md' },
-                    ].map((l, i) => (
-                      <div key={i} className="lead-item" style={{ marginBottom: i < 2 ? '6px' : '0' }}>
-                        <span className={`src-badge ${l.cls}`} style={{
-                          fontSize: '9px', fontFamily: 'var(--font-mono)', fontWeight: 500, textTransform: 'uppercase',
-                          letterSpacing: '0.08em', padding: '3px 7px', borderRadius: '3px', flexShrink: 0, minWidth: '44px', textAlign: 'center',
-                        } as React.CSSProperties}>{l.src}</span>
-                        <div className="lead-text">
-                          <div className="lead-title" style={{ fontSize: '12px' }}>{l.title}</div>
-                          <div className="lead-meta">{l.meta}</div>
-                        </div>
-                        <div style={{ width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-mono)', fontSize: '11px', fontWeight: 500, flexShrink: 0 }} className={l.scls}>{l.score}</div>
-                      </div>
-                    ))}
-                  </div>
-                )}
+          </div>
+        </section>
+
+        {/* ═══ FINAL CTA ═══ */}
+        <section className="final section-py" aria-labelledby="cta-h">
+          <div className="hero-bg" aria-hidden="true"></div>
+          <div className="hero-glow" aria-hidden="true"></div>
+          <div className="container" style={{ textAlign: 'center', maxWidth: 760, position: 'relative', zIndex: 2 }}>
+            <div className="sr">
+              <div className="tag tag-onink tag-bracket" style={{ marginBottom: 18, justifyContent: 'center' }}>get started</div>
+              <h2 className="display" style={{ fontSize: 'clamp(2.1rem, 5vw, 3.4rem)', color: '#fff', marginBottom: 18 }}>Your next client is<br />already out there.</h2>
+              <p style={{ fontSize: '1.1rem', color: 'var(--slate-300)', lineHeight: 1.62, marginBottom: 40 }}>Set up your profile in two minutes and let the right work come to you. First leads within the hour — no card needed.</p>
+              <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 14 }}>
+                <Link href="/auth/signup" className="btn-p btn-lg">Get started free →</Link>
+                <Link href="/auth/login" className="btn-ghost btn-lg">Log in</Link>
               </div>
             </div>
           </div>
+        </section>
+      </main>
+
+      {/* ═══ STICKY CTA BAR ═══ */}
+      <div id="sticky-bar" className={stickyVisible ? 'visible' : ''} aria-hidden="true">
+        <div className="sticky-inner">
+          <span className="sticky-txt"><b>12 new leads</b> matched today — see yours in minutes.</span>
+          <Link href="/auth/signup" className="btn-p btn-sm">Get started free →</Link>
         </div>
-      </section>
-
-      {/* ── FEATURES ── */}
-      <section id="features" className="reveal section">
-        <div style={{ maxWidth: '1140px', margin: '0 auto', padding: '0 32px' }}>
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10.5px', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--amber)', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <span style={{ display: 'inline-block', width: '20px', height: '1px', background: 'var(--amber)', opacity: 0.6 }} />
-            Why freelancers switch to LeadFlow
-          </div>
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(30px, 3.5vw, 46px)', fontWeight: 700, color: 'var(--cream)', lineHeight: 1.1, letterSpacing: '-0.025em', marginBottom: '0' }}>
-            You already know how to<br />win the work. <em style={{ fontStyle: 'italic', color: 'var(--amber)' }}>We find it.</em>
-          </h2>
-          <div className="features-grid">
-            {[
-              { icon: 'star', title: 'A score before you even open it', desc: 'Every lead is rated 1–10 before it reaches your feed — on budget clarity, scope detail, and how well it matches your skills and rate. You prioritise in seconds, not after reading four paragraphs.' },
-              { icon: 'clock', title: 'Leads hours old, not days old', desc: 'We check every 6 hours. By the time you open your feed, you\'re still near the front of the queue — not buried under 40 applications from people who saw it two days before you.' },
-              { icon: 'filter', title: 'Every lead you see was put there for you', desc: 'If it doesn\'t match your skills or rate, it never reaches your feed. No scrolling past listings for roles you can\'t fill. Every item is there deliberately — filtered against your profile, not a generic algorithm.' },
-              { icon: 'pound', title: 'See the budget before you write a word', desc: 'Leads without a stated budget get scored down automatically. Real numbers are always visible. Stop spending an hour on a proposal that was never going to pay your rate — because you couldn\'t see the number until the end.' },
-              { icon: 'link', title: 'Apply directly — we\'re never in the way', desc: 'Every lead links straight to the original post on the client\'s platform. You deal with them directly. LeadFlow is a filter, not a middleman. No platform commission, no mediated conversation, no gatekeeping.' },
-              { icon: 'grid', title: 'Nothing promising slips through the cracks', desc: 'Track everything from first look to won contract — one clean pipeline view, no spreadsheet, no "wait, did I reply to that one?" Every application has a clear status. Nothing gets lost.' },
-            ].map((f, i) => (
-              <div key={i} className="feature-cell" data-num={String(i + 1).padStart(2, '0')}>
-                <div className="feature-icon">
-                  <svg width="28" height="28" fill="none" stroke="var(--amber)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                    {f.icon === 'star' && <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6L12 2z" />}
-                    {f.icon === 'clock' && <><circle cx="12" cy="12" r="9" /><polyline points="12 7 12 12 15.5 14.5" /></>}
-                    {f.icon === 'filter' && <><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" /></>}
-                    {f.icon === 'pound' && <><path d="M8 16h9M7 20h10M10 16v-5a3 3 0 016 0v1M10 11a3 3 0 01-3 3H7" /></>}
-                    {f.icon === 'link' && <><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></>}
-                    {f.icon === 'grid' && <><rect x="2" y="3" width="5" height="18" rx="1" /><rect x="9.5" y="3" width="5" height="12" rx="1" /><rect x="17" y="3" width="5" height="7" rx="1" /></>}
-                  </svg>
-                </div>
-                <div className="feature-title">{f.title}</div>
-                <div className="feature-desc">{f.desc}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── PRICING ── */}
-      <section id="pricing" className="reveal section">
-        <div style={{ maxWidth: '1140px', margin: '0 auto', padding: '0 32px' }}>
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10.5px', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--amber)', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <span style={{ display: 'inline-block', width: '20px', height: '1px', background: 'var(--amber)', opacity: 0.6 }} />
-            Pricing
-          </div>
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(30px, 3.5vw, 46px)', fontWeight: 700, color: 'var(--cream)', lineHeight: 1.1, letterSpacing: '-0.025em' }}>
-            No hidden steps. Here's<br /><em style={{ fontStyle: 'italic', color: 'var(--amber)' }}>exactly</em> what happens.
-          </h2>
-          <p style={{ fontSize: '15px', color: 'var(--slate)', marginTop: '12px', maxWidth: '480px', lineHeight: 1.65 }}>
-            Start with the full Pro feed today — no card, no commitment. We'll tell you before anything changes.
-          </p>
-
-          <div className="trial-timeline" style={{ margin: '40px 0 48px' }}>
-            {[
-              { day: 'Today', amber: true, desc: '<strong>You unlock the full Pro feed.</strong> Unlimited leads, AI scores, skill filtering — everything, immediately. No card needed.' },
-              { day: 'Day 5', amber: false, desc: '<strong>We email you a heads-up.</strong> Two days before anything happens, we\'ll remind you the trial is ending — so you can decide without pressure.' },
-              { day: 'Day 7', amber: false, desc: '<strong>Your first charge, if you stay.</strong> Cancel any time before then and you pay nothing. One click in your account settings.' },
-            ].map((t, i) => (
-              <div key={t.day} className="trial-step" style={{ borderBottom: i < 2 ? '1px solid var(--border)' : 'none' }}>
-                <div className="trial-day" style={{ color: t.amber ? 'var(--amber)' : 'var(--amber)' }}>{t.day}</div>
-                <div className="trial-connector">
-                  <div className={`trial-dot ${t.amber ? 'trial-dot-amber' : ''}`} />
-                  {i < 2 && <div className="trial-line" />}
-                </div>
-                <div className="trial-desc" dangerouslySetInnerHTML={{ __html: t.desc }} />
-              </div>
-            ))}
-          </div>
-
-          <div className="pricing-toggle-row">
-            <span style={{ fontSize: '14px', fontWeight: 500, color: 'var(--slate)' }}>Choose a plan</span>
-            <div className="pricing-toggle">
-              <span className="toggle-label active" style={{ color: annual ? 'var(--slate)' : 'var(--cream)' }}>Monthly</span>
-              <button onClick={() => setAnnual(!annual)}
-                className={`toggle-switch ${annual ? 'on' : ''}`}
-                role="switch" aria-checked={annual}>
-                <div className="toggle-knob" />
-              </button>
-              <span className="toggle-label" style={{ color: annual ? 'var(--cream)' : 'var(--slate)' }}>Annual</span>
-              <span className="annual-badge" style={{ opacity: annual ? 1 : 0.4 }}>Save 2 months</span>
-            </div>
-          </div>
-
-          <div className="pricing-grid-2">
-            <div className="pricing-card-2">
-              <div className="plan-tier">Free</div>
-              <div className="plan-cost-row">
-                <div className="plan-big-price">£0</div>
-                <div className="plan-cost-meta">forever · no expiry</div>
-              </div>
-              <div className="plan-desc-2">For exploring. 3 leads a week to see if the quality is worth it — no deadline, no catch.</div>
-              <Link href="/auth/signup" className="plan-btn plan-btn-secondary" style={{ marginBottom: '24px', display: 'block', width: '100%', textAlign: 'center', padding: '12px', borderRadius: 'var(--radius)', fontSize: '13.5px', fontWeight: 600, textDecoration: 'none', fontFamily: 'var(--font-body)', transition: 'all 0.15s', background: 'transparent', color: 'var(--slate)', border: '1px solid var(--border-card)' }}>Start with free plan</Link>
-              <div className="plan-feat-group">
-                <div className="plan-feat-label">What's included</div>
-                {['3 leads per week', 'AI quality scores visible', 'Direct links to original posts'].map(f => (
-                  <div key={f} className="plan-feat-row">
-                    <svg width="14" height="14" fill="none" stroke="var(--green-score)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5" /></svg>
-                    {f}
-                  </div>
-                ))}
-              </div>
-              <div className="plan-upgrade-hint">
-                <svg width="13" height="13" fill="none" stroke="var(--amber)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
-                Upgrade to Pro for unlimited leads + skill filtering
-              </div>
-            </div>
-
-            <div className="pricing-card-2 pricing-card-featured">
-              <div className="plan-badge-2">
-                <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21 12 17.77 5.82 21 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
-                Most popular · 7-day free trial
-              </div>
-              <div className="plan-tier">Pro</div>
-              <div className="plan-cost-row">
-                <div className="plan-big-price">£{annual ? '24' : '29'}</div>
-                <div className="plan-cost-meta" style={{ color: 'var(--slate-2)' }}>{annual ? 'per month, billed annually' : 'per month · cancel any time'}</div>
-              </div>
-              {annual && <div className="plan-saving">You save £70 vs monthly — 2 months free</div>}
-              <div className="plan-desc-2">For freelancers who want a steady pipeline without the daily grind of job board trawling.</div>
-              <Link href="/auth/signup" className="plan-btn plan-btn-primary" style={{ marginBottom: '12px', display: 'block', width: '100%', textAlign: 'center', padding: '12px', borderRadius: 'var(--radius)', fontSize: '13.5px', fontWeight: 600, textDecoration: 'none', fontFamily: 'var(--font-body)', transition: 'all 0.15s', background: 'var(--amber)', color: 'var(--ink)', border: 'none' }}>Start my 7-day free trial</Link>
-              <div className="plan-guarantee" style={{ marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11.5px', fontFamily: 'var(--font-mono)', color: 'var(--slate-2)', letterSpacing: '0.02em' }}>
-                <svg width="13" height="13" fill="none" stroke="var(--green-score)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
-                First charge on day 7. We remind you on day 5.
-              </div>
-              <div className="plan-feat-group">
-                <div className="plan-feat-label">Everything in Free, plus</div>
-                {[
-                  'Unlimited leads, every 6 hours',
-                  'Skill + rate filtering',
-                  'Daily email digest',
-                  'Pipeline tracking',
-                  'Custom lead alerts',
-                  'Analytics dashboard + CSV export',
-                  'Priority support + onboarding call',
-                ].map(f => (
-                  <div key={f} className="plan-feat-row">
-                    <svg width="14" height="14" fill="none" stroke="var(--amber)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5" /></svg>
-                    {f}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── FAQ ── */}
-      <section className="reveal section">
-        <div style={{ maxWidth: '780px', margin: '0 auto', padding: '0 32px' }}>
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10.5px', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--amber)', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <span style={{ display: 'inline-block', width: '20px', height: '1px', background: 'var(--amber)', opacity: 0.6 }} />
-            FAQ
-          </div>
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(30px, 3.5vw, 46px)', fontWeight: 700, color: 'var(--cream)', lineHeight: 1.1, letterSpacing: '-0.025em' }}>
-            Questions worth asking<br /><em style={{ fontStyle: 'italic', color: 'var(--amber)' }}>before you start.</em>
-          </h2>
-          <div className="faq-list">
-            {faqs.map((faq, i) => (
-              <div key={i} className="faq-item">
-                <button onClick={() => setOpenFaq(openFaq === i ? null : i)} className="faq-btn" aria-expanded={openFaq === i}>
-                  {faq.q}
-                  <span className="faq-icon" style={{ transform: openFaq === i ? 'rotate(45deg)' : 'rotate(0)', color: openFaq === i ? 'var(--amber)' : 'var(--slate-2)' }}>+</span>
-                </button>
-                <div className="faq-answer" style={{ maxHeight: openFaq === i ? '200px' : '0' }}>
-                  <div className="faq-answer-inner">{faq.a}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── CTA ── */}
-      <section className="cta-section reveal">
-        <div className="cta-inner">
-          <div className="eyebrow" style={{ justifyContent: 'center' }}>Get started</div>
-          <h2>Your next client lead<br />arrives in <em>under an hour.</em></h2>
-          <p>Set up your profile in 2 minutes. We'll scan the boards and push your first matched, scored leads before you've finished your next coffee. No card. We remind you on day 5 before anything gets charged.</p>
-          <div className="cta-btns">
-            <Link href="/auth/signup" className="btn-primary">Start my free trial →</Link>
-            <Link href="/auth/login" className="btn-secondary">Log in</Link>
-          </div>
-          <div style={{ marginTop: '20px', fontSize: '12px', fontFamily: 'var(--font-mono)', color: 'var(--slate-2)', letterSpacing: '0.03em' }}>
-            7-day trial · reminder on day 5 · cancel in one click
-          </div>
-        </div>
-      </section>
-
-      {/* ── STICKY BAR ── */}
-      <div className={`sticky-bar ${showSticky ? 'visible' : ''}`}>
-        <p><span style={{ color: 'var(--cream)' }}>7-day free trial</span> · Full Pro feed from day one · We remind you on day 5 · Cancel any time</p>
-        <Link href="/auth/signup" className="btn-amber">Start my free trial →</Link>
       </div>
 
-      {/* ── FOOTER ── */}
-      <footer>
-        <div className="footer-inner">
-          <div className="footer-grid">
-            <div className="footer-brand">
-              <Link href="/" className="logo" style={{ marginBottom: '4px' }}>
-                <div className="logo-mark">LF</div>
-                LeadFlow
-              </Link>
-              <p>Quality freelance leads, scored by AI, delivered every 6 hours. Stop hunting, start choosing.</p>
+      {/* ═══ FOOTER ═══ */}
+      <footer className="footer" aria-label="Footer">
+        <div className="container" style={{ paddingTop: 60, paddingBottom: 40 }}>
+          <div className="footer-grid" style={{ marginBottom: 48 }}>
+            <div>
+              <a href="#" style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }} aria-label="LeadFlow home">
+                <span className="nav-logo-mark"><span>LF</span></span>
+                <span style={{ fontFamily: "'Space Grotesk',sans-serif", color: '#fff', fontWeight: 700, fontSize: '1.05rem', letterSpacing: '-.02em' }}>LeadFlow</span>
+              </a>
+              <p style={{ fontSize: '.875rem', color: 'var(--slate-400)', lineHeight: 1.65, maxWidth: 250 }}>AI-scored freelance leads, matched to your skills and delivered every 6 hours.</p>
             </div>
-            <div className="footer-col">
-              <h5>Product</h5>
-              <ul>
-                <li><a href="#features">Features</a></li>
-                <li><a href="#pricing">Pricing</a></li>
-                <li><a href="/blog">Blog</a></li>
+            <nav aria-label="Product">
+              <h4>Product</h4>
+              <ul style={{ display: 'flex', flexDirection: 'column', gap: 11, listStyle: 'none' }}>
+                <li><a href="#features" className="flink">Features</a></li>
+                <li><a href="#pricing" className="flink">Pricing</a></li>
+                <li><a href="#how" className="flink">How it works</a></li>
               </ul>
-            </div>
-            <div className="footer-col">
-              <h5>Company</h5>
-              <ul>
-                <li><a href="/about">About</a></li>
-                <li><a href="/contact">Contact</a></li>
-                <li><a href="/careers">Careers</a></li>
+            </nav>
+            <nav aria-label="Company">
+              <h4>Company</h4>
+              <ul style={{ display: 'flex', flexDirection: 'column', gap: 11, listStyle: 'none' }}>
+                <li><a href="/about" className="flink">About</a></li>
+                <li><a href="/blog" className="flink">Blog</a></li>
+                <li><a href="/contact" className="flink">Contact</a></li>
               </ul>
-            </div>
-            <div className="footer-col">
-              <h5>Legal</h5>
-              <ul>
-                <li><a href="/privacy">Privacy policy</a></li>
-                <li><a href="/terms">Terms of service</a></li>
-                <li><a href="/cookies">Cookie policy</a></li>
+            </nav>
+            <nav aria-label="Legal">
+              <h4>Legal</h4>
+              <ul style={{ display: 'flex', flexDirection: 'column', gap: 11, listStyle: 'none' }}>
+                <li><a href="/privacy" className="flink">Privacy</a></li>
+                <li><a href="/terms" className="flink">Terms</a></li>
+                <li><a href="/cookies" className="flink">Cookies</a></li>
               </ul>
-            </div>
+            </nav>
           </div>
-          <div className="footer-bottom">
-            <span className="footer-copy">&copy; {new Date().getFullYear()} LeadFlow. All rights reserved.</span>
-            <div className="footer-links">
-              <a href="/privacy">Privacy</a>
-              <a href="/terms">Terms</a>
-            </div>
+          <div style={{ borderTop: '1px solid var(--ink-700)', paddingTop: 24, display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '.78rem', color: 'var(--slate-600)' }}>© 2026 LeadFlow. All rights reserved.</span>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '.72rem', color: 'var(--lime-deep)', display: 'flex', alignItems: 'center', gap: 7 }}>
+              <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--lime)', animation: 'blink 1.6s infinite' }}></span>
+              updating every 6 hours
+            </span>
           </div>
         </div>
       </footer>
