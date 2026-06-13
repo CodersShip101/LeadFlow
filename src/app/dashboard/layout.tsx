@@ -123,11 +123,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {/* Profile warning banner */}
         {profile && (!profile.skills || profile.skills.length === 0 || !profile.hourly_rate) && (
           <div className="flex items-center gap-2.5 px-4 md:px-8 py-2.5 text-xs font-medium animate-fadeIn"
-            style={{ background: 'rgba(255,176,32,.1)', borderBottom: '1px solid rgba(255,176,32,.25)' }}>
-            <i className="ti ti-alert-triangle" style={{ color: 'var(--amber)' }} />
-            <span style={{ color: 'var(--slate-700)' }}>Complete your profile to get matched leads.</span>
+            style={{ background: 'var(--mid-bg)', borderBottom: '1px solid #F0D9A0' }}>
+            <i className="ti ti-alert-triangle" style={{ color: 'var(--mid)' }} />
+            <span style={{ color: '#7A5A12' }}>Complete your profile to get matched leads.</span>
             <button onClick={() => router.push('/dashboard/profile')}
-              className="underline font-semibold ml-auto" style={{ color: 'var(--slate-700)' }}>Add skills &rarr;</button>
+              className="underline font-semibold ml-auto" style={{ color: '#5E4609' }}>Add skills &rarr;</button>
           </div>
         )}
 

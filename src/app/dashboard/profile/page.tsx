@@ -62,80 +62,81 @@ export default function ProfilePage() {
         <h1>Settings</h1>
       </div>
 
-      <div className="flex gap-4 border-b mb-6" style={{ borderColor: 'var(--slate-200)' }}>
+      <div className="tabs">
         {(['profile', 'account'] as const).map(t => (
-          <button key={t} onClick={() => setTab(t)}
-            className="pb-2 text-sm font-medium capitalize transition-all"
-            style={{ color: tab === t ? 'var(--lime-deep)' : 'var(--slate-500)', borderBottom: tab === t ? '2px solid var(--lime-deep)' : '2px solid transparent' }}>
-            {t}
-          </button>
+          <button key={t} onClick={() => setTab(t)} className={`tab ${tab === t ? 'on' : ''}`}>{t}</button>
         ))}
       </div>
 
       {tab === 'profile' && (
-        <div className="space-y-5">
-          <div className="auth-field">
+        <div className="section-card">
+          <div className="field">
             <label>Full name</label>
             <input value={fullName} onChange={e => setFullName(e.target.value)} className="input" />
           </div>
-          <div className="auth-field">
-            <label>Location</label>
-            <input value={location} onChange={e => setLocation(e.target.value)} className="input" placeholder="e.g. London, UK" />
+          <div className="field-row">
+            <div className="field">
+              <label>Location</label>
+              <input value={location} onChange={e => setLocation(e.target.value)} className="input" placeholder="e.g. London, UK" />
+            </div>
+            <div className="field">
+              <label>Hourly rate (&pound;)</label>
+              <input value={rate} onChange={e => setRate(e.target.value)} type="number" className="input" />
+            </div>
           </div>
-          <div className="auth-field">
-            <label>Hourly rate (&pound;)</label>
-            <input value={rate} onChange={e => setRate(e.target.value)} type="number" className="input" />
+          <div className="field-row">
+            <div className="field">
+              <label>Experience level</label>
+              <select value={exp} onChange={e => setExp(e.target.value)} className="input">
+                <option value="">Select&hellip;</option>
+                {['Junior (0-2 years)','Mid (2-5)','Senior (5-10)','Expert (10+)'].map(o => <option key={o} value={o}>{o}</option>)}
+              </select>
+            </div>
+            <div className="field">
+              <label>Availability</label>
+              <select value={avail} onChange={e => setAvail(e.target.value)} className="input">
+                <option value="">Select&hellip;</option>
+                <option value="now">Available now</option>
+                <option value="soon">Available from [date]</option>
+                <option value="no">Not currently available</option>
+              </select>
+            </div>
           </div>
-          <div className="auth-field">
-            <label>Experience level</label>
-            <select value={exp} onChange={e => setExp(e.target.value)} className="input">
-              <option value="">Select&hellip;</option>
-              {['Junior (0-2 years)','Mid (2-5)','Senior (5-10)','Expert (10+)'].map(o => <option key={o} value={o}>{o}</option>)}
-            </select>
-          </div>
-          <div className="auth-field">
-            <label>Availability</label>
-            <select value={avail} onChange={e => setAvail(e.target.value)} className="input">
-              <option value="">Select&hellip;</option>
-              <option value="now">Available now</option>
-              <option value="soon">Available from [date]</option>
-              <option value="no">Not currently available</option>
-            </select>
-          </div>
-          <div className="auth-field">
+          <div className="field">
             <label>Portfolio URL</label>
             <input value={portfolio} onChange={e => setPortfolio(e.target.value)} className="input" placeholder="https://&hellip;" />
           </div>
-          <div className="auth-field">
+          <div className="field">
             <label>Skills</label>
-            <div className="auth-skills-grid max-h-48 overflow-y-auto p-2 rounded-lg border" style={{ borderColor: 'var(--slate-200)' }}>
+            <div className="skill-grid">
               {skillOptions.map(sk => (
                 <button key={sk} onClick={() => toggleSkill(sk)}
-                  className={`auth-skill-pill ${skills.includes(sk) ? 'selected' : ''}`}>
-                  {sk}
-                </button>
+                  className={`skill-pick ${skills.includes(sk) ? 'on' : ''}`}>{sk}</button>
               ))}
             </div>
           </div>
-          <button onClick={handleSave} disabled={saving} className="btn-p px-8">
-            {saving ? 'Saving&hellip;' : 'Save'}
+          <button onClick={handleSave} disabled={saving} className="btn btn-primary" style={{ marginTop: 8 }}>
+            {saving ? 'Saving\u2026' : 'Save'}
           </button>
         </div>
       )}
 
       {tab === 'account' && (
-        <div className="space-y-4">
-          <div className="card p-5">
-            <p className="text-sm font-semibold" style={{ color: 'var(--ink-900)' }}>Email</p>
-            <p className="text-xs mt-1" style={{ color: 'var(--slate-500)' }}>{profile?.email || '\u2014'}</p>
-          </div>
-          <div className="card p-5">
-            <p className="text-sm font-semibold" style={{ color: 'var(--ink-900)' }}>Plan</p>
-            <p className="text-xs mt-1 capitalize" style={{ color: 'var(--slate-500)' }}>{profile?.subscription_status || 'free'}</p>
+        <div>
+          <div className="section-card">
+            <div className="field">
+              <label>Email</label>
+              <input className="input" value={profile?.email || '\u2014'} disabled style={{ color: 'var(--slate)' }} />
+            </div>
+            <div className="field">
+              <label>Plan</label>
+              <input className="input" value={profile?.subscription_status || 'free'} disabled style={{ color: 'var(--slate)', textTransform: 'capitalize' }} />
+            </div>
           </div>
           <button onClick={async () => { await supabase.auth.signOut(); router.push('/') }}
-            className="px-6 py-2.5 rounded-lg text-sm font-semibold transition-all"
-            style={{ background: 'rgba(255,107,94,.1)', color: 'var(--coral)' }}>Sign out</button>
+            className="btn" style={{ color: 'var(--coral)', background: 'rgba(229,87,61,.1)', marginTop: 8 }}>
+            <i className="ti ti-logout" /> Sign out
+          </button>
         </div>
       )}
     </div>

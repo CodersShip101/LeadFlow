@@ -49,53 +49,51 @@ export default function OnboardingPage() {
     <div className="min-h-screen flex items-center justify-center px-4 py-12" style={{ background: 'var(--paper)' }}>
       <div className="w-full max-w-lg">
         <div className="text-center mb-8">
-          <div className="auth-logo-mark mx-auto mb-3" style={{ width: '40px', height: '40px' }}>
-            <span>LF</span>
+          <div style={{ width: 40, height: 40, borderRadius: 10, background: 'var(--lime)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px' }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, fontSize: 14, color: 'var(--ink-950)' }}>LF</span>
           </div>
-          <h1 className="display text-xl" style={{ color: 'var(--ink-900)' }}>Let&apos;s get you set up</h1>
-          <p className="text-sm mt-1" style={{ color: 'var(--slate-500)' }}>Step {step + 1} of {steps.length}</p>
+          <h1 className="display" style={{ fontSize: '1.4rem', color: 'var(--ink)' }}>Let&apos;s get you set up</h1>
+          <p style={{ color: 'var(--slate)', fontSize: 14, marginTop: 4 }}>Step {step + 1} of {steps.length}</p>
         </div>
 
-        <div className="flex gap-1.5 mb-8">
+        <div style={{ display: 'flex', gap: 6, marginBottom: 32 }}>
           {steps.map((_, i) => (
-            <div key={i} className="flex-1 h-1.5 rounded-full transition-all duration-500" style={{ background: i <= step ? 'var(--lime)' : 'var(--slate-200)' }} />
+            <div key={i} style={{ flex: 1, height: 6, borderRadius: 99, background: i <= step ? 'var(--lime)' : 'var(--line)', transition: 'background .5s' }} />
           ))}
         </div>
 
-        <div className="min-h-[280px]">
+        <div style={{ minHeight: 280 }}>
           {step === 0 && (
-            <div className="auth-field">
+            <div className="field">
               <label>Full name</label>
               <input value={fullName} onChange={e => setFullName(e.target.value)} className="input" placeholder="Your name" autoFocus />
             </div>
           )}
           {step === 1 && (
             <div>
-              <p className="text-sm mb-4" style={{ color: 'var(--slate-500)' }}>What do you specialise in?</p>
-              <div className="auth-skills-grid max-h-72 overflow-y-auto">
+              <p style={{ color: 'var(--slate)', fontSize: 14, marginBottom: 16 }}>What do you specialise in?</p>
+              <div className="skill-grid" style={{ maxHeight: 288, overflowY: 'auto', padding: 8 }}>
                 {skillOptions.map(sk => (
                   <button key={sk} onClick={() => toggleSkill(sk)}
-                    className={`auth-skill-pill ${skills.includes(sk) ? 'selected' : ''}`}>
-                    {sk}
-                  </button>
+                    className={`skill-pick ${skills.includes(sk) ? 'on' : ''}`}>{sk}</button>
                 ))}
               </div>
             </div>
           )}
           {step === 2 && (
-            <div className="space-y-5">
-              <div className="auth-field">
+            <div>
+              <div className="field">
                 <label>Hourly rate (&pound;)</label>
                 <input value={rate} onChange={e => setRate(e.target.value)} type="number" className="input" placeholder="e.g. 75" autoFocus />
               </div>
-              <div className="auth-field">
+              <div className="field">
                 <label>Experience level</label>
                 <select value={exp} onChange={e => setExp(e.target.value)} className="input">
                   <option value="">Select&hellip;</option>
                   {['Junior (0-2 years)','Mid (2-5)','Senior (5-10)','Expert (10+)'].map(o => <option key={o} value={o}>{o}</option>)}
                 </select>
               </div>
-              <div className="auth-field">
+              <div className="field">
                 <label>Availability</label>
                 <select value={avail} onChange={e => setAvail(e.target.value)} className="input">
                   <option value="">Select&hellip;</option>
@@ -108,15 +106,15 @@ export default function OnboardingPage() {
           )}
         </div>
 
-        <div className="flex gap-3 mt-8">
-          {step > 0 && <button onClick={goBack} className="btn-line flex-1 justify-center">Back</button>}
+        <div style={{ display: 'flex', gap: 12, marginTop: 32 }}>
+          {step > 0 && <button onClick={goBack} className="btn btn-ghost" style={{ flex: 1 }}>Back</button>}
           {step < 2 ? (
-            <button onClick={goNext} disabled={!canProceed()} className="btn-p flex-[2] justify-center" style={{ opacity: canProceed() ? 1 : 0.45 }}>
+            <button onClick={goNext} disabled={!canProceed()} className="btn btn-primary" style={{ flex: 2, opacity: canProceed() ? 1 : 0.45 }}>
               Next <i className="ti ti-arrow-right" />
             </button>
           ) : (
-            <button onClick={handleFinish} disabled={saving} className="btn-p flex-[2] justify-center" style={{ opacity: saving ? 0.45 : 1 }}>
-              {saving ? 'Setting up&hellip;' : 'Go to my feed'}
+            <button onClick={handleFinish} disabled={saving} className="btn btn-primary" style={{ flex: 2, opacity: saving ? 0.45 : 1 }}>
+              {saving ? 'Setting up\u2026' : 'Go to my feed'}
             </button>
           )}
         </div>

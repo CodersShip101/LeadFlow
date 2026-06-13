@@ -7,13 +7,13 @@ import toast from 'react-hot-toast'
 import type { Lead, Profile, Application } from '@/types'
 import { computeMatchExplanation } from '@/types'
 import { getSourceInfo, formatBudgetGBP, isNewLead, formatDate } from '@/lib/utils'
-
+import ScoreGauge from '@/components/ScoreGauge'
 
 const statusConfig: Record<string, { label: string, color: string, bg: string }> = {
-  saved:      { label: 'Saved', color: 'var(--lime-dim)', bg: 'rgba(196,240,0,.12)' },
-  interested: { label: 'Interested', color: 'var(--lime-deep)', bg: 'rgba(196,240,0,.12)' },
-  applied:    { label: 'Applied', color: 'var(--amber)', bg: 'rgba(255,176,32,.1)' },
-  hired:      { label: 'Hired', color: 'var(--green-score)', bg: 'rgba(61,219,122,.1)' },
+  saved:      { label: 'Saved', color: 'var(--lime-ink)', bg: 'var(--lime-dim)' },
+  interested: { label: 'Interested', color: 'var(--lime-deep)', bg: 'var(--lime-dim)' },
+  applied:    { label: 'Applied', color: 'var(--mid)', bg: 'var(--mid-bg)' },
+  hired:      { label: 'Won', color: 'var(--hi)', bg: 'var(--hi-bg)' },
 }
 
 export default function LeadDetailPage() {
@@ -122,44 +122,39 @@ export default function LeadDetailPage() {
         </button>
 
         <div className="card p-6 md:p-8 !shadow-none">
-          <div className="flex items-start justify-between gap-4">
+            <div className="flex items-start justify-between gap-4">
             <div className="flex items-center gap-3 min-w-0">
               <button onClick={() => { if (!isFree && lead.source_url) window.open(lead.source_url, '_blank', 'noopener,noreferrer') }}
                 className="text-xs font-semibold px-2.5 py-1 rounded-lg shrink-0 transition-opacity hover:opacity-80"
                 style={{ background: source.bg, color: source.color }}>{source.label}</button>
-              {isNewLead(lead.posted_date) && <span className="dash-badge-new text-[10px] px-2 py-0.5 rounded-lg">New</span>}
+              {isNewLead(lead.posted_date) && <span className="lead-state st-new text-[10px] px-2 py-0.5 rounded-lg">New</span>}
               <div className="min-w-0">
-                <h1 className="text-xl md:text-2xl font-bold truncate" style={{ color: 'var(--ink-900)' }}>{lead.title}</h1>
-                <div className="flex items-center gap-2 mt-0.5 text-xs" style={{ color: 'var(--slate-400)' }}>
+                <h1 className="text-xl md:text-2xl font-bold truncate" style={{ color: 'var(--ink)' }}>{lead.title}</h1>
+                <div className="flex items-center gap-2 mt-0.5 text-xs" style={{ color: 'var(--slate-2)' }}>
                   {lead.project_type && <span className="capitalize">{lead.project_type}</span>}
                   {lead.client_location && <><i className="ti ti-briefcase" style={{ fontSize: '10px' }} /><span>{lead.client_location}</span></>}
                 </div>
               </div>
             </div>
-            <span className="dash-badge-status text-xs" style={{
-              background: score >= 8 ? 'rgba(61,219,122,.12)' : score >= 5 ? 'rgba(255,176,32,.1)' : 'var(--slate-100)',
-              color: score >= 8 ? 'var(--green-score)' : score >= 5 ? 'var(--amber)' : 'var(--slate-500)',
-            }}>
-              {score}/10
-            </span>
+            <ScoreGauge score={score} />
           </div>
 
           <div className="flex flex-wrap items-center gap-2 mt-4">
-            {budget && <span className="dash-badge-status" style={{ background: 'rgba(196,240,0,.12)', color: 'var(--lime-deep)' }}>{budget}</span>}
-            {lead.project_type && <span className="dash-badge-status" style={{ background: 'var(--slate-100)', color: 'var(--slate-500)' }}>{lead.project_type}</span>}
-            {lead.client_location && <span className="dash-badge-status flex items-center gap-1" style={{ background: 'var(--slate-100)', color: 'var(--slate-500)' }}>
+            {budget && <span className="lead-state" style={{ background: 'var(--hi-bg)', color: 'var(--hi)' }}>{budget}</span>}
+            {lead.project_type && <span className="lead-state">{lead.project_type}</span>}
+            {lead.client_location && <span className="lead-state flex items-center gap-1">
               <i className="ti ti-map-pin" style={{ fontSize: '12px' }} /> {lead.client_location}
             </span>}
           </div>
 
           <div className="mt-6">
-            <h3 className="text-sm font-semibold mb-2" style={{ color: 'var(--ink-900)' }}>Description</h3>
-            <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: 'var(--slate-600)' }}>{lead.description}</p>
+            <h3 className="text-sm font-semibold mb-2" style={{ color: 'var(--ink)' }}>Description</h3>
+            <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: 'var(--ink-2)' }}>{lead.description}</p>
           </div>
 
           {lead.skills_required && lead.skills_required.length > 0 && (
             <div className="mt-6">
-              <h3 className="text-sm font-semibold mb-2" style={{ color: 'var(--ink-900)' }}>Skills Required</h3>
+              <h3 className="text-sm font-semibold mb-2" style={{ color: 'var(--ink)' }}>Skills Required</h3>
               <div className="flex flex-wrap gap-2">
                 {lead.skills_required.map(skill => (
                   <span key={skill} className="badge-skill">{skill}</span>
@@ -168,7 +163,7 @@ export default function LeadDetailPage() {
             </div>
           )}
 
-          <div className="flex flex-wrap gap-4 mt-6 text-xs" style={{ color: 'var(--slate-400)' }}>
+          <div className="flex flex-wrap gap-4 mt-6 text-xs" style={{ color: 'var(--slate)' }}>
             <span className="flex items-center gap-1">
               <i className="ti ti-calendar" style={{ fontSize: '12px' }} />
               Posted {new Date(lead.posted_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
@@ -182,63 +177,63 @@ export default function LeadDetailPage() {
           </div>
 
           {lead.source_url && (
-            <div className="mt-5 pt-5" style={{ borderTop: '1px solid var(--slate-200)' }}>
-              <h3 className="text-sm font-semibold mb-2" style={{ color: 'var(--ink-900)' }}>Source</h3>
+            <div className="mt-5 pt-5" style={{ borderTop: '1px solid var(--line)' }}>
+              <h3 className="text-sm font-semibold mb-2" style={{ color: 'var(--ink)' }}>Source</h3>
               {isFree ? (
-                <div className="rounded-lg p-5 text-center" style={{ background: 'var(--slate-100)', border: '1px solid var(--slate-200)' }}>
-                  <i className="ti ti-lock text-2xl" style={{ color: 'var(--slate-300)', display: 'block', margin: '0 auto 8px' }} />
-                  <p className="text-xs font-medium" style={{ color: 'var(--slate-500)' }}>Source URL hidden</p>
-                  <p className="text-xs mt-1" style={{ color: 'var(--slate-400)' }}>Upgrade to Pro to see where this lead came from and apply directly.</p>
-                  <button onClick={() => router.push('/dashboard/billing')} className="btn-p btn-sm mt-3">Upgrade to Pro &mdash; &pound;49/month</button>
+                <div className="lock-card">
+                  <i className="ti ti-lock text-2xl" style={{ color: 'var(--slate)', display: 'block', margin: '0 auto 8px' }} />
+                  <p className="text-xs font-medium" style={{ color: 'var(--ink-2)' }}>Source URL hidden</p>
+                  <p className="text-xs mt-1" style={{ color: 'var(--slate)' }}>Upgrade to Pro to see where this lead came from and apply directly.</p>
+                  <button onClick={() => router.push('/dashboard/billing')} className="btn btn-primary btn-sm mt-3">Upgrade to Pro &mdash; &pound;49/month</button>
                 </div>
               ) : (
                 <a href={lead.source_url} target="_blank" rel="noopener noreferrer"
-                  className="text-sm hover:underline inline-flex items-center gap-1" style={{ color: 'var(--lime-dim)' }}>
+                  className="text-sm hover:underline inline-flex items-center gap-1" style={{ color: 'var(--lime)' }}>
                   {lead.source_url} <i className="ti ti-external-link" style={{ fontSize: '12px' }} />
                 </a>
               )}
             </div>
           )}
 
-          <div className="mt-5 pt-5" style={{ borderTop: '1px solid var(--slate-200)' }}>
+          <div className="mt-5 pt-5" style={{ borderTop: '1px solid var(--line)' }}>
             <div className="flex items-center justify-between mb-1">
-              <h3 className="text-sm font-semibold" style={{ color: 'var(--ink-900)' }}>Why this score?</h3>
-              <span className="font-mono font-bold text-sm" style={{ color: score >= 8 ? 'var(--green-score)' : score >= 5 ? 'var(--amber)' : 'var(--slate-500)' }}>{score}/10</span>
+              <h3 className="text-sm font-semibold" style={{ color: 'var(--ink)' }}>Why this score?</h3>
+              <span className="font-mono font-bold text-sm" style={{ color: score >= 8 ? 'var(--hi)' : score >= 5 ? 'var(--mid)' : 'var(--slate)' }}>{score}/10</span>
             </div>
-            <p className="text-xs mb-3" style={{ color: 'var(--slate-500)' }}>{matchInfo.why}</p>
+            <p className="text-xs mb-3" style={{ color: 'var(--slate)' }}>{matchInfo.why}</p>
             <div className="space-y-3">
               {matchInfo.subScores.map(s => (
                 <div key={s.label} className="flex items-start gap-2.5 text-xs">
-                  <i className={`ti ti-${s.icon}`} style={{ fontSize: '14px', color: 'var(--slate-400)', marginTop: '1px' }} />
+                  <i className={`ti ti-${s.icon}`} style={{ fontSize: '14px', color: 'var(--slate)', marginTop: '1px' }} />
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between">
-                      <span className="font-semibold" style={{ color: 'var(--ink-800)' }}>{s.label}</span>
-                      <span className="font-mono font-semibold" style={{ color: 'var(--slate-600)' }}>{s.value}/10 <span style={{ color: 'var(--slate-400)', fontWeight: 400 }}>· {Math.round(s.weight * 100)}%</span></span>
+                      <span className="font-semibold" style={{ color: 'var(--ink)' }}>{s.label}</span>
+                      <span className="font-mono font-semibold" style={{ color: 'var(--ink-2)' }}>{s.value}/10 <span style={{ color: 'var(--slate)', fontWeight: 400 }}>· {Math.round(s.weight * 100)}%</span></span>
                     </div>
                     <div className="score-bar mt-1"><span className={s.value >= 7 ? '' : s.value >= 4 ? 'warn' : 'weak'} style={{ width: `${s.value * 10}%` }} /></div>
-                    <p className="mt-1" style={{ color: 'var(--slate-500)', fontSize: '11px' }}>{s.detail}</p>
+                    <p className="mt-1" style={{ color: 'var(--slate)', fontSize: '11px' }}>{s.detail}</p>
                   </div>
                 </div>
               ))}
             </div>
-            <p className="text-xs mt-3 pt-3" style={{ color: 'var(--slate-500)', borderTop: '1px solid var(--slate-200)' }}>{matchInfo.summary}</p>
+            <p className="text-xs mt-3 pt-3" style={{ color: 'var(--slate)', borderTop: '1px solid var(--line)' }}>{matchInfo.summary}</p>
 
             {profile?.skills && profile.skills.length > 0 && (
-              <div className="mt-4 pt-3" style={{ borderTop: '1px solid var(--slate-200)' }}>
-                <div className="text-xs font-semibold mb-2" style={{ color: 'var(--ink-900)' }}>
+              <div className="mt-4 pt-3" style={{ borderTop: '1px solid var(--line)' }}>
+                <div className="text-xs font-semibold mb-2" style={{ color: 'var(--ink)' }}>
                   Skill Match: {matchInfo.skillMatch.matched.length}/{lead.skills_required?.length || 0}
                 </div>
                 {matchInfo.skillMatch.matched.length > 0 && (
                   <div className="flex flex-wrap gap-1.5 mb-1.5">
                     {matchInfo.skillMatch.matched.map(s => (
-                      <span key={s} className="badge-skill text-[10px] !bg-[rgba(61,219,122,.12)] !text-[var(--green-score)]">{s} &check;</span>
+                      <span key={s} className="badge-skill text-[10px]" style={{ background: 'var(--hi-bg)', color: 'var(--hi)' }}>{s} &check;</span>
                     ))}
                   </div>
                 )}
                 {matchInfo.skillMatch.missing.length > 0 && (
                   <div className="flex flex-wrap gap-1.5">
                     {matchInfo.skillMatch.missing.map(s => (
-                      <span key={s} className="text-[10px] px-2 py-0.5 rounded font-medium" style={{ background: 'var(--slate-100)', color: 'var(--slate-400)' }}>{s}</span>
+                      <span key={s} className="text-[10px] px-2 py-0.5 rounded font-medium" style={{ background: 'var(--paper-2)', color: 'var(--slate)' }}>{s}</span>
                     ))}
                   </div>
                 )}
@@ -247,14 +242,14 @@ export default function LeadDetailPage() {
           </div>
 
           {showOutcomePrompt && (
-            <div className="mt-5 pt-5" style={{ borderTop: '1px solid var(--slate-200)' }}>
-              <h3 className="text-sm font-semibold mb-2" style={{ color: 'var(--ink-900)' }}>Did you get this project?</h3>
-              <p className="text-xs mb-3" style={{ color: 'var(--slate-500)' }}>Help us improve your matches by telling us what happened.</p>
+            <div className="mt-5 pt-5" style={{ borderTop: '1px solid var(--line)' }}>
+              <h3 className="text-sm font-semibold mb-2" style={{ color: 'var(--ink)' }}>Did you get this project?</h3>
+              <p className="text-xs mb-3" style={{ color: 'var(--slate)' }}>Help us improve your matches by telling us what happened.</p>
               <div className="flex flex-wrap gap-2">
                 {[
-                  { outcome: 'won', label: 'Got it!', icon: 'ti-thumb-up', color: 'var(--green-score)', bg: 'rgba(61,219,122,.1)' },
-                  { outcome: 'lost', label: 'Did not get it', icon: 'ti-thumb-down', color: 'var(--coral)', bg: 'rgba(255,107,94,.1)' },
-                  { outcome: 'pending', label: 'Still waiting', icon: 'ti-clock', color: 'var(--amber)', bg: 'rgba(255,176,32,.1)' },
+                  { outcome: 'won', label: 'Got it!', icon: 'ti-thumb-up', color: 'var(--hi)', bg: 'var(--hi-bg)' },
+                  { outcome: 'lost', label: 'Did not get it', icon: 'ti-thumb-down', color: 'var(--coral)', bg: 'rgba(229,87,61,.1)' },
+                  { outcome: 'pending', label: 'Still waiting', icon: 'ti-clock', color: 'var(--mid)', bg: 'var(--mid-bg)' },
                 ].map(opt => (
                   <button key={opt.outcome} onClick={async () => {
                     const res = await fetch('/api/applications', {
@@ -278,19 +273,19 @@ export default function LeadDetailPage() {
           )}
 
           {application?.outcome && (
-            <div className="mt-5 pt-5" style={{ borderTop: '1px solid var(--slate-200)' }}>
+            <div className="mt-5 pt-5" style={{ borderTop: '1px solid var(--line)' }}>
               <div className="flex items-center gap-2 text-sm font-medium"
-                style={{ color: application.outcome === 'won' ? 'var(--green-score)' : application.outcome === 'lost' ? 'var(--coral)' : 'var(--amber)' }}>
+                style={{ color: application.outcome === 'won' ? 'var(--hi)' : application.outcome === 'lost' ? 'var(--coral)' : 'var(--mid)' }}>
                 <i className={`ti ${application.outcome === 'won' ? 'ti-thumb-up' : application.outcome === 'lost' ? 'ti-thumb-down' : 'ti-clock'}`} style={{ fontSize: '14px' }} />
                 {application.outcome === 'won' ? 'You got this project!' : application.outcome === 'lost' ? 'Did not get this project' : 'Still waiting on this project'}
               </div>
             </div>
           )}
 
-          <div className="flex flex-wrap items-center gap-3 mt-6 pt-5" style={{ borderTop: '1px solid var(--slate-200)' }}>
+          <div className="flex flex-wrap items-center gap-3 mt-6 pt-5" style={{ borderTop: '1px solid var(--line)' }}>
             {!isFree && lead.source_url && (
               <a href={lead.source_url} target="_blank" rel="noopener noreferrer"
-                className="btn-p !px-5 !py-2.5 text-sm no-underline">
+                className="btn btn-primary !px-5 !py-2.5 text-sm no-underline">
                 <i className="ti ti-external-link" style={{ fontSize: '14px' }} />
                 Apply on {source.label}
               </a>
@@ -298,8 +293,8 @@ export default function LeadDetailPage() {
             <button onClick={handleInterested}
               className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition-all min-h-[36px]"
               style={{
-                background: application?.status === 'interested' || application?.status === 'applied' || application?.status === 'hired' ? 'rgba(196,240,0,.12)' : 'var(--slate-100)',
-                color: application?.status === 'interested' || application?.status === 'applied' || application?.status === 'hired' ? 'var(--lime-deep)' : 'var(--slate-600)',
+                background: application?.status === 'interested' || application?.status === 'applied' || application?.status === 'hired' ? 'var(--lime-dim)' : 'var(--paper-2)',
+                color: application?.status === 'interested' || application?.status === 'applied' || application?.status === 'hired' ? 'var(--lime-ink)' : 'var(--ink-2)',
               }}>
               <i className="ti ti-send" style={{ fontSize: '14px' }} />
               {application?.status === 'interested' || application?.status === 'applied' || application?.status === 'hired' ? 'Interest Expressed' : 'Express Interest'}
@@ -308,8 +303,8 @@ export default function LeadDetailPage() {
             <button onClick={handleBookmark}
               className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all min-h-[36px] active:scale-[0.97]"
               style={{
-                background: application?.status === 'saved' ? 'rgba(196,240,0,.12)' : 'var(--slate-100)',
-                color: application?.status === 'saved' ? 'var(--lime-dim)' : 'var(--slate-500)',
+                background: application?.status === 'saved' ? 'var(--lime-dim)' : 'var(--paper-2)',
+                color: application?.status === 'saved' ? 'var(--lime-ink)' : 'var(--slate)',
               }}>
               <i className={`ti ${application?.status === 'saved' ? 'ti-bookmark-filled' : 'ti-bookmark'}`} style={{ fontSize: '14px' }} />
               {application?.status === 'saved' ? 'Saved' : 'Save for later'}
@@ -318,20 +313,20 @@ export default function LeadDetailPage() {
             {application?.status === 'interested' && (
               <button onClick={() => { updateApplication('applied'); toast.success('Marked as applied') }}
                 className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium min-h-[36px] transition-all hover:opacity-80 active:scale-[0.97]"
-                style={{ background: 'rgba(255,176,32,.1)', color: 'var(--amber)' }}>
+                style={{ background: 'var(--mid-bg)', color: 'var(--mid)' }}>
                 <i className="ti ti-send" style={{ fontSize: '14px' }} /> Mark as Applied
               </button>
             )}
             {application?.status === 'applied' && (
               <button onClick={() => { updateApplication('hired'); toast.success('Marked as hired!') }}
                 className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium min-h-[36px] transition-all hover:opacity-80 active:scale-[0.97]"
-                style={{ background: 'rgba(61,219,122,.1)', color: 'var(--green-score)' }}>
+                style={{ background: 'var(--hi-bg)', color: 'var(--hi)' }}>
                 <i className="ti ti-trophy" style={{ fontSize: '14px' }} /> Mark as Hired
               </button>
             )}
 
             {application?.status && application.status !== 'saved' && (
-              <span className="dash-badge-status" style={{ background: statusConfig[application.status]?.bg, color: statusConfig[application.status]?.color }}>
+              <span className="lead-state" style={{ background: statusConfig[application.status]?.bg, color: statusConfig[application.status]?.color }}>
                 {statusConfig[application.status]?.label || application.status}
               </span>
             )}

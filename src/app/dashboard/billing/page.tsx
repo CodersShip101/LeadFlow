@@ -4,33 +4,30 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-client'
 import type { Profile } from '@/types'
-import PricingCard from '@/components/PricingCard'
 
 const tiers = [
   {
     name: 'Starter',
     price: 0,
-    priceLabel: 'Free',
-    description: 'For freelancers just getting started.',
-    features: ['5 applications/month', 'Basic lead matching', 'Email support'],
-    cta: 'Get started free',
-    highlighted: false,
+    priceLabel: '£0',
+    features: ['Full scored feed', '5 applications / month', 'Pipeline tracking', 'Source links hidden', 'No analytics'],
+    cta: 'Current plan',
+    pro: false,
   },
   {
     name: 'Pro',
     price: 49,
-    priceLabel: '£49/month',
-    description: 'For serious freelancers ready to scale.',
-    features: ['Unlimited applications', 'Advanced matching', 'Priority support', 'Source URLs revealed', 'Analytics dashboard'],
-    cta: 'Upgrade to Pro',
-    highlighted: true,
+    priceLabel: '£49',
+    features: ['Everything in Starter', 'Unlimited applications', 'Direct source links', 'Pipeline analytics', 'Priority support'],
+    cta: 'Upgrade — £49/mo',
+    pro: true,
   },
 ]
 
 export default function BillingPage() {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [tab, setTab] = useState<'plans' | 'usage'>('plans')
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = true ? useState(true) : useState(false)
   const router = useRouter()
   const supabase = createClient()
 
@@ -47,7 +44,7 @@ export default function BillingPage() {
 
   if (loading) return (
     <div className="flex-1 flex items-center justify-center pt-16">
-      <div className="flex items-center gap-3" style={{ color: 'var(--slate-500)' }}>
+      <div className="flex items-center gap-3" style={{ color: 'var(--slate)' }}>
         <div className="w-2.5 h-2.5 rounded-full animate-pulse" style={{ background: 'var(--lime)' }} />
         <span className="text-sm">Loading&hellip;</span>
       </div>
@@ -55,46 +52,57 @@ export default function BillingPage() {
   )
 
   return (
-    <div className="flex-1 dash-page">
+    <div className="flex-1 dash-page max-w-3xl">
       <div className="dash-header">
-        <h1>Billing</h1>
+        <h1>Plan & billing</h1>
       </div>
 
-      <div className="flex gap-4 border-b mb-6" style={{ borderColor: 'var(--slate-200)' }}>
+      <div className="tabs">
         {(['plans', 'usage'] as const).map(t => (
-          <button key={t} onClick={() => setTab(t)}
-            className="pb-2 text-sm font-medium capitalize transition-all"
-            style={{ color: tab === t ? 'var(--lime-deep)' : 'var(--slate-500)', borderBottom: tab === t ? '2px solid var(--lime-deep)' : '2px solid transparent' }}>
-            {t}
-          </button>
+          <button key={t} onClick={() => setTab(t)} className={`tab ${tab === t ? 'on' : ''}`}>{t}</button>
         ))}
       </div>
 
       {tab === 'plans' && (
-        <div className="grid md:grid-cols-2 gap-5 max-w-2xl">
-          {tiers.map(tier => <PricingCard key={tier.name} tier={tier} />)}
+        <div className="price-grid">
+          {tiers.map(tier => (
+            <div key={tier.name} className={`price-card ${tier.pro ? 'pro' : ''}`}>
+              {tier.pro && <span className="reco-pill">RECOMMENDED</span>}
+              <div className="pc-name">{tier.name}</div>
+              <div className="pc-price">{tier.priceLabel}<span className="per">/month</span></div>
+              <ul className="pc-feats">
+                {tier.features.map(f => (
+                  <li key={f} className="pc-feat">
+                    <i className={`ti ti-${tier.pro ? 'check' : 'check'}`} />
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <button className={`btn ${tier.pro ? 'btn-primary' : 'btn-ghost'}`} style={{ width: '100%' }}
+                disabled={!tier.pro && profile?.subscription_status !== 'pro'}>
+                {tier.pro ? (profile?.subscription_status === 'pro' ? 'Current plan' : tier.cta) : 'Current plan'}
+              </button>
+            </div>
+          ))}
         </div>
       )}
 
       {tab === 'usage' && (
-        <div className="space-y-4 max-w-lg">
-          <div className="card p-5">
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-sm font-semibold" style={{ color: 'var(--ink-900)' }}>Applications used</p>
-              <span className="dash-badge-status" style={{ background: 'rgba(196,240,0,.12)', color: 'var(--lime-deep)' }}>
-                {profile?.subscription_status === 'free' ? '0/5' : 'Unlimited'}
-              </span>
+        <div className="section-card">
+          <div className="dp-section-label" style={{ marginTop: 0 }}>This month&apos;s usage</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+            <div style={{ flex: 1 }}>
+              <div style={{ height: 8, background: 'var(--line)', borderRadius: 99, overflow: 'hidden' }}>
+                <div style={{
+                  height: '100%', borderRadius: 99, background: 'var(--lime)',
+                  width: profile?.subscription_status === 'pro' ? '100%' : '40%',
+                  transition: 'width .5s'
+                }} />
+              </div>
             </div>
-            <div className="h-2 rounded-full" style={{ background: 'var(--slate-200)' }}>
-              <div className="h-2 rounded-full transition-all duration-500" style={{ width: profile?.subscription_status === 'free' ? '0%' : '100%', background: 'var(--lime)' }} />
-            </div>
-          </div>
-          <div className="card p-5">
-            <p className="text-sm font-semibold" style={{ color: 'var(--ink-900)' }}>Current plan</p>
-            <p className="text-xs mt-1 capitalize" style={{ color: 'var(--slate-500)' }}>{profile?.subscription_status || 'Free'}</p>
-            {profile?.subscription_status === 'free' && (
-              <button onClick={() => setTab('plans')} className="btn-p btn-sm mt-3">Upgrade</button>
-            )}
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 13, fontWeight: 600 }}>
+              {profile?.subscription_status === 'pro' ? 'Unlimited' : '2 / 5 applications'}
+            </span>
           </div>
         </div>
       )}
