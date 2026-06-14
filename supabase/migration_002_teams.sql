@@ -3,7 +3,7 @@
 -- Adds the four-tier plan system and team/organization support.
 -- Run AFTER schema.sql.
 --
--- Tiers:  free | starter (£15) | pro (£49) | team (£39/seat)
+-- Tiers:  free | pro (£15) | max (£49) | team (£39/seat)
 -- A "team" is an organization with seats; individual tiers stay on the profile.
 -- ============================================================================
 

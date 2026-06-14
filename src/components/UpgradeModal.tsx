@@ -57,7 +57,7 @@ export default function UpgradeModal({ open, onClose }: UpgradeModalProps) {
               onClick={() => { onClose(); router.push('/dashboard/billing') }}
               className="btn-int on w-full text-sm py-2.5"
             >
-              Upgrade to Starter — £15/month
+              Upgrade to Pro — £15/month
             </button>
             <button
               onClick={onClose}

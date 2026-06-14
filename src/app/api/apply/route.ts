@@ -2,6 +2,13 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabase } from '@/lib/supabase-server'
 import { ENTITLEMENTS, type Tier } from '@/lib/tiers'
 
+function normalizePlan(raw: string): Tier {
+  if (raw === 'starter') return 'pro'
+  if (raw === 'pro') return 'max'
+  if (raw === 'max' || raw === 'team' || raw === 'enterprise') return raw as Tier
+  return 'free'
+}
+
 export async function POST(req: NextRequest) {
   const supabase = await createServerSupabase()
   const { data: { user } } = await supabase.auth.getUser()
@@ -11,7 +18,7 @@ export async function POST(req: NextRequest) {
   if (!leadId) return NextResponse.json({ error: 'leadId required' }, { status: 400 })
 
   const { data: planRow } = await supabase.rpc('effective_plan', { p_user: user.id })
-  const plan = (planRow as Tier) ?? 'free'
+  const plan = normalizePlan((planRow as string) ?? 'free')
 
   const { data: profile } = await supabase
     .from('profiles')

@@ -11,7 +11,7 @@ export interface Profile {
   portfolio_url: string | null;
   availability: string | null;
   onboarding_completed: boolean;
-  subscription_status: 'free' | 'starter' | 'pro' | 'team';
+  subscription_status: 'free' | 'pro' | 'max' | 'team';
   created_at: string;
 }
 

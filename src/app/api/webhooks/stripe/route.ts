@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
 
   const admin = createAdminSupabase()
 
-  const setProfilePlan = async (customerId: string, plan: 'free' | 'starter' | 'pro') => {
+  const setProfilePlan = async (customerId: string, plan: 'free' | 'pro' | 'max') => {
     await admin.from('profiles').update({ subscription_status: plan }).eq('stripe_customer_id', customerId)
   }
 
@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
             .from('org_members')
             .upsert({ org_id: org.id, user_id: userId, role: 'admin' }, { onConflict: 'org_id,user_id' })
         }
-      } else if (tier === 'starter' || tier === 'pro') {
+      } else if (tier === 'pro' || tier === 'max') {
         await setProfilePlan(customerId, tier)
       }
       break
@@ -68,8 +68,8 @@ export async function POST(req: NextRequest) {
         await admin.from('organizations').update({ seats: qty }).eq('id', org.id)
       } else {
         const nick = sub.items.data[0]?.price?.nickname?.toLowerCase() ?? ''
-        const plan = nick.includes('pro') ? 'pro' : 'starter'
-        await setProfilePlan(customerId, active ? (plan as 'pro' | 'starter') : 'free')
+        const plan = nick.includes('max') ? 'max' : 'pro'
+        await setProfilePlan(customerId, active ? (plan as 'max' | 'pro') : 'free')
       }
       break
     }

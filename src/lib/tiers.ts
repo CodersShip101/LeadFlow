@@ -4,20 +4,21 @@
 // gates in the API routes, and the upgrade prompts all read from here, so a
 // tier's definition lives in exactly one place.
 //
-// Ladder (Good / Better / Best):
+// Ladder:
 //   free     £0             exploring        — freemium hook
-//   starter  £15/mo         working solo     — "I outgrew free"
-//   pro      £49/mo         optimising solo  — power features
+//   pro      £15/mo         working solo     — "I outgrew free"
+//   max      £49/mo         optimising solo  — power features
 //   team     £39/seat/mo    agencies/studios — multi-seat, shared pipeline
 //                            (+ enterprise = custom)
 // ---------------------------------------------------------------------------
 
-export type Tier = 'free' | 'starter' | 'pro' | 'team' | 'enterprise'
+export type Tier = 'free' | 'pro' | 'max' | 'team' | 'enterprise'
 
 export type Entitlements = {
   applicationsPerMonth: number | 'unlimited'
   seats: number | 'custom'
   scanIntervalHours: number
+  manualRefresh: boolean
   sourceLinks: boolean
   emailDigest: boolean
   basicAnalytics: boolean
@@ -40,7 +41,8 @@ export const ENTITLEMENTS: Record<Tier, Entitlements> = {
   free: {
     applicationsPerMonth: 5,
     seats: 1,
-    scanIntervalHours: 6,
+    scanIntervalHours: 5,
+    manualRefresh: false,
     sourceLinks: false,
     emailDigest: false,
     basicAnalytics: false,
@@ -58,10 +60,11 @@ export const ENTITLEMENTS: Record<Tier, Entitlements> = {
     apiAccess: false,
     dedicatedManager: false,
   },
-  starter: {
+  pro: {
     applicationsPerMonth: 'unlimited',
     seats: 1,
-    scanIntervalHours: 6,
+    scanIntervalHours: 2,
+    manualRefresh: false,
     sourceLinks: true,
     emailDigest: true,
     basicAnalytics: true,
@@ -79,10 +82,11 @@ export const ENTITLEMENTS: Record<Tier, Entitlements> = {
     apiAccess: false,
     dedicatedManager: false,
   },
-  pro: {
+  max: {
     applicationsPerMonth: 'unlimited',
     seats: 1,
-    scanIntervalHours: 3,
+    scanIntervalHours: 1,
+    manualRefresh: true,
     sourceLinks: true,
     emailDigest: true,
     basicAnalytics: true,
@@ -103,7 +107,8 @@ export const ENTITLEMENTS: Record<Tier, Entitlements> = {
   team: {
     applicationsPerMonth: 'unlimited',
     seats: 1,
-    scanIntervalHours: 3,
+    scanIntervalHours: 1,
+    manualRefresh: true,
     sourceLinks: true,
     emailDigest: true,
     basicAnalytics: true,
@@ -125,6 +130,7 @@ export const ENTITLEMENTS: Record<Tier, Entitlements> = {
     applicationsPerMonth: 'unlimited',
     seats: 'custom',
     scanIntervalHours: 1,
+    manualRefresh: true,
     sourceLinks: true,
     emailDigest: true,
     basicAnalytics: true,
@@ -149,8 +155,8 @@ export const PRICING: Record<
   { label: string; monthly: number | null; annual: number | null; perSeat?: boolean; blurb: string }
 > = {
   free: { label: 'Free', monthly: 0, annual: 0, blurb: 'Try the scored feed and build a pipeline.' },
-  starter: { label: 'Starter', monthly: 15, annual: 12, blurb: 'For freelancers actively winning work.' },
-  pro: { label: 'Pro', monthly: 49, annual: 39, blurb: 'For optimising every lead and rate.' },
+  pro: { label: 'Pro', monthly: 15, annual: 12, blurb: 'For freelancers actively winning work.' },
+  max: { label: 'Max', monthly: 49, annual: 39, blurb: 'For optimising every lead and rate.' },
   team: { label: 'Team', monthly: 39, annual: 32, perSeat: true, blurb: 'For agencies and studios sharing a pipeline.' },
   enterprise: { label: 'Enterprise', monthly: null, annual: null, blurb: 'Custom scale, SSO, API and a dedicated manager.' },
 }

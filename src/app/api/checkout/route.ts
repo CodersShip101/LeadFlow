@@ -5,10 +5,10 @@ import { createServerSupabase } from '@/lib/supabase-server'
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
 const PRICES: Record<string, string | undefined> = {
-  'starter:monthly': process.env.STRIPE_PRICE_STARTER_MONTHLY,
-  'starter:annual': process.env.STRIPE_PRICE_STARTER_ANNUAL,
   'pro:monthly': process.env.STRIPE_PRICE_PRO_MONTHLY,
   'pro:annual': process.env.STRIPE_PRICE_PRO_ANNUAL,
+  'max:monthly': process.env.STRIPE_PRICE_MAX_MONTHLY,
+  'max:annual': process.env.STRIPE_PRICE_MAX_ANNUAL,
   'team:monthly': process.env.STRIPE_PRICE_TEAM_MONTHLY,
   'team:annual': process.env.STRIPE_PRICE_TEAM_ANNUAL,
 }
@@ -19,11 +19,11 @@ export async function POST(req: NextRequest) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const body = await req.json().catch(() => ({}))
-  const tier = body.tier as 'starter' | 'pro' | 'team'
+  const tier = body.tier as 'pro' | 'max' | 'team'
   const cycle = (body.cycle as 'monthly' | 'annual') ?? 'monthly'
   const seats = Math.max(1, Math.min(200, Number(body.seats) || 1))
 
-  if (!['starter', 'pro', 'team'].includes(tier)) {
+  if (!['pro', 'max', 'team'].includes(tier)) {
     return NextResponse.json({ error: 'invalid tier' }, { status: 400 })
   }
   const price = PRICES[`${tier}:${cycle}`]
