@@ -308,7 +308,14 @@ export default function DashboardPage() {
             <div className="empty-icon"><i className="ti ti-radar" /></div>
             <h3>We&apos;re scanning 4 sources for you</h3>
             <p>Your first scored leads appear within 30 minutes &mdash; we&apos;ll email you when they&apos;re ready.</p>
-            <button onClick={() => router.refresh()} className="btn btn-ghost" style={{ display: 'inline-flex' }}><i className="ti ti-refresh" /> Check now</button>
+            <div className="flex items-center gap-3 mt-4 justify-center">
+              <button onClick={async () => {
+                const res = await fetch('/api/leads/seed', { method: 'POST' })
+                if (res.ok) { router.refresh() }
+                else { toast.error('Failed to seed leads') }
+              }} className="btn btn-primary" style={{ display: 'inline-flex' }}><i className="ti ti-flask" /> Generate demo leads</button>
+              <button onClick={() => router.refresh()} className="btn btn-ghost" style={{ display: 'inline-flex' }}><i className="ti ti-refresh" /> Check now</button>
+            </div>
           </div>
         )}
 
