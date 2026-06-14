@@ -470,22 +470,28 @@ textarea.input { resize: vertical; min-height: 80px; }
 .gauge-num { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-weight: 700; font-size: 14px; }
 
 /* ── PIPELINE (kanban) ── */
-.kanban { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; height: calc(100vh - 200px); min-height: 400px; }
+.kanban { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; height: calc(100vh - 180px); min-height: 420px; }
 @media (max-width: 860px) { .kanban { grid-template-columns: 1fr; height: auto; } }
 .kan-col { background: var(--paper-2); border-radius: var(--r-lg); display: flex; flex-direction: column; min-height: 0; }
-.kan-head { padding: 14px 16px; display: flex; align-items: center; gap: 9px; border-bottom: 1px solid var(--line); flex-shrink: 0; }
+.kan-head { padding: 16px 18px; display: flex; align-items: center; gap: 9px; border-bottom: 1px solid var(--line); flex-shrink: 0; }
 .kan-dot { width: 9px; height: 9px; border-radius: 50%; }
-.kan-title { font-family: var(--font-display); font-weight: 700; font-size: 14px; }
+.kan-title { font-family: var(--font-display); font-weight: 700; font-size: 14px; color: var(--ink); }
 .kan-count { margin-left: auto; font-family: var(--font-mono); font-size: 12px; font-weight: 600; color: var(--slate); background: var(--card); padding: 2px 9px; border-radius: var(--r-pill); }
-.kan-body { padding: 12px; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; flex: 1; min-height: 120px; }
+.kan-body { padding: 14px; display: flex; flex-direction: column; gap: 12px; overflow-y: auto; flex: 1; min-height: 120px; }
 .kan-body.dragover { background: var(--lime-dim); outline: 2px dashed var(--lime-deep); outline-offset: -6px; border-radius: var(--r-md); }
-.kan-card { background: var(--card); border: 1px solid var(--line); border-radius: var(--r-md); padding: 13px; cursor: grab; transition: box-shadow .15s, transform .15s; }
-.kan-card:hover { box-shadow: var(--sh-sm); }
-.kan-card.dragging { opacity: .4; cursor: grabbing; }
-.kan-card .kc-top { display: flex; align-items: center; gap: 7px; margin-bottom: 8px; }
-.kan-card .kc-title { font-weight: 600; font-size: 13.5px; line-height: 1.35; margin-bottom: 8px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.kan-card .kc-foot { display: flex; align-items: center; gap: 7px; }
+.kan-card { background: var(--card); border: 1px solid var(--line); border-radius: var(--r-md); padding: 16px; cursor: grab; transition: box-shadow .15s, transform .15s; }
+.kan-card:hover { box-shadow: var(--sh-sm); border-color: var(--slate-2); }
+.kan-card.dragging { opacity: .4; cursor: grabbing; transform: rotate(2deg); }
+.kan-card .kc-top { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.kan-card .kc-meta-right { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+.kan-card .kc-title { font-weight: 600; font-size: 13.5px; line-height: 1.4; margin-bottom: 10px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; color: var(--ink); }
+.kan-card .kc-meta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+.kan-card .kc-chip { font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 5px; display: inline-flex; align-items: center; gap: 3px; }
+.kan-card .kc-skills { display: flex; gap: 4px; flex-wrap: wrap; }
+.kan-card .kc-skill { font-size: 10px; font-weight: 500; padding: 2px 7px; border-radius: 4px; background: var(--paper-2); color: var(--slate); }
+.kan-card .kc-skill-more { font-family: var(--font-mono); background: var(--card); border: 1px solid var(--line); color: var(--slate-2); }
 .kan-empty { text-align: center; color: var(--slate-2); font-size: 13px; padding: 30px 10px; }
+.kan-empty::before { content: '\2193'; display: block; font-size: 18px; margin-bottom: 6px; }
 
 /* ── GENERIC PAGE CARDS ── */
 .section-card { background: var(--card); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 22px; margin-bottom: 16px; }

@@ -33,3 +33,10 @@ export function createAdminSupabase() {
     }
   )
 }
+
+export async function requireUser() {
+  const supabase = await createServerSupabase()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Response('Unauthorized', { status: 401 })
+  return { supabase, user }
+}
