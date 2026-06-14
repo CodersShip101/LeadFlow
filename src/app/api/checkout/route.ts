@@ -4,9 +4,13 @@ import { createServerSupabase } from '@/lib/supabase-server'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
-const PRICE = {
-  monthly: process.env.STRIPE_PRICE_PRO_MONTHLY!,
-  annual: process.env.STRIPE_PRICE_PRO_ANNUAL!,
+const PRICES: Record<string, string | undefined> = {
+  'starter:monthly': process.env.STRIPE_PRICE_STARTER_MONTHLY,
+  'starter:annual': process.env.STRIPE_PRICE_STARTER_ANNUAL,
+  'pro:monthly': process.env.STRIPE_PRICE_PRO_MONTHLY,
+  'pro:annual': process.env.STRIPE_PRICE_PRO_ANNUAL,
+  'team:monthly': process.env.STRIPE_PRICE_TEAM_MONTHLY,
+  'team:annual': process.env.STRIPE_PRICE_TEAM_ANNUAL,
 }
 
 export async function POST(req: NextRequest) {
@@ -14,12 +18,20 @@ export async function POST(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { cycle = 'monthly' } = await req.json().catch(() => ({}))
-  const price = PRICE[cycle as 'monthly' | 'annual'] ?? PRICE.monthly
+  const body = await req.json().catch(() => ({}))
+  const tier = body.tier as 'starter' | 'pro' | 'team'
+  const cycle = (body.cycle as 'monthly' | 'annual') ?? 'monthly'
+  const seats = Math.max(1, Math.min(200, Number(body.seats) || 1))
+
+  if (!['starter', 'pro', 'team'].includes(tier)) {
+    return NextResponse.json({ error: 'invalid tier' }, { status: 400 })
+  }
+  const price = PRICES[`${tier}:${cycle}`]
+  if (!price) return NextResponse.json({ error: 'price not configured' }, { status: 500 })
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('stripe_customer_id')
+    .select('stripe_customer_id, full_name')
     .eq('id', user.id)
     .single()
 
@@ -34,16 +46,22 @@ export async function POST(req: NextRequest) {
   }
 
   const origin = req.headers.get('origin') ?? process.env.NEXT_PUBLIC_SITE_URL!
+  const quantity = tier === 'team' ? seats : 1
 
   const session = await stripe.checkout.sessions.create({
     mode: 'subscription',
     customer: customerId,
-    line_items: [{ price, quantity: 1 }],
+    line_items: [{ price, quantity }],
     subscription_data: { trial_period_days: 7 },
     allow_promotion_codes: true,
-    success_url: `${origin}/dashboard/billing?upgraded=1`,
+    success_url: `${origin}/dashboard/billing?upgraded=${tier}`,
     cancel_url: `${origin}/dashboard/billing`,
-    metadata: { supabase_user_id: user.id },
+    metadata: {
+      supabase_user_id: user.id,
+      tier,
+      seats: String(quantity),
+      org_name: body.orgName ?? (profile?.full_name ? `${profile.full_name}'s team` : 'My team'),
+    },
   })
 
   return NextResponse.json({ url: session.url })

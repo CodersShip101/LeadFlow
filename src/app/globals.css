@@ -543,21 +543,54 @@ textarea.input { resize: vertical; min-height: 80px; }
 .lock-card p { font-size: 13px; color: #A9B5AC; line-height: 1.45; }
 
 /* ── PRICING (dashboard) ── */
-.price-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-@media (max-width: 640px) { .price-grid { grid-template-columns: 1fr; } }
-.price-card { border: 1.5px solid var(--line); border-radius: var(--r-lg); padding: 24px; position: relative; background: var(--card); }
-.price-card.pro { background: var(--ink-900); color: #fff; border-color: var(--ink-900); }
-.price-card.pro .pc-feat { color: #C8D0CA; }
+.price-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+@media (max-width: 900px) { .price-grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 540px) { .price-grid { grid-template-columns: 1fr; } }
+.price-card { border: 1.5px solid var(--line); border-radius: var(--r-lg); padding: 20px 18px; position: relative; background: var(--card); display: flex; flex-direction: column; }
+.price-card.feat { border-color: var(--lime-deep); box-shadow: 0 0 0 1px var(--lime-deep), 0 10px 30px rgba(126,158,10,.10); }
+.price-card.team { background: var(--sidebar); color: #fff; border-color: var(--sidebar); }
+.price-card.team .pc-name { color: var(--lime); }
+.price-card.team .pc-price { color: #fff; }
+.price-card.team .pc-price .per { color: #A9B5AC; }
+.price-card.team .pc-blurb { color: #A9B5AC; }
+.price-card.team .pc-feat { color: #C8D0CA; }
+.price-card.team .pc-feat .ti { color: var(--lime); }
 .pc-name { font-family: var(--font-mono); font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--slate); margin-bottom: 8px; }
-.price-card.pro .pc-name { color: var(--lime); }
-.pc-price { font-family: var(--font-display); font-size: 34px; font-weight: 700; letter-spacing: -.02em; margin-bottom: 4px; }
-.pc-price .per { font-size: 14px; color: var(--slate-2); font-weight: 500; }
-.price-card.pro .pc-price .per { color: #A9B5AC; }
-.pc-feats { list-style: none; margin: 18px 0; display: flex; flex-direction: column; gap: 10px; }
-.pc-feat { display: flex; align-items: center; gap: 9px; font-size: 13.5px; }
-.pc-feat .ti { color: var(--lime-deep); font-size: 17px; }
-.price-card.pro .pc-feat .ti { color: var(--lime); }
-.reco-pill { position: absolute; top: -11px; right: 20px; background: var(--lime); color: var(--ink-950); font-family: var(--font-mono); font-size: 10px; font-weight: 700; letter-spacing: .06em; padding: 4px 11px; border-radius: var(--r-pill); }
+.price-card.feat .pc-name { color: var(--lime-deep); }
+.pc-price { font-family: var(--font-display); font-size: 30px; font-weight: 700; letter-spacing: -.02em; margin-bottom: 2px; }
+.pc-price .per { font-size: 13px; color: var(--slate-2); font-weight: 500; }
+.pc-blurb { font-size: 12px; color: var(--slate); margin-bottom: 14px; }
+.pc-feats { list-style: none; margin: 14px 0; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+.pc-feat { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ink-2); }
+.pc-feat .ti { color: var(--lime-deep); font-size: 15px; }
+.reco-pill { position: absolute; top: -11px; right: 16px; background: var(--lime); color: var(--ink-950); font-family: var(--font-mono); font-size: 10px; font-weight: 700; letter-spacing: .06em; padding: 4px 11px; border-radius: var(--r-pill); }
+.pc-toggle { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--slate); margin-bottom: 14px; }
+.pc-toggle .toggle { width: 36px; height: 20px; border-radius: 99px; background: var(--line); border: none; cursor: pointer; position: relative; transition: background .2s; }
+.pc-toggle .toggle.on { background: var(--lime-deep); }
+.pc-toggle .toggle::after { content: ''; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: transform .2s; }
+.pc-toggle .toggle.on::after { transform: translateX(16px); }
+.pc-toggle .save { font-weight: 600; color: var(--lime-deep); }
+.seat-controls { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+.seat-controls label { font-size: 12px; color: var(--slate-2); }
+.seat-controls .qb { width: 28px; height: 28px; border-radius: 6px; border: 1px solid var(--line); background: var(--card); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 14px; color: var(--ink); transition: .1s; }
+.seat-controls .qb:hover { background: var(--paper-2); }
+.seat-controls .qbv { font-family: var(--font-mono); font-size: 14px; font-weight: 600; min-width: 24px; text-align: center; color: var(--ink); }
+.price-card.team .seat-controls .qb { border-color: rgba(255,255,255,.15); background: rgba(255,255,255,.08); color: #fff; }
+.price-card.team .seat-controls .qbv { color: #fff; }
+.price-card.team .seat-controls label { color: #A9B5AC; }
+
+/* ── COMPARISON TABLE ── */
+.cmp-wrap { margin-top: 28px; overflow-x: auto; }
+.cmp-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.cmp-table th, .cmp-table td { padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--line-2); }
+.cmp-table th:first-child, .cmp-table td:first-child { padding-left: 0; }
+.cmp-table th:not(:first-child), .cmp-table td:not(:first-child) { text-align: center; width: 18%; }
+.cmp-table th { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--slate); padding-top: 0; }
+.cmp-table .cmp-price { display: block; font-family: var(--font-display); font-size: 13px; font-weight: 700; color: var(--ink); margin-top: 2px; }
+.cmp-table .cmp-hdr { font-weight: 600; color: var(--ink); font-size: 12px; text-transform: uppercase; letter-spacing: .06em; background: var(--paper-2); }
+.cmp-yes { color: var(--lime-deep); }
+.cmp-no { color: var(--slate-2); }
+.cmp-enterprise { margin-top: 12px; font-size: 13px; color: var(--slate); text-align: center; padding: 12px; background: var(--paper-2); border-radius: var(--r-md); }
 
 /* ── PROFILE BANNER ── */
 .profile-banner { display: flex; align-items: center; gap: 12px; background: var(--mid-bg); border: 1px solid #F0D9A0; border-radius: var(--r-md); padding: 12px 16px; margin-bottom: 20px; }

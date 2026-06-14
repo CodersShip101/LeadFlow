@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabase } from '@/lib/supabase-server'
-
-const FREE_MONTHLY_CAP = 5
+import { ENTITLEMENTS, type Tier } from '@/lib/tiers'
 
 export async function POST(req: NextRequest) {
   const supabase = await createServerSupabase()
@@ -11,20 +10,20 @@ export async function POST(req: NextRequest) {
   const { leadId } = await req.json().catch(() => ({}))
   if (!leadId) return NextResponse.json({ error: 'leadId required' }, { status: 400 })
 
+  const { data: planRow } = await supabase.rpc('effective_plan', { p_user: user.id })
+  const plan = (planRow as Tier) ?? 'free'
+
   const { data: profile } = await supabase
     .from('profiles')
-    .select('plan, applications_this_month')
+    .select('applications_this_month')
     .eq('id', user.id)
     .single()
   if (!profile) return NextResponse.json({ error: 'No profile' }, { status: 404 })
 
-  if (profile.plan === 'free' && profile.applications_this_month >= FREE_MONTHLY_CAP) {
+  const cap = ENTITLEMENTS[plan].applicationsPerMonth
+  if (cap !== 'unlimited' && profile.applications_this_month >= cap) {
     return NextResponse.json(
-      {
-        error: 'quota_reached',
-        message: `Free plan is limited to ${FREE_MONTHLY_CAP} applications per month.`,
-        cap: FREE_MONTHLY_CAP,
-      },
+      { error: 'quota_reached', message: `Your plan is limited to ${cap} applications per month.`, cap, plan },
       { status: 402 },
     )
   }
@@ -40,17 +39,13 @@ export async function POST(req: NextRequest) {
   )
   if (upErr) return NextResponse.json({ error: upErr.message }, { status: 500 })
 
-  const { error: incErr } = await supabase.rpc('increment_application_counters', {
-    p_user: user.id,
-  })
+  const { error: incErr } = await supabase.rpc('increment_application_counters', { p_user: user.id })
   if (incErr) {
     await supabase
       .from('profiles')
-      .update({
-        applications_this_month: (profile.applications_this_month ?? 0) + 1,
-      })
+      .update({ applications_this_month: (profile.applications_this_month ?? 0) + 1 })
       .eq('id', user.id)
   }
 
-  return NextResponse.json({ ok: true, stage: 'applied' })
+  return NextResponse.json({ ok: true, status: 'applied' })
 }

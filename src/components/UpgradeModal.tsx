@@ -2,15 +2,12 @@
 
 import { useRouter } from 'next/navigation'
 
-
 interface UpgradeModalProps {
   open: boolean
   onClose: () => void
-  title?: string
-  description?: string
 }
 
-export default function UpgradeModal({ open, onClose, title = 'Upgrade to Pro', description = 'Unlock unlimited leads and full details.' }: UpgradeModalProps) {
+export default function UpgradeModal({ open, onClose }: UpgradeModalProps) {
   const router = useRouter()
 
   if (!open) return null
@@ -35,16 +32,18 @@ export default function UpgradeModal({ open, onClose, title = 'Upgrade to Pro', 
             <i className="ti ti-lock" style={{ fontSize: '20px', color: '#1B6B4A' }} />
           </div>
 
-          <h3 className="text-base font-semibold mb-1" style={{ color: '#1A1D23' }}>{title}</h3>
-          <p className="text-xs mb-4" style={{ color: '#6B7280' }}>{description}</p>
+          <h3 className="text-base font-semibold mb-1" style={{ color: '#1A1D23' }}>You&apos;ve hit your limit</h3>
+          <p className="text-xs mb-4" style={{ color: '#6B7280' }}>
+            Free plan is limited to 5 applications per month. Upgrade to keep going.
+          </p>
 
           <ul className="text-left space-y-2 mb-5">
             {[
-              'Unlimited leads every week',
-              'Full lead details & source URLs',
-              'Skill-based filtering',
-              'Early access to new leads',
-              'Priority matching',
+              'Unlimited applications',
+              'Direct source links',
+              'Daily email digest',
+              'Custom lead alerts',
+              'Basic analytics',
             ].map(f => (
               <li key={f} className="flex items-center gap-2 text-xs" style={{ color: '#4B5563' }}>
                 <i className="ti ti-check" style={{ fontSize: '13px', color: '#1B6B4A' }} />
@@ -53,19 +52,20 @@ export default function UpgradeModal({ open, onClose, title = 'Upgrade to Pro', 
             ))}
           </ul>
 
-          <button
-            onClick={() => { onClose(); router.push('/dashboard/billing') }}
-            className="btn-int on w-full text-sm py-2.5"
-          >
-            Upgrade to Pro — £49/month
-          </button>
-
-          <button
-            onClick={onClose}
-            className="btn-ghost w-full justify-center mt-1"
-          >
-            Maybe later
-          </button>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <button
+              onClick={() => { onClose(); router.push('/dashboard/billing') }}
+              className="btn-int on w-full text-sm py-2.5"
+            >
+              Upgrade to Starter — £15/month
+            </button>
+            <button
+              onClick={onClose}
+              className="btn-ghost w-full justify-center"
+            >
+              Maybe later
+            </button>
+          </div>
         </div>
       </div>
     </div>
