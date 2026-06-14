@@ -8,6 +8,7 @@ import { computeMatchExplanation } from '@/types'
 import { getSourceInfo, formatBudgetGBP, timeAgo, isNewLead } from '@/lib/utils'
 import { ALL_SKILLS } from '@/lib/skills'
 import ScoreGauge from '@/components/ScoreGauge'
+import RefreshBar from '@/components/RefreshBar'
 import toast from 'react-hot-toast'
 
 const sourceFilters = ['All', 'Reddit', 'Reed', 'WWR', 'Remote OK']
@@ -89,7 +90,7 @@ export default function DashboardPage() {
       const apps: Application[] = res.ok ? await res.json() : []
       setApplications(apps)
 
-      const { data: leadsData } = await supabase.from('leads').select('*').eq('status', 'active').gte('posted_date', new Date(Date.now() - 7 * 86400000).toISOString()).order('posted_date', { ascending: false })
+      const { data: leadsData } = await supabase.from('leads').select('*').eq('status', 'active').order('posted_date', { ascending: false })
       setLeads(leadsData || [])
 
       const lastSeen = parseInt(localStorage.getItem('lastSeen') || '0')
@@ -246,6 +247,15 @@ export default function DashboardPage() {
             </div>
           ))}
         </div>
+
+        {/* Refresh bar — tier-aware */}
+        <RefreshBar
+          plan={profile?.subscription_status as any ?? 'free'}
+          lastScanAt={leads.length > 0
+            ? Math.max(...leads.map(l => new Date(l.posted_date).getTime()))
+            : null
+          }
+        />
 
         {/* Toolbar */}
         <div className="dash-toolbar">

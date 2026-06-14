@@ -631,6 +631,36 @@ textarea.input { resize: vertical; min-height: 80px; }
 
 /* ── DASHBOARD PREVIEW ── */
 .dash { background: linear-gradient(180deg, var(--ink-850), var(--ink-900)); border: 1px solid var(--ink-600); border-radius: var(--r-xl); overflow: hidden; box-shadow: 0 30px 80px rgba(0,0,0,.4); }
+/* ── Refresh bar ── */
+.refresh-bar {
+  display: flex; align-items: center; gap: 14px;
+  padding: 11px 16px; margin-bottom: 18px;
+  border-radius: var(--r-md);
+  background: var(--card); border: 1px solid var(--line);
+}
+.rb-left { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.rb-left .ti { font-size: 18px; color: var(--lime-deep); }
+.rb-label { font-size: 12.5px; color: var(--slate); white-space: nowrap; }
+.rb-label strong { color: var(--ink); }
+.rb-countdown { font-family: var(--font-mono); font-size: 11.5px; color: var(--slate-2); white-space: nowrap; }
+.rb-due { color: var(--mid); font-weight: 600; }
+.rb-center { flex: 1; min-width: 60px; }
+.rb-track { height: 4px; border-radius: 99px; background: var(--line); overflow: hidden; }
+.rb-fill { height: 100%; border-radius: 99px; background: var(--lime-deep); transition: width 1s linear; }
+.rb-right { flex-shrink: 0; }
+.rb-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12.5px; font-weight: 600; padding: 7px 14px;
+  border-radius: var(--r-sm); border: none;
+  background: var(--paper-2); color: var(--ink-2);
+  cursor: pointer; transition: all .15s;
+  white-space: nowrap;
+}
+.rb-btn:hover:not(:disabled) { background: var(--line); }
+.rb-btn:disabled { opacity: .5; cursor: default; }
+.rb-btn .ti { font-size: 15px; }
+.rb-btn .ti-loader { animation: spin .8s linear infinite; }
+
 .dash-bar { display: flex; align-items: center; gap: 8px; padding: 13px 16px; border-bottom: 1px solid var(--ink-600); background: rgba(0,0,0,.2); }
 .dash-chip { font-family: var(--font-mono); font-size: .68rem; padding: 3px 9px; border-radius: 5px; }
 .dash-row { display: flex; align-items: center; gap: 12px; padding: 13px 16px; border-bottom: 1px solid rgba(255,255,255,.04); }

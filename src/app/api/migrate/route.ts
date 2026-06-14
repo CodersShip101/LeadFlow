@@ -5,6 +5,7 @@ const STATEMENTS = [
   `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS disciplines text[] DEFAULT NULL;`,
   `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS onboarding_completed boolean DEFAULT false;`,
   `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS timezone text DEFAULT NULL;`,
+  `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS last_manual_refresh_at timestamptz DEFAULT NULL;`,
   `ALTER TABLE applications ADD COLUMN IF NOT EXISTS outcome text DEFAULT NULL;`,
   `ALTER TABLE applications ADD COLUMN IF NOT EXISTS outcome_at timestamptz DEFAULT NULL;`,
 ]

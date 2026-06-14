@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createAdminSupabase } from '@/lib/supabase-server'
 
 const DEMO_LEADS = [
@@ -184,17 +184,53 @@ const DEMO_LEADS = [
   },
 ]
 
+export async function GET(req: NextRequest) {
+  try {
+    const admin = createAdminSupabase()
+
+    const raw = req.nextUrl.searchParams.get('raw')
+    if (raw) {
+      const { data, error } = await admin.from('leads').select('*').limit(5)
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+      const { count } = await admin.from('leads').select('*', { count: 'exact', head: true })
+      return NextResponse.json({ totalLeads: count ?? 0, sample: data })
+    }
+
+    const { data: columns, error: colErr } = await admin.rpc('exec_sql', { query: `
+      SELECT column_name, data_type
+      FROM information_schema.columns
+      WHERE table_name = 'leads'
+      ORDER BY ordinal_position
+    ` })
+    if (colErr) {
+      return NextResponse.json({ info: 'exec_sql not available', hint: 'Try GET /api/leads/seed?raw=1' }, { status: 200 })
+    }
+
+    return NextResponse.json({ columns })
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message }, { status: 500 })
+  }
+}
+
 export async function POST() {
   try {
     const admin = createAdminSupabase()
 
-    const { data: existing } = await admin
-      .from('leads')
-      .select('id')
-      .limit(1)
+    // Verify table exists first
+    const { error: tableCheck } = await admin.from('leads').select('id').limit(1)
+    if (tableCheck) {
+      return NextResponse.json({ error: `Cannot access leads table: ${tableCheck.message}`, hint: 'Run the schema migration first via POST /api/migrate, then try again.' }, { status: 500 })
+    }
 
-    if (existing && existing.length > 0) {
-      return NextResponse.json({ message: 'Leads already exist — no action taken', count: 0 })
+    // Only skip if there are leads posted within the last 6 hours (likely already seeded)
+    const sixHoursAgo = new Date(Date.now() - 6 * 3600000).toISOString()
+    const { count: recentCount } = await admin
+      .from('leads')
+      .select('*', { count: 'exact', head: true })
+      .gte('posted_date', sixHoursAgo)
+
+    if (recentCount && recentCount > 0) {
+      return NextResponse.json({ message: 'Recent leads already exist — no action taken', count: 0 })
     }
 
     const { data, error } = await admin
