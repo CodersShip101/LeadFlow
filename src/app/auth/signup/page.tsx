@@ -21,9 +21,9 @@ function scorePassword(pw: string) {
 
 const signalPool = [
   { src: 'REDDIT', c: 'rgba(255,140,66,.14)', t: '#ff9c5b', title: 'Senior UX Designer — London (Fintech)', meta: '£350–450/day · Figma · Inside IR35', score: '9.1', cls: 'score-a' },
-  { src: 'REMOTE OK', c: 'rgba(196,240,0,.16)', t: 'var(--lime)', title: 'Full-Stack Developer — Remote UK', meta: '£60–75k · React, Node · ASAP', score: '8.7', cls: 'score-a' },
+  { src: 'WWR', c: 'rgba(110,168,212,.16)', t: '#7fb6e6', title: 'Full-Stack Developer — Remote UK', meta: '£60–75k · React, Node · ASAP', score: '8.7', cls: 'score-a' },
   { src: 'REED', c: 'rgba(176,138,219,.16)', t: '#c4a3ec', title: 'Brand Identity — 3-month contract', meta: '£40k pro rata · Branding', score: '7.4', cls: 'score-b' },
-  { src: 'WWR', c: 'rgba(110,168,212,.16)', t: '#7fb6e6', title: 'DevOps Engineer — Full-time Remote', meta: '£70–90k · AWS, Terraform', score: '8.9', cls: 'score-a' },
+  { src: 'REMOTE OK', c: 'rgba(196,240,0,.16)', t: 'var(--lime)', title: 'DevOps Engineer — Full-time Remote', meta: '£70–90k · AWS, Terraform', score: '8.9', cls: 'score-a' },
   { src: 'REDDIT', c: 'rgba(255,140,66,.14)', t: '#ff9c5b', title: 'Content Strategist — B2B SaaS', meta: '£350/day · Notion, Writing', score: '8.5', cls: 'score-a' },
   { src: 'WWR', c: 'rgba(110,168,212,.16)', t: '#7fb6e6', title: 'Shopify Developer — E-commerce', meta: '£45–55k · Liquid, JS · Ongoing', score: '7.8', cls: 'score-b' },
   { src: 'REED', c: 'rgba(176,138,219,.16)', t: '#c4a3ec', title: 'Motion Designer — Ad Agency', meta: '£300–380/day · After Effects', score: '9.0', cls: 'score-a' },
@@ -31,8 +31,6 @@ const signalPool = [
 ]
 
 export default function SignupPage() {
-  const [firstName, setFirstName] = useState('')
-  const [lastName, setLastName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -185,20 +183,20 @@ export default function SignupPage() {
       <main className="panel-right">
         {sent ? (
           <div className="auth-sent-card">
-            <div className="card" style={{ padding: '36px 28px' }}>
+            <div className="card">
               <div className="auth-sent-icon"><i className="ti ti-mail-fast" aria-hidden="true"></i></div>
-              <h1 style={{ fontSize: '1.5rem' }}>Check your inbox</h1>
+              <h1>Check your inbox</h1>
               <p>We&apos;ve sent a confirmation link to</p>
               <p className="auth-sent-email">{email}</p>
-              <p>Click it to verify your email and start setting up your feed. The link expires in 1 hour.</p>
-              <div className="auth-sent-actions" style={{ marginTop: 18 }}>
-                <button className="btn-p" onClick={handleResend} disabled={resending} style={{ minWidth: 180 }}>
+              <p style={{ marginTop: 10 }}>Click it to verify your email and start setting up your feed. The link expires in 1 hour.</p>
+              <div className="auth-sent-actions">
+                <button className="btn-p" onClick={handleResend} disabled={resending}>
                   <i className="ti ti-refresh" aria-hidden="true"></i>
                   {resending ? 'Resending...' : 'Resend email'}
                 </button>
                 <button className="auth-magic-link" onClick={() => setSent(false)}>Use a different email</button>
               </div>
-              <p className="auth-legal" style={{ marginTop: 16 }}>
+              <p className="auth-legal" style={{ marginTop: 22 }}>
                 Wrong address or didn&apos;t arrive? Check spam, or <Link href="/auth/login">log in</Link> if you already confirmed.
               </p>
             </div>
@@ -206,48 +204,37 @@ export default function SignupPage() {
         ) : (
         <div className="auth-form-wrap">
           <div className="auth-form-eyebrow">Create your account</div>
-          <h1 style={{ fontSize: '1.6rem' }}>Get started free</h1>
-          <p className="auth-tagline" style={{ marginBottom: 18 }}>Set up in 2 minutes. First leads within the hour.</p>
+          <h1>Get started free</h1>
+          <p className="auth-tagline">Just an email and password — we&apos;ll set up your feed next.</p>
 
-          <div className="auth-trial-strip" role="note" style={{ marginBottom: 16, padding: '10px 14px' }}>
+          <div className="auth-trial-strip" role="note" style={{ marginBottom: 18, padding: '10px 14px' }}>
             <i className="ti ti-gift" aria-hidden="true"></i>
-            <p style={{ fontSize: '.78rem' }}><strong>7-day Pro trial included.</strong> Unlimited leads, skill filtering, daily digest. No card needed — ever.</p>
+            <p style={{ fontSize: '.8rem' }}><strong>7-day Pro trial included.</strong> Unlimited leads, skill filtering, daily digest. No card needed — ever.</p>
           </div>
 
-          <div className="auth-step-row" style={{ marginBottom: 14 }}>
+          <div className="auth-step-row" style={{ marginBottom: 18 }}>
             <span className="auth-step-dot" aria-hidden="true"></span>
             <span className="auth-step-dot inactive" aria-hidden="true"></span>
-            <span className="auth-step-label">Step 1 of 2 · Account details</span>
+            <span className="auth-step-label">Step 1 of 3 · Create account</span>
           </div>
 
           <form onSubmit={handleSignup}>
-            <div className="auth-field-row" style={{ marginBottom: 12 }}>
-              <div className="auth-field" style={{ marginBottom: 0 }}>
-                <label htmlFor="first-name">First name</label>
-                <input type="text" id="first-name" className="auth-input" placeholder="Alex" autoComplete="given-name" required value={firstName} onChange={e => setFirstName(e.target.value)} />
-              </div>
-              <div className="auth-field" style={{ marginBottom: 0 }}>
-                <label htmlFor="last-name">Last name</label>
-                <input type="text" id="last-name" className="auth-input" placeholder="Morgan" autoComplete="family-name" required value={lastName} onChange={e => setLastName(e.target.value)} />
-              </div>
-            </div>
-
-            <div className="auth-field" style={{ marginBottom: 12 }}>
+            <div className="auth-field" style={{ marginBottom: 14 }}>
               <label htmlFor="email">Email</label>
               <input type="email" id="email" className="auth-input" placeholder="alex@yoursite.co.uk" autoComplete="email" required value={email} onChange={e => setEmail(e.target.value)} />
             </div>
 
-            <div className="auth-field" style={{ marginBottom: 12 }}>
+            <div className="auth-field" style={{ marginBottom: 14 }}>
               <label htmlFor="password">Password</label>
               <div className="auth-pw-field">
                 <input type="password" id="password" className="auth-input" placeholder="8+ characters" autoComplete="new-password" required minLength={8} value={password} onChange={e => setPassword(e.target.value)} />
               </div>
-              <div className="auth-pw-strength" aria-hidden="true" style={{ marginTop: 6 }}>
+              <div className="auth-pw-strength" aria-hidden="true">
                 {[0, 1, 2, 3].map(i => (
                   <div key={i} className={`auth-pw-bar${i < pwScore ? (pwScore <= 1 ? ' weak' : pwScore <= 2 ? ' medium' : ' strong') : ''}`}></div>
                 ))}
               </div>
-              <div className="auth-field-hint" style={{ fontSize: '.68rem', marginTop: 4 }}>
+              <div className="auth-field-hint" id="pw-hint" style={{ fontSize: '.68rem' }}>
                 {pwScore === 0 && 'Use 8+ characters for a stronger password'}
                 {pwScore === 1 && 'Weak — try adding numbers or symbols'}
                 {pwScore === 2 && 'OK — a little longer or more variety helps'}
@@ -256,36 +243,17 @@ export default function SignupPage() {
               </div>
             </div>
 
-            <div className="auth-field" style={{ marginBottom: 12 }}>
-              <label>What do you do? <span style={{ fontWeight: 400, color: 'var(--slate-500)' }}>(pick all that apply)</span></label>
-              <div className="auth-skills-grid" role="group" aria-label="Select your disciplines">
-                {['Design', 'Development', 'Writing', 'Marketing', 'Consulting', 'Finance', 'DevOps', 'Other'].map(s => (
-                  <button key={s} type="button" className="auth-skill-pill" onClick={e => e.currentTarget.classList.toggle('selected')}>{s}</button>
-                ))}
-              </div>
-              <div className="auth-field-hint" style={{ fontSize: '.68rem' }}>These power your AI score — leads are ranked against your discipline</div>
-            </div>
-
-            <div className="auth-field" style={{ marginBottom: 0 }}>
-              <label htmlFor="day-rate">Your day rate (optional)</label>
-              <div className="auth-input-prefix">
-                <span className="auth-prefix-symbol">£</span>
-                <input type="text" id="day-rate" className="auth-input" placeholder="350" inputMode="numeric" />
-              </div>
-              <div className="auth-field-hint" style={{ fontSize: '.68rem' }}>Used to filter out leads below your rate. Skip if you&apos;re flexible.</div>
-            </div>
-
-            <button type="submit" className="btn-p btn-full" disabled={loading} style={{ marginTop: 10 }}>
+            <button type="submit" className="btn-p btn-full" disabled={loading} style={{ marginTop: 4 }}>
               <i className="ti ti-arrow-right" aria-hidden="true"></i>
               {loading ? 'Creating account\u2026' : 'Create my account \u2192'}
             </button>
 
-            <p className="auth-legal" style={{ fontSize: '.7rem', marginTop: 8 }}>
+            <p className="auth-legal" style={{ fontSize: '.72rem', marginTop: 10 }}>
               By continuing you agree to our <a href="/terms">Terms of Service</a> and <a href="/privacy">Privacy Policy</a>. No card needed. Cancel any time.
             </p>
           </form>
 
-          <div className="auth-login-link" style={{ marginTop: 10, fontSize: '.8rem' }}>Already have an account? <Link href="/auth/login">Log in →</Link></div>
+          <div className="auth-login-link" style={{ marginTop: 12, fontSize: '.82rem' }}>Already have an account? <Link href="/auth/login">Log in →</Link></div>
         </div>
         )}
       </main>

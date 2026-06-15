@@ -901,7 +901,7 @@ textarea.input { resize: vertical; min-height: 80px; }
 .auth-author-name { color: #fff; font-weight: 600; }
 .auth-author-role { color: var(--slate-500); }
 
-.panel-right { background: var(--paper); padding: 32px 44px; display: flex; flex-direction: column; justify-content: center; animation: fadeIn .5s ease both; }
+.panel-right { background: var(--paper); padding: 48px 52px; display: flex; flex-direction: column; justify-content: center; animation: fadeIn .5s ease both; }
 .auth-form-wrap { max-width: 380px; width: 100%; margin: 0 auto; }
 .auth-form-eyebrow { font-family: var(--font-mono); font-size: .7rem; letter-spacing: .12em; text-transform: uppercase; color: var(--lime-dim); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
 .auth-form-eyebrow::before { content: "["; opacity: .5; }
@@ -1058,3 +1058,152 @@ textarea.input { resize: vertical; min-height: 80px; }
   .sticky-txt { display: none; }
   .sticky-inner { justify-content: center; }
 }
+
+/* ───────────────────────────────────────────────────────────────
+   BILLING — redesigned plan page
+   Ports leadflow-dashboard-billing.html to the live Free/Pro/Max/Team
+   tiers. Uses collision-free `bill-`/`bpc-` names so it never clashes
+   with the dashboard's or the landing page's `.price-card`/`.cmp-table`.
+   ─────────────────────────────────────────────────────────────── */
+.bill-page { max-width: 1180px; }
+.bill-header { margin-bottom: 22px; }
+.bill-header h1 { font-family: var(--font-display); font-weight: 700; font-size: 1.6rem; letter-spacing: -.025em; color: var(--ink); margin-bottom: 4px; }
+.bill-header p { color: var(--slate); font-size: 14px; line-height: 1.5; }
+.bill-header .hl { color: var(--ink); font-weight: 600; }
+
+/* cycle toggle */
+.cycle-row { display: flex; align-items: center; gap: 14px; margin-bottom: 26px; flex-wrap: wrap; }
+.bill-toggle { display: inline-flex; background: var(--paper-2); border-radius: var(--r-pill); padding: 4px; gap: 2px; }
+.bill-toggle button { padding: 7px 18px; border-radius: var(--r-pill); font-size: 13px; font-weight: 600; color: var(--slate); transition: all .16s; line-height: 1; border: none; background: none; cursor: pointer; }
+.bill-toggle button.on { background: var(--card); color: var(--ink); box-shadow: var(--sh-sm); }
+.save-badge { display: inline-flex; align-items: center; gap: 4px; font-family: var(--font-mono); font-size: 10.5px; font-weight: 700; letter-spacing: .04em; background: var(--hi-bg); color: var(--hi); padding: 4px 10px; border-radius: var(--r-pill); border: 1px solid rgba(91,160,46,.2); transition: opacity .16s; }
+.save-badge .ti { font-size: 13px; }
+
+/* plan grid + cards */
+.bill-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; align-items: start; margin-bottom: 24px; }
+@media (max-width: 1100px) { .bill-grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 640px) { .bill-grid { grid-template-columns: 1fr; } }
+.bill-card { border: 1.5px solid var(--line); border-radius: var(--r-xl); padding: 22px 20px 20px; position: relative; background: var(--card); display: flex; flex-direction: column; transition: box-shadow .18s, transform .18s, border-color .18s; }
+.bill-card:hover { box-shadow: var(--sh-md); transform: translateY(-2px); }
+.bill-card.feat { border-color: var(--lime-deep); box-shadow: 0 0 0 1px var(--lime-deep), 0 12px 36px rgba(126,158,10,.12); }
+.bill-card.feat:hover { box-shadow: 0 0 0 1px var(--lime-deep), 0 18px 44px rgba(126,158,10,.16); transform: translateY(-3px); }
+.bill-card.team-card { background: var(--ink-900); color: #fff; border-color: transparent; box-shadow: 0 8px 32px rgba(11,18,32,.18); }
+.bill-card.team-card:hover { box-shadow: 0 14px 44px rgba(11,18,32,.26); transform: translateY(-3px); }
+.bill-reco { position: absolute; top: -11px; left: 50%; transform: translateX(-50%); background: var(--lime); color: var(--ink-950); font-family: var(--font-mono); font-size: 9.5px; font-weight: 700; letter-spacing: .07em; padding: 4px 12px; border-radius: var(--r-pill); white-space: nowrap; }
+
+/* card header */
+.bpc-tier { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.bpc-name { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: .1em; color: var(--slate); font-weight: 700; }
+.bill-card.feat .bpc-name { color: var(--lime-deep); }
+.bill-card.team-card .bpc-name { color: var(--lime); }
+.bpc-icon { width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: var(--paper-2); color: var(--slate); }
+.bpc-icon .ti { font-size: 15px; }
+.bill-card.feat .bpc-icon { background: var(--lime-dim); color: var(--lime-ink); }
+.bill-card.team-card .bpc-icon { background: rgba(196,240,0,.12); color: var(--lime); }
+
+/* price */
+.bpc-price-block { margin-bottom: 10px; min-height: 38px; }
+.bpc-price { font-family: var(--font-display); font-size: 34px; font-weight: 700; letter-spacing: -.03em; line-height: 1; color: var(--ink); }
+.bill-card.team-card .bpc-price { color: #fff; }
+.bpc-price .per { font-size: 13px; font-weight: 500; color: var(--slate-2); letter-spacing: 0; }
+.bill-card.team-card .bpc-price .per { color: #A9B5AC; }
+.bpc-price .was { font-size: 13px; font-weight: 500; color: var(--slate-2); text-decoration: line-through; margin-left: 6px; }
+.bpc-blurb { font-size: 13px; color: var(--slate); line-height: 1.5; margin-bottom: 16px; min-height: 38px; }
+.bill-card.team-card .bpc-blurb { color: #A9B5AC; }
+.bpc-divider { height: 1px; background: var(--line-2); margin: 0 0 16px; }
+.bill-card.team-card .bpc-divider { background: rgba(255,255,255,.1); }
+
+/* feature list */
+.bpc-feats { list-style: none; display: flex; flex-direction: column; gap: 9px; flex: 1; margin: 0 0 20px; padding: 0; }
+.bpc-feat { display: flex; align-items: flex-start; gap: 9px; font-size: 13px; line-height: 1.35; color: var(--ink-2); }
+.bill-card.team-card .bpc-feat { color: #C8D0CA; }
+.bpc-feat.muted { color: var(--slate-2); }
+.bpc-fi { width: 18px; height: 18px; border-radius: 5px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; background: var(--hi-bg); color: var(--hi); }
+.bpc-fi .ti { font-size: 12px; }
+.bpc-feat.muted .bpc-fi { background: var(--line-2); color: var(--slate-2); }
+.bill-card.feat .bpc-fi { background: rgba(91,160,46,.14); color: var(--hi); }
+.bill-card.team-card .bpc-fi { background: rgba(196,240,0,.14); color: var(--lime); }
+.bill-card.team-card .bpc-feat.muted .bpc-fi { background: rgba(255,255,255,.06); color: #4d5f57; }
+
+/* seat selector (team) */
+.bill-seat { margin-bottom: 16px; }
+.bill-seat-label { font-family: var(--font-mono); font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; color: #A9B5AC; margin-bottom: 8px; }
+.bill-seat-pick { display: inline-flex; align-items: center; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12); border-radius: var(--r-md); overflow: hidden; }
+.bill-seat-pick button { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; color: #fff; transition: background .12s; border: none; background: none; cursor: pointer; }
+.bill-seat-pick button:hover { background: rgba(255,255,255,.12); }
+.bill-seat-n { font-family: var(--font-mono); font-weight: 700; font-size: 15px; min-width: 36px; text-align: center; color: #fff; border-left: 1px solid rgba(255,255,255,.1); border-right: 1px solid rgba(255,255,255,.1); height: 32px; display: flex; align-items: center; justify-content: center; }
+.bill-seat-sum { font-family: var(--font-mono); font-size: 11.5px; color: #A9B5AC; margin-top: 7px; }
+.bill-seat-sum b { color: #fff; }
+
+/* CTAs */
+.bill-cta { display: flex; align-items: center; justify-content: center; gap: 7px; width: 100%; padding: 11px 16px; border-radius: var(--r-md); font-size: 13.5px; font-weight: 700; border: none; cursor: pointer; transition: background .16s, box-shadow .16s, transform .14s, border-color .16s; font-family: inherit; }
+.bill-cta:disabled { cursor: not-allowed; }
+.bill-cta-primary { background: var(--lime); color: var(--ink-950); }
+.bill-cta-primary:hover { background: var(--lime-bright); box-shadow: 0 4px 14px rgba(196,240,0,.3); transform: translateY(-1px); }
+.bill-cta-primary:active { transform: scale(.97); }
+.bill-cta-warm { background: linear-gradient(135deg, #FF8A3D, #FF6A3D); color: #fff; }
+.bill-cta-warm:hover { box-shadow: 0 6px 18px rgba(255,106,61,.32); transform: translateY(-1px); }
+.bill-cta-warm:active { transform: scale(.97); }
+.bill-cta-ghost { background: var(--paper-2); color: var(--ink-2); border: 1.5px solid var(--line); font-weight: 600; }
+.bill-cta-ghost:hover:not(:disabled) { background: var(--line); border-color: var(--slate-2); }
+.bill-cta-ghost:disabled { opacity: .55; }
+.bill-card.team-card .bill-cta-ghost { background: rgba(255,255,255,.06); color: #fff; border-color: rgba(255,255,255,.16); }
+.bill-card.team-card .bill-cta-ghost:hover:not(:disabled) { background: rgba(255,255,255,.12); }
+.bill-cta-current { background: var(--lime-dim); color: var(--lime-ink); border: 1.5px solid #DDEFA8; cursor: default; font-weight: 600; }
+
+/* reassure strip under featured/team CTA */
+.bill-reassure { display: flex; justify-content: center; gap: 14px; margin-top: 12px; }
+.bill-reassure span { display: inline-flex; align-items: center; gap: 4px; font-family: var(--font-mono); font-size: 10.5px; color: var(--slate); }
+.bill-reassure .ti { font-size: 13px; color: var(--lime-deep); }
+.bill-card.team-card .bill-reassure span { color: #7A9285; }
+.bill-card.team-card .bill-reassure .ti { color: var(--lime); }
+
+/* enterprise row */
+.bill-ent { background: var(--paper-2); border: 1.5px dashed var(--line); border-radius: var(--r-lg); padding: 18px 22px; display: flex; align-items: center; gap: 18px; margin-bottom: 24px; }
+.bill-ent-icon { width: 40px; height: 40px; border-radius: var(--r-md); background: var(--card); border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: var(--slate); }
+.bill-ent-icon .ti { font-size: 20px; }
+.bill-ent-body { flex: 1; min-width: 0; }
+.bill-ent-body h4 { font-family: var(--font-display); font-size: 14px; font-weight: 700; margin-bottom: 2px; color: var(--ink); }
+.bill-ent-body p { font-size: 13px; color: var(--slate); line-height: 1.45; }
+.bill-ent-btn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 16px; border-radius: var(--r-md); font-size: 13px; font-weight: 600; background: var(--card); color: var(--ink); border: 1.5px solid var(--line); white-space: nowrap; transition: border-color .14s, box-shadow .14s; cursor: pointer; }
+.bill-ent-btn:hover { border-color: var(--slate-2); box-shadow: var(--sh-sm); }
+@media (max-width: 640px) { .bill-ent { flex-direction: column; align-items: flex-start; gap: 12px; } }
+
+/* usage card */
+.bill-usage { background: var(--card); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 20px 22px; margin-bottom: 16px; }
+.bill-usage-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.bill-usage-head h3 { font-family: var(--font-display); font-size: 15px; font-weight: 700; color: var(--ink); }
+.bill-usage-cycle { font-family: var(--font-mono); font-size: 11px; color: var(--slate); letter-spacing: .04em; }
+.bill-usage-bars { display: flex; flex-direction: column; gap: 13px; }
+.bill-usage-meta { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+.bill-usage-label { font-size: 13px; font-weight: 600; color: var(--ink-2); }
+.bill-usage-val { font-family: var(--font-mono); font-size: 12px; font-weight: 700; }
+.bill-usage-track { height: 7px; background: var(--paper-2); border-radius: 99px; overflow: hidden; }
+.bill-usage-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--lime-deep), var(--lime)); transition: width .6s var(--ease); }
+.bill-usage-fill.warn { background: linear-gradient(90deg, var(--mid), #FFB020); }
+.bill-usage-fill.crit { background: linear-gradient(90deg, var(--coral), #FF6B5E); }
+.bill-usage-note { font-size: 12px; color: var(--slate); margin-top: 6px; display: flex; align-items: center; gap: 5px; }
+.bill-usage-note .ti { font-size: 13px; }
+.bill-usage-note.warn { color: var(--mid); }
+.bill-usage-note.crit { color: var(--coral); }
+
+/* comparison table */
+.bill-cmp { background: var(--card); border: 1px solid var(--line); border-radius: var(--r-lg); overflow: hidden; margin-bottom: 16px; }
+.bill-cmp-head { padding: 18px 22px 16px; border-bottom: 1px solid var(--line); }
+.bill-cmp-head h3 { font-family: var(--font-display); font-size: 15px; font-weight: 700; margin-bottom: 2px; color: var(--ink); }
+.bill-cmp-head p { font-size: 13px; color: var(--slate); }
+.bill-cmp-scroll { overflow-x: auto; }
+.bill-cmp table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 560px; }
+.bill-cmp th, .bill-cmp td { padding: 11px 16px; text-align: center; border-bottom: 1px solid var(--line-2); }
+.bill-cmp th:first-child, .bill-cmp td:first-child { text-align: left; font-weight: 500; color: var(--ink-2); padding-left: 22px; }
+.bill-cmp th:last-child, .bill-cmp td:last-child { padding-right: 22px; }
+.bill-cmp thead th { font-family: var(--font-display); font-weight: 700; font-size: 13px; color: var(--ink); border-bottom: 2px solid var(--line); padding-top: 14px; padding-bottom: 14px; }
+.bill-cmp thead th.feat-col { color: var(--lime-deep); }
+.bill-cmp-pname { display: block; font-size: 13px; font-weight: 700; }
+.bill-cmp-pprice { display: block; font-family: var(--font-mono); font-size: 10.5px; font-weight: 500; color: var(--slate-2); margin-top: 2px; letter-spacing: .02em; }
+.bill-cmp-yes { color: var(--hi); font-size: 16px; font-weight: 700; }
+.bill-cmp-no { color: var(--slate-2); opacity: .45; font-size: 16px; }
+.bill-cmp-val { font-family: var(--font-mono); font-size: 12px; font-weight: 600; }
+.bill-cmp tbody tr:hover td { background: var(--paper-2); }
+.bill-cmp-grp td { font-family: var(--font-mono); font-size: 9.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--slate-2); padding-top: 18px; padding-bottom: 8px; background: var(--paper-2) !important; font-weight: 700; border-bottom: 1px solid var(--line); }
+.bill-cmp tbody tr:last-child td { border-bottom: none; }
