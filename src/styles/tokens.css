@@ -18,6 +18,10 @@
   --lime-deep: #7E9E0A;
   --lime-dim: #F2FAD6;
   --lime-ink: #3D4D08;
+  /* ── Sidebar ── */
+  --sidebar: #16201B;
+  --sidebar-2: #1F2C25;
+  --sidebar-line: #2B3A31;
   /* ── Legacy aliases (auth pages still reference these) ── */
   --ink-950: #070b13;
   --ink-900: #0B1220;

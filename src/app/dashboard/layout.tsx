@@ -156,8 +156,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {profile && profile.onboarding_completed && !profile.hourly_rate && (
           <div className="profile-banner">
             <i className="ti ti-alert-triangle"></i>
-            <div className="pb-txt"><b>Finish your profile</b> — add your rate so we can score leads for you.</div>
-            <a onClick={() => navTo('/dashboard/profile')}>Update profile &rarr;</a>
+            <div className="pb-txt"><b>Finish your profile</b> — add your skills and rate so we can score leads for you.</div>
+            <a onClick={() => navTo('/dashboard/profile')}>Complete profile &rarr;</a>
           </div>
         )}
 

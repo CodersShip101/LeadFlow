@@ -276,6 +276,7 @@ textarea.input { resize: vertical; min-height: 80px; }
 .profile-banner .ti{color:var(--mid);font-size:20px}
 .profile-banner .pb-txt{font-size:13.5px;color:#7A5A12}
 .profile-banner .pb-txt b{color:#5E4609}
+.profile-banner a{margin-left:auto;font-weight:600;font-size:13px;color:var(--lime-ink);background:#fff;border:1px solid #EAD9A8;padding:7px 14px;border-radius:var(--r-sm);white-space:nowrap;cursor:pointer;font-family:inherit}
 
 /* ---- Mobile ---- */
 #mobile-top,#mobile-tabs{display:none}
