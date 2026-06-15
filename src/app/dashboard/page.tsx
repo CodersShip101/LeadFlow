@@ -252,7 +252,7 @@ export default function DashboardPage() {
         <RefreshBar
           plan={profile?.subscription_status as any ?? 'free'}
           lastScanAt={leads.length > 0
-            ? Math.max(...leads.map(l => new Date(l.posted_date).getTime()))
+            ? Math.max(...leads.map(l => new Date(l.created_at ?? l.posted_date).getTime()))
             : null
           }
         />
@@ -320,9 +320,9 @@ export default function DashboardPage() {
             <p>Your first scored leads appear within 30 minutes &mdash; we&apos;ll email you when they&apos;re ready.</p>
             <div className="flex items-center gap-3 mt-4 justify-center">
               <button onClick={async () => {
-                const res = await fetch('/api/leads/seed', { method: 'POST' })
+                const res = await fetch('/api/leads/seed?force=1', { method: 'POST' })
                 if (res.ok) { router.refresh() }
-                else { toast.error('Failed to seed leads') }
+                else { const d = await res.json(); toast.error(d.error || 'Failed to seed leads') }
               }} className="btn btn-primary" style={{ display: 'inline-flex' }}><i className="ti ti-flask" /> Generate demo leads</button>
               <button onClick={() => router.refresh()} className="btn btn-ghost" style={{ display: 'inline-flex' }}><i className="ti ti-refresh" /> Check now</button>
             </div>

@@ -212,7 +212,7 @@ export async function GET(req: NextRequest) {
   }
 }
 
-export async function POST() {
+export async function POST(req: NextRequest) {
   try {
     const admin = createAdminSupabase()
 
@@ -222,14 +222,14 @@ export async function POST() {
       return NextResponse.json({ error: `Cannot access leads table: ${tableCheck.message}`, hint: 'Run the schema migration first via POST /api/migrate, then try again.' }, { status: 500 })
     }
 
-    // Only skip if there are leads posted within the last 6 hours (likely already seeded)
-    const sixHoursAgo = new Date(Date.now() - 6 * 3600000).toISOString()
+    // Only skip if there are leads inserted within the last hour (likely already seeded)
+    const oneHourAgo = new Date(Date.now() - 3600000).toISOString()
     const { count: recentCount } = await admin
       .from('leads')
       .select('*', { count: 'exact', head: true })
-      .gte('posted_date', sixHoursAgo)
+      .gte('created_at', oneHourAgo)
 
-    if (recentCount && recentCount > 0) {
+    if (recentCount && recentCount > 0 && !req.nextUrl.searchParams.get('force')) {
       return NextResponse.json({ message: 'Recent leads already exist — no action taken', count: 0 })
     }
 

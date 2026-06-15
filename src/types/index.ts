@@ -28,6 +28,7 @@ export interface Lead {
   posted_date: string;
   expiry_date: string | null;
   status: 'active' | 'filled' | 'expired';
+  created_at?: string;
 }
 
 export interface Application {
