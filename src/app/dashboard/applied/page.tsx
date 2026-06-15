@@ -225,6 +225,22 @@ export default function PipelinePage() {
                                 )}
                               </div>
                             )}
+
+                            {/* Stage timeline */}
+                            {(() => {
+                              const stageIdx = col.key === 'hired' ? 2 : col.key === 'applied' ? 1 : 0
+                              const stageLbl = ['Interested', 'Applied', 'Won'][stageIdx]
+                              return (
+                                <div className="stage-track">
+                                  <span className={`stage-dot ${stageIdx >= 0 ? 'done' : ''} ${stageIdx === 0 ? 'now' : ''}`}></span>
+                                  <span className={`stage-line ${stageIdx >= 1 ? 'done' : ''}`}></span>
+                                  <span className={`stage-dot ${stageIdx >= 1 ? 'done' : ''} ${stageIdx === 1 ? 'now' : ''}`}></span>
+                                  <span className={`stage-line ${stageIdx >= 2 ? 'done' : ''}`}></span>
+                                  <span className={`stage-dot ${stageIdx >= 2 ? 'done' : ''} ${stageIdx === 2 ? 'now' : ''}`}></span>
+                                  <span className="stage-lbl">{stageLbl}</span>
+                                </div>
+                              )
+                            })()}
                           </div>
                         )
                       })

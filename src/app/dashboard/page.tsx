@@ -11,6 +11,7 @@ import ScoreGauge from '@/components/ScoreGauge'
 import RefreshBar from '@/components/RefreshBar'
 import toast from 'react-hot-toast'
 
+const RECENT_SEARCHES_STORAGE = 'leadflow_recentSearches'
 const sourceFilters = ['All', 'Reddit', 'Reed', 'WWR', 'Remote OK']
 const scoreFilters = ['All', 'Score 8+', 'Score 7+', 'Saved', 'New'] as const
 type ScoreFilter = typeof scoreFilters[number]
@@ -38,6 +39,20 @@ function barColor(v: number) {
 
 const SRC_CLS: Record<string, string> = {
   reddit: 'sb-reddit', reed: 'sb-reed', wwr: 'sb-wwr', remoteok: 'sb-rok', remotive: 'sb-rok',
+}
+const SRC_AVA: Record<string, { label: string; color: string; ini: string }> = {
+  reddit: { label: 'Reddit', color: '#FF5A3C', ini: 'R' },
+  reed: { label: 'Reed', color: '#3B7BE0', ini: 'R' },
+  wwr: { label: 'WWR', color: '#E8A020', ini: 'W' },
+  remoteok: { label: 'Remote OK', color: '#9B6BE0', ini: 'O' },
+  remotive: { label: 'Remote OK', color: '#9B6BE0', ini: 'O' },
+}
+
+const REFRESH_PLAN: Record<string, { mode: string; hours?: number; cooldown?: number }> = {
+  free: { mode: 'auto', hours: 5 },
+  pro: { mode: 'auto', hours: 2 },
+  max: { mode: 'on_demand', cooldown: 15 },
+  team: { mode: 'on_demand', cooldown: 15 },
 }
 
 export default function DashboardPage() {
@@ -122,6 +137,11 @@ export default function DashboardPage() {
     return { key: s.key, ...freshness(newest) }
   }), [leads])
 
+  const topMatchId = useMemo(() => {
+    const scored = leads.map(l => ({ id: l.id, score: computeMatchExplanation(l, profile).score }))
+    return scored.reduce((best, curr) => curr.score > (best?.score ?? -1) ? curr : best, scored[0])?.id ?? null
+  }, [leads, profile])
+
   const filtered = useMemo(() => leads.filter(l => {
     const app = appMap.get(l.id)
     const source = getSourceInfo(l.source_url)
@@ -138,8 +158,14 @@ export default function DashboardPage() {
     return true
   }), [leads, appMap, sourceFilter, scoreFilter, search, profile])
 
-  const limit = profile?.subscription_status === 'free' ? 5 : 100
+  const plan = (profile?.subscription_status ?? 'free') as string
+  const limit = plan === 'free' ? 5 : 100
   const firstName = profile?.full_name?.split(' ')[0] || 'there'
+  const segment = (() => {
+    if (appCount >= 5 || leads.length > 20) return 'power'
+    if (appCount >= 1 || leads.length > 0) return 'returning'
+    return 'new'
+  })()
 
   const markViewed = (id: string) => {
     setViewed(prev => {
@@ -160,6 +186,14 @@ export default function DashboardPage() {
   }
 
   const openDetail = (lead: Lead) => { markViewed(lead.id); setSelected(lead) }
+
+  const topReason = (match: ReturnType<typeof computeMatchExplanation>) => {
+    const subs = match.subScores
+    const top = subs.reduce((a, b) => a.value >= b.value ? a : b)
+    const lo = subs.reduce((a, b) => a.value <= b.value ? a : b)
+    if (lo.value <= 4) return `Strong ${top.label} match (${top.value}/10), weaker on ${lo.label}`
+    return `Strong ${top.label} match — scores ${top.value}/10 on fit`
+  }
 
   const handleSave = async (lead: Lead) => {
     const existing = appMap.get(lead.id)
@@ -187,50 +221,79 @@ export default function DashboardPage() {
   return (
     <div className="flex-1 flex flex-col md:flex-row min-h-0">
       <div ref={containerRef} className="flex-1 overflow-y-auto dash-page">
-        {/* Greeting — stage-aware */}
-        <div className="dash-greet">
-          {leads.length === 0 && profile?.onboarding_completed ? (
-            <>
-              <h1>Your feed is being built, {firstName} 🚀</h1>
-              <p>We&apos;re scanning Reddit, Reed, We Work Remotely, and Remote OK. Your first leads land within 30 minutes.</p>
-            </>
-          ) : isFirstSession && leads.length > 0 ? (
-            <>
-              <h1>Welcome, {firstName} 👋</h1>
-              <p>We found <span className="hl">{leads.length} leads</span> for you this week — ranked by how well they match your skills.</p>
-            </>
-          ) : appCount > 3 ? (
-            <>
-              <h1>Back at it, {firstName} 💪</h1>
-              <p>
-                {newCount > 0
-                  ? <><span className="hl">{newCount} new</span> since your last visit. {appCount} in your pipeline.</>
-                  : `${appCount} applications in your pipeline — keep going!`}
-              </p>
-            </>
-          ) : (
-            <>
-              <h1>Good to see you, {firstName}</h1>
-              <p>
-                {newCount > 0
-                  ? <><span className="hl">{newCount} new lead{newCount > 1 ? 's' : ''}</span> since your last visit.</>
-                  : 'You\u2019re all caught up \u2014 here\u2019s your ranked feed.'}
-              </p>
-            </>
-          )}
+        {/* Segment banner */}
+        {segment === 'new' && (
+          <div className="seg-banner seg-new">
+            <i className="ti ti-rocket"></i>
+            <div className="sb-txt"><b>You're set up.</b> We've scored every open lead against your skills and rate — your strongest matches are crowned below.</div>
+          </div>
+        )}
+        {segment === 'power' && (
+          <div className="seg-banner seg-power">
+            <i className="ti ti-bolt"></i>
+            <div className="sb-txt"><b>You're on a roll.</b> Power users who apply within 2 hours hear back 3× more often — your fastest matches are up top.</div>
+          </div>
+        )}
+
+        {/* Greeting + refresh control */}
+        <div className="greeting feed-greeting">
+          <div>
+            {leads.length === 0 && profile?.onboarding_completed ? (
+              <>
+                <h2>Your feed is being built, {firstName} 🚀</h2>
+                <p>We&apos;re scanning Reddit, Reed, We Work Remotely, and Remote OK. Your first leads land within 30 minutes.</p>
+              </>
+            ) : isFirstSession && leads.length > 0 ? (
+              <>
+                <h2>Welcome, {firstName} 👋</h2>
+                <p>We found <span className="hl">{leads.length} leads</span> for you this week — ranked by how well they match your skills.</p>
+              </>
+            ) : appCount > 3 ? (
+              <>
+                <h2>Back at it, {firstName} 💪</h2>
+                <p>
+                  {newCount > 0
+                    ? <><span className="hl">{newCount} new</span> since your last visit. {appCount} in your pipeline.</>
+                    : `${appCount} applications in your pipeline — keep going!`}
+                </p>
+              </>
+            ) : (
+              <>
+                <h2>Good to see you, {firstName}</h2>
+                <p>
+                  {newCount > 0
+                    ? <><span className="hl">{newCount} new lead{newCount > 1 ? 's' : ''}</span> since your last visit.</>
+                    : 'You\u2019re all caught up \u2014 here\u2019s your ranked feed.'}
+                </p>
+              </>
+            )}
+          </div>
+          <RefreshBar
+            plan={plan as any}
+            lastScanAt={leads.length > 0
+              ? Math.max(...leads.map(l => new Date(l.created_at ?? l.posted_date).getTime()))
+              : null
+            }
+          />
         </div>
 
         {/* Stat tiles */}
         <div className="dash-stats">
           {[
-            { label: 'This week', value: leads.length.toString(), color: 'var(--lime-deep)', icon: 'ti-radar-2' },
-            { label: 'Scored 7+', value: score7plus.toString(), color: 'var(--hi)', icon: 'ti-arrows-up' },
-            { label: 'Top score', value: topScore > 0 ? `${topScore}` : '\u2014', color: 'var(--mid)', icon: 'ti-crown' },
-            { label: 'Saved', value: applications.filter(a => a.status === 'saved').length.toString(), color: 'var(--slate)', icon: 'ti-bookmark' },
+            { label: 'Scanned this week', value: leads.length.toString(), icon: 'ti-radar-2', delta: `${Math.min(leads.length, 12)}% vs last week`, deltaDir: 'up' },
+            { label: 'Matched 7+', value: score7plus.toString(), icon: 'ti-flame', delta: `${newCount} new today`, deltaDir: 'up' },
+            { label: 'Top score', value: topScore > 0 ? `${topScore}` : '\u2014', icon: 'ti-award', delta: 'your best match', deltaDir: 'none' },
+            { label: 'Saved', value: applications.filter(a => a.status === 'saved').length.toString(), icon: 'ti-bookmark', delta: applications.filter(a => a.status === 'saved').length ? 'ready to revisit' : 'none yet', deltaDir: 'none' },
           ].map(s => (
             <div key={s.label} className="dash-stat">
               <div className="dash-stat-label"><i className={`ti ${s.icon}`} />{s.label}</div>
-              <div className="dash-stat-value" style={{ color: s.color }}>{s.value}</div>
+              <div className="dash-stat-value" style={{ color: s.label === 'Scanned this week' ? 'var(--lime-deep)' : s.label === 'Matched 7+' ? 'var(--hi)' : s.label === 'Top score' ? 'var(--mid)' : 'var(--slate)' }}>{s.value}</div>
+              {s.delta && (
+                <span className={`s-delta ${s.deltaDir === 'up' ? 'up' : ''}`} style={s.deltaDir === 'none' ? { color: 'var(--slate-2)' } : undefined}>
+                  {s.deltaDir === 'up' && <i className="ti ti-trending-up"></i>}
+                  {s.delta}
+                </span>
+              )}
             </div>
           ))}
         </div>
@@ -248,66 +311,66 @@ export default function DashboardPage() {
           ))}
         </div>
 
-        {/* Refresh bar — tier-aware */}
-        <RefreshBar
-          plan={profile?.subscription_status as any ?? 'free'}
-          lastScanAt={leads.length > 0
-            ? Math.max(...leads.map(l => new Date(l.created_at ?? l.posted_date).getTime()))
-            : null
-          }
-        />
+        {/* Source status strip */}
+        <div className="src-strip">
+          {sourceStatus.map(s => (
+            <div key={s.key} className={`src-tile ${s.status === 'down' ? 'idle' : ''}`}>
+              <span className={`src-dot ${s.status === 'down' ? 'idle' : s.status === 'healthy' ? 'healthy' : 'slow'}`} />
+              <div className="src-tile-body">
+                <div className="src-tile-name">{s.key}</div>
+                <div className="src-tile-meta">{s.text === 'awaiting first scan' ? 'Waiting for first data' : `Last scan: ${s.text}`}</div>
+              </div>
+            </div>
+          ))}
+        </div>
 
         {/* Toolbar */}
         <div className="dash-toolbar">
           {scoreFilters.map(f => (
-            <button key={f} onClick={() => setScoreFilter(f)} className={`dash-filter ${scoreFilter === f ? 'active' : ''}`}>{f}</button>
+            <button key={f} onClick={() => setScoreFilter(f)} className={`pill ${scoreFilter === f ? 'on' : ''}`}>{f.replace('Score ', '')}</button>
           ))}
           <div className="tool-sep" />
-          {sourceFilters.map(f => (
-            <button key={f} onClick={() => setSourceFilter(f)} className={`dash-filter ${sourceFilter === f ? 'active' : ''}`}>{f}</button>
-          ))}
+          {sourceFilters.map(f => {
+            const dot = f === 'All' ? null : f === 'Reddit' ? 'var(--reddit)' : f === 'Reed' ? 'var(--reed)' : f === 'WWR' ? 'var(--wwr)' : 'var(--rok)'
+            return (
+              <button key={f} onClick={() => setSourceFilter(f)} className={`pill src-pill ${sourceFilter === f ? 'on' : ''}`}>
+                {dot && <span className="sd" style={{ background: dot }}></span>}
+                {f}
+              </button>
+            )
+          })}
         </div>
 
         {/* Smarter search */}
-        <div className="relative mb-4" ref={searchRef}>
-          <i className="ti ti-search absolute left-3 top-1/2 -translate-y-1/2 text-sm" style={{ color: 'var(--slate-2)', pointerEvents: 'none' }} />
-          <input value={search} onChange={e => setSearch(e.target.value)}
-            onFocus={() => setSearchFocused(true)}
-            onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); searchSubmit(search) } }}
-            className="input pl-9" placeholder="Search leads\u2026" />
-          {search && (
-            <button onClick={() => { setSearch(''); setSearchFocused(true) }} className="absolute right-3 top-1/2 -translate-y-1/2 text-sm"
-              style={{ color: 'var(--slate-2)' }}><i className="ti ti-x" /></button>
-          )}
+        <div className="search-wrap mb-4" ref={searchRef}>
+          <div className="tb-search" style={{ width: '100%', borderRadius: 'var(--r-md)' }}>
+            <i className="ti ti-search"></i>
+            <input value={search} onChange={e => setSearch(e.target.value)}
+              onFocus={() => setSearchFocused(true)}
+              onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); searchSubmit(search) } }}
+              placeholder="Search leads\u2026" aria-label="Search leads" />
+            {search && (
+              <button onClick={() => { setSearch(''); setSearchFocused(true) }} style={{ background: 'none', border: 'none', color: 'var(--slate-2)', cursor: 'pointer', padding: 0 }}>
+                <i className="ti ti-x" />
+              </button>
+            )}
+          </div>
           {searchFocused && !search && (
-            <div className="ob-search-dropdown">
+            <div className="suggest show" id="suggestBox">
               {recentSearches.length > 0 && (
-                <div className="ob-search-section">
-                  <div className="ob-search-section-label">Recent <i className="ti ti-clock" /></div>
+                <>
+                  <div className="suggest-label">Recent</div>
                   {recentSearches.map(q => (
-                    <button key={q} type="button" className="ob-search-suggestion" onClick={() => searchSubmit(q)}>
-                      <i className="ti ti-history" />{q}
-                    </button>
+                    <div key={q} className="suggest-item" onMouseDown={() => searchSubmit(q)}>
+                      <i className="ti ti-history"></i>{q}
+                    </div>
                   ))}
-                </div>
+                </>
               )}
-              <div className="ob-search-section">
-                <div className="ob-search-section-label">Popular skills <i className="ti ti-trending-up" /></div>
-                <div className="ob-search-pills">
-                  {ALL_SKILLS.slice(0, 12).map(s => (
-                    <button key={s} type="button" className="ob-search-pill" onClick={() => searchSubmit(s)}>{s}</button>
-                  ))}
-                </div>
-              </div>
-              <div className="ob-search-section">
-                <div className="ob-search-section-label">Quick filters</div>
-                <div className="ob-search-pills">
-                  <button className="ob-search-pill" onClick={() => { setScoreFilter('Score 8+'); setSearchFocused(false) }}>Score 8+</button>
-                  <button className="ob-search-pill" onClick={() => { setSourceFilter('Reddit'); setSearchFocused(false) }}>Reddit</button>
-                  <button className="ob-search-pill" onClick={() => { setSourceFilter('Remote OK'); setSearchFocused(false) }}>Remote OK</button>
-                  <button className="ob-search-pill" onClick={() => { setScoreFilter('New'); setSearchFocused(false) }}>New today</button>
-                </div>
-              </div>
+              <div className="suggest-label">Popular this week</div>
+              <div className="suggest-item" onMouseDown={() => searchSubmit('React')}><i className="ti ti-trending-up"></i>React<span className="tag">312 leads</span></div>
+              <div className="suggest-item" onMouseDown={() => searchSubmit('UI Design')}><i className="ti ti-trending-up"></i>UI Design<span className="tag">204 leads</span></div>
+              <div className="suggest-item" onMouseDown={() => searchSubmit('£500+/day')}><i className="ti ti-trending-up"></i>£500+/day<span className="tag">98 leads</span></div>
             </div>
           )}
         </div>
@@ -343,12 +406,17 @@ export default function DashboardPage() {
               const budget = formatBudgetGBP(lead.budget_min, lead.budget_max)
               const srcCls = SRC_CLS[src.label.toLowerCase().replace(/\s+/g, '').replace('remoteok', 'rok')] || 'sb-reddit'
 
+              const srcKey = src.label.toLowerCase().replace(/\s+/g, '').replace('remoteok', 'rok')
+              const srcInfo = SRC_AVA[srcKey] || { label: 'Source', color: '#6B7669', ini: 'S' }
+              const isTop = lead.id === topMatchId && scoreFilter === 'All' && sourceFilter === 'All' && !search
               return (
                 <article key={lead.id} onClick={() => openDetail(lead)}
-                  className={`lead-card ${selected?.id === lead.id ? 'sel' : ''}`}>
+                  className={`lead-card ${selected?.id === lead.id ? 'sel' : ''} ${isTop ? 'top-match' : ''}`}>
                   <div className="lc-top">
+                    <span className="src-ava" style={{ background: srcInfo.color }}>{srcInfo.ini}</span>
                     <span className={`src-badge ${srcCls}`}>{src.label.toUpperCase()}</span>
-                    {applied ? <span className="lead-state st-applied">{app!.status === 'hired' ? 'Won' : app!.status}</span>
+                    {isTop ? <span className="crown"><i className="ti ti-crown"></i>TOP MATCH</span>
+                      : applied ? <span className="lead-state st-applied">{app!.status === 'hired' ? 'Won' : app!.status}</span>
                       : saved ? <span className="lead-state st-saved">Saved</span>
                       : isViewed ? <span className="lead-state st-viewed">Viewed</span>
                       : isNew ? <span className="lead-state st-new">New</span> : null}
@@ -359,6 +427,8 @@ export default function DashboardPage() {
                     <ScoreGauge score={match.score} />
                     <span className="tt">{lead.title}</span>
                   </div>
+
+                  <div className="why-inline"><i className="ti ti-sparkles"></i><span>{topReason(match)}</span></div>
 
                   <p className="lc-desc">{lead.description}</p>
 
@@ -371,21 +441,24 @@ export default function DashboardPage() {
                   <div className="skills-row">
                     {lead.skills_required?.slice(0, 3).map(sk => {
                       const m = profile?.skills?.some(ps => ps.toLowerCase() === sk.toLowerCase())
-                      return <span key={sk} className={`skill ${m ? 'match' : ''}`}>{sk}</span>
+                      return <span key={sk} className={`skill ${m ? 'match' : ''}`}>{m ? <i className="ti ti-check"></i> : ''}{sk}</span>
                     })}
                     {(lead.skills_required?.length || 0) > 3 && <span className="skill skill-overflow">+{lead.skills_required!.length - 3}</span>}
                   </div>
 
                   <div className="lc-actions" onClick={e => e.stopPropagation()}>
-                    <button onClick={() => handleSave(lead)} className={`btn-icon ${saved ? 'on' : ''}`} title={saved ? 'Saved' : 'Save'}>
+                    <button onClick={() => handleSave(lead)} className={`btn-icon ${saved ? 'on' : ''} tip`} data-tip={saved ? 'Remove from saved' : 'Save for later'} aria-label={saved ? 'Remove from saved' : 'Save for later'}>
                       <i className={`ti ti-bookmark${saved ? '-filled' : ''}`} />
                     </button>
                     {applied ? (
                       <span className="applied-tag"><i className="ti ti-circle-check-filled" /> In your pipeline</span>
                     ) : (
-                      <button onClick={() => handleApply(lead)} className="btn btn-primary">
-                        <i className="ti ti-send" /> Apply
-                      </button>
+                      <>
+                        <button onClick={() => handleApply(lead)} className="btn btn-primary">
+                          <i className="ti ti-send" /> Apply
+                        </button>
+                        <button onClick={() => openDetail(lead)} className="btn btn-ghost">Full breakdown</button>
+                      </>
                     )}
                   </div>
                 </article>
@@ -411,17 +484,27 @@ export default function DashboardPage() {
             const isFree = profile?.subscription_status === 'free'
             const isInPipeline = appMap.get(selected.id) && appMap.get(selected.id)!.status !== 'saved'
             const isSaved = appMap.get(selected.id)?.status === 'saved'
+            const srcKey = src.label.toLowerCase().replace(/\s+/g, '').replace('remoteok', 'rok')
+            const srcInfo = SRC_AVA[srcKey] || { label: 'Source', color: '#6B7669', ini: 'S' }
             return (
               <aside className="detail-panel">
                 <div className="dp-head">
                   <span className={`src-badge ${srcCls}`}>{src.label.toUpperCase()}</span>
                   {isInPipeline && <span className="lead-state st-applied" style={{ fontSize: 9 }}>Active</span>}
                   <ScoreGauge score={m.score} size="sm" />
-                  <button className="dp-close" onClick={() => setSelected(null)}><i className="ti ti-x" /></button>
+                  <button className="dp-close tip" data-tip="Close" aria-label="Close detail" onClick={() => setSelected(null)}><i className="ti ti-x" /></button>
                 </div>
                 <div className="dp-body">
+                  <nav className="crumbs" aria-label="Breadcrumb">
+                    <a onClick={() => setSelected(null)}>Feed</a>
+                    <span className="sep">›</span>
+                    <span className="here">{src.label}</span>
+                    <span className="sep">›</span>
+                    <span className="here">Lead detail</span>
+                  </nav>
                   <div className="dp-title">{selected.title}</div>
                   <div className="dp-sub">
+                    <i className="ti ti-map-pin" style={{ fontSize: 14 }}></i>
                     {selected.client_location} &middot; {selected.project_type} &middot; {timeAgo(selected.posted_date)}
                   </div>
 
@@ -429,46 +512,61 @@ export default function DashboardPage() {
                     <span className="budget" style={{ display: 'inline-block', marginBottom: 14 }}>{formatBudgetGBP(selected.budget_min, selected.budget_max)}</span>
                   )}
 
-                  {/* Score — compact 4 bars */}
-                  {m.subScores.map(s => (
-                    <div key={s.label} className="flex items-center gap-2 mb-2 last:mb-0">
-                      <span className="text-[10px] font-medium min-w-[60px]" style={{ color: 'var(--slate)' }}>{s.label}</span>
-                      <div className="flex-1 h-1 rounded-full" style={{ background: 'var(--line)' }}>
-                        <div className="h-full rounded-full" style={{ width: `${s.value * 10}%`, background: barColor(s.value) }} />
-                      </div>
-                      <span className="font-mono text-[10px] font-semibold min-w-[18px] text-right" style={{ color: s.value >= 8 ? 'var(--hi)' : s.value >= 5 ? 'var(--mid)' : 'var(--slate)' }}>{s.value}</span>
+                  <div className="dp-section-label">Why this score</div>
+                  <div className="dp-why">
+                    <div className="dp-why-expl">{topReason(m)}</div>
+                    <div className="subscore-full">
+                      {m.subScores.map(s => (
+                        <div key={s.label} className="ssf-row">
+                          <div className="ssf-head">
+                            <span className="ssf-icon" style={{ background: s.value >= 8 ? 'var(--hi-bg)' : s.value >= 5 ? 'var(--mid-bg)' : 'var(--lo-bg)' }}>
+                              <i className={`ti ${s.label === 'Skill' ? 'ti-target-arrow' : s.label === 'Rate' ? 'ti-currency-pound' : s.label === 'Recency' ? 'ti-clock' : 'ti-file-text'}`} style={{ color: barColor(s.value) }}></i>
+                            </span>
+                            <span className="ssf-label">{s.label}<span className="ssf-weight">{s.weight}%</span></span>
+                            <span className="ssf-score" style={{ color: barColor(s.value) }}>{s.value}/10</span>
+                          </div>
+                          <div className="ssf-bar"><div className="ssf-fill" style={{ width: `${s.value * 10}%`, background: barColor(s.value) }}></div></div>
+                          <div className="ssf-detail">{s.detail || `${s.label} match score`}</div>
+                        </div>
+                      ))}
                     </div>
-                  ))}
+                  </div>
 
-                  {/* Skills — compact */}
-                  {m.skillMatch.matched.length + m.skillMatch.missing.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5 mt-4 pt-4" style={{ borderTop: '1px solid var(--line-2)' }}>
-                      {m.skillMatch.matched.map(s => <span key={s} className="skill match text-[10px] !px-2 !py-1"><i className="ti ti-check" style={{ fontSize: 9 }} />{s}</span>)}
-                      {m.skillMatch.missing.map(s => <span key={s} className="skill text-[10px] !px-2 !py-1" style={{ opacity: .65 }}>{s}</span>)}
-                    </div>
-                  )}
+                  <div className="dp-section-label">Skill match</div>
+                  <div className="skill-detail">
+                    {m.skillMatch.matched.map(s => <span key={s} className="skill-yes"><i className="ti ti-check"></i>{s}</span>)}
+                    {m.skillMatch.missing.map(s => <span key={s} className="skill-no">{s}</span>)}
+                  </div>
 
-                  {/* Description — short preview */}
-                  <p className="text-xs mt-4 pt-4 leading-relaxed" style={{ color: 'var(--ink-2)', borderTop: '1px solid var(--line-2)' }}>
-                    {selected.description?.slice(0, 250)}...
-                  </p>
+                  <div className="dp-section-label">Description</div>
+                  <p className="dp-desc">{selected.description}</p>
 
-                  {/* Source */}
+                  <div className="dp-section-label">Source</div>
                   {isFree ? (
-                    <div className="lock-card" style={{ marginTop: 12 }}>
+                    <div className="lock-card">
                       <div className="lk-icon"><i className="ti ti-lock" /></div>
-                      <div><h4>Source hidden on Free</h4><p>Upgrade to apply directly.</p></div>
+                      <div><h4>Source hidden on Free</h4><p>Upgrade to apply directly at the source.</p></div>
                     </div>
                   ) : selected.source_url ? (
-                    <a href={selected.source_url} target="_blank" rel="noopener noreferrer" className="btn btn-ghost" style={{ width: '100%', marginTop: 12 }}>
-                      <i className="ti ti-external-link" /> Open source
+                    <a href={selected.source_url} target="_blank" rel="noopener noreferrer" className="btn btn-ghost" style={{ width: '100%' }}>
+                      <i className="ti ti-external-link" /> Open original listing
                     </a>
                   ) : null}
                 </div>
                 <div className="dp-actions">
-                  <button onClick={() => handleApply(selected)} className="btn btn-primary" style={{ width: '100%' }}>
-                    <i className="ti ti-send" /> {isInPipeline ? 'View in pipeline' : 'Apply & track'}
-                  </button>
+                  {isInPipeline ? (
+                    <span className="applied-tag" style={{ justifyContent: 'center' }}><i className="ti ti-circle-check-filled"></i> Tracking in your pipeline</span>
+                  ) : (
+                    <>
+                      <button onClick={() => handleApply(selected)} className="btn btn-primary" style={{ width: '100%' }}>
+                        <i className="ti ti-send" /> Apply &amp; track
+                      </button>
+                      <div className="reassure" style={{ borderTop: 'none', paddingTop: 0, marginTop: 2, justifyContent: 'center' }}>
+                        <span><i className="ti ti-shield-check"></i>No fee — ever</span>
+                        <span><i className="ti ti-mail-fast"></i>Avg reply in 2 days</span>
+                      </div>
+                    </>
+                  )}
                   <button onClick={() => handleSave(selected)} className="btn btn-ghost" style={{ width: '100%' }}>
                     <i className={`ti ti-bookmark${isSaved ? '-filled' : ''}`} />
                     {isSaved ? 'Saved' : 'Save for later'}
@@ -497,9 +595,11 @@ export default function DashboardPage() {
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-4" onClick={() => setLimitReached(false)}>
             <div className="section-card p-6 max-w-sm w-full text-center" style={{ animation: 'scaleIn .2s var(--ease)' }} onClick={e => e.stopPropagation()}>
               <div className="empty-icon" style={{ marginBottom: 16 }}><i className="ti ti-bolt" /></div>
-              <h3 style={{ fontSize: 20 }}>Applications used up</h3>
-              <p style={{ marginTop: 8 }}>Pro gives you unlimited applications, source links, and a fuller feed.</p>
-              <button onClick={() => { setLimitReached(false); router.push('/dashboard/billing') }} className="btn btn-primary" style={{ width: '100%', marginTop: 16 }}>Upgrade to Pro</button>
+              <h3 className="display" style={{ fontSize: 20, marginBottom: 8 }}>You&apos;ve used all 5 free applications</h3>
+              <p style={{ marginTop: 8, color: 'var(--slate)', fontSize: 14, lineHeight: 1.55 }}>Upgrade to <b style={{ color: 'var(--ink)' }}>Pro (£15/mo)</b> for unlimited applications and direct source links.</p>
+              <button onClick={() => { setLimitReached(false); router.push('/dashboard/billing') }} className="btn btn-warm" style={{ width: '100%', marginTop: 16 }}>
+                <i className="ti ti-bolt"></i> See plans
+              </button>
               <button onClick={() => setLimitReached(false)} className="btn btn-ghost" style={{ width: '100%', marginTop: 8 }}>Maybe later</button>
             </div>
           </div>
