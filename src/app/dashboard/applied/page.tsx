@@ -4,10 +4,25 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-client'
 import toast from 'react-hot-toast'
-import type { Lead, Profile, Application } from '@/types'
-import { getSourceInfo, formatBudgetGBP, timeAgo } from '@/lib/utils'
-import ScoreGauge from '@/components/ScoreGauge'
-import { computeMatchExplanation } from '@/types'
+import type { Lead, Application } from '@/types'
+import { formatBudgetGBP, timeAgo } from '@/lib/utils'
+
+const SRC: Record<string, { name: string; cls: string; ava: string; ini: string }> = {
+  reddit: { name: 'Reddit', cls: 'sb-reddit', ava: '#FF5A3C', ini: 'R' },
+  reed: { name: 'Reed', cls: 'sb-reed', ava: '#3B7BE0', ini: 'R' },
+  wwr: { name: 'WWR', cls: 'sb-wwr', ava: '#E8A020', ini: 'W' },
+  rok: { name: 'Remote OK', cls: 'sb-rok', ava: '#9B6BE0', ini: 'O' },
+}
+
+function srcKey(surl: string | null): string {
+  const l = (surl || '').toLowerCase()
+  if (l.includes('reddit')) return 'reddit'
+  if (l.includes('reed')) return 'reed'
+  if (l.includes('weworkremotely') || l.includes('wwr')) return 'wwr'
+  return 'rok'
+}
+
+function srcInfo(surl: string | null) { return SRC[srcKey(surl)] || SRC.reddit }
 
 interface Column {
   key: string
@@ -21,9 +36,8 @@ const columns: Column[] = [
   { key: 'hired', label: 'Won', color: 'var(--hi)' },
 ]
 
-const SRC_CLS: Record<string, string> = {
-  reddit: 'sb-reddit', reed: 'sb-reed', wwr: 'sb-wwr', remoteok: 'sb-rok', remotive: 'sb-rok',
-}
+const stageIdxMap: Record<string, number> = { interested: 0, applied: 1, hired: 2 }
+const stageLabels = ['Interested', 'Applied', 'Won']
 
 export default function PipelinePage() {
   const [leads, setLeads] = useState<Lead[]>([])
@@ -70,8 +84,8 @@ export default function PipelinePage() {
     return groups
   }, [leads, appMap])
 
-  const wonCount = grouped.hired.length
   const totalActive = applications.filter(a => a.status !== 'saved').length
+  const wonCount = grouped.hired.length
 
   const updateApplication = useCallback(async (leadId: string, status: string) => {
     const res = await fetch('/api/applications', {
@@ -125,117 +139,80 @@ export default function PipelinePage() {
     setDragCol(null)
   }
 
-  if (loading) return (
-    <div className="flex-1 flex items-center justify-center min-h-screen" style={{ background: 'var(--paper)' }}>
-      <div className="flex items-center gap-3" style={{ color: 'var(--slate)' }}>
-        <div className="w-2.5 h-2.5 rounded-full animate-pulse" style={{ background: 'var(--lime)' }} />
-        <span className="text-sm">Loading&hellip;</span>
+  if (loading) return null
+
+  if (totalActive === 0) {
+    return (
+      <div className="empty">
+        <div className="empty-icon"><i className="ti ti-send"></i></div>
+        <h3>No leads in your pipeline yet</h3>
+        <p>Browse the feed and click Apply on leads you like.</p>
+        <button className="btn btn-primary" style={{ display: 'inline-flex' }} onClick={() => router.push('/dashboard')}>
+          <i className="ti ti-arrow-left"></i> Go to feed
+        </button>
       </div>
-    </div>
-  )
+    )
+  }
 
   return (
-    <div className="flex-1 pb-20 md:pb-0" style={{ background: 'var(--paper)' }}>
-      <div className="dash-page">
-        {/* Header */}
-        <div className="dash-header">
-          <div>
-            <h1>Pipeline</h1>
-            <p style={{ color: 'var(--slate)', fontSize: 14, marginTop: 4 }}>
-              {totalActive} active &middot; drag cards between stages
-            </p>
-          </div>
-          {wonCount > 0 && (
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg" style={{ background: 'var(--hi-bg)' }}>
-              <i className="ti ti-trophy" style={{ fontSize: 14, color: 'var(--hi)' }} />
-              <span className="text-xs font-semibold" style={{ color: 'var(--hi)' }}>{wonCount} won</span>
-            </div>
-          )}
-        </div>
-
-        {totalActive === 0 ? (
-          <div className="empty">
-            <div className="empty-icon"><i className="ti ti-send" /></div>
-            <h3>No leads in your pipeline yet</h3>
-            <p>Browse the feed and click Apply on leads you like.</p>
-            <button onClick={() => router.push('/dashboard')} className="btn btn-primary" style={{ display: 'inline-flex' }}>Go to feed</button>
-          </div>
-        ) : (
-          <div className="kanban">
-            {columns.map(col => {
-              const colLeads = grouped[col.key] || []
-              return (
-                <div key={col.key} className="kan-col"
-                  onDragOver={e => handleDragOver(e, col.key)}
-                  onDragLeave={handleDragLeave}
-                  onDrop={e => handleDrop(e, col.key)}>
-                  <div className="kan-head">
-                    <span className="kan-dot" style={{ background: col.color }} />
-                    <span className="kan-title">{col.label}</span>
-                    <span className="kan-count">{colLeads.length}</span>
-                  </div>
-                  <div className={`kan-body ${overCol === col.key ? 'dragover' : ''}`}>
-                    {colLeads.length === 0 ? (
-                      <div className="kan-empty">Drop leads here</div>
-                    ) : (
-                      colLeads.map(lead => {
-                        const source = getSourceInfo(lead.source_url)
-                        const srcCls = SRC_CLS[source.label.toLowerCase().replace(/\s+/g, '').replace('remoteok', 'rok')] || 'sb-reddit'
-                        const match = computeMatchExplanation(lead, null)
-                        const budget = formatBudgetGBP(lead.budget_min, lead.budget_max)
-                        return (
-                          <div key={lead.id}
-                            className="kan-card"
-                            draggable
-                            onDragStart={e => handleDragStart(e, lead.id, col.key)}
-                            onDragEnd={handleDragEnd}
-                            onClick={() => router.push(`/dashboard/lead/${lead.id}`)}>
-                            {/* Top row: source + date + score */}
-                            <div className="kc-top">
-                              <span className={`src-badge ${srcCls}`}>{source.label.toUpperCase()}</span>
-                              <span className="kc-meta-right">
-                                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10.5, color: 'var(--slate-2)' }}>{timeAgo(lead.posted_date)}</span>
-                                <ScoreGauge score={match.score} size="sm" />
-                              </span>
-                            </div>
-
-                            {/* Title */}
-                            <div className="kc-title">{lead.title}</div>
-
-                            {/* Meta row: budget + location */}
-                            {(budget || lead.client_location) && (
-                              <div className="kc-meta">
-                                {budget && <span className="kc-chip" style={{ background: 'var(--lime-dim)', color: 'var(--lime-ink)' }}>{budget}</span>}
-                                {lead.client_location && (
-                                  <span className="kc-chip" style={{ background: 'var(--paper-2)', color: 'var(--slate)' }}>
-                                    <i className="ti ti-map-pin" style={{ fontSize: 10 }} /> {lead.client_location}
-                                  </span>
-                                )}
-                              </div>
-                            )}
-
-                            {/* Skills preview */}
-                            {lead.skills_required && lead.skills_required.length > 0 && (
-                              <div className="kc-skills">
-                                {lead.skills_required.slice(0, 3).map(s => (
-                                  <span key={s} className="kc-skill">{s}</span>
-                                ))}
-                                {lead.skills_required.length > 3 && (
-                                  <span className="kc-skill kc-skill-more">+{lead.skills_required.length - 3}</span>
-                                )}
-                              </div>
-                            )}
-                          </div>
-                        )
-                      })
-                    )}
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        )}
+    <>
+      <div className="greeting">
+        <h2>Pipeline</h2>
+        <p>{totalActive} active · {wonCount} won. Drag cards between stages as things progress.</p>
       </div>
-    </div>
+      <div className="kanban">
+        {columns.map(col => {
+          const colLeads = grouped[col.key] || []
+          return (
+            <div key={col.key} className="kan-col"
+              onDragOver={e => handleDragOver(e, col.key)}
+              onDragLeave={handleDragLeave}
+              onDrop={e => handleDrop(e, col.key)}>
+              <div className="kan-head">
+                <span className="kan-dot" style={{ background: col.color }} />
+                <span className="kan-title">{col.label}</span>
+                <span className="kan-count">{colLeads.length}</span>
+              </div>
+              <div className={`kan-body ${overCol === col.key ? 'dragover' : ''}`}>
+                {colLeads.length === 0 ? (
+                  <div className="kan-empty">Drop leads here</div>
+                ) : (
+                  colLeads.map(lead => {
+                    const si = srcInfo(lead.source_url)
+                    const budget = formatBudgetGBP(lead.budget_min, lead.budget_max)
+                    const stageIdx = stageIdxMap[col.key] ?? 0
+                    const stageLbl = stageLabels[stageIdx]
+                    return (
+                      <div key={lead.id}
+                        className="kan-card"
+                        draggable
+                        onDragStart={e => handleDragStart(e, lead.id, col.key)}
+                        onDragEnd={handleDragEnd}
+                        onClick={() => router.push(`/dashboard/lead/${lead.id}`)}>
+                        <div className="kc-top">
+                          <span className="src-ava" style={{ background: si.ava, width: 18, height: 18, fontSize: 9 }}>{si.ini}</span>
+                          <span className={`src-badge ${si.cls}`}>{si.name.toUpperCase()}</span>
+                          <span className="lc-time" style={{ marginLeft: 'auto' }}>{timeAgo(lead.posted_date)}</span>
+                        </div>
+                        <div className="kc-title">{lead.title}</div>
+                        {budget && <div className="kc-foot"><span className="budget">{budget}</span></div>}
+                        <div className="stage-track">
+                          <span className={`stage-dot ${stageIdx >= 0 ? 'done' : ''} ${stageIdx === 0 ? 'now' : ''}`}></span>
+                          <span className={`stage-line ${stageIdx >= 1 ? 'done' : ''}`}></span>
+                          <span className={`stage-dot ${stageIdx >= 1 ? 'done' : ''} ${stageIdx === 1 ? 'now' : ''}`}></span>
+                          <span className={`stage-line ${stageIdx >= 2 ? 'done' : ''}`}></span>
+                          <span className={`stage-dot ${stageIdx >= 2 ? 'done' : ''} ${stageIdx === 2 ? 'now' : ''}`}></span>
+                          <span className="stage-lbl">{stageLbl}</span>
+                        </div>
+                      </div>
+                    )
+                  })
+                )}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </>
   )
 }

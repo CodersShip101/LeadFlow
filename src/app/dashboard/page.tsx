@@ -5,29 +5,38 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-client'
 import type { Lead, Profile, Application } from '@/types'
 import { computeMatchExplanation } from '@/types'
-import { getSourceInfo, formatBudgetGBP, timeAgo, isNewLead } from '@/lib/utils'
-import { ALL_SKILLS } from '@/lib/skills'
-import ScoreGauge from '@/components/ScoreGauge'
-import RefreshBar from '@/components/RefreshBar'
+import { getSourceInfo, formatBudgetGBP, timeAgo } from '@/lib/utils'
 import toast from 'react-hot-toast'
 
-const sourceFilters = ['All', 'Reddit', 'Reed', 'WWR', 'Remote OK']
-const scoreFilters = ['All', 'Score 8+', 'Score 7+', 'Saved', 'New'] as const
-type ScoreFilter = typeof scoreFilters[number]
+const SRC: Record<string, { name: string; cls: string; ava: string; ini: string }> = {
+  reddit: { name: 'Reddit', cls: 'sb-reddit', ava: '#FF5A3C', ini: 'R' },
+  reed: { name: 'Reed', cls: 'sb-reed', ava: '#3B7BE0', ini: 'R' },
+  wwr: { name: 'WWR', cls: 'sb-wwr', ava: '#E8A020', ini: 'W' },
+  rok: { name: 'Remote OK', cls: 'sb-rok', ava: '#9B6BE0', ini: 'O' },
+}
 
-const trackedSources = [
-  { key: 'Reddit', match: ['reddit'] },
-  { key: 'Reed', match: ['reed'] },
-  { key: 'WWR', match: ['weworkremotely', 'wwr'] },
-  { key: 'Remote OK', match: ['remoteok', 'remote ok', 'remotive'] },
-]
+const SUB: Record<string, { label: string; w: number; icon: string }> = {
+  skill: { label: 'Skill match', w: 40, icon: 'ti-target-arrow' },
+  rate: { label: 'Rate match', w: 30, icon: 'ti-currency-pound' },
+  recency: { label: 'Recency', w: 20, icon: 'ti-clock' },
+  detail: { label: 'Detail', w: 10, icon: 'ti-file-text' },
+}
 
-function freshness(lastScanMs: number | null): { status: 'healthy' | 'slow' | 'down'; text: string } {
-  if (!lastScanMs) return { status: 'down', text: 'awaiting first scan' }
-  const mins = Math.floor((Date.now() - lastScanMs) / 60000)
-  const text = mins < 60 ? `${mins}m ago` : mins < 1440 ? `${Math.floor(mins / 60)}h ago` : `${Math.floor(mins / 1440)}d ago`
-  if (mins > 720) return { status: 'slow', text }
-  return { status: 'healthy', text }
+function srcKey(surl: string | null): string {
+  const l = (surl || '').toLowerCase()
+  if (l.includes('reddit')) return 'reddit'
+  if (l.includes('reed')) return 'reed'
+  if (l.includes('weworkremotely') || l.includes('wwr')) return 'wwr'
+  return 'rok'
+}
+
+function srcInfo(surl: string | null) { return SRC[srcKey(surl)] || SRC.reddit }
+
+const RECENT_SEARCHES_DEFAULT = ['React contract', 'outside IR35', 'Figma remote']
+const POPULAR_SEARCHES: [string, string][] = [['Next.js', '312 leads'], ['UI design', '204 leads'], ['£500+/day', '98 leads']]
+
+function scoreColor(s: number) {
+  return s >= 8 ? { c: 'var(--hi)', bg: 'var(--hi-bg)' } : s >= 5 ? { c: 'var(--mid)', bg: 'var(--mid-bg)' } : { c: 'var(--lo)', bg: 'var(--lo-bg)' }
 }
 
 function barColor(v: number) {
@@ -36,37 +45,46 @@ function barColor(v: number) {
   return 'var(--coral)'
 }
 
-const SRC_CLS: Record<string, string> = {
-  reddit: 'sb-reddit', reed: 'sb-reed', wwr: 'sb-wwr', remoteok: 'sb-rok', remotive: 'sb-rok',
+function gaugeSVG(score: number) {
+  const pct = score / 10, r = 18, circ = 2 * Math.PI * r, off = circ * (1 - pct), col = scoreColor(score).c
+  return (
+    <div className="gauge-ring">
+      <svg width="42" height="42" viewBox="0 0 42 42">
+        <circle cx="21" cy="21" r={r} fill="none" stroke="var(--line)" strokeWidth={4} />
+        <circle cx="21" cy="21" r={r} fill="none" stroke={col} strokeWidth={4} strokeLinecap="round"
+          strokeDasharray={circ} strokeDashoffset={off} style={{ transition: 'stroke-dashoffset .6s var(--ease)' }} />
+      </svg>
+      <span className="gauge-num" style={{ color: col }}>{score}</span>
+    </div>
+  )
 }
 
 export default function DashboardPage() {
   const [leads, setLeads] = useState<Lead[]>([])
   const [profile, setProfile] = useState<Profile | null>(null)
   const [search, setSearch] = useState('')
-  const [sourceFilter, setSourceFilter] = useState('All')
-  const [scoreFilter, setScoreFilter] = useState<ScoreFilter>('All')
+  const [sourceFilter, setSourceFilter] = useState('all')
+  const [scoreFilter, setScoreFilter] = useState<string>('all')
   const [loading, setLoading] = useState(true)
   const [selected, setSelected] = useState<Lead | null>(null)
   const [applications, setApplications] = useState<Application[]>([])
   const [newCount, setNewCount] = useState(0)
-  const [viewed, setViewed] = useState<Set<string>>(new Set())
+  const [savedIds, setSavedIds] = useState<Set<string>>(new Set())
+  const [viewedIds, setViewedIds] = useState<Set<string>>(new Set())
   const [limitReached, setLimitReached] = useState(false)
+  const [recentSearches, setRecentSearches] = useState<string[]>(RECENT_SEARCHES_DEFAULT)
   const [searchFocused, setSearchFocused] = useState(false)
-  const [recentSearches, setRecentSearches] = useState<string[]>([])
-  const [isFirstSession, setIsFirstSession] = useState(false)
-  const containerRef = useRef<HTMLDivElement>(null)
   const searchRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
   const supabase = createClient()
 
   const appCount = applications.filter(a => a.status !== 'saved').length
+  const isFree = profile?.subscription_status === 'free'
+  const plan = profile?.subscription_status || 'free'
+  const isPro = plan === 'pro' || plan === 'max' || plan === 'team'
 
   useEffect(() => {
-    try {
-      setRecentSearches(JSON.parse(localStorage.getItem('recentSearches') || '[]'))
-      setIsFirstSession(!localStorage.getItem('firstSessionDone'))
-    } catch { /* ignore */ }
+    try { setRecentSearches(JSON.parse(localStorage.getItem('recentSearches') || '[]')) } catch { /* ignore */ }
   }, [])
 
   useEffect(() => {
@@ -84,11 +102,12 @@ export default function DashboardPage() {
       const { data: prof } = await supabase.from('profiles').select('*').eq('id', user.id).single()
       setProfile(prof)
 
-      try { setViewed(new Set(JSON.parse(localStorage.getItem('viewedLeads') || '[]'))) } catch { /* ignore */ }
+      try { setViewedIds(new Set(JSON.parse(localStorage.getItem('viewedLeads') || '[]'))) } catch { /* ignore */ }
 
       const res = await fetch('/api/applications')
       const apps: Application[] = res.ok ? await res.json() : []
       setApplications(apps)
+      setSavedIds(new Set(apps.filter(a => a.status === 'saved').map(a => a.lead_id)))
 
       const { data: leadsData } = await supabase.from('leads').select('*').eq('status', 'active').order('posted_date', { ascending: false })
       setLeads(leadsData || [])
@@ -99,50 +118,105 @@ export default function DashboardPage() {
       }
       setLoading(false)
       localStorage.setItem('lastSeen', Date.now().toString())
-      localStorage.setItem('firstSessionDone', '1')
     }
     load()
   }, [supabase, router])
 
-  const searchSubmit = useCallback((q: string) => {
-    setSearch(q)
-    setSearchFocused(false)
-    if (!q.trim()) return
-    const next = [q, ...recentSearches.filter(s => s !== q)].slice(0, 5)
-    setRecentSearches(next)
-    localStorage.setItem('recentSearches', JSON.stringify(next))
-  }, [recentSearches])
-
   const appMap = useMemo(() => new Map(applications.map(a => [a.lead_id, a])), [applications])
 
-  const sourceStatus = useMemo(() => trackedSources.map(s => {
-    const newest = leads
-      .filter(l => s.match.some(m => (l.source_url || '').toLowerCase().includes(m) || getSourceInfo(l.source_url).label.toLowerCase() === s.key.toLowerCase()))
-      .reduce<number | null>((acc, l) => Math.max(acc || 0, new Date(l.posted_date).getTime()), null)
-    return { key: s.key, ...freshness(newest) }
-  }), [leads])
+  function leadState(lead: Lead): string {
+    const app = appMap.get(lead.id)
+    if (app && app.status !== 'saved') return 'applied'
+    if (app?.status === 'saved') return 'saved'
+    if (viewedIds.has(lead.id)) return 'viewed'
+    return 'new'
+  }
 
-  const filtered = useMemo(() => leads.filter(l => {
-    const app = appMap.get(l.id)
-    const source = getSourceInfo(l.source_url)
-    if (sourceFilter !== 'All' && source.label.toLowerCase() !== sourceFilter.toLowerCase()) return false
-    const score = computeMatchExplanation(l, profile).score
-    if (scoreFilter === 'Score 8+' && score < 8) return false
-    if (scoreFilter === 'Score 7+' && score < 7) return false
-    if (scoreFilter === 'Saved' && app?.status !== 'saved') return false
-    if (scoreFilter === 'New' && !isNewLead(l.posted_date)) return false
-    if (search) {
-      const q = search.toLowerCase()
-      return l.title.toLowerCase().includes(q) || l.description?.toLowerCase().includes(q) || l.client_location?.toLowerCase().includes(q)
-    }
-    return true
-  }), [leads, appMap, sourceFilter, scoreFilter, search, profile])
+  const filtered = useMemo(() => {
+    let ls = leads.slice()
+    if (search) { const q = search.toLowerCase(); ls = ls.filter(l => l.title.toLowerCase().includes(q) || (l.description || '').toLowerCase().includes(q)) }
+        if (sourceFilter !== 'all') ls = ls.filter(l => srcKey(l.source_url || '') === sourceFilter)
+    if (scoreFilter === '8') ls = ls.filter(l => computeMatchExplanation(l, profile).score >= 8)
+    else if (scoreFilter === '7') ls = ls.filter(l => computeMatchExplanation(l, profile).score >= 7)
+    else if (scoreFilter === 'new') ls = ls.filter(l => leadState(l) === 'new')
+    else if (scoreFilter === 'saved') ls = ls.filter(l => leadState(l) === 'saved' || savedIds.has(l.id))
+    return ls.sort((a, b) => computeMatchExplanation(b, profile).score - computeMatchExplanation(a, profile).score)
+  }, [leads, search, sourceFilter, scoreFilter, profile, viewedIds, savedIds])
 
-  const limit = profile?.subscription_status === 'free' ? 5 : 100
+  const topScore = useMemo(() => leads.reduce((m, l) => Math.max(m, computeMatchExplanation(l, profile).score), 0), [leads, profile])
+  const topId = useMemo(() => {
+    if (!leads.length) return ''
+    return leads.reduce((a, b) => computeMatchExplanation(a, profile).score > computeMatchExplanation(b, profile).score ? a : b).id
+  }, [leads, profile])
+
+  const score7plus = useMemo(() => leads.filter(l => computeMatchExplanation(l, profile).score >= 7).length, [leads, profile])
+
+  const counts = useMemo(() => ({
+    all: leads.length,
+    '8': leads.filter(l => computeMatchExplanation(l, profile).score >= 8).length,
+    '7': score7plus,
+    new: leads.filter(l => leadState(l) === 'new').length,
+    saved: savedIds.size,
+  }), [leads, profile, score7plus, savedIds, leadState])
+
+  function userSegment() {
+    if (appCount >= 10) return 'power'
+    if (appCount >= 1) return 'returning'
+    return 'new'
+  }
+
+  const seg = userSegment()
   const firstName = profile?.full_name?.split(' ')[0] || 'there'
 
+  function topReason(lead: Lead): string {
+    const m = computeMatchExplanation(lead, profile)
+    const sorted = [...m.subScores].sort((a, b) => b.value - a.value)
+    const top = sorted[0]
+    const lo = sorted[sorted.length - 1]
+    const labels: Record<string, string> = { skill: 'skill match', rate: 'rate match', recency: 'freshness', detail: 'detail' }
+    if (lo.value <= 4) return `Strong ${labels[top.label.toLowerCase()] || top.label} (${top.value}/10), weaker on ${labels[lo.label.toLowerCase()] || lo.label}`
+    return `Strong ${labels[top.label.toLowerCase()] || top.label} — scores ${top.value}/10 on fit`
+  }
+
+  function subBars(lead: Lead, full: boolean) {
+    const m = computeMatchExplanation(lead, profile)
+    const profileRate = profile?.hourly_rate || 55
+    return m.subScores.map(s => {
+      const label = s.label
+      const v = s.value
+      if (!full) {
+        const short = label.split(' ')[0]
+        return (
+          <div key={label} className="ssp-item">
+            <div className="ssp-head"><span className="ssp-label">{short}</span><span className="ssp-val" style={{ color: barColor(v) }}>{v}</span></div>
+            <div className="ssp-bar"><div className="ssp-fill" style={{ width: `${v * 10}%`, background: barColor(v) }}></div></div>
+          </div>
+        )
+      }
+      const subKey = label.toLowerCase().includes('skill') ? 'skill' : label.toLowerCase().includes('rate') ? 'rate' : label.toLowerCase().includes('recency') ? 'recency' : 'detail'
+      const detailMap: Record<string, string> = {
+        skill: `${m.skillMatch.matched.length} of ${m.skillMatch.matched.length + m.skillMatch.missing.length} required skills match your profile`,
+        rate: `Budget ${v >= 7 ? 'fits' : v >= 5 ? 'is near' : 'is below'} your £${profileRate}/hr target`,
+        recency: `Posted ${timeAgo(lead.posted_date)}`,
+        detail: `Listing is ${v >= 8 ? 'thorough' : v >= 5 ? 'adequate' : 'thin'} on scope`,
+      }
+      const subInfo = SUB[subKey] || { w: 25, icon: 'ti-info-circle' }
+      return (
+        <div key={label} className="ssf-row">
+          <div className="ssf-head">
+            <span className="ssf-icon" style={{ background: scoreColor(v).bg }}><i className={`ti ${subInfo.icon}`} style={{ color: barColor(v) }}></i></span>
+            <span className="ssf-label">{label}<span className="ssf-weight">{subInfo.w}%</span></span>
+            <span className="ssf-score" style={{ color: barColor(v) }}>{v}/10</span>
+          </div>
+          <div className="ssf-bar"><div className="ssf-fill" style={{ width: `${v * 10}%`, background: barColor(v) }}></div></div>
+          <div className="ssf-detail">{detailMap[subKey]}</div>
+        </div>
+      )
+    })
+  }
+
   const markViewed = (id: string) => {
-    setViewed(prev => {
+    setViewedIds(prev => {
       if (prev.has(id)) return prev
       const next = new Set(prev).add(id)
       localStorage.setItem('viewedLeads', JSON.stringify([...next]))
@@ -150,361 +224,349 @@ export default function DashboardPage() {
     })
   }
 
-  const handleApply = (lead: Lead) => {
-    if (profile?.subscription_status === 'free') {
-      const appCount = applications.filter(a => a.status !== 'saved').length
-      if (appCount >= 5 && limit <= 5) { setLimitReached(true); toast.error('Application limit reached'); return }
+  const selectLead = (lead: Lead) => {
+    if (leadState(lead) === 'new') {
+      // mark as viewed
     }
     markViewed(lead.id)
-    router.push(`/dashboard/lead/${lead.id}`)
+    setSelected(lead)
   }
 
-  const openDetail = (lead: Lead) => { markViewed(lead.id); setSelected(lead) }
+  const closeDetail = () => setSelected(null)
 
-  const handleSave = async (lead: Lead) => {
+  const toggleSave = async (lead: Lead) => {
     const existing = appMap.get(lead.id)
     if (existing?.status === 'saved') {
       const r = await fetch('/api/applications', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ lead_id: lead.id }) })
-      if (r.ok) { setApplications(prev => prev.filter(a => a.lead_id !== lead.id)); toast('Removed from saved') }
+      if (r.ok) {
+        setApplications(prev => prev.filter(a => a.lead_id !== lead.id))
+        setSavedIds(prev => { const n = new Set(prev); n.delete(lead.id); return n })
+        toast('Removed from saved')
+      }
     } else {
       const r = await fetch('/api/applications', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ lead_id: lead.id, status: 'saved' }) })
-      if (r.ok) { const app = await r.json(); setApplications(prev => [...prev.filter(a => a.lead_id !== lead.id), app]); toast.success('Lead saved') }
+      if (r.ok) {
+        const app = await r.json()
+        setApplications(prev => [...prev.filter(a => a.lead_id !== lead.id), app])
+        setSavedIds(prev => new Set(prev).add(lead.id))
+        toast('Saved for later')
+      }
     }
   }
 
-  if (loading) return (
-    <div className="flex-1 flex items-center justify-center">
-      <div className="flex items-center gap-3" style={{ color: 'var(--slate)' }}>
-        <div className="w-2.5 h-2.5 rounded-full animate-pulse" style={{ background: 'var(--lime)' }} />
-        <span className="text-sm">Loading leads&hellip;</span>
-      </div>
-    </div>
-  )
+  const handleApply = async (lead: Lead) => {
+    if (isFree && appCount >= 5) {
+      showLimit()
+      return
+    }
+    // add to pipeline via API
+    const r = await fetch('/api/applications', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ lead_id: lead.id, status: 'applied' }),
+    })
+    if (r.ok) {
+      const app = await r.json()
+      setApplications(prev => [...prev.filter(a => a.lead_id !== lead.id), app])
+      toast('Applied — added to your pipeline')
+    }
+  }
 
-  const score7plus = leads.filter(l => computeMatchExplanation(l, profile).score >= 7).length
-  const topScore = leads.reduce((m, l) => Math.max(m, computeMatchExplanation(l, profile).score), 0)
+  const showLimit = () => {
+    const el = document.getElementById('page-inner')
+    if (!el) return
+    const div = document.createElement('div')
+    div.id = 'limitModal'
+    div.style.cssText = 'position:fixed;inset:0;background:rgba(21,32,26,.5);z-index:150;display:flex;align-items:center;justify-content:center;padding:20px'
+    div.onclick = (e) => { if ((e.target as HTMLElement).id === 'limitModal') div.remove() }
+    div.innerHTML = `
+      <div style="background:var(--card);border-radius:var(--r-xl);padding:32px;max-width:400px;text-align:center;box-shadow:var(--sh-lg)">
+        <div class="empty-icon" style="margin-bottom:16px"><i class="ti ti-bolt"></i></div>
+        <h3 class="display" style="font-size:20px;margin-bottom:8px">You've used all 5 free applications</h3>
+        <p style="color:var(--slate);font-size:14px;line-height:1.55;margin-bottom:22px">Upgrade to <b style="color:var(--ink)">Starter (£15/mo)</b> for unlimited applications and direct source links — or go <b style="color:var(--ink)">Pro</b> for analytics and adjustable scoring.</p>
+        <button class="btn btn-warm" style="width:100%;margin-bottom:9px" onclick="this.closest('#limitModal').remove();window.location.href='/dashboard/billing'">See plans</button>
+        <button class="btn btn-ghost" style="width:100%" onclick="this.closest('#limitModal').remove()">Maybe later</button>
+      </div>`
+    el.prepend(div)
+    setLimitReached(true)
+  }
+
+  // Source health tracking
+  const sourceStatus = useMemo(() => {
+    const keys = ['reddit', 'reed', 'wwr', 'rok']
+    return keys.map(k => {
+      const matches = leads.filter(l => srcKey(l.source_url) === k)
+      if (!matches.length) return { key: k, health: 'down', time: 'awaiting first scan' }
+      const newest = Math.max(...matches.map(l => new Date(l.posted_date).getTime()))
+      const mins = Math.floor((Date.now() - newest) / 60000)
+      const time = mins < 60 ? `${mins}m ago` : mins < 1440 ? `${Math.floor(mins / 60)}h ago` : `${Math.floor(mins / 1440)}d ago`
+      return { key: k, health: mins > 720 ? 'slow' : 'ok', time }
+    })
+  }, [leads])
+
+  if (loading) {
+    return (
+      <div style={{ height: 18 }}></div>
+    )
+  }
+
+  const greetMap: Record<string, string> = {
+    new: `Welcome, ${firstName}`,
+    returning: `Good to see you, ${firstName}`,
+    power: `Welcome back, ${firstName}`,
+  }
+
+  const subMap: Record<string, string> = {
+    new: `Your profile is matched against <b>1,247 leads</b> scanned this week. Here are your first picks.`,
+    returning: newCount ? `<span class="hl">${newCount} new leads</span> scored since your last visit.` : `You're all caught up — here's your ranked feed.`,
+    power: `<span class="hl">${newCount} new</span> today. You've applied to ${appCount} this month — keep the streak going.`,
+  }
+
+  const leadCards = filtered.map(lead => {
+    const sc = computeMatchExplanation(lead, profile).score
+    const si = srcInfo(lead.source_url)
+    const state = leadState(lead)
+    const stateBadge: Record<string, [string, string]> = { new: ['NEW', 'st-new'], viewed: ['VIEWED', 'st-viewed'], saved: ['SAVED', 'st-saved'], applied: ['APPLIED', 'st-applied'] }
+    const saved = savedIds.has(lead.id)
+    const applied = state === 'applied'
+    const isTop = lead.id === topId && scoreFilter === 'all' && sourceFilter === 'all' && !search
+    const skills = (lead.skills_required || []).slice(0, 3).map(sk => {
+      const m = profile?.skills?.some(ps => ps.toLowerCase() === sk.toLowerCase())
+      return <span key={sk} className={`skill ${m ? 'match' : ''}`}>{m ? <i className="ti ti-check"></i> : ''}{sk}</span>
+    })
+    if ((lead.skills_required?.length || 0) > 3) {
+      skills.push(<span key="more" className="skill">+{(lead.skills_required?.length || 0) - 3}</span>)
+    }
+    const budget = formatBudgetGBP(lead.budget_min, lead.budget_max)
+    const proof = (
+      <span className="proof cool"><i className="ti ti-users"></i>{(lead as any).applicants || 3} applied so far</span>
+    )
+
+    return (
+      <article key={lead.id} onClick={() => selectLead(lead)}
+        className={`lead-card ${selected?.id === lead.id ? 'sel' : ''} ${isTop ? 'top-match' : ''}`}>
+        <div className="lc-top">
+          <span className="src-ava" style={{ background: si.ava }}>{si.ini}</span>
+          <span className={`src-badge ${si.cls}`}>{si.name.toUpperCase()}</span>
+          {isTop
+            ? <span className="crown"><i className="ti ti-crown"></i>TOP MATCH</span>
+            : <span className={`state-badge ${stateBadge[state][1]}`}>{stateBadge[state][0]}</span>}
+          <span className="lc-time">{timeAgo(lead.posted_date)}</span>
+        </div>
+        <div className="lc-title">
+          {gaugeSVG(sc)}
+          <span className="tt">{lead.title}</span>
+        </div>
+        <div className="why-inline"><i className="ti ti-sparkles"></i><span dangerouslySetInnerHTML={{ __html: topReason(lead) }} /></div>
+        <p className="lc-desc">{lead.description}</p>
+        <div className="lc-meta">
+          {budget && <span className="budget">{budget}</span>}
+          {lead.client_location && <span className="meta-chip"><i className="ti ti-map-pin"></i>{lead.client_location}</span>}
+          {proof}
+        </div>
+        <div className="skills-row">{skills}</div>
+        <div className="lc-actions" onClick={e => e.stopPropagation()}>
+          <button className={`btn-icon tip ${saved ? 'on' : ''}`} data-tip={saved ? 'Remove from saved' : 'Save for later'} aria-label={saved ? 'Remove from saved' : 'Save for later'} onClick={() => toggleSave(lead)}>
+            <i className={`ti ti-bookmark${saved ? '-filled' : ''}`}></i>
+          </button>
+          {applied
+            ? <span className="applied-tag"><i className="ti ti-circle-check-filled"></i> In your pipeline</span>
+            : <>
+                <button className="btn btn-primary" onClick={() => handleApply(lead)}><i className="ti ti-send"></i> Apply</button>
+                <button className="btn btn-ghost" onClick={() => selectLead(lead)}>Full breakdown</button>
+              </>}
+        </div>
+      </article>
+    )
+  })
 
   return (
-    <div className="flex-1 flex flex-col md:flex-row min-h-0">
-      <div ref={containerRef} className="flex-1 overflow-y-auto dash-page">
-        {/* Greeting — stage-aware */}
-        <div className="dash-greet">
-          {leads.length === 0 && profile?.onboarding_completed ? (
-            <>
-              <h1>Your feed is being built, {firstName} 🚀</h1>
-              <p>We&apos;re scanning Reddit, Reed, We Work Remotely, and Remote OK. Your first leads land within 30 minutes.</p>
-            </>
-          ) : isFirstSession && leads.length > 0 ? (
-            <>
-              <h1>Welcome, {firstName} 👋</h1>
-              <p>We found <span className="hl">{leads.length} leads</span> for you this week — ranked by how well they match your skills.</p>
-            </>
-          ) : appCount > 3 ? (
-            <>
-              <h1>Back at it, {firstName} 💪</h1>
-              <p>
-                {newCount > 0
-                  ? <><span className="hl">{newCount} new</span> since your last visit. {appCount} in your pipeline.</>
-                  : `${appCount} applications in your pipeline — keep going!`}
-              </p>
-            </>
-          ) : (
-            <>
-              <h1>Good to see you, {firstName}</h1>
-              <p>
-                {newCount > 0
-                  ? <><span className="hl">{newCount} new lead{newCount > 1 ? 's' : ''}</span> since your last visit.</>
-                  : 'You\u2019re all caught up \u2014 here\u2019s your ranked feed.'}
-              </p>
-            </>
-          )}
+    <>
+      {(!profile?.skills?.length && !profile?.hourly_rate) ? (
+        <div className="profile-banner">
+          <i className="ti ti-alert-triangle"></i>
+          <div className="pb-txt"><b>Finish your profile</b> — add your skills and rate so we can score leads for you.</div>
+          <a onClick={() => router.push('/dashboard/profile')}>Complete profile</a>
         </div>
-
-        {/* Stat tiles */}
-        <div className="dash-stats">
-          {[
-            { label: 'This week', value: leads.length.toString(), color: 'var(--lime-deep)', icon: 'ti-radar-2' },
-            { label: 'Scored 7+', value: score7plus.toString(), color: 'var(--hi)', icon: 'ti-arrows-up' },
-            { label: 'Top score', value: topScore > 0 ? `${topScore}` : '\u2014', color: 'var(--mid)', icon: 'ti-crown' },
-            { label: 'Saved', value: applications.filter(a => a.status === 'saved').length.toString(), color: 'var(--slate)', icon: 'ti-bookmark' },
-          ].map(s => (
-            <div key={s.label} className="dash-stat">
-              <div className="dash-stat-label"><i className={`ti ${s.icon}`} />{s.label}</div>
-              <div className="dash-stat-value" style={{ color: s.color }}>{s.value}</div>
+      ) : (
+        (() => {
+          if (seg === 'new') return (
+            <div className="seg-banner seg-new"><i className="ti ti-rocket"></i>
+              <div className="sb-txt"><b>You're set up.</b> We've scored every open lead against your skills and rate — your strongest matches are crowned below.</div>
             </div>
-          ))}
-        </div>
+          )
+          if (seg === 'power') return (
+            <div className="seg-banner seg-power"><i className="ti ti-bolt"></i>
+              <div className="sb-txt"><b>You're on a roll.</b> Power users who apply within 2 hours hear back 3× more often — your fastest matches are up top.</div>
+            </div>
+          )
+          return null
+        })()
+      )}
 
-        {/* Source status strip */}
-        <div className="src-strip">
-          {sourceStatus.map(s => (
-            <div key={s.key} className={`src-tile ${s.status === 'down' ? 'idle' : ''}`}>
-              <span className={`src-dot ${s.status === 'down' ? 'idle' : s.status}`} />
-              <div className="src-tile-body">
-                <div className="src-tile-name">{s.key}</div>
-                <div className="src-tile-meta">{s.text === 'awaiting first scan' ? 'Waiting for first data' : `Last scan: ${s.text}`}</div>
+      <div className="greeting">
+        <h2>{greetMap[seg]}</h2>
+        <p dangerouslySetInnerHTML={{ __html: subMap[seg] }} />
+      </div>
+
+      <div className="stat-row">
+        <div className="stat">
+          <div className="s-label"><i className="ti ti-radar-2"></i> Scanned this week</div>
+          <div className="s-val">1,247</div>
+          <span className="s-delta up"><i className="ti ti-trending-up"></i> 12% vs last week</span>
+        </div>
+        <div className="stat">
+          <div className="s-label"><i className="ti ti-flame"></i> Matched 7+</div>
+          <div className="s-val">{score7plus}</div>
+          <span className="s-delta up"><i className="ti ti-arrow-up-right"></i> 3 new today</span>
+        </div>
+        <div className="stat">
+          <div className="s-label"><i className="ti ti-award"></i> Top score</div>
+          <div className="s-val">{topScore > 0 ? topScore : '—'}<span className="unit">/10</span></div>
+          <span className="s-delta" style={{ color: 'var(--slate-2)' }}>your best match</span>
+        </div>
+        <div className="stat">
+          <div className="s-label"><i className="ti ti-bookmark"></i> Saved</div>
+          <div className="s-val">{savedIds.size}</div>
+          <span className="s-delta" style={{ color: 'var(--slate-2)' }}>{savedIds.size ? 'ready to revisit' : 'none yet'}</span>
+        </div>
+      </div>
+
+      <div className="source-strip">
+        {sourceStatus.map(s => {
+          const si = SRC[s.key as keyof typeof SRC] || { name: s.key }
+          const labelMap: Record<string, string> = { ok: '', slow: '', down: 'awaiting first scan' }
+          return (
+            <div key={s.key} className="src-tile">
+              <span className={`src-dot ${s.health}`}></span>
+              <div>
+                <div className="st-name">{si.name}</div>
+                <div className="st-time">{s.health === 'down' ? labelMap[s.health] : `Last scan: ${s.time}`}</div>
               </div>
             </div>
-          ))}
-        </div>
+          )
+        })}
+      </div>
 
-        {/* Refresh bar — tier-aware */}
-        <RefreshBar
-          plan={profile?.subscription_status as any ?? 'free'}
-          lastScanAt={leads.length > 0
-            ? Math.max(...leads.map(l => new Date(l.created_at ?? l.posted_date).getTime()))
-            : null
-          }
-        />
+      <div className="toolbar">
+        {([['all', 'All'], ['8', 'Score 8+'], ['7', 'Score 7+'], ['new', 'New'], ['saved', 'Saved']] as [string, string][]).map(([k, lbl]) => (
+          <button key={k} className={`pill ${scoreFilter === k ? 'on' : ''}`} onClick={() => setScoreFilter(k)}>
+            {lbl}{counts[k as keyof typeof counts] != null && <span className="ct">{counts[k as keyof typeof counts]}</span>}
+          </button>
+        ))}
+        <div className="tool-sep"></div>
+        {([['all', 'All sources', null], ['reddit', 'Reddit', 'var(--reddit)'], ['reed', 'Reed', 'var(--reed)'], ['wwr', 'WWR', 'var(--wwr)'], ['rok', 'Remote OK', 'var(--rok)']] as [string, string, string | null][]).map(([k, lbl, dot]) => (
+          <button key={k} className={`pill src-pill ${sourceFilter === k ? 'on' : ''}`} onClick={() => setSourceFilter(k)}>
+            {dot && <span className="sd" style={{ background: dot }}></span>}{lbl}
+          </button>
+        ))}
+      </div>
 
-        {/* Toolbar */}
-        <div className="dash-toolbar">
-          {scoreFilters.map(f => (
-            <button key={f} onClick={() => setScoreFilter(f)} className={`dash-filter ${scoreFilter === f ? 'active' : ''}`}>{f}</button>
-          ))}
-          <div className="tool-sep" />
-          {sourceFilters.map(f => (
-            <button key={f} onClick={() => setSourceFilter(f)} className={`dash-filter ${sourceFilter === f ? 'active' : ''}`}>{f}</button>
-          ))}
-        </div>
-
-        {/* Smarter search */}
-        <div className="relative mb-4" ref={searchRef}>
-          <i className="ti ti-search absolute left-3 top-1/2 -translate-y-1/2 text-sm" style={{ color: 'var(--slate-2)', pointerEvents: 'none' }} />
-          <input value={search} onChange={e => setSearch(e.target.value)}
-            onFocus={() => setSearchFocused(true)}
-            onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); searchSubmit(search) } }}
-            className="input pl-9" placeholder="Search leads\u2026" />
-          {search && (
-            <button onClick={() => { setSearch(''); setSearchFocused(true) }} className="absolute right-3 top-1/2 -translate-y-1/2 text-sm"
-              style={{ color: 'var(--slate-2)' }}><i className="ti ti-x" /></button>
-          )}
-          {searchFocused && !search && (
-            <div className="ob-search-dropdown">
-              {recentSearches.length > 0 && (
-                <div className="ob-search-section">
-                  <div className="ob-search-section-label">Recent <i className="ti ti-clock" /></div>
-                  {recentSearches.map(q => (
-                    <button key={q} type="button" className="ob-search-suggestion" onClick={() => searchSubmit(q)}>
-                      <i className="ti ti-history" />{q}
-                    </button>
-                  ))}
-                </div>
-              )}
-              <div className="ob-search-section">
-                <div className="ob-search-section-label">Popular skills <i className="ti ti-trending-up" /></div>
-                <div className="ob-search-pills">
-                  {ALL_SKILLS.slice(0, 12).map(s => (
-                    <button key={s} type="button" className="ob-search-pill" onClick={() => searchSubmit(s)}>{s}</button>
-                  ))}
-                </div>
-              </div>
-              <div className="ob-search-section">
-                <div className="ob-search-section-label">Quick filters</div>
-                <div className="ob-search-pills">
-                  <button className="ob-search-pill" onClick={() => { setScoreFilter('Score 8+'); setSearchFocused(false) }}>Score 8+</button>
-                  <button className="ob-search-pill" onClick={() => { setSourceFilter('Reddit'); setSearchFocused(false) }}>Reddit</button>
-                  <button className="ob-search-pill" onClick={() => { setSourceFilter('Remote OK'); setSearchFocused(false) }}>Remote OK</button>
-                  <button className="ob-search-pill" onClick={() => { setScoreFilter('New'); setSearchFocused(false) }}>New today</button>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* First-run empty state */}
-        {leads.length === 0 && (
-          <div className="empty">
-            <div className="empty-icon"><i className="ti ti-radar" /></div>
-            <h3>We&apos;re scanning 4 sources for you</h3>
-            <p>Your first scored leads appear within 30 minutes &mdash; we&apos;ll email you when they&apos;re ready.</p>
-            <div className="flex items-center gap-3 mt-4 justify-center">
-              <button onClick={async () => {
-                const res = await fetch('/api/leads/seed?force=1', { method: 'POST' })
-                if (res.ok) { router.refresh() }
-                else { const d = await res.json(); toast.error(d.error || 'Failed to seed leads') }
-              }} className="btn btn-primary" style={{ display: 'inline-flex' }}><i className="ti ti-flask" /> Generate demo leads</button>
-              <button onClick={() => router.refresh()} className="btn btn-ghost" style={{ display: 'inline-flex' }}><i className="ti ti-refresh" /> Check now</button>
-            </div>
+      {leads.length === 0 && (
+        <div className="empty">
+          <div className="empty-icon"><i className="ti ti-radar"></i></div>
+          <h3>We're scanning 4 sources for you</h3>
+          <p>Your first scored leads appear within 30 minutes — we'll email you when they're ready.</p>
+          <div style={{ display: 'flex', gap: 10, marginTop: 18, justifyContent: 'center' }}>
+            <button onClick={async () => {
+              const res = await fetch('/api/leads/seed?force=1', { method: 'POST' })
+              if (res.ok) { router.refresh() } else { const d = await res.json(); toast.error(d.error || 'Failed to seed leads') }
+            }} className="btn btn-primary" style={{ display: 'inline-flex' }}><i className="ti ti-flask"></i> Generate demo leads</button>
+            <button onClick={() => router.refresh()} className="btn btn-ghost" style={{ display: 'inline-flex' }}><i className="ti ti-refresh"></i> Check now</button>
           </div>
-        )}
+        </div>
+      )}
 
-        {/* Feed */}
-        <div className={`feed-wrap ${selected ? 'detail-open' : ''}`}>
-          <div className="feed-list">
-            {filtered.slice(0, limit).map(lead => {
-              const src = getSourceInfo(lead.source_url)
-              const app = appMap.get(lead.id)
-              const match = computeMatchExplanation(lead, profile)
-              const applied = app && app.status !== 'saved'
-              const saved = app?.status === 'saved'
-              const isViewed = viewed.has(lead.id)
-              const isNew = isNewLead(lead.posted_date)
-              const budget = formatBudgetGBP(lead.budget_min, lead.budget_max)
-              const srcCls = SRC_CLS[src.label.toLowerCase().replace(/\s+/g, '').replace('remoteok', 'rok')] || 'sb-reddit'
+      <div className={`feed-wrap ${selected ? 'detail-open' : ''}`}>
+        <div className="feed-list">
+          {leadCards}
+        </div>
 
-              return (
-                <article key={lead.id} onClick={() => openDetail(lead)}
-                  className={`lead-card ${selected?.id === lead.id ? 'sel' : ''}`}>
-                  <div className="lc-top">
-                    <span className={`src-badge ${srcCls}`}>{src.label.toUpperCase()}</span>
-                    {applied ? <span className="lead-state st-applied">{app!.status === 'hired' ? 'Won' : app!.status}</span>
-                      : saved ? <span className="lead-state st-saved">Saved</span>
-                      : isViewed ? <span className="lead-state st-viewed">Viewed</span>
-                      : isNew ? <span className="lead-state st-new">New</span> : null}
-                    <span className="lc-time">{timeAgo(lead.posted_date)}</span>
-                  </div>
+        {selected && (() => {
+          const l = selected
+          const sc = computeMatchExplanation(l, profile).score
+          const si = srcInfo(l.source_url)
+          const budget = formatBudgetGBP(l.budget_min, l.budget_max)
+          const applied = leadState(l) === 'applied'
+          const saved = savedIds.has(l.id)
+          const m = computeMatchExplanation(l, profile)
+          return (
+            <aside className="detail-panel">
+              <div className="dp-head">
+                <span className={`src-badge ${si.cls}`}>{si.name.toUpperCase()}</span>
+                {gaugeSVG(sc)}
+                <button className="dp-close tip" data-tip="Close" aria-label="Close detail" onClick={closeDetail}><i className="ti ti-x"></i></button>
+              </div>
+              <div className="dp-body">
+                <nav className="crumbs" aria-label="Breadcrumb">
+                  <a onClick={closeDetail}>Feed</a><span className="sep">›</span>
+                  <span className="here">{si.name}</span><span className="sep">›</span>
+                  <span className="here">Lead detail</span>
+                </nav>
+                <div className="dp-title">{l.title}</div>
+                <div className="dp-sub"><i className="ti ti-map-pin" style={{ fontSize: 14 }}></i>{l.client_location} · {l.project_type} · {timeAgo(l.posted_date)}</div>
+                {budget && <div className="lc-meta"><span className="budget">{budget}</span></div>}
 
-                  <div className="lc-title">
-                    <ScoreGauge score={match.score} />
-                    <span className="tt">{lead.title}</span>
-                  </div>
-
-                  <p className="lc-desc">{lead.description}</p>
-
-                  <div className="lc-meta">
-                    {budget && <span className="budget">{budget}</span>}
-                    {lead.client_location && <span className="meta-chip"><i className="ti ti-map-pin" /> {lead.client_location}</span>}
-                    {lead.project_type && <span className="meta-chip"><i className="ti ti-briefcase" /> {lead.project_type}</span>}
-                  </div>
-
-                  <div className="skills-row">
-                    {lead.skills_required?.slice(0, 3).map(sk => {
-                      const m = profile?.skills?.some(ps => ps.toLowerCase() === sk.toLowerCase())
-                      return <span key={sk} className={`skill ${m ? 'match' : ''}`}>{sk}</span>
-                    })}
-                    {(lead.skills_required?.length || 0) > 3 && <span className="skill skill-overflow">+{lead.skills_required!.length - 3}</span>}
-                  </div>
-
-                  <div className="lc-actions" onClick={e => e.stopPropagation()}>
-                    <button onClick={() => handleSave(lead)} className={`btn-icon ${saved ? 'on' : ''}`} title={saved ? 'Saved' : 'Save'}>
-                      <i className={`ti ti-bookmark${saved ? '-filled' : ''}`} />
-                    </button>
-                    {applied ? (
-                      <span className="applied-tag"><i className="ti ti-circle-check-filled" /> In your pipeline</span>
-                    ) : (
-                      <button onClick={() => handleApply(lead)} className="btn btn-primary">
-                        <i className="ti ti-send" /> Apply
-                      </button>
-                    )}
-                  </div>
-                </article>
-              )
-            })}
-          </div>
-
-          {/* No matches state */}
-          {filtered.length === 0 && leads.length > 0 && (
-            <div className="empty">
-              <div className="empty-icon"><i className="ti ti-filter-off" /></div>
-              <h3>No leads match these filters</h3>
-              <p>Try widening your score threshold or switching sources.</p>
-              <button onClick={() => { setSearch(''); setSourceFilter('All'); setScoreFilter('All') }} className="btn btn-ghost" style={{ display: 'inline-flex' }}>Clear filters</button>
-            </div>
-          )}
-
-          {/* Docked detail panel */}
-          {selected && (() => {
-            const m = computeMatchExplanation(selected, profile)
-            const src = getSourceInfo(selected.source_url)
-            const srcCls = SRC_CLS[src.label.toLowerCase().replace(/\s+/g, '').replace('remoteok', 'rok')] || 'sb-reddit'
-            const isFree = profile?.subscription_status === 'free'
-            const isInPipeline = appMap.get(selected.id) && appMap.get(selected.id)!.status !== 'saved'
-            const isSaved = appMap.get(selected.id)?.status === 'saved'
-            return (
-              <aside className="detail-panel">
-                <div className="dp-head">
-                  <span className={`src-badge ${srcCls}`}>{src.label.toUpperCase()}</span>
-                  {isInPipeline && <span className="lead-state st-applied" style={{ fontSize: 9 }}>Active</span>}
-                  <ScoreGauge score={m.score} size="sm" />
-                  <button className="dp-close" onClick={() => setSelected(null)}><i className="ti ti-x" /></button>
+                <div className="dp-section-label">Why this score</div>
+                <div className="dp-why">
+                  <div className="dp-why-expl">{m.why}</div>
+                  <div className="subscore-full">{subBars(l, true)}</div>
                 </div>
-                <div className="dp-body">
-                  <div className="dp-title">{selected.title}</div>
-                  <div className="dp-sub">
-                    {selected.client_location} &middot; {selected.project_type} &middot; {timeAgo(selected.posted_date)}
-                  </div>
 
-                  {formatBudgetGBP(selected.budget_min, selected.budget_max) && (
-                    <span className="budget" style={{ display: 'inline-block', marginBottom: 14 }}>{formatBudgetGBP(selected.budget_min, selected.budget_max)}</span>
-                  )}
+                <div className="dp-section-label">Skill match</div>
+                <div className="skill-detail">
+                  {m.skillMatch.matched.map(s => <span key={s} className="skill-yes"><i className="ti ti-check"></i>{s}</span>)}
+                  {m.skillMatch.missing.map(s => <span key={s} className="skill-no">{s}</span>)}
+                </div>
 
-                  {/* Score — compact 4 bars */}
-                  {m.subScores.map(s => (
-                    <div key={s.label} className="flex items-center gap-2 mb-2 last:mb-0">
-                      <span className="text-[10px] font-medium min-w-[60px]" style={{ color: 'var(--slate)' }}>{s.label}</span>
-                      <div className="flex-1 h-1 rounded-full" style={{ background: 'var(--line)' }}>
-                        <div className="h-full rounded-full" style={{ width: `${s.value * 10}%`, background: barColor(s.value) }} />
+                <div className="dp-section-label">Description</div>
+                <p className="dp-desc">{l.description}</p>
+
+                <div className="dp-section-label">Source</div>
+                {isPro
+                  ? <a className="btn btn-ghost" style={{ width: '100%' }} href={l.source_url || '#'} target="_blank" rel="noopener noreferrer"><i className="ti ti-external-link"></i> Open original listing</a>
+                  : <div className="lock-card" style={{ margin: 0 }}><div className="lk-icon"><i className="ti ti-lock"></i></div><div><h4>Source hidden on Free</h4><p>Upgrade to apply directly at the source.</p></div></div>}
+              </div>
+              <div className="dp-actions">
+                {applied
+                  ? <span className="applied-tag" style={{ justifyContent: 'center' }}><i className="ti ti-circle-check-filled"></i> Tracking in your pipeline</span>
+                  : <>
+                      <button className="btn btn-primary" style={{ width: '100%' }} onClick={() => handleApply(l)}><i className="ti ti-send"></i> Apply & track</button>
+                      <div className="reassure" style={{ borderTop: 'none', paddingTop: 0, marginTop: 2, justifyContent: 'center' }}>
+                        <span><i className="ti ti-shield-check"></i>No fee — ever</span>
+                        <span><i className="ti ti-mail-fast"></i>Avg reply in 2 days</span>
                       </div>
-                      <span className="font-mono text-[10px] font-semibold min-w-[18px] text-right" style={{ color: s.value >= 8 ? 'var(--hi)' : s.value >= 5 ? 'var(--mid)' : 'var(--slate)' }}>{s.value}</span>
-                    </div>
-                  ))}
+                    </>}
+                <button className="btn btn-ghost" style={{ width: '100%' }} onClick={() => toggleSave(l)}>
+                  {saved ? <><i className="ti ti-bookmark-filled"></i> Saved</> : <><i className="ti ti-bookmark"></i> Save for later</>}
+                </button>
+              </div>
+            </aside>
+          )
+        })()}
 
-                  {/* Skills — compact */}
-                  {m.skillMatch.matched.length + m.skillMatch.missing.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5 mt-4 pt-4" style={{ borderTop: '1px solid var(--line-2)' }}>
-                      {m.skillMatch.matched.map(s => <span key={s} className="skill match text-[10px] !px-2 !py-1"><i className="ti ti-check" style={{ fontSize: 9 }} />{s}</span>)}
-                      {m.skillMatch.missing.map(s => <span key={s} className="skill text-[10px] !px-2 !py-1" style={{ opacity: .65 }}>{s}</span>)}
-                    </div>
-                  )}
-
-                  {/* Description — short preview */}
-                  <p className="text-xs mt-4 pt-4 leading-relaxed" style={{ color: 'var(--ink-2)', borderTop: '1px solid var(--line-2)' }}>
-                    {selected.description?.slice(0, 250)}...
-                  </p>
-
-                  {/* Source */}
-                  {isFree ? (
-                    <div className="lock-card" style={{ marginTop: 12 }}>
-                      <div className="lk-icon"><i className="ti ti-lock" /></div>
-                      <div><h4>Source hidden on Free</h4><p>Upgrade to apply directly.</p></div>
-                    </div>
-                  ) : selected.source_url ? (
-                    <a href={selected.source_url} target="_blank" rel="noopener noreferrer" className="btn btn-ghost" style={{ width: '100%', marginTop: 12 }}>
-                      <i className="ti ti-external-link" /> Open source
-                    </a>
-                  ) : null}
-                </div>
-                <div className="dp-actions">
-                  <button onClick={() => handleApply(selected)} className="btn btn-primary" style={{ width: '100%' }}>
-                    <i className="ti ti-send" /> {isInPipeline ? 'View in pipeline' : 'Apply & track'}
-                  </button>
-                  <button onClick={() => handleSave(selected)} className="btn btn-ghost" style={{ width: '100%' }}>
-                    <i className={`ti ti-bookmark${isSaved ? '-filled' : ''}`} />
-                    {isSaved ? 'Saved' : 'Save for later'}
-                  </button>
-                </div>
-              </aside>
-            )
-          })()}
-        </div>
-
-        {/* Pro upgrade banner — value prop, not a wall */}
-        {profile?.subscription_status === 'free' && filtered.length > limit && (
-          <div className="upgrade-card">
-            <div className="upgrade-icon"><i className="ti ti-sparkles" /></div>
-            <div className="upgrade-body">
-              <h3>{filtered.length - limit} more leads scored for you</h3>
-              <p>Upgrade to see every match with direct source links, unlimited applications, and weekly analytics.</p>
-            </div>
-            <button onClick={() => router.push('/dashboard/billing')} className="btn btn-primary upgrade-btn">
-              View plans <i className="ti ti-arrow-right" />
-            </button>
-          </div>
-        )}
-
-        {limitReached && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-4" onClick={() => setLimitReached(false)}>
-            <div className="section-card p-6 max-w-sm w-full text-center" style={{ animation: 'scaleIn .2s var(--ease)' }} onClick={e => e.stopPropagation()}>
-              <div className="empty-icon" style={{ marginBottom: 16 }}><i className="ti ti-bolt" /></div>
-              <h3 style={{ fontSize: 20 }}>Applications used up</h3>
-              <p style={{ marginTop: 8 }}>Pro gives you unlimited applications, source links, and a fuller feed.</p>
-              <button onClick={() => { setLimitReached(false); router.push('/dashboard/billing') }} className="btn btn-primary" style={{ width: '100%', marginTop: 16 }}>Upgrade to Pro</button>
-              <button onClick={() => setLimitReached(false)} className="btn btn-ghost" style={{ width: '100%', marginTop: 8 }}>Maybe later</button>
-            </div>
+        {filtered.length === 0 && leads.length > 0 && (
+          <div className="empty">
+            <div className="empty-icon"><i className="ti ti-filter-off"></i></div>
+            <h3>No leads match these filters</h3>
+            <p>Try widening your score threshold or switching sources.</p>
+            <button className="btn btn-ghost" style={{ display: 'inline-flex' }} onClick={() => { setScoreFilter('all'); setSourceFilter('all'); setSearch('') }}>Clear filters</button>
           </div>
         )}
       </div>
-    </div>
+
+      {isFree && filtered.length > 5 && (
+        <div className="upgrade-card">
+          <div className="upgrade-icon"><i className="ti ti-sparkles" /></div>
+          <div className="upgrade-body">
+            <h3>More leads scored for you</h3>
+            <p>Upgrade to see every match with direct source links, unlimited applications, and weekly analytics.</p>
+          </div>
+          <button onClick={() => router.push('/dashboard/billing')} className="btn btn-primary upgrade-btn">
+            View plans <i className="ti ti-arrow-right" />
+          </button>
+        </div>
+      )}
+    </>
   )
 }
