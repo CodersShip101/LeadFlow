@@ -1,11 +1,11 @@
 'use client'
 
-import { useEffect, useState, useRef, useMemo, useCallback } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-client'
 import type { Lead, Profile, Application } from '@/types'
 import { computeMatchExplanation } from '@/types'
-import { getSourceInfo, formatBudgetGBP, timeAgo } from '@/lib/utils'
+import { formatBudgetGBP, timeAgo } from '@/lib/utils'
 import toast from 'react-hot-toast'
 
 const SRC: Record<string, { name: string; cls: string; ava: string; ini: string }> = {
@@ -31,9 +31,6 @@ function srcKey(surl: string | null): string {
 }
 
 function srcInfo(surl: string | null) { return SRC[srcKey(surl)] || SRC.reddit }
-
-const RECENT_SEARCHES_DEFAULT = ['React contract', 'outside IR35', 'Figma remote']
-const POPULAR_SEARCHES: [string, string][] = [['Next.js', '312 leads'], ['UI design', '204 leads'], ['£500+/day', '98 leads']]
 
 function scoreColor(s: number) {
   return s >= 8 ? { c: 'var(--hi)', bg: 'var(--hi-bg)' } : s >= 5 ? { c: 'var(--mid)', bg: 'var(--mid-bg)' } : { c: 'var(--lo)', bg: 'var(--lo-bg)' }
@@ -71,10 +68,6 @@ export default function DashboardPage() {
   const [newCount, setNewCount] = useState(0)
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set())
   const [viewedIds, setViewedIds] = useState<Set<string>>(new Set())
-  const [limitReached, setLimitReached] = useState(false)
-  const [recentSearches, setRecentSearches] = useState<string[]>(RECENT_SEARCHES_DEFAULT)
-  const [searchFocused, setSearchFocused] = useState(false)
-  const searchRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
   const supabase = createClient()
 
@@ -82,18 +75,6 @@ export default function DashboardPage() {
   const isFree = profile?.subscription_status === 'free'
   const plan = profile?.subscription_status || 'free'
   const isPro = plan === 'pro' || plan === 'max' || plan === 'team'
-
-  useEffect(() => {
-    try { setRecentSearches(JSON.parse(localStorage.getItem('recentSearches') || '[]')) } catch { /* ignore */ }
-  }, [])
-
-  useEffect(() => {
-    const handleClick = (e: MouseEvent) => {
-      if (searchRef.current && !searchRef.current.contains(e.target as Node)) setSearchFocused(false)
-    }
-    document.addEventListener('mousedown', handleClick)
-    return () => document.removeEventListener('mousedown', handleClick)
-  }, [])
 
   useEffect(() => {
     const load = async () => {
@@ -225,9 +206,6 @@ export default function DashboardPage() {
   }
 
   const selectLead = (lead: Lead) => {
-    if (leadState(lead) === 'new') {
-      // mark as viewed
-    }
     markViewed(lead.id)
     setSelected(lead)
   }
@@ -288,7 +266,6 @@ export default function DashboardPage() {
         <button class="btn btn-ghost" style="width:100%" onclick="this.closest('#limitModal').remove()">Maybe later</button>
       </div>`
     el.prepend(div)
-    setLimitReached(true)
   }
 
   // Source health tracking
@@ -311,9 +288,9 @@ export default function DashboardPage() {
   }
 
   const greetMap: Record<string, string> = {
-    new: `Welcome, ${firstName}`,
-    returning: `Good to see you, ${firstName}`,
-    power: `Welcome back, ${firstName}`,
+    new: `Welcome, ${firstName} 👋`,
+    returning: `Good to see you, ${firstName} 👋`,
+    power: `Welcome back, ${firstName} 👋`,
   }
 
   const subMap: Record<string, string> = {
@@ -382,7 +359,7 @@ export default function DashboardPage() {
 
   return (
     <>
-      {(!profile?.skills?.length && !profile?.hourly_rate) ? (
+      {!profile?.skills?.length ? (
         <div className="profile-banner">
           <i className="ti ti-alert-triangle"></i>
           <div className="pb-txt"><b>Finish your profile</b> — add your skills and rate so we can score leads for you.</div>
