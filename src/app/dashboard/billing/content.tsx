@@ -260,8 +260,8 @@ export default function BillingContent() {
         </span>
       </div>
 
-      {/* Plan cards */}
-      <div className="bill-grid">
+      {/* Plan cards — escalating ladder: each tier larger than the last */}
+      <div className="tier-ladder">
         {TIER_ORDER.map(renderCard)}
       </div>
 

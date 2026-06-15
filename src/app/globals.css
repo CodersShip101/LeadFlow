@@ -1114,6 +1114,30 @@ textarea.input { resize: vertical; min-height: 80px; }
 .bill-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; align-items: start; margin-bottom: 24px; }
 @media (max-width: 1100px) { .bill-grid { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 640px) { .bill-grid { grid-template-columns: 1fr; } }
+
+/* ── LANDING PRICING LADDER ──
+   Escalating card size = escalating value: each tier is taller (bottoms aligned,
+   so the tops ascend left→right) and a touch wider than the one before, with a
+   larger price, so "you get more" reads at a glance. The dashboard billing keeps
+   the equal-size .bill-grid above; only the public landing uses this. */
+.tier-ladder { display: grid; grid-template-columns: 0.9fr 1fr 1.1fr 1.2fr; gap: 16px; align-items: end; margin-bottom: 24px; }
+.tier-ladder .bill-card { min-height: 444px; transition: box-shadow .18s, transform .18s, border-color .18s; }
+.tier-ladder .bill-card:nth-child(2) { min-height: 488px; }
+.tier-ladder .bill-card:nth-child(3) { min-height: 532px; }
+.tier-ladder .bill-card:nth-child(4) { min-height: 576px; }
+.tier-ladder .bill-card:nth-child(1) .bpc-price { font-size: 31px; }
+.tier-ladder .bill-card:nth-child(2) .bpc-price { font-size: 36px; }
+.tier-ladder .bill-card:nth-child(3) .bpc-price { font-size: 40px; }
+.tier-ladder .bill-card:nth-child(4) .bpc-price { font-size: 45px; }
+@media (max-width: 1100px) {
+  .tier-ladder { grid-template-columns: 1fr 1fr; align-items: stretch; }
+  .tier-ladder .bill-card,
+  .tier-ladder .bill-card:nth-child(2),
+  .tier-ladder .bill-card:nth-child(3),
+  .tier-ladder .bill-card:nth-child(4) { min-height: 0; }
+  .tier-ladder .bill-card .bpc-price { font-size: 34px; }
+}
+@media (max-width: 640px) { .tier-ladder { grid-template-columns: 1fr; } }
 .bill-card { border: 1.5px solid var(--line); border-radius: var(--r-xl); padding: 22px 20px 20px; position: relative; background: var(--card); display: flex; flex-direction: column; transition: box-shadow .18s, transform .18s, border-color .18s; }
 .bill-card:hover { box-shadow: var(--sh-md); transform: translateY(-2px); }
 .bill-card.feat { border-color: var(--lime-deep); box-shadow: 0 0 0 1px var(--lime-deep), 0 12px 36px rgba(126,158,10,.12); }

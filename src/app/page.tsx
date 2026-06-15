@@ -517,8 +517,8 @@ export default function HomePage() {
           <div className="container">
             <div className="section-head sr" style={{ marginBottom: 40 }}>
               <div className="tag tag-lime tag-bracket">pricing</div>
-              <h2 id="price-h">Simple pricing, no surprises</h2>
-              <p>Start with the full Pro experience today — no card, no commitment. We&apos;ll always tell you before anything changes.</p>
+              <h2 id="price-h">Pricing that grows with you</h2>
+              <p>Start free — no card, no commitment. Each plan builds on the one before, so you only pay for the reach, speed and insight you actually need. We&apos;ll always tell you before anything changes.</p>
             </div>
 
             <div className="trial-timeline sr">
@@ -549,7 +549,7 @@ export default function HomePage() {
               </span>
             </div>
 
-            <div className="bill-grid sr">
+            <div className="tier-ladder sr">
               {(['free', 'pro', 'max', 'team'] as const).map(t => {
                 const v = PRICING[t]
                 const featured = t === 'max'
