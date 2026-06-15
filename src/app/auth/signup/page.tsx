@@ -21,9 +21,9 @@ function scorePassword(pw: string) {
 
 const signalPool = [
   { src: 'REDDIT', c: 'rgba(255,140,66,.14)', t: '#ff9c5b', title: 'Senior UX Designer — London (Fintech)', meta: '£350–450/day · Figma · Inside IR35', score: '9.1', cls: 'score-a' },
-  { src: 'WWR', c: 'rgba(110,168,212,.16)', t: '#7fb6e6', title: 'Full-Stack Developer — Remote UK', meta: '£60–75k · React, Node · ASAP', score: '8.7', cls: 'score-a' },
+  { src: 'REMOTE OK', c: 'rgba(196,240,0,.16)', t: 'var(--lime)', title: 'Full-Stack Developer — Remote UK', meta: '£60–75k · React, Node · ASAP', score: '8.7', cls: 'score-a' },
   { src: 'REED', c: 'rgba(176,138,219,.16)', t: '#c4a3ec', title: 'Brand Identity — 3-month contract', meta: '£40k pro rata · Branding', score: '7.4', cls: 'score-b' },
-  { src: 'REMOTE OK', c: 'rgba(196,240,0,.16)', t: 'var(--lime)', title: 'DevOps Engineer — Full-time Remote', meta: '£70–90k · AWS, Terraform', score: '8.9', cls: 'score-a' },
+  { src: 'WWR', c: 'rgba(110,168,212,.16)', t: '#7fb6e6', title: 'DevOps Engineer — Full-time Remote', meta: '£70–90k · AWS, Terraform', score: '8.9', cls: 'score-a' },
   { src: 'REDDIT', c: 'rgba(255,140,66,.14)', t: '#ff9c5b', title: 'Content Strategist — B2B SaaS', meta: '£350/day · Notion, Writing', score: '8.5', cls: 'score-a' },
   { src: 'WWR', c: 'rgba(110,168,212,.16)', t: '#7fb6e6', title: 'Shopify Developer — E-commerce', meta: '£45–55k · Liquid, JS · Ongoing', score: '7.8', cls: 'score-b' },
   { src: 'REED', c: 'rgba(176,138,219,.16)', t: '#c4a3ec', title: 'Motion Designer — Ad Agency', meta: '£300–380/day · After Effects', score: '9.0', cls: 'score-a' },
@@ -31,6 +31,8 @@ const signalPool = [
 ]
 
 export default function SignupPage() {
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -96,62 +98,75 @@ export default function SignupPage() {
 
   return (
     <div className="auth-body">
+      {/* LEFT: BRAND PANEL */}
       <aside className="panel-left">
         <div className="panel-bg" aria-hidden="true"></div>
         <div className="panel-glow" aria-hidden="true"></div>
+
         <div className="panel-content">
           <div className="auth-logo" style={{ marginBottom: 28 }}>
             <span className="auth-logo-mark"><span>LF</span></span>
             <span className="auth-logo-name">LeadFlow</span>
           </div>
-          <div className="panel-hero" style={{ justifyContent: 'flex-start' }}>
-            <div className="panel-eyebrow" style={{ marginBottom: 10 }}>AI-Scored Freelance Leads</div>
-            <h2 className="panel-heading" style={{ fontSize: 'clamp(1.4rem, 2.2vw, 1.8rem)', marginBottom: 10 }}>Stop searching.<br />Let the <span className="hl">right leads</span> find you.</h2>
-            <p className="panel-sub" style={{ fontSize: '.88rem', marginBottom: 20, maxWidth: 300 }}>We scan Reddit, Reed, We Work Remotely, and Remote OK every 6 hours — scoring every post against your skills.</p>
 
-            <div className="auth-mini-console" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)}>
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+            <div className="panel-eyebrow" style={{ marginBottom: 10 }}>AI-Scored Freelance Leads</div>
+            <h2 className="panel-heading" style={{ fontSize: 'clamp(1.5rem, 2.4vw, 2rem)', marginBottom: 10 }}>
+              Stop searching.<br />Let the <span className="hl">right leads</span> find you.
+            </h2>
+            <p className="panel-sub" style={{ fontSize: '.88rem', marginBottom: 18, maxWidth: 300 }}>
+              We scan Reddit, Reed, We Work Remotely, and Remote OK every 6 hours — scoring every post against your skills before it reaches you.
+            </p>
+
+            {/* Mini live feed */}
+            <div className="auth-mini-console" style={{ marginBottom: 18 }} onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)}>
               <div className="auth-mini-bar">
                 <span className="radar-mini" aria-hidden="true"></span>
                 <span className="auth-mini-bar-label">Your lead feed</span>
                 <span className="auth-mini-live"><span className="dot"></span> live</span>
               </div>
-              <div className="feed-filters" aria-hidden="true" style={{ padding: '5px 10px 8px' }}>
-                <span className="feed-chip on">All</span>
-                <span className="feed-chip">Score 8+</span>
-                <span className="feed-chip">Design</span>
-                <span className="feed-chip">Remote</span>
-                <span className="feed-chip">£300+/day</span>
-              </div>
               <div className="auth-mini-signals">
-                {(() => {
-                  const maxScore = Math.max(...signals.map(s => parseFloat(s.score)))
-                  const bestIdx = signals.findIndex(s => parseFloat(s.score) === maxScore)
-                  return signals.map((s, i) => (
-                    <div key={`${s.title}-${i}`} className="auth-mini-signal" style={i === 0 && siRef.current > 3 ? { animation: 'newFlash .8s ease-out' } : { animation: 'sweep .6s var(--ease-spring) both' }}>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ marginBottom: 3, display: 'flex', alignItems: 'center', gap: 5 }}>
-                          <span className="auth-msig-src" style={{ background: s.c, color: s.t }}>{s.src}</span>
-                          {i === 0 && <span className="dash-badge dash-badge-new">new</span>}
-                          {i === bestIdx && i !== 0 && <span className="dash-badge dash-badge-rec"><i className="ti ti-star-filled" style={{ fontSize: 9 }} aria-hidden="true"></i> recommended</span>}
-                        </div>
-                        <div className="auth-msig-title">{s.title}</div>
-                        <div className="auth-msig-meta">{s.meta}</div>
+                {signals.map((s, i) => (
+                  <div key={`${s.title}-${i}`} className="auth-mini-signal"
+                    style={i === 0 && siRef.current > 3
+                      ? { animation: 'newFlash .8s ease-out' }
+                      : { animation: `sweep .6s var(--ease-spring) both`, animationDelay: `${i * 0.12}s` }
+                    }>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ marginBottom: 3, display: 'flex', alignItems: 'center', gap: 5 }}>
+                        <span className="auth-msig-src" style={{ background: s.c, color: s.t }}>{s.src}</span>
+                        {i === 0 && siRef.current > 3 && <span className="dash-badge dash-badge-new">new</span>}
                       </div>
-                      <div className={`auth-msig-score ${s.cls}`}><span className="v">{s.score}</span><span className="l">SCORE</span></div>
+                      <div className="auth-msig-title">{s.title}</div>
+                      <div className="auth-msig-meta">{s.meta}</div>
                     </div>
-                  ))
-                })()}
+                    <div className={`auth-msig-score ${s.cls}`}><span className="v">{s.score}</span><span className="l">SCORE</span></div>
+                  </div>
+                ))}
               </div>
             </div>
 
-            <div className="auth-trust-badges" style={{ marginTop: 14, gap: 6 }}>
-              <div className="auth-trust-item" style={{ fontSize: '.8rem' }}><i className="ti ti-circle-check" aria-hidden="true"></i> No card required — free forever plan available</div>
-              <div className="auth-trust-item" style={{ fontSize: '.8rem' }}><i className="ti ti-circle-check" aria-hidden="true"></i> First leads delivered within 1 hour of setup</div>
-              <div className="auth-trust-item" style={{ fontSize: '.8rem' }}><i className="ti ti-circle-check" aria-hidden="true"></i> You apply on the original platform — zero commission</div>
+            {/* Sources strip */}
+            <div className="auth-sources-section" style={{ marginBottom: 14 }}>
+              <div className="auth-sources-label">Scanning now from</div>
+              <div className="auth-source-pills">
+                <span className="auth-source-pill"><i className="ti ti-brand-reddit" aria-hidden="true"></i> Reddit</span>
+                <span className="auth-source-pill"><i className="ti ti-briefcase" aria-hidden="true"></i> Reed.co.uk</span>
+                <span className="auth-source-pill"><i className="ti ti-world" aria-hidden="true"></i> We Work Remotely</span>
+                <span className="auth-source-pill"><i className="ti ti-device-laptop" aria-hidden="true"></i> Remote OK</span>
+              </div>
+            </div>
+
+            {/* Trust badges */}
+            <div className="auth-trust-badges" style={{ gap: 5, marginBottom: 0 }}>
+              <div className="auth-trust-item" style={{ fontSize: '.78rem' }}><i className="ti ti-circle-check" aria-hidden="true"></i> No card required — free forever plan available</div>
+              <div className="auth-trust-item" style={{ fontSize: '.78rem' }}><i className="ti ti-circle-check" aria-hidden="true"></i> First leads delivered within 1 hour of setup</div>
+              <div className="auth-trust-item" style={{ fontSize: '.78rem' }}><i className="ti ti-circle-check" aria-hidden="true"></i> You apply on the original platform — zero commission</div>
             </div>
           </div>
 
-          <div className="auth-social-proof" style={{ paddingTop: 14 }}>
+          {/* Social proof */}
+          <div className="auth-social-proof" style={{ paddingTop: 12 }}>
             <div className="auth-avatar-stack" aria-hidden="true">
               <div className="avatar" style={{ background: 'var(--lime)' }}>JK</div>
               <div className="avatar" style={{ background: 'var(--amber)' }}>SM</div>
@@ -166,23 +181,24 @@ export default function SignupPage() {
         </div>
       </aside>
 
+      {/* RIGHT: FORM */}
       <main className="panel-right">
         {sent ? (
           <div className="auth-sent-card">
-            <div className="card">
+            <div className="card" style={{ padding: '36px 28px' }}>
               <div className="auth-sent-icon"><i className="ti ti-mail-fast" aria-hidden="true"></i></div>
-              <h1>Check your inbox</h1>
+              <h1 style={{ fontSize: '1.5rem' }}>Check your inbox</h1>
               <p>We&apos;ve sent a confirmation link to</p>
               <p className="auth-sent-email">{email}</p>
-              <p style={{ marginTop: 10 }}>Click it to verify your email and start setting up your feed. The link expires in 1 hour.</p>
-              <div className="auth-sent-actions">
-                <button className="btn-p" onClick={handleResend} disabled={resending}>
+              <p>Click it to verify your email and start setting up your feed. The link expires in 1 hour.</p>
+              <div className="auth-sent-actions" style={{ marginTop: 18 }}>
+                <button className="btn-p" onClick={handleResend} disabled={resending} style={{ minWidth: 180 }}>
                   <i className="ti ti-refresh" aria-hidden="true"></i>
                   {resending ? 'Resending...' : 'Resend email'}
                 </button>
                 <button className="auth-magic-link" onClick={() => setSent(false)}>Use a different email</button>
               </div>
-              <p className="auth-legal" style={{ marginTop: 22 }}>
+              <p className="auth-legal" style={{ marginTop: 16 }}>
                 Wrong address or didn&apos;t arrive? Check spam, or <Link href="/auth/login">log in</Link> if you already confirmed.
               </p>
             </div>
@@ -190,37 +206,48 @@ export default function SignupPage() {
         ) : (
         <div className="auth-form-wrap">
           <div className="auth-form-eyebrow">Create your account</div>
-          <h1>Get started free</h1>
-          <p className="auth-tagline">Just an email and password — we&apos;ll set up your feed next.</p>
+          <h1 style={{ fontSize: '1.6rem' }}>Get started free</h1>
+          <p className="auth-tagline" style={{ marginBottom: 18 }}>Set up in 2 minutes. First leads within the hour.</p>
 
-          <div className="auth-trial-strip" role="note" style={{ marginBottom: 18, padding: '10px 14px' }}>
+          <div className="auth-trial-strip" role="note" style={{ marginBottom: 16, padding: '10px 14px' }}>
             <i className="ti ti-gift" aria-hidden="true"></i>
-            <p style={{ fontSize: '.8rem' }}><strong>7-day Pro trial included.</strong> Unlimited leads, skill filtering, daily digest. No card needed — ever.</p>
+            <p style={{ fontSize: '.78rem' }}><strong>7-day Pro trial included.</strong> Unlimited leads, skill filtering, daily digest. No card needed — ever.</p>
           </div>
 
-          <div className="auth-step-row" style={{ marginBottom: 18 }}>
+          <div className="auth-step-row" style={{ marginBottom: 14 }}>
             <span className="auth-step-dot" aria-hidden="true"></span>
             <span className="auth-step-dot inactive" aria-hidden="true"></span>
-            <span className="auth-step-label">Step 1 of 3 · Create account</span>
+            <span className="auth-step-label">Step 1 of 2 · Account details</span>
           </div>
 
           <form onSubmit={handleSignup}>
-            <div className="auth-field" style={{ marginBottom: 14 }}>
+            <div className="auth-field-row" style={{ marginBottom: 12 }}>
+              <div className="auth-field" style={{ marginBottom: 0 }}>
+                <label htmlFor="first-name">First name</label>
+                <input type="text" id="first-name" className="auth-input" placeholder="Alex" autoComplete="given-name" required value={firstName} onChange={e => setFirstName(e.target.value)} />
+              </div>
+              <div className="auth-field" style={{ marginBottom: 0 }}>
+                <label htmlFor="last-name">Last name</label>
+                <input type="text" id="last-name" className="auth-input" placeholder="Morgan" autoComplete="family-name" required value={lastName} onChange={e => setLastName(e.target.value)} />
+              </div>
+            </div>
+
+            <div className="auth-field" style={{ marginBottom: 12 }}>
               <label htmlFor="email">Email</label>
               <input type="email" id="email" className="auth-input" placeholder="alex@yoursite.co.uk" autoComplete="email" required value={email} onChange={e => setEmail(e.target.value)} />
             </div>
 
-            <div className="auth-field" style={{ marginBottom: 14 }}>
+            <div className="auth-field" style={{ marginBottom: 12 }}>
               <label htmlFor="password">Password</label>
               <div className="auth-pw-field">
                 <input type="password" id="password" className="auth-input" placeholder="8+ characters" autoComplete="new-password" required minLength={8} value={password} onChange={e => setPassword(e.target.value)} />
               </div>
-              <div className="auth-pw-strength" aria-hidden="true">
+              <div className="auth-pw-strength" aria-hidden="true" style={{ marginTop: 6 }}>
                 {[0, 1, 2, 3].map(i => (
                   <div key={i} className={`auth-pw-bar${i < pwScore ? (pwScore <= 1 ? ' weak' : pwScore <= 2 ? ' medium' : ' strong') : ''}`}></div>
                 ))}
               </div>
-              <div className="auth-field-hint" id="pw-hint" style={{ fontSize: '.68rem' }}>
+              <div className="auth-field-hint" style={{ fontSize: '.68rem', marginTop: 4 }}>
                 {pwScore === 0 && 'Use 8+ characters for a stronger password'}
                 {pwScore === 1 && 'Weak — try adding numbers or symbols'}
                 {pwScore === 2 && 'OK — a little longer or more variety helps'}
@@ -229,17 +256,36 @@ export default function SignupPage() {
               </div>
             </div>
 
-            <button type="submit" className="btn-p btn-full" disabled={loading} style={{ marginTop: 4 }}>
+            <div className="auth-field" style={{ marginBottom: 12 }}>
+              <label>What do you do? <span style={{ fontWeight: 400, color: 'var(--slate-500)' }}>(pick all that apply)</span></label>
+              <div className="auth-skills-grid" role="group" aria-label="Select your disciplines">
+                {['Design', 'Development', 'Writing', 'Marketing', 'Consulting', 'Finance', 'DevOps', 'Other'].map(s => (
+                  <button key={s} type="button" className="auth-skill-pill" onClick={e => e.currentTarget.classList.toggle('selected')}>{s}</button>
+                ))}
+              </div>
+              <div className="auth-field-hint" style={{ fontSize: '.68rem' }}>These power your AI score — leads are ranked against your discipline</div>
+            </div>
+
+            <div className="auth-field" style={{ marginBottom: 0 }}>
+              <label htmlFor="day-rate">Your day rate (optional)</label>
+              <div className="auth-input-prefix">
+                <span className="auth-prefix-symbol">£</span>
+                <input type="text" id="day-rate" className="auth-input" placeholder="350" inputMode="numeric" />
+              </div>
+              <div className="auth-field-hint" style={{ fontSize: '.68rem' }}>Used to filter out leads below your rate. Skip if you&apos;re flexible.</div>
+            </div>
+
+            <button type="submit" className="btn-p btn-full" disabled={loading} style={{ marginTop: 10 }}>
               <i className="ti ti-arrow-right" aria-hidden="true"></i>
               {loading ? 'Creating account\u2026' : 'Create my account \u2192'}
             </button>
 
-            <p className="auth-legal" style={{ fontSize: '.72rem', marginTop: 10 }}>
+            <p className="auth-legal" style={{ fontSize: '.7rem', marginTop: 8 }}>
               By continuing you agree to our <a href="/terms">Terms of Service</a> and <a href="/privacy">Privacy Policy</a>. No card needed. Cancel any time.
             </p>
           </form>
 
-          <div className="auth-login-link" style={{ marginTop: 12, fontSize: '.82rem' }}>Already have an account? <Link href="/auth/login">Log in →</Link></div>
+          <div className="auth-login-link" style={{ marginTop: 10, fontSize: '.8rem' }}>Already have an account? <Link href="/auth/login">Log in →</Link></div>
         </div>
         )}
       </main>

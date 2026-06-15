@@ -28,7 +28,7 @@ button { font-family: inherit; cursor: pointer; }
 ::selection { background: rgba(196,240,0,0.20); color: var(--ink-950); }
 
 /* ── KEYFRAMES ── */
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
 @keyframes slideUp { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: none; } }
 @keyframes slideInRight { from { opacity: 0; transform: translateX(28px); } to { opacity: 1; transform: none; } }
 @keyframes scaleIn { from { opacity: 0; transform: scale(.94); } to { opacity: 1; transform: scale(1); } }
@@ -849,8 +849,8 @@ textarea.input { resize: vertical; min-height: 80px; }
 .ob-search-pill:hover { background: var(--lime-dim); color: var(--lime-ink); }
 
 /* ── AUTH PAGES (login / signup / forgot / reset) ── */
-.auth-body { position: fixed; inset: 0; z-index: 50; display: grid; grid-template-columns: 1fr 1fr; overflow: hidden; }
-.panel-left, .panel-right { overflow-y: auto; }
+.auth-body { position: fixed; inset: 0; z-index: 50; display: grid; grid-template-columns: 1fr 1fr; }
+.panel-left, .panel-right { overflow: hidden; }
 .panel-left {
   background: var(--ink-950); padding: 48px 52px; display: flex; flex-direction: column;
   justify-content: space-between; position: relative; overflow: hidden; border-right: 1px solid var(--ink-700);
@@ -901,7 +901,7 @@ textarea.input { resize: vertical; min-height: 80px; }
 .auth-author-name { color: #fff; font-weight: 600; }
 .auth-author-role { color: var(--slate-500); }
 
-.panel-right { background: var(--paper); padding: 48px 52px; display: flex; flex-direction: column; justify-content: center; animation: fadeIn .4s ease both; }
+.panel-right { background: var(--paper); padding: 32px 44px; display: flex; flex-direction: column; justify-content: center; animation: fadeIn .5s ease both; }
 .auth-form-wrap { max-width: 380px; width: 100%; margin: 0 auto; }
 .auth-form-eyebrow { font-family: var(--font-mono); font-size: .7rem; letter-spacing: .12em; text-transform: uppercase; color: var(--lime-dim); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
 .auth-form-eyebrow::before { content: "["; opacity: .5; }
