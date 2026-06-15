@@ -26,7 +26,6 @@ const bottomNavMobile = [
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [newCount, setNewCount] = useState(0)
-  const [appCount, setAppCount] = useState(0)
   const [menuOpen, setMenuOpen] = useState(false)
   const router = useRouter()
   const pathname = usePathname() || ''
@@ -45,10 +44,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         router.push('/dashboard/onboarding')
         return
       }
-      try {
-        const res = await fetch('/api/applications')
-        if (res.ok) { const apps = await res.json(); setAppCount(apps.filter((a: any) => a.status !== 'saved').length) }
-      } catch { /* ignore */ }
       const lastSeen = parseInt(localStorage.getItem('lastSeen') || '0')
       if (lastSeen > 0) {
         const { count } = await supabase.from('leads').select('id', { count: 'exact', head: true }).eq('status', 'active').gte('posted_date', new Date(lastSeen).toISOString())
@@ -101,16 +96,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
       </div>
       <div className="sb-footer">
-        <div className="usage-mini">
-          <div className="um-top"><span className="um-label">Applications</span><span className="um-val" id="usage-text">{profile?.subscription_status === 'free' ? `${appCount} / 5` : 'Unlimited'}</span></div>
-          <div className="usage-track"><div className="usage-fill" id="usage-fill" style={{ width: profile?.subscription_status === 'free' ? `${Math.min(100, (appCount / 5) * 100)}%` : '100%' }}></div></div>
-          {(!profile || profile.subscription_status === 'free') && (
-            <button className="upgrade-link" onClick={() => router.push('/dashboard/billing')}><i className="ti ti-bolt" style={{ fontSize: 14 }}></i> Upgrade to Pro</button>
-          )}
-          {profile?.subscription_status === 'pro' && (
-            <button className="upgrade-link" onClick={() => router.push('/dashboard/billing')}><i className="ti ti-bolt" style={{ fontSize: 14 }}></i> Upgrade to Max</button>
-          )}
-        </div>
         <button onClick={handleLogout} className="sb-item-logout">
           <i className="ti ti-logout" />
           <span className="label">Sign out</span>

@@ -8,7 +8,7 @@ import { PRICING, ENTITLEMENTS, type Tier } from '@/lib/tiers'
 import toast from 'react-hot-toast'
 
 // Order shown in the plan grid. Source of truth for names/prices is lib/tiers.ts.
-const TIER_ORDER: Tier[] = ['free', 'pro', 'max']
+const TIER_ORDER: Tier[] = ['free', 'pro', 'max', 'team']
 const TIER_ICON: Record<string, string> = { free: 'ti-radar-2', pro: 'ti-bolt', max: 'ti-crown', team: 'ti-users' }
 const FREE_APP_LIMIT = ENTITLEMENTS.free.applicationsPerMonth as number
 
@@ -49,35 +49,45 @@ const FEATURES: Record<string, Feat[]> = {
   ],
 }
 
-// Full comparison grid. Columns: Free · Pro · Max
+// Full comparison grid. Columns: Free · Pro · Max · Team.
 type CmpVal = boolean | string
-const CMP_GROUPS: { label: string; rows: [string, CmpVal, CmpVal, CmpVal][] }[] = [
+const CMP_GROUPS: { label: string; rows: [string, CmpVal, CmpVal, CmpVal, CmpVal][] }[] = [
   {
     label: 'Lead feed',
     rows: [
-      ['Scored lead feed', true, true, true],
-      ['Applications / month', String(FREE_APP_LIMIT), '∞', '∞'],
-      ['Direct source links', false, true, true],
-      ['Auto-refresh', '5h', '2h', '1h'],
-      ['Manual refresh', false, false, true],
+      ['Scored lead feed', true, true, true, true],
+      ['Applications / month', String(FREE_APP_LIMIT), '∞', '∞', '∞'],
+      ['Direct source links', false, true, true, true],
+      ['Auto-refresh', '5h', '2h', '1h', '1h'],
+      ['Manual refresh', false, false, true, true],
     ],
   },
   {
     label: 'Insight',
     rows: [
-      ['Daily email digest', false, true, true],
-      ['Custom lead alerts', false, true, true],
-      ['Basic analytics', false, true, true],
-      ['Advanced analytics', false, false, true],
-      ['CSV export', false, false, true],
-      ['Adjustable scoring weights', false, false, true],
+      ['Daily email digest', false, true, true, true],
+      ['Custom lead alerts', false, true, true, true],
+      ['Basic analytics', false, true, true, true],
+      ['Advanced analytics', false, false, true, true],
+      ['CSV export', false, false, true, true],
+      ['Adjustable scoring weights', false, false, true, true],
+    ],
+  },
+  {
+    label: 'Team',
+    rows: [
+      ['Shared lead pool', false, false, false, true],
+      ['Team pipeline & assignment', false, false, false, true],
+      ['Admin & member roles', false, false, false, true],
+      ['Centralised billing', false, false, false, true],
     ],
   },
   {
     label: 'Support',
     rows: [
-      ['Standard support', true, true, true],
-      ['Priority support', false, false, true],
+      ['Standard support', true, true, true, true],
+      ['Priority support', false, false, true, true],
+      ['Dedicated account manager', false, false, false, 'Enterprise'],
     ],
   },
 ]
@@ -119,7 +129,6 @@ export default function BillingContent() {
 
   const plan = (profile?.subscription_status ?? 'free') as Tier
   const isAnnual = cycle === 'annual'
-  const teamPrice = PRICING.team.monthly ?? 15
 
   const priceOf = useCallback((t: Tier) => {
     const p = PRICING[t]
@@ -180,6 +189,7 @@ export default function BillingContent() {
     const v = PRICING[t]
     const isCurrent = plan === t
     const featured = t === 'pro'
+    const isTeam = t === 'team'
     const idx = TIER_ORDER.indexOf(t)
     const isDowngrade = idx < curIdx
     const price = priceOf(t)
@@ -192,6 +202,24 @@ export default function BillingContent() {
         <div className="bpc-price-block">
           <div className="bpc-price">&pound;0<span className="per"> / month</span></div>
         </div>
+      )
+    } else if (isTeam) {
+      const total = price * teamSeats
+      priceBlock = (
+        <>
+          <div className="bpc-price-block">
+            <div className="bpc-price">&pound;{price}<span className="per"> / seat{isAnnual ? ' · yr' : '/mo'}</span></div>
+          </div>
+          <div className="bill-seat">
+            <div className="bill-seat-label">Team size</div>
+            <div className="bill-seat-pick">
+              <button onClick={() => setTeamSeats(s => Math.max(1, s - 1))} aria-label="Fewer seats">&minus;</button>
+              <span className="bill-seat-n">{teamSeats}</span>
+              <button onClick={() => setTeamSeats(s => Math.min(200, s + 1))} aria-label="More seats">+</button>
+            </div>
+            <div className="bill-seat-sum">Total: <b>&pound;{total}/mo</b> for {teamSeats} seat{teamSeats === 1 ? '' : 's'}</div>
+          </div>
+        </>
       )
     } else {
       priceBlock = (
@@ -212,28 +240,22 @@ export default function BillingContent() {
       cta = <button className="bill-cta bill-cta-ghost" disabled>Base plan</button>
     } else if (isDowngrade) {
       cta = <button className="bill-cta bill-cta-ghost" disabled={busy} onClick={() => handleUpgrade(t)}>Switch to {v.label}</button>
+    } else if (isTeam) {
+      cta = <button className="bill-cta bill-cta-warm" disabled={busy} onClick={() => handleUpgrade(t)}><i className="ti ti-users" /> Start Team &mdash; &pound;{price * teamSeats}/mo</button>
     } else if (featured) {
       cta = <button className="bill-cta bill-cta-warm" disabled={busy} onClick={() => handleUpgrade(t)}><i className="ti ti-crown" /> Upgrade to Pro</button>
     } else {
       cta = <button className="bill-cta bill-cta-primary" disabled={busy} onClick={() => handleUpgrade(t)}><i className="ti ti-arrow-right" /> Upgrade to {v.label}</button>
     }
 
-    const refreshLine = t === 'free' ? { icon: 'ti-refresh', text: `Auto-refresh every ${ENTITLEMENTS.free.scanIntervalHours}h`, cls: '' }
-      : t === 'pro' ? { icon: 'ti-refresh', text: `Auto-refresh every ${ENTITLEMENTS.pro.scanIntervalHours}h`, cls: '' }
-      : { icon: 'ti-bolt', text: 'Refresh on demand', cls: 'on-demand' }
-
     return (
-      <div key={t} className={`bill-card${featured ? ' feat' : ''}`}>
+      <div key={t} className={`bill-card${featured ? ' feat' : ''}${isTeam ? ' team-card' : ''}`}>
         {featured && <span className="bill-reco">MOST POPULAR</span>}
         <div className="bpc-tier">
           <span className="bpc-name">{v.label}</span>
           <span className="bpc-icon"><i className={`ti ${TIER_ICON[t]}`} /></span>
         </div>
         {priceBlock}
-        <div className={`refresh-line ${refreshLine.cls}`}>
-          <i className={`ti ${refreshLine.icon}`}></i>
-          {refreshLine.text}
-        </div>
         <p className="bpc-blurb">{v.blurb}</p>
         <div className="bpc-divider" />
         <ul className="bpc-feats">
@@ -245,7 +267,7 @@ export default function BillingContent() {
           ))}
         </ul>
         {cta}
-        {(featured) && (
+        {(featured || isTeam) && (
           <div className="bill-reassure">
             <span><i className="ti ti-shield-check" />Cancel anytime</span>
             <span><i className="ti ti-gift" />7 days free</span>
@@ -276,88 +298,19 @@ export default function BillingContent() {
         </span>
       </div>
 
-      {/* Plan cards — individual plans */}
-      <div className="bill-grid bill-grid-3">
+      {/* Plan cards */}
+      <div className="bill-grid">
         {TIER_ORDER.map(renderCard)}
       </div>
 
-      {/* Team section — plans that grow with you */}
-      <div className="team-band">
-        <div className="team-head">
-          <div>
-            <h3 className="display" style={{ fontSize: 22, fontWeight: 700, marginBottom: 4 }}>Plans that grow with you</h3>
-            <p style={{ color: 'var(--slate)', fontSize: 13.5 }}>Questions? <span onClick={() => toast('Chat with our team (demo)')} style={{ color: 'var(--lime-ink)', fontWeight: 600, cursor: 'pointer' }}>Chat with our team &rarr;</span></p>
-          </div>
-          <div className="seat-controls">
-            <span style={{ fontSize: 12.5, color: 'var(--slate)', fontWeight: 500 }}>Seats</span>
-            <div className="seat-pick light">
-              <button onClick={() => setTeamSeats(Math.max(5, teamSeats - 1))}>&minus;</button>
-              <span className="seat-n">{teamSeats}</span>
-              <button onClick={() => setTeamSeats(Math.min(150, teamSeats + 1))}>+</button>
-            </div>
-            <span style={{ fontSize: 11.5, color: 'var(--slate-2)' }}>5–150 users</span>
-          </div>
+      {/* Enterprise */}
+      <div className="bill-ent">
+        <div className="bill-ent-icon"><i className="ti ti-building" /></div>
+        <div className="bill-ent-body">
+          <h4>Need more than Team?</h4>
+          <p>SSO, API access, a dedicated account manager, custom data retention, and 20&ndash;150+ seats. Quoted to fit your organisation.</p>
         </div>
-
-        <div className="team-grid">
-          {/* Standard seat */}
-          <div className="team-card">
-            <div className="tc-tag">Team</div>
-            <div className="tc-name">Standard seat</div>
-            <div className="tc-price">£{teamPrice}<span>/seat/mo</span></div>
-            <div className="tc-sub">Predictable usage per seat &middot; £{teamPrice * teamSeats}/mo for {teamSeats} seats</div>
-            <ul className="tc-feats">
-              <li><i className="ti ti-check"></i>All Pro features per seat</li>
-              <li><i className="ti ti-check"></i>Auto-refresh every 2h</li>
-              <li><i className="ti ti-check"></i>Shared team lead pool</li>
-              <li><i className="ti ti-check"></i>Team pipeline &amp; roles</li>
-              <li><i className="ti ti-check"></i>Central billing &amp; admin</li>
-            </ul>
-            <button className={`btn ${plan === 'team' ? 'btn-ghost' : 'btn-primary'}`} style={{ width: '100%' }} disabled={plan === 'team'} onClick={() => handleUpgrade('team')}>
-              {plan === 'team' ? 'Current plan' : `Start Team — £${teamPrice * teamSeats}/mo`}
-            </button>
-          </div>
-
-          {/* Premium seat */}
-          {(() => {
-            const premPrice = isAnnual ? 32 : 39
-            const premTotal = premPrice * teamSeats
-            return (
-              <div className="team-card prem">
-                <div className="tc-tag">Team</div>
-                <div className="tc-name">Premium seat</div>
-                <div className="tc-price">£{premPrice}<span>/seat/mo</span></div>
-                <div className="tc-sub">Max power per seat &middot; £{premTotal}/mo for {teamSeats} seats</div>
-                <ul className="tc-feats">
-                  <li><i className="ti ti-check"></i>Everything in Standard</li>
-                  <li><i className="ti ti-check"></i>On-demand refresh button</li>
-                  <li><i className="ti ti-check"></i>Advanced analytics + CSV</li>
-                  <li><i className="ti ti-check"></i>Adjustable scoring weights</li>
-                  <li><i className="ti ti-check"></i>Lead assignment &amp; admin controls</li>
-                </ul>
-                <button className="btn btn-warm" style={{ width: '100%' }} onClick={() => toast('Premium seat coming soon (demo)')}>
-                  Start Premium — £{premTotal}/mo
-                </button>
-              </div>
-            )
-          })()}
-
-          {/* Enterprise */}
-          <div className="team-card ent">
-            <div className="tc-tag" style={{ color: 'var(--lime)' }}>20+ users</div>
-            <div className="tc-name" style={{ color: '#fff' }}>Enterprise</div>
-            <div className="tc-price" style={{ color: '#fff' }}>Custom<span style={{ color: '#A9B5AC' }}> pricing</span></div>
-            <div className="tc-sub" style={{ color: '#A9B5AC' }}>Flexible pooled usage across your org</div>
-            <ul className="tc-feats ent-feats">
-              <li><i className="ti ti-check"></i>Everything in Team, plus:</li>
-              <li><i className="ti ti-check"></i>Pooled billing &amp; spend limits</li>
-              <li><i className="ti ti-check"></i>SSO &amp; SCIM provisioning</li>
-              <li><i className="ti ti-check"></i>Audit logs &amp; API access</li>
-              <li><i className="ti ti-check"></i>Dedicated account manager</li>
-            </ul>
-            <button className="btn btn-light" style={{ width: '100%' }} onClick={() => toast('Routing to sales (demo)')}>Contact sales</button>
-          </div>
-        </div>
+        <a className="bill-ent-btn" href="mailto:sales@leadflow.dev?subject=Enterprise%20plan%20inquiry"><i className="ti ti-mail" /> Talk to us</a>
       </div>
 
       {/* Usage */}
@@ -403,18 +356,22 @@ export default function BillingContent() {
               <tr>
                 <th>Feature</th>
                 <th><span className="bill-cmp-pname">Free</span><span className="bill-cmp-pprice">&pound;0</span></th>
-                <th className="feat-col"><span className="bill-cmp-pname">Pro</span><span className="bill-cmp-pprice">&pound;{PRICING.pro.monthly}/mo</span></th>
-                <th><span className="bill-cmp-pname">Max</span><span className="bill-cmp-pprice">&pound;{PRICING.max.monthly}/mo</span></th>
+                <th><span className="bill-cmp-pname">Pro</span><span className="bill-cmp-pprice">&pound;{PRICING.pro.monthly}/mo</span></th>
+                <th className="feat-col"><span className="bill-cmp-pname">Max</span><span className="bill-cmp-pprice">&pound;{PRICING.max.monthly}/mo</span></th>
+                <th><span className="bill-cmp-pname">Team</span><span className="bill-cmp-pprice">&pound;{PRICING.team.monthly}/seat</span></th>
               </tr>
             </thead>
             <tbody>
               {CMP_GROUPS.map(g => (
                 <Fragment key={g.label}>
-                  <tr className="bill-cmp-grp"><td colSpan={4}>{g.label}</td></tr>
-                  {g.rows.map(([label, ...vals]) => (
+                  <tr className="bill-cmp-grp"><td colSpan={5}>{g.label}</td></tr>
+                  {g.rows.map(([label, f, p, m, tm]) => (
                     <tr key={label}>
                       <td>{label}</td>
-                      {vals.map((v, i) => <td key={i}>{cmpCell(v)}</td>)}
+                      <td>{cmpCell(f)}</td>
+                      <td>{cmpCell(p)}</td>
+                      <td>{cmpCell(m)}</td>
+                      <td>{cmpCell(tm)}</td>
                     </tr>
                   ))}
                 </Fragment>

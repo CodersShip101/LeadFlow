@@ -86,10 +86,6 @@ export default function SavedPage() {
                     <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--slate-2)' }}>{timeAgo(lead.posted_date)}</span>
                   </div>
                 </div>
-                <button onClick={e => { e.stopPropagation(); router.push(`/dashboard/lead/${lead.id}`) }}
-                  className="btn btn-primary" style={{ padding: '7px 14px', fontSize: 12.5 }}>
-                  Open
-                </button>
                 <button onClick={e => { e.stopPropagation(); unsave(lead.id) }}
                   className="btn-icon" style={{ color: 'var(--coral)' }}>
                   <i className="ti ti-trash" />
