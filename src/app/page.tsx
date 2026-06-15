@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import Script from 'next/script'
+import { PRICING, TIER_ICONS, planFeatures } from '@/lib/tiers'
 
 const incomingSignals = [
   { src: 'REDDIT', c: 'rgba(255,140,66,.14)', t: '#ff9c5b', title: 'Content Strategist — B2B SaaS, Remote', meta: '£350/day · Notion, Writing · 2-month', score: '8.5', cls: 'score-a' },
@@ -186,11 +187,13 @@ export default function HomePage() {
           "name": "LeadFlow",
           "applicationCategory": "BusinessApplication",
           "operatingSystem": "Web",
-          "description": "LeadFlow finds and scores freelance leads, then delivers the best matches to your inbox every 6 hours.",
+          "description": "LeadFlow finds and scores freelance leads, then delivers the best matches to your inbox as often as every hour.",
           "url": "https://lead-flow-gpyj.vercel.app/",
           "offers": [
-            { "@type": "Offer", "name": "Free", "price": "0", "priceCurrency": "GBP" },
-            { "@type": "Offer", "name": "Pro", "price": "29", "priceCurrency": "GBP", "description": "Per month. 7-day free trial, no card required." }
+            { "@type": "Offer", "name": PRICING.free.label, "price": String(PRICING.free.monthly), "priceCurrency": "GBP" },
+            { "@type": "Offer", "name": PRICING.pro.label, "price": String(PRICING.pro.monthly), "priceCurrency": "GBP", "description": "Per month. 7-day free trial, no card required." },
+            { "@type": "Offer", "name": PRICING.max.label, "price": String(PRICING.max.monthly), "priceCurrency": "GBP", "description": "Per month. 7-day free trial, no card required." },
+            { "@type": "Offer", "name": PRICING.team.label, "price": String(PRICING.team.monthly), "priceCurrency": "GBP", "description": "Per seat / month. 7-day free trial, no card required." }
           ],
           "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.9", "ratingCount": "87" }
         })
@@ -258,7 +261,7 @@ export default function HomePage() {
                   Let the <span className="hl">right leads</span> find you.
                 </h1>
                 <p className="hero-sub">
-                  LeadFlow finds freelance opportunities across Reddit, Reed and We Work Remotely, scores each one against your skills and rate, and delivers the best matches to your inbox every 6 hours.
+                  LeadFlow finds freelance opportunities across Reddit, Reed and We Work Remotely, scores each one against your skills and rate, and delivers the best matches to your inbox as often as every hour.
                 </p>
                 <div className="hero-cta-row">
                   <Link href="/auth/signup" className="btn-p btn-lg">Get started free →</Link>
@@ -375,7 +378,7 @@ export default function HomePage() {
                 <div className="step-rule" aria-hidden="true"></div>
                 <div className="step-num">STEP 03</div>
                 <h3>Apply &amp; win</h3>
-                <p>Your best matches arrive every 6 hours. Apply directly on the original platform.</p>
+                <p>Your best matches arrive as often as every hour. Apply directly on the original platform.</p>
               </div>
             </div>
             <div style={{ textAlign: 'center', marginTop: 54 }} className="sr">
@@ -392,7 +395,7 @@ export default function HomePage() {
             <div className="grid-stats sr">
               <div className="stat"><div className="v">2,400+</div><div className="l">leads scored</div></div>
               <div className="stat"><div className="v">340+</div><div className="l">freelancers using it</div></div>
-              <div className="stat"><div className="v">6h</div><div className="l">delivery interval</div></div>
+              <div className="stat"><div className="v">1h</div><div className="l">fastest delivery</div></div>
               <div className="stat"><div className="v">9.1</div><div className="l">avg top-match score</div></div>
             </div>
           </div>
@@ -409,7 +412,7 @@ export default function HomePage() {
             <div className="grid-3">
               {[
                 { icon: 'ti-brain', title: 'AI quality scoring', desc: 'Every lead ranked 1–10 so you focus on the best ones first. Stop guessing which are worth applying to.' },
-                { icon: 'ti-clock-bolt', title: 'Delivered every 6 hours', desc: 'Fresh matches four times a day. You reply while the client is still reading applications.' },
+                { icon: 'ti-clock-bolt', title: 'Delivered as often as every hour', desc: 'Fresh matches throughout the day. You reply while the client is still reading applications.' },
                 { icon: 'ti-target-arrow', title: 'Skill-matched', desc: 'Only leads that fit your skills and rate reach your feed. No irrelevant listings.' },
                 { icon: 'ti-currency-pound', title: 'Budgets upfront', desc: 'Real numbers before you pitch. Never burn a call discovering the rate doesn\'t work.' },
                 { icon: 'ti-link', title: 'Direct links, no commission', desc: 'Apply on the original platform. We never sit between you and the client or take a cut of your work.' },
@@ -546,44 +549,57 @@ export default function HomePage() {
               </span>
             </div>
 
-            <div className="pricing-2 sr">
-              <article className="price-card">
-                <div className="plan-name">Free</div>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: 12 }}><span className="price-amt">£0</span><span className="price-per">forever · no expiry</span></div>
-                <p className="plan-desc">For getting started. 3 leads a week to see if the quality is worth it — no deadline, no catch.</p>
-                <Link href="/auth/signup" className="btn-line btn-full" style={{ justifyContent: 'center', marginBottom: 24 }}>Get started free</Link>
-                <div className="feat-label">What&apos;s included</div>
-                <ul style={{ listStyle: 'none' }}>
-                  <li className="pf"><i className="ti ti-check" aria-hidden="true"></i>3 leads per week</li>
-                  <li className="pf"><i className="ti ti-check" aria-hidden="true"></i>AI quality scores visible</li>
-                  <li className="pf"><i className="ti ti-check" aria-hidden="true"></i>Direct links to original posts</li>
-                </ul>
-                <div className="upgrade-hint"><i className="ti ti-arrow-right" aria-hidden="true"></i>Upgrade to Pro for unlimited leads + filtering</div>
-              </article>
-
-              <article className="price-card feat">
-                <div className="feat-pill">Most popular · 7-day free trial</div>
-                <div className="plan-name">Pro</div>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: 12 }}>
-                  <span className="price-amt"><span className="price-num" data-m="29" data-a="24">£{annual ? '24' : '29'}</span></span>
-                  <span className="price-per price-suf">{annual ? '/mo, billed yearly' : '/mo · cancel any time'}</span>
-                </div>
-                <div className="plan-anchor">Less than one hour of your day rate. Pays for itself on the first lead you land.</div>
-                <div className="plan-saving" style={{ display: annual ? 'inline-block' : 'none' }}>You save £60/yr — 2 months free</div>
-                <p className="plan-desc">For freelancers who want a steady pipeline without the daily grind of searching job boards.</p>
-                <Link href="/auth/signup" className="btn-p btn-full" style={{ justifyContent: 'center', marginBottom: 12 }}>Start my 7-day free trial</Link>
-                <div className="plan-guarantee"><i className="ti ti-shield-check" aria-hidden="true"></i>First charge on day 7. We remind you on day 5.</div>
-                <div className="feat-label">Everything in Free, plus</div>
-                <ul style={{ listStyle: 'none' }}>
-                  <li className="pf"><i className="ti ti-check" aria-hidden="true"></i>Unlimited leads, every 6 hours</li>
-                  <li className="pf"><i className="ti ti-check" aria-hidden="true"></i>Skill + rate filtering</li>
-                  <li className="pf"><i className="ti ti-check" aria-hidden="true"></i>Daily email digest</li>
-                  <li className="pf"><i className="ti ti-check" aria-hidden="true"></i>Pipeline tracking</li>
-                  <li className="pf"><i className="ti ti-check" aria-hidden="true"></i>Custom lead alerts</li>
-                  <li className="pf"><i className="ti ti-check" aria-hidden="true"></i>Analytics dashboard + CSV export</li>
-                  <li className="pf"><i className="ti ti-check" aria-hidden="true"></i>Priority support + onboarding call</li>
-                </ul>
-              </article>
+            <div className="bill-grid sr">
+              {(['free', 'pro', 'max', 'team'] as const).map(t => {
+                const v = PRICING[t]
+                const featured = t === 'max'
+                const isTeam = t === 'team'
+                const price = annual ? v.annual : v.monthly
+                const was = annual && !isTeam ? v.monthly : null
+                return (
+                  <div key={t} className={`bill-card${featured ? ' feat' : ''}${isTeam ? ' team-card' : ''}`}>
+                    {featured && <span className="bill-reco">MOST POPULAR</span>}
+                    <div className="bpc-tier">
+                      <span className="bpc-name">{v.label}</span>
+                      <span className="bpc-icon"><i className={`ti ${TIER_ICONS[t]}`} /></span>
+                    </div>
+                    <div className="bpc-price-block">
+                      {t === 'free' ? (
+                        <div className="bpc-price">£0<span className="per"> / month</span></div>
+                      ) : isTeam ? (
+                        <div className="bpc-price">£{price}<span className="per"> / seat{annual ? ' · yr' : '/mo'}</span></div>
+                      ) : (
+                        <div className="bpc-price">£{price}{was ? <span className="was">£{was}</span> : null}<span className="per">{annual ? ' / mo · billed yr' : ' / month'}</span></div>
+                      )}
+                    </div>
+                    <p className="bpc-blurb">{v.blurb}</p>
+                    <div className="bpc-divider" />
+                    <ul className="bpc-feats">
+                      {planFeatures(t).map(f => (
+                        <li key={f.txt} className={`bpc-feat${f.muted ? ' muted' : ''}`}>
+                          <span className="bpc-fi"><i className={`ti ${f.muted ? 'ti-minus' : 'ti-check'}`} /></span>
+                          <span>{f.txt}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <Link href="/auth/signup" className={`bill-cta ${t === 'free' ? 'bill-cta-ghost' : featured || isTeam ? 'bill-cta-warm' : 'bill-cta-primary'}`}>
+                      {t === 'free'
+                        ? 'Get started free'
+                        : isTeam
+                          ? <><i className="ti ti-users" /> Start Team</>
+                          : featured
+                            ? <><i className="ti ti-crown" /> Start free trial</>
+                            : <><i className="ti ti-arrow-right" /> Start free trial</>}
+                    </Link>
+                    {(featured || isTeam) && (
+                      <div className="bill-reassure">
+                        <span><i className="ti ti-shield-check" />Cancel anytime</span>
+                        <span><i className="ti ti-gift" />7 days free</span>
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
             </div>
           </div>
         </section>
@@ -646,7 +662,7 @@ export default function HomePage() {
                 <span className="nav-logo-mark"><span>LF</span></span>
                 <span style={{ fontFamily: "'Space Grotesk',sans-serif", color: '#fff', fontWeight: 700, fontSize: '1.05rem', letterSpacing: '-.02em' }}>LeadFlow</span>
               </a>
-              <p style={{ fontSize: '.875rem', color: 'var(--slate-400)', lineHeight: 1.65, maxWidth: 250 }}>AI-scored freelance leads, matched to your skills and delivered every 6 hours.</p>
+              <p style={{ fontSize: '.875rem', color: 'var(--slate-400)', lineHeight: 1.65, maxWidth: 250 }}>AI-scored freelance leads, matched to your skills and delivered as often as every hour.</p>
             </div>
             <nav aria-label="Product">
               <h4>Product</h4>
@@ -677,7 +693,7 @@ export default function HomePage() {
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: '.78rem', color: 'var(--slate-600)' }}>© 2026 LeadFlow. All rights reserved.</span>
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: '.72rem', color: 'var(--lime-deep)', display: 'flex', alignItems: 'center', gap: 7 }}>
               <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--lime)', animation: 'blink 1.6s infinite' }}></span>
-              updating every 6 hours
+              updating as often as every hour
             </span>
           </div>
         </div>

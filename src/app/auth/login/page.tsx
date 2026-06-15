@@ -38,7 +38,7 @@ export default function LoginPage() {
           </div>
           <div className="panel-hero">
             <div className="panel-eyebrow">Your lead feed is waiting</div>
-            <h2 className="panel-heading">New work matched<br />to you every 6 hours.</h2>
+            <h2 className="panel-heading">New work matched<br />to you as often as every hour.</h2>
             <p className="panel-sub">While you&apos;ve been away, we&apos;ve been scanning and scoring. Log back in to see what&apos;s matched.</p>
             <div className="auth-stats-row">
               <div className="auth-stat-item">

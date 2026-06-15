@@ -68,7 +68,7 @@ export default function RefreshBar({ plan, lastScanAt }: Props) {
         setCooldown(data.cooldownRemaining ?? 300000)
         toast.error(data.error || 'Too soon — wait before refreshing again')
       } else if (res.status === 403 && data.upgrade) {
-        toast.error('Upgrade to Max or Team for manual refresh')
+        toast.error('Upgrade to Pro or Team for manual refresh')
       } else {
         toast.error(data.error || 'Refresh failed')
       }

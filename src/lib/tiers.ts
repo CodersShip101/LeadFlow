@@ -4,12 +4,16 @@
 // gates in the API routes, and the upgrade prompts all read from here, so a
 // tier's definition lives in exactly one place.
 //
-// Ladder:
-//   free     £0             exploring        — freemium hook
-//   pro      £15/mo         working solo     — "I outgrew free"
-//   max      £49/mo         optimising solo  — power features
-//   team     £39/seat/mo    agencies/studios — multi-seat, shared pipeline
-//                            (+ enterprise = custom)
+// Ladder (internal key → customer-facing label):
+//   free  → "Free"     £0             exploring        — freemium hook
+//   pro   → "Starter"  £15/mo         working solo     — "I outgrew free"
+//   max   → "Pro"      £49/mo         optimising solo  — power features (most popular)
+//   team  → "Team"     £39/seat/mo    agencies/studios — multi-seat, shared pipeline
+//                                       (+ enterprise = custom)
+//
+// NOTE: the internal keys (`pro`, `max`) are bound to Stripe price env vars,
+// the `subscription_status` column, and the webhook mapping — DO NOT rename them.
+// Only the `label` below is shown to users.
 // ---------------------------------------------------------------------------
 
 export type Tier = 'free' | 'pro' | 'max' | 'team' | 'enterprise'
@@ -154,10 +158,10 @@ export const PRICING: Record<
   Tier,
   { label: string; monthly: number | null; annual: number | null; perSeat?: boolean; blurb: string }
 > = {
-  free: { label: 'Free', monthly: 0, annual: 0, blurb: 'Try the scored feed and build a pipeline.' },
-  pro: { label: 'Pro', monthly: 15, annual: 12, blurb: 'For freelancers actively winning work.' },
-  max: { label: 'Max', monthly: 49, annual: 39, blurb: 'For optimising every lead and rate.' },
-  team: { label: 'Team', monthly: 39, annual: 32, perSeat: true, blurb: 'For agencies and studios sharing a pipeline.' },
+  free: { label: 'Free', monthly: 0, annual: 0, blurb: 'Dip your toes in. Scored feed, pipeline, 5 applications a month.' },
+  pro: { label: 'Starter', monthly: 15, annual: 12, blurb: 'For freelancers actively chasing work. No cap, no middleman.' },
+  max: { label: 'Pro', monthly: 49, annual: 39, blurb: 'For those who want every edge: adjust scoring, export data, get in first.' },
+  team: { label: 'Team', monthly: 39, annual: 32, perSeat: true, blurb: 'Shared pipeline and lead pool for agencies and studios.' },
   enterprise: { label: 'Enterprise', monthly: null, annual: null, blurb: 'Custom scale, SSO, API and a dedicated manager.' },
 }
 
@@ -171,4 +175,61 @@ export function entitlementsFor(plan: Tier, orgSeats?: number): Entitlements {
 
 export function can(plan: Tier, feature: keyof Entitlements): boolean {
   return ENTITLEMENTS[plan][feature] === true
+}
+
+// ---------------------------------------------------------------------------
+// Presentation — shared by the dashboard billing page and the public landing
+// pricing grid so the two never drift. Mirrors the entitlements above and uses
+// the customer-facing labels (hence "Everything in Starter / Pro").
+// ---------------------------------------------------------------------------
+
+export type PlanFeature = { txt: string; muted?: boolean }
+
+export const TIER_ICONS: Record<Tier, string> = {
+  free: 'ti-radar-2',
+  pro: 'ti-bolt',
+  max: 'ti-crown',
+  team: 'ti-users',
+  enterprise: 'ti-building',
+}
+
+export function planFeatures(tier: Tier): PlanFeature[] {
+  const appLimit = ENTITLEMENTS.free.applicationsPerMonth
+  switch (tier) {
+    case 'free':
+      return [
+        { txt: 'Scored lead feed (all sources)' },
+        { txt: `${appLimit} applications / month` },
+        { txt: 'Pipeline tracking' },
+        { txt: 'Source links hidden', muted: true },
+        { txt: 'No analytics', muted: true },
+      ]
+    case 'pro':
+      return [
+        { txt: 'Everything in Free' },
+        { txt: 'Unlimited applications' },
+        { txt: 'Direct source links' },
+        { txt: 'Daily email digest' },
+        { txt: 'Custom lead alerts' },
+        { txt: 'Basic analytics' },
+      ]
+    case 'max':
+      return [
+        { txt: `Everything in ${PRICING.pro.label}` },
+        { txt: 'Adjustable scoring weights' },
+        { txt: `Priority scanning every ${ENTITLEMENTS.max.scanIntervalHours}h` },
+        { txt: 'Full analytics + CSV export' },
+        { txt: 'Priority support' },
+      ]
+    case 'team':
+      return [
+        { txt: `Everything in ${PRICING.max.label}` },
+        { txt: 'Shared team lead pool' },
+        { txt: 'Team pipeline & assignment' },
+        { txt: 'Admin & member roles' },
+        { txt: 'Centralised billing' },
+      ]
+    default:
+      return []
+  }
 }

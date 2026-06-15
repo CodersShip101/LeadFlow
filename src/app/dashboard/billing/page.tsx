@@ -1,1 +1,17 @@
-import { Suspense } from 'react'\nimport DashboardBilling from './content\billing';\n\nexport default function BillingPage() {\n  return (\n    <Suspense fallback={\n      <div className="flex-1 flex items-center justify-center pt-16">\n        <div className="flex items-center gap-3" style={{ color: 'var(--slate)' }}>\n          <div className="w-2.5 h-2.5 rounded-full animate-pulse" style={{ background: 'var(--lime)' }} />\n          <span className="text-sm">Loading…</span>\n        </div>\n      </div>\n    }>\n      <DashboardBilling />\n    </Suspense>\n  )\n}
+import { Suspense } from 'react'
+import DashboardBilling from './content'
+
+export default function BillingPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex-1 flex items-center justify-center pt-16">
+        <div className="flex items-center gap-3" style={{ color: 'var(--slate)' }}>
+          <div className="w-2.5 h-2.5 rounded-full animate-pulse" style={{ background: 'var(--lime)' }} />
+          <span className="text-sm">Loading&hellip;</span>
+        </div>
+      </div>
+    }>
+      <DashboardBilling />
+    </Suspense>
+  )
+}

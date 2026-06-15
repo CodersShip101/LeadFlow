@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-client'
 import type { Profile } from '@/types'
+import { PRICING, type Tier } from '@/lib/tiers'
 import toast from 'react-hot-toast'
 
 const skillOptions = ['React','Vue','Angular','Next.js','TypeScript','Python','Node.js','PHP','WordPress','Figma','UI/UX','Illustration','Copywriting','SEO','Content','Video Editing','Photography','Social Media','Email Marketing','Paid Ads','Project Management','Virtual Assistance','Bookkeeping','Consulting']
@@ -57,14 +58,17 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="flex-1 dash-page max-w-2xl">
-      <div className="dash-header">
-        <h1>Settings</h1>
+    <>
+      <div className="greeting">
+        <h2>Settings</h2>
+        <p>Tune your profile so leads are scored accurately.</p>
       </div>
 
       <div className="tabs">
         {(['profile', 'account'] as const).map(t => (
-          <button key={t} onClick={() => setTab(t)} className={`tab ${tab === t ? 'on' : ''}`}>{t}</button>
+          <button key={t} onClick={() => setTab(t)} className={`tab ${tab === t ? 'on' : ''}`}>
+            {t === 'profile' ? 'Profile' : 'Account'}
+          </button>
         ))}
       </div>
 
@@ -116,7 +120,7 @@ export default function ProfilePage() {
             </div>
           </div>
           <button onClick={handleSave} disabled={saving} className="btn btn-primary" style={{ marginTop: 8 }}>
-            {saving ? 'Saving\u2026' : 'Save'}
+            <i className="ti ti-check"></i> {saving ? 'Saving\u2026' : 'Save changes'}
           </button>
         </div>
       )}
@@ -130,7 +134,7 @@ export default function ProfilePage() {
             </div>
             <div className="field">
               <label>Plan</label>
-              <input className="input" value={profile?.subscription_status || 'free'} disabled style={{ color: 'var(--slate)', textTransform: 'capitalize' }} />
+              <input className="input" value={PRICING[(profile?.subscription_status as Tier) || 'free']?.label || 'Free'} disabled style={{ color: 'var(--slate)' }} />
             </div>
           </div>
           <button onClick={async () => { await supabase.auth.signOut(); router.push('/') }}
@@ -139,6 +143,6 @@ export default function ProfilePage() {
           </button>
         </div>
       )}
-    </div>
+    </>
   )
 }

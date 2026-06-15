@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-client'
+import TopbarSearch, { SearchProvider } from '@/components/TopbarSearch'
 import type { Profile } from '@/types'
 
 const profileInitials = (name?: string | null) => {
@@ -15,7 +16,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [newCount, setNewCount] = useState(0)
   const [appCount, setAppCount] = useState(0)
   const [menuOpen, setMenuOpen] = useState(false)
-  const [query, setQuery] = useState('')
   const router = useRouter()
   const pathname = usePathname() || ''
   const supabase = createClient()
@@ -75,6 +75,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const handleLogout = async () => { await supabase.auth.signOut(); router.push('/') }
 
   return (
+    <SearchProvider>
     <div id="app">
       {/* ─── Sidebar ─── */}
       <aside id="rail" className={menuOpen ? 'open' : ''}>
@@ -142,12 +143,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <h1>{pageTitle}</h1>
           </div>
           <div className="tb-right">
-            <div className="tb-search search-wrap">
-              <i className="ti ti-search"></i>
-              <input id="searchInput" placeholder="Search leads&hellip;" aria-label="Search leads"
-                autoComplete="off" value={query} onChange={e => setQuery(e.target.value)} />
-              <div className="suggest" id="suggestBox"></div>
-            </div>
+            <TopbarSearch />
             <div className="avatar">{profileInitials(profile?.full_name)}</div>
           </div>
         </header>
@@ -184,5 +180,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </button>
       </nav>
     </div>
+    </SearchProvider>
   )
 }

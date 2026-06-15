@@ -4,50 +4,12 @@ import { useEffect, useState, useCallback, Fragment } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase-client'
 import type { Profile, Application } from '@/types'
-import { PRICING, ENTITLEMENTS, type Tier } from '@/lib/tiers'
+import { PRICING, ENTITLEMENTS, TIER_ICONS, planFeatures, type Tier } from '@/lib/tiers'
 import toast from 'react-hot-toast'
 
 // Order shown in the plan grid. Source of truth for names/prices is lib/tiers.ts.
 const TIER_ORDER: Tier[] = ['free', 'pro', 'max', 'team']
-const TIER_ICON: Record<string, string> = { free: 'ti-radar-2', pro: 'ti-bolt', max: 'ti-crown', team: 'ti-users' }
 const FREE_APP_LIMIT = ENTITLEMENTS.free.applicationsPerMonth as number
-
-// Per-card feature lists — mirror the entitlements in lib/tiers.ts.
-type Feat = { txt: string; muted?: boolean }
-const FEATURES: Record<string, Feat[]> = {
-  free: [
-    { txt: 'Scored lead feed (all sources)' },
-    { txt: `${FREE_APP_LIMIT} applications / month` },
-    { txt: 'Pipeline tracking' },
-    { txt: `Auto-refresh every ${ENTITLEMENTS.free.scanIntervalHours}h` },
-    { txt: 'Source links hidden', muted: true },
-    { txt: 'No analytics', muted: true },
-  ],
-  pro: [
-    { txt: 'Everything in Free' },
-    { txt: 'Unlimited applications' },
-    { txt: 'Direct source links' },
-    { txt: `Auto-refresh every ${ENTITLEMENTS.pro.scanIntervalHours}h` },
-    { txt: 'Daily email digest' },
-    { txt: 'Custom lead alerts' },
-    { txt: 'Basic analytics' },
-  ],
-  max: [
-    { txt: 'Everything in Pro' },
-    { txt: `Auto-refresh every ${ENTITLEMENTS.max.scanIntervalHours}h` },
-    { txt: 'Manual refresh on demand' },
-    { txt: 'Adjustable scoring weights' },
-    { txt: 'Advanced analytics + CSV export' },
-    { txt: 'Priority support' },
-  ],
-  team: [
-    { txt: 'Everything in Max' },
-    { txt: 'Shared team lead pool' },
-    { txt: 'Team pipeline & assignment' },
-    { txt: 'Admin & member roles' },
-    { txt: 'Centralised billing' },
-  ],
-}
 
 // Full comparison grid. Columns: Free · Pro · Max · Team.
 type CmpVal = boolean | string
@@ -58,7 +20,7 @@ const CMP_GROUPS: { label: string; rows: [string, CmpVal, CmpVal, CmpVal, CmpVal
       ['Scored lead feed', true, true, true, true],
       ['Applications / month', String(FREE_APP_LIMIT), '∞', '∞', '∞'],
       ['Direct source links', false, true, true, true],
-      ['Auto-refresh', '5h', '2h', '1h', '1h'],
+      ['Scan frequency', '5h', '2h', '1h', '1h'],
       ['Manual refresh', false, false, true, true],
     ],
   },
@@ -106,8 +68,8 @@ export default function BillingContent() {
   useEffect(() => {
     const upgraded = sp.get('upgraded')
     if (upgraded) {
-      const labels: Record<string, string> = { pro: 'Pro', max: 'Max', team: 'Team' }
-      toast.success(`Welcome to ${labels[upgraded] || upgraded}!`)
+      const label = PRICING[upgraded as Tier]?.label || upgraded
+      toast.success(`Welcome to ${label}!`)
     }
   }, [sp])
 
@@ -188,7 +150,7 @@ export default function BillingContent() {
   const renderCard = (t: Tier) => {
     const v = PRICING[t]
     const isCurrent = plan === t
-    const featured = t === 'pro'
+    const featured = t === 'max'
     const isTeam = t === 'team'
     const idx = TIER_ORDER.indexOf(t)
     const isDowngrade = idx < curIdx
@@ -253,13 +215,13 @@ export default function BillingContent() {
         {featured && <span className="bill-reco">MOST POPULAR</span>}
         <div className="bpc-tier">
           <span className="bpc-name">{v.label}</span>
-          <span className="bpc-icon"><i className={`ti ${TIER_ICON[t]}`} /></span>
+          <span className="bpc-icon"><i className={`ti ${TIER_ICONS[t]}`} /></span>
         </div>
         {priceBlock}
         <p className="bpc-blurb">{v.blurb}</p>
         <div className="bpc-divider" />
         <ul className="bpc-feats">
-          {FEATURES[t].map(f => (
+          {planFeatures(t).map(f => (
             <li key={f.txt} className={`bpc-feat${f.muted ? ' muted' : ''}`}>
               <span className="bpc-fi"><i className={`ti ${f.muted ? 'ti-minus' : 'ti-check'}`} /></span>
               <span>{f.txt}</span>
@@ -355,10 +317,10 @@ export default function BillingContent() {
             <thead>
               <tr>
                 <th>Feature</th>
-                <th><span className="bill-cmp-pname">Free</span><span className="bill-cmp-pprice">&pound;0</span></th>
-                <th><span className="bill-cmp-pname">Pro</span><span className="bill-cmp-pprice">&pound;{PRICING.pro.monthly}/mo</span></th>
-                <th className="feat-col"><span className="bill-cmp-pname">Max</span><span className="bill-cmp-pprice">&pound;{PRICING.max.monthly}/mo</span></th>
-                <th><span className="bill-cmp-pname">Team</span><span className="bill-cmp-pprice">&pound;{PRICING.team.monthly}/seat</span></th>
+                <th><span className="bill-cmp-pname">{PRICING.free.label}</span><span className="bill-cmp-pprice">&pound;0</span></th>
+                <th><span className="bill-cmp-pname">{PRICING.pro.label}</span><span className="bill-cmp-pprice">&pound;{PRICING.pro.monthly}/mo</span></th>
+                <th className="feat-col"><span className="bill-cmp-pname">{PRICING.max.label}</span><span className="bill-cmp-pprice">&pound;{PRICING.max.monthly}/mo</span></th>
+                <th><span className="bill-cmp-pname">{PRICING.team.label}</span><span className="bill-cmp-pprice">&pound;{PRICING.team.monthly}/seat</span></th>
               </tr>
             </thead>
             <tbody>

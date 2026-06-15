@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase-client'
 import type { Lead, Profile, Application } from '@/types'
 import { computeMatchExplanation } from '@/types'
 import { formatBudgetGBP, timeAgo } from '@/lib/utils'
+import { useSearch } from '@/components/TopbarSearch'
 import toast from 'react-hot-toast'
 
 const SRC: Record<string, { name: string; cls: string; ava: string; ini: string }> = {
@@ -59,7 +60,7 @@ function gaugeSVG(score: number) {
 export default function DashboardPage() {
   const [leads, setLeads] = useState<Lead[]>([])
   const [profile, setProfile] = useState<Profile | null>(null)
-  const [search, setSearch] = useState('')
+  const { query: search, setQuery: setSearch } = useSearch()
   const [sourceFilter, setSourceFilter] = useState('all')
   const [scoreFilter, setScoreFilter] = useState<string>('all')
   const [loading, setLoading] = useState(true)

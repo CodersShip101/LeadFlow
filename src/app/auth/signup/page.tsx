@@ -113,7 +113,7 @@ export default function SignupPage() {
               Stop searching.<br />Let the <span className="hl">right leads</span> find you.
             </h2>
             <p className="panel-sub" style={{ fontSize: '.88rem', marginBottom: 18, maxWidth: 300 }}>
-              We scan Reddit, Reed, We Work Remotely, and Remote OK every 6 hours — scoring every post against your skills before it reaches you.
+              We scan Reddit, Reed, We Work Remotely, and Remote OK as often as every hour — scoring every post against your skills before it reaches you.
             </p>
 
             {/* Mini live feed */}
