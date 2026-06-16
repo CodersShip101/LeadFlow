@@ -64,36 +64,29 @@ function gaugeSVG(score: number) {
   )
 }
 
-// Animated gauge ring — redraws from 0 each time panelKey changes
-function AnimatedGauge({ score, panelKey }: { score: number; panelKey: string }) {
-  const r = 22, circ = 2 * Math.PI * r
-  const [offset, setOffset] = useState(circ)
-  const { c } = scoreColor(score)
-  useEffect(() => {
-    setOffset(circ)
-    const t = setTimeout(() => setOffset(circ * (1 - score / 10)), 80)
-    return () => clearTimeout(t)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [panelKey])
-  return (
-    <div className="dp-gauge">
-      <svg width="60" height="60" viewBox="0 0 60 60" style={{ transform: 'rotate(-90deg)' }}>
-        <circle cx="30" cy="30" r={r} fill="none" stroke="var(--line)" strokeWidth={5.5} />
-        <circle cx="30" cy="30" r={r} fill="none" stroke={c} strokeWidth={5.5}
-          strokeLinecap="round" strokeDasharray={circ} strokeDashoffset={offset}
-          style={{ transition: 'stroke-dashoffset .9s cubic-bezier(.4,0,.2,1)' }} />
-      </svg>
-      <span className="dp-gauge-num" style={{ color: c }}>{score}</span>
-    </div>
-  )
+function scoreChipColor(s: number) {
+  return s >= 8 ? 'var(--hi)' : s >= 5.5 ? 'var(--mid)' : 'var(--coral)'
 }
 
-function verdictLabel(s: number): { label: string; col: string } {
-  if (s >= 8.5) return { label: 'Strong match', col: 'var(--hi)' }
-  if (s >= 7)   return { label: 'Good fit',     col: 'var(--hi)' }
-  if (s >= 5.5) return { label: 'Solid',        col: 'var(--mid)' }
-  if (s >= 4)   return { label: 'Partial fit',  col: 'var(--mid)' }
-  return               { label: 'Weak match',   col: 'var(--coral)' }
+function verdictSentence(m: ReturnType<typeof computeMatchExplanation>, sc: number): string {
+  const { matched, missing } = m.skillMatch
+  const rateScore = m.subScores.find(s => s.label === 'Rate match')?.value ?? 5
+  const freshScore = m.subScores.find(s => s.label === 'Recency')?.value ?? 5
+  const skillPart = missing.length === 0 && matched.length > 0
+    ? `all ${matched.length} required skill${matched.length > 1 ? 's' : ''} match`
+    : matched.length > 0
+    ? `${matched.length} of ${matched.length + missing.length} skills match`
+    : 'no direct skill overlap'
+  const ratePart = rateScore >= 8 ? 'budget exceeds your rate'
+    : rateScore >= 6 ? 'budget is close to your rate'
+    : 'budget is below your rate'
+  const freshPart = freshScore >= 9 ? ', just posted' : freshScore >= 7 ? ', still fresh' : ''
+  const opening = sc >= 8 ? 'Strong fit' : sc >= 6.5 ? 'Good fit' : sc >= 5 ? 'Partial fit' : 'Weak fit'
+  return `${opening} — ${skillPart}, ${ratePart}${freshPart}.`
+}
+
+function verdictBorderColor(sc: number) {
+  return sc >= 8 ? 'var(--hi)' : sc >= 5.5 ? 'var(--mid)' : 'var(--coral)'
 }
 
 function SkeletonFeed() {
@@ -558,132 +551,108 @@ export default function DashboardPage() {
           const budget = formatBudgetGBP(l.budget_min, l.budget_max)
           const applied = leadState(l) === 'applied'
           const saved = savedIds.has(l.id)
-          const vd = verdictLabel(sc)
           const matchCount = m.skillMatch.matched.length
           const totalSkills = (l.skills_required || []).length
           const ageH = (Date.now() - new Date(l.posted_date).getTime()) / 3600000
-          const pressure = ageH < 6
-            ? { txt: `${Math.round(ageH * 60)}m ago — apply early`, col: 'var(--hi)' }
-            : ageH < 24 ? { txt: `${Math.round(ageH)}h ago — still early`, col: 'var(--hi)' }
-            : ageH < 72 ? { txt: `${Math.round(ageH / 24)}d ago — moderate`, col: 'var(--mid)' }
-            : { txt: `${Math.round(ageH / 24)}d ago — may be filling`, col: 'var(--coral)' }
+          const ageLabel = ageH < 1 ? `${Math.round(ageH * 60)}m ago`
+            : ageH < 24 ? `${Math.round(ageH)}h ago`
+            : `${Math.round(ageH / 24)}d ago`
+          const ageCol = ageH < 24 ? 'var(--hi)' : ageH < 96 ? 'var(--mid)' : 'var(--coral)'
+          const applicants = (l as any).applicants || 3
 
           return (
             <aside className="detail-panel"
               onTouchStart={e => { touchStartY.current = e.touches[0].clientY }}
               onTouchEnd={e => { if (e.changedTouches[0].clientY - touchStartY.current > 80) closeDetail() }}>
 
-              {/* Mobile drag handle */}
               <div className="dp-handle" aria-hidden="true"><div className="dp-handle-bar" /></div>
 
-              {/* ── HERO HEADER ── */}
-              <div className="dp-hero">
-                <div className="dp-hero-top">
-                  <span className={`src-badge ${si.cls}`}>{si.name.toUpperCase()}</span>
-                  <div style={{ display: 'flex', gap: 6, marginLeft: 'auto', alignItems: 'center' }}>
-                    {l.source_url && (
-                      <button className="dp-icon-btn" title={panelCopied ? 'Copied!' : 'Copy link'}
-                        onClick={async () => { await navigator.clipboard.writeText(l.source_url!); setPanelCopied(true); setTimeout(() => setPanelCopied(false), 2000) }}>
-                        <i className={`ti ${panelCopied ? 'ti-check' : 'ti-copy'}`} />
-                      </button>
-                    )}
-                    <button className="dp-icon-btn" aria-label="Close (Esc)" onClick={closeDetail}>
-                      <i className="ti ti-x" />
+              {/* ── COMPACT HEADER ── */}
+              <div className="dp-header">
+                <span className={`src-badge ${si.cls}`}>{si.name.toUpperCase()}</span>
+                <span className="dp-score-chip" style={{ color: scoreChipColor(sc), borderColor: `${scoreChipColor(sc)}33` }}>
+                  {sc}
+                </span>
+                <div className="dp-header-actions">
+                  {l.source_url && (
+                    <button className="dp-icon-btn" title={panelCopied ? 'Copied!' : 'Copy link'}
+                      onClick={async () => { await navigator.clipboard.writeText(l.source_url!); setPanelCopied(true); setTimeout(() => setPanelCopied(false), 2000) }}>
+                      <i className={`ti ${panelCopied ? 'ti-check' : 'ti-copy'}`} />
                     </button>
-                  </div>
-                </div>
-
-                <div className="dp-hero-title">{l.title}</div>
-
-                <div className="dp-score-row">
-                  <AnimatedGauge score={sc} panelKey={l.id} />
-                  <div className="dp-verdict">
-                    <span className="dp-verdict-num" style={{ color: vd.col }}>{sc}</span>
-                    <span className="dp-verdict-label" style={{ color: vd.col }}>{vd.label}</span>
-                  </div>
-                </div>
-
-                <div className="dp-hero-meta">
-                  {budget && <span className="budget">{budget}</span>}
-                  {l.client_location && <span className="dp-meta-chip"><i className="ti ti-map-pin" />{l.client_location}</span>}
-                  <span className="dp-meta-chip" style={{ color: pressure.col, fontWeight: 500 }}>
-                    <i className="ti ti-clock" />{pressure.txt}
-                  </span>
+                  )}
+                  <button className="dp-icon-btn" aria-label="Close (Esc)" onClick={closeDetail}>
+                    <i className="ti ti-x" />
+                  </button>
                 </div>
               </div>
 
               {/* ── SCROLLABLE BODY ── */}
               <div className="dp-body">
 
-                <div className="dp-section-label">About this role</div>
-                <p className="dp-desc">{l.description}</p>
+                {/* 1. Title */}
+                <h2 className="dp-title">{l.title}</h2>
 
-                <div className="dp-section-label">Why this score</div>
-                <div className="dp-why">
-                  <div className="dp-why-expl">{m.why}</div>
-                  <div className="subscore-full">{subBars(l, true)}</div>
+                {/* 2. Verdict — one sentence */}
+                <div className="dp-verdict-line" style={{ borderLeftColor: verdictBorderColor(sc) }}>
+                  {verdictSentence(m, sc)}
                 </div>
 
+                {/* 3. Meta strip — icons only, no emojis */}
+                <div className="dp-meta-strip">
+                  {budget && <span className="dp-meta-budget"><i className="ti ti-currency-pound" />{budget}</span>}
+                  {l.client_location && <span className="dp-meta-item"><i className="ti ti-map-pin" />{l.client_location}</span>}
+                  {l.project_type && <span className="dp-meta-item"><i className="ti ti-briefcase" />{l.project_type}</span>}
+                  <span className="dp-meta-item" style={{ color: ageCol }}><i className="ti ti-clock" />{ageLabel}</span>
+                  <span className="dp-meta-item" style={{ color: applicants > 5 ? 'var(--coral)' : 'var(--slate)' }}>
+                    <i className={`ti ${applicants > 5 ? 'ti-flame' : 'ti-users'}`} />{applicants} applied
+                  </span>
+                </div>
+
+                <div className="dp-rule" />
+
+                {/* 4. Description — no label, just the brief */}
+                <p className="dp-desc">{l.description}</p>
+
+                {/* 5. Skills */}
                 {totalSkills > 0 && <>
-                  <div className="dp-section-label">
-                    Skill match
-                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 600, color: matchCount === totalSkills ? 'var(--hi)' : 'var(--mid)' }}>
-                      {matchCount}/{totalSkills}
+                  <div className="dp-rule" />
+                  <div className="dp-skills-head">
+                    <span className="dp-skills-lbl">Skills</span>
+                    <span className="dp-skills-ratio" style={{ color: matchCount === totalSkills ? 'var(--hi)' : 'var(--mid)' }}>
+                      {matchCount} of {totalSkills} matched
                     </span>
                   </div>
-                  <div className="dp-skill-bar-wrap">
-                    <div className="dp-skill-track">
-                      <div className="dp-skill-fill" style={{ width: `${totalSkills ? (matchCount / totalSkills) * 100 : 0}%`, background: matchCount === totalSkills ? 'var(--hi)' : matchCount > 0 ? 'var(--mid)' : 'var(--coral)' }} />
-                    </div>
-                  </div>
-                  <div className="skill-detail">
+                  <div className="skill-detail" style={{ marginTop: 10 }}>
                     {m.skillMatch.matched.map(s => <span key={s} className="skill-yes"><i className="ti ti-check" />{s}</span>)}
                     {m.skillMatch.missing.map(s => <span key={s} className="skill-no">{s}</span>)}
                   </div>
                 </>}
 
-                {similarLeads.length > 0 && <>
-                  <div className="dp-section-label">Similar leads</div>
-                  <div className="dp-similar">
-                    {similarLeads.map(sl => {
-                      const ss = computeMatchExplanation(sl, profile)
-                      const ssi = srcInfo(sl.source_url)
-                      return (
-                        <div key={sl.id} className="dp-sim-card" onClick={() => selectLead(sl)}>
-                          <span className={`src-badge ${ssi.cls}`} style={{ fontSize: 9 }}>{ssi.name.toUpperCase()}</span>
-                          <span className="dp-sim-title">{sl.title}</span>
-                          <span className="dp-sim-score" style={{ color: scoreColor(ss.score).c }}>{ss.score}</span>
-                        </div>
-                      )
-                    })}
-                  </div>
-                </>}
-
-                <div className="dp-section-label" style={{ marginTop: 20 }}>Source</div>
+                {/* 6. Source */}
+                <div className="dp-rule" />
                 {isPro
                   ? <a className="btn btn-ghost" style={{ width: '100%' }} href={l.source_url || '#'} target="_blank" rel="noopener noreferrer">
                       <i className="ti ti-external-link" /> Open original listing
                     </a>
                   : <div className="lock-card" style={{ margin: 0 }}>
                       <div className="lk-icon"><i className="ti ti-lock" /></div>
-                      <div><h4>Source hidden on Free</h4><p>Upgrade to apply directly at the source.</p></div>
+                      <div><h4>Source hidden on Free</h4><p>Upgrade to see where to apply.</p></div>
                     </div>}
               </div>
 
               {/* ── STICKY FOOTER ── */}
               <div className="dp-foot">
                 {applied
-                  ? <span className="applied-tag" style={{ justifyContent: 'center' }}><i className="ti ti-circle-check-filled" /> Tracking in your pipeline</span>
-                  : <>
-                      <button className="btn btn-primary" style={{ width: '100%' }} onClick={() => handleApply(l)}><i className="ti ti-send" /> Apply & track</button>
-                      <div className="reassure" style={{ borderTop: 'none', paddingTop: 0, marginTop: 0, justifyContent: 'center' }}>
-                        <span><i className="ti ti-shield-check" />No fee — ever</span>
-                        <span><i className="ti ti-mail-fast" />Avg reply in 2 days</span>
-                      </div>
-                    </>}
+                  ? <span className="applied-tag" style={{ justifyContent: 'center' }}>
+                      <i className="ti ti-circle-check-filled" /> Tracking in your pipeline
+                    </span>
+                  : <button className="btn btn-primary" style={{ width: '100%' }} onClick={() => handleApply(l)}>
+                      <i className="ti ti-send" /> Apply & track
+                    </button>}
                 <button className="btn btn-ghost" style={{ width: '100%' }} onClick={() => toggleSave(l)}>
                   {saved ? <><i className="ti ti-bookmark-filled" /> Saved</> : <><i className="ti ti-bookmark" /> Save for later</>}
                 </button>
+                {!applied && <p className="dp-foot-note">Direct link · no commission · no fee</p>}
               </div>
             </aside>
           )
