@@ -234,7 +234,7 @@ export default function DashboardPage() {
 
   function userSegment() {
     if (appCount >= 10) return 'power'
-    if (appCount >= 1) return 'returning'
+    if (appCount >= 1 || newCount > 0) return 'returning'
     return 'new'
   }
 
