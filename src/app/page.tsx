@@ -440,7 +440,7 @@ export default function HomePage() {
                 { v: '2,400+', l: 'leads scored',          icon: 'ti-target-arrow',  note: 'updating live',  up: true  },
                 { v: '340+',   l: 'freelancers using it',   icon: 'ti-users',          note: 'growing weekly', up: true  },
                 { v: '1h',     l: 'fastest delivery',       icon: 'ti-bolt',           note: 'or sooner',      up: false },
-                { v: '9.1',    l: 'avg top-match score',    icon: 'ti-star-filled',    note: 'out of 10',      up: false },
+                { v: '9.1',    l: 'avg top-match score',    icon: 'ti-award',          note: 'out of 10',      up: false },
               ].map(s => (
                 <div className="stat" key={s.l}>
                   <span className="stat-ico" aria-hidden="true"><i className={`ti ${s.icon}`} /></span>
