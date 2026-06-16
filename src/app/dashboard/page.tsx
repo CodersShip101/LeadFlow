@@ -64,6 +64,38 @@ function gaugeSVG(score: number) {
   )
 }
 
+// Animated gauge ring — redraws from 0 each time panelKey changes
+function AnimatedGauge({ score, panelKey }: { score: number; panelKey: string }) {
+  const r = 22, circ = 2 * Math.PI * r
+  const [offset, setOffset] = useState(circ)
+  const { c } = scoreColor(score)
+  useEffect(() => {
+    setOffset(circ)
+    const t = setTimeout(() => setOffset(circ * (1 - score / 10)), 80)
+    return () => clearTimeout(t)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [panelKey])
+  return (
+    <div className="dp-gauge">
+      <svg width="60" height="60" viewBox="0 0 60 60" style={{ transform: 'rotate(-90deg)' }}>
+        <circle cx="30" cy="30" r={r} fill="none" stroke="var(--line)" strokeWidth={5.5} />
+        <circle cx="30" cy="30" r={r} fill="none" stroke={c} strokeWidth={5.5}
+          strokeLinecap="round" strokeDasharray={circ} strokeDashoffset={offset}
+          style={{ transition: 'stroke-dashoffset .9s cubic-bezier(.4,0,.2,1)' }} />
+      </svg>
+      <span className="dp-gauge-num" style={{ color: c }}>{score}</span>
+    </div>
+  )
+}
+
+function verdictLabel(s: number): { label: string; col: string } {
+  if (s >= 8.5) return { label: 'Strong match', col: 'var(--hi)' }
+  if (s >= 7)   return { label: 'Good fit',     col: 'var(--hi)' }
+  if (s >= 5.5) return { label: 'Solid',        col: 'var(--mid)' }
+  if (s >= 4)   return { label: 'Partial fit',  col: 'var(--mid)' }
+  return               { label: 'Weak match',   col: 'var(--coral)' }
+}
+
 function SkeletonFeed() {
   return (
     <div className="feed-list">
@@ -107,6 +139,9 @@ export default function DashboardPage() {
   const [newCount, setNewCount] = useState(0)
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set())
   const [sortMode, setSortMode] = useState<'score' | 'recent' | 'budget'>('score')
+  const [similarLeads, setSimilarLeads] = useState<Lead[]>([])
+  const [panelCopied, setPanelCopied] = useState(false)
+  const touchStartY = useRef(0)
   const [viewedIds, setViewedIds] = useState<Set<string>>(new Set())
   const router = useRouter()
   const supabase = createClient()
@@ -268,7 +303,31 @@ export default function DashboardPage() {
     setSelected(lead)
   }
 
-  const closeDetail = () => setSelected(null)
+  const closeDetail = () => { setSelected(null); setSimilarLeads([]) }
+
+  // Escape key closes panel
+  useEffect(() => {
+    const h = (e: KeyboardEvent) => { if (e.key === 'Escape') closeDetail() }
+    document.addEventListener('keydown', h)
+    return () => document.removeEventListener('keydown', h)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Similar leads — fetch on panel open
+  useEffect(() => {
+    if (!selected) { setSimilarLeads([]); return }
+    const skills = selected.skills_required || []
+    if (!skills.length) return
+    supabase
+      .from('leads')
+      .select('*')
+      .eq('status', 'active')
+      .neq('id', selected.id)
+      .overlaps('skills_required', skills)
+      .order('posted_date', { ascending: false })
+      .limit(3)
+      .then(({ data }) => setSimilarLeads(data || []))
+  }, [selected?.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const toggleSave = async (lead: Lead) => {
     const existing = appMap.get(lead.id)
@@ -493,28 +552,71 @@ export default function DashboardPage() {
 
         {selected && (() => {
           const l = selected
-          const sc = computeMatchExplanation(l, profile).score
+          const m = computeMatchExplanation(l, profile)
+          const sc = m.score
           const si = srcInfo(l.source_url)
           const budget = formatBudgetGBP(l.budget_min, l.budget_max)
           const applied = leadState(l) === 'applied'
           const saved = savedIds.has(l.id)
-          const m = computeMatchExplanation(l, profile)
+          const vd = verdictLabel(sc)
+          const matchCount = m.skillMatch.matched.length
+          const totalSkills = (l.skills_required || []).length
+          const ageH = (Date.now() - new Date(l.posted_date).getTime()) / 3600000
+          const pressure = ageH < 6
+            ? { txt: `${Math.round(ageH * 60)}m ago — apply early`, col: 'var(--hi)' }
+            : ageH < 24 ? { txt: `${Math.round(ageH)}h ago — still early`, col: 'var(--hi)' }
+            : ageH < 72 ? { txt: `${Math.round(ageH / 24)}d ago — moderate`, col: 'var(--mid)' }
+            : { txt: `${Math.round(ageH / 24)}d ago — may be filling`, col: 'var(--coral)' }
+
           return (
-            <aside className="detail-panel">
-              <div className="dp-head">
-                <span className={`src-badge ${si.cls}`}>{si.name.toUpperCase()}</span>
-                {gaugeSVG(sc)}
-                <button className="dp-close tip" data-tip="Close" aria-label="Close detail" onClick={closeDetail}><i className="ti ti-x"></i></button>
+            <aside className="detail-panel"
+              onTouchStart={e => { touchStartY.current = e.touches[0].clientY }}
+              onTouchEnd={e => { if (e.changedTouches[0].clientY - touchStartY.current > 80) closeDetail() }}>
+
+              {/* Mobile drag handle */}
+              <div className="dp-handle" aria-hidden="true"><div className="dp-handle-bar" /></div>
+
+              {/* ── HERO HEADER ── */}
+              <div className="dp-hero">
+                <div className="dp-hero-top">
+                  <span className={`src-badge ${si.cls}`}>{si.name.toUpperCase()}</span>
+                  <div style={{ display: 'flex', gap: 6, marginLeft: 'auto', alignItems: 'center' }}>
+                    {l.source_url && (
+                      <button className="dp-icon-btn" title={panelCopied ? 'Copied!' : 'Copy link'}
+                        onClick={async () => { await navigator.clipboard.writeText(l.source_url!); setPanelCopied(true); setTimeout(() => setPanelCopied(false), 2000) }}>
+                        <i className={`ti ${panelCopied ? 'ti-check' : 'ti-copy'}`} />
+                      </button>
+                    )}
+                    <button className="dp-icon-btn" aria-label="Close (Esc)" onClick={closeDetail}>
+                      <i className="ti ti-x" />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="dp-hero-title">{l.title}</div>
+
+                <div className="dp-score-row">
+                  <AnimatedGauge score={sc} panelKey={l.id} />
+                  <div className="dp-verdict">
+                    <span className="dp-verdict-num" style={{ color: vd.col }}>{sc}</span>
+                    <span className="dp-verdict-label" style={{ color: vd.col }}>{vd.label}</span>
+                  </div>
+                </div>
+
+                <div className="dp-hero-meta">
+                  {budget && <span className="budget">{budget}</span>}
+                  {l.client_location && <span className="dp-meta-chip"><i className="ti ti-map-pin" />{l.client_location}</span>}
+                  <span className="dp-meta-chip" style={{ color: pressure.col, fontWeight: 500 }}>
+                    <i className="ti ti-clock" />{pressure.txt}
+                  </span>
+                </div>
               </div>
+
+              {/* ── SCROLLABLE BODY ── */}
               <div className="dp-body">
-                <nav className="crumbs" aria-label="Breadcrumb">
-                  <a onClick={closeDetail}>Feed</a><span className="sep">›</span>
-                  <span className="here">{si.name}</span><span className="sep">›</span>
-                  <span className="here">Lead detail</span>
-                </nav>
-                <div className="dp-title">{l.title}</div>
-                <div className="dp-sub"><i className="ti ti-map-pin" style={{ fontSize: 14 }}></i>{l.client_location} · {l.project_type} · {timeAgo(l.posted_date)}</div>
-                {budget && <div className="lc-meta"><span className="budget">{budget}</span></div>}
+
+                <div className="dp-section-label">About this role</div>
+                <p className="dp-desc">{l.description}</p>
 
                 <div className="dp-section-label">Why this score</div>
                 <div className="dp-why">
@@ -522,32 +624,65 @@ export default function DashboardPage() {
                   <div className="subscore-full">{subBars(l, true)}</div>
                 </div>
 
-                <div className="dp-section-label">Skill match</div>
-                <div className="skill-detail">
-                  {m.skillMatch.matched.map(s => <span key={s} className="skill-yes"><i className="ti ti-check"></i>{s}</span>)}
-                  {m.skillMatch.missing.map(s => <span key={s} className="skill-no">{s}</span>)}
-                </div>
+                {totalSkills > 0 && <>
+                  <div className="dp-section-label">
+                    Skill match
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 600, color: matchCount === totalSkills ? 'var(--hi)' : 'var(--mid)' }}>
+                      {matchCount}/{totalSkills}
+                    </span>
+                  </div>
+                  <div className="dp-skill-bar-wrap">
+                    <div className="dp-skill-track">
+                      <div className="dp-skill-fill" style={{ width: `${totalSkills ? (matchCount / totalSkills) * 100 : 0}%`, background: matchCount === totalSkills ? 'var(--hi)' : matchCount > 0 ? 'var(--mid)' : 'var(--coral)' }} />
+                    </div>
+                  </div>
+                  <div className="skill-detail">
+                    {m.skillMatch.matched.map(s => <span key={s} className="skill-yes"><i className="ti ti-check" />{s}</span>)}
+                    {m.skillMatch.missing.map(s => <span key={s} className="skill-no">{s}</span>)}
+                  </div>
+                </>}
 
-                <div className="dp-section-label">Description</div>
-                <p className="dp-desc">{l.description}</p>
+                {similarLeads.length > 0 && <>
+                  <div className="dp-section-label">Similar leads</div>
+                  <div className="dp-similar">
+                    {similarLeads.map(sl => {
+                      const ss = computeMatchExplanation(sl, profile)
+                      const ssi = srcInfo(sl.source_url)
+                      return (
+                        <div key={sl.id} className="dp-sim-card" onClick={() => selectLead(sl)}>
+                          <span className={`src-badge ${ssi.cls}`} style={{ fontSize: 9 }}>{ssi.name.toUpperCase()}</span>
+                          <span className="dp-sim-title">{sl.title}</span>
+                          <span className="dp-sim-score" style={{ color: scoreColor(ss.score).c }}>{ss.score}</span>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </>}
 
-                <div className="dp-section-label">Source</div>
+                <div className="dp-section-label" style={{ marginTop: 20 }}>Source</div>
                 {isPro
-                  ? <a className="btn btn-ghost" style={{ width: '100%' }} href={l.source_url || '#'} target="_blank" rel="noopener noreferrer"><i className="ti ti-external-link"></i> Open original listing</a>
-                  : <div className="lock-card" style={{ margin: 0 }}><div className="lk-icon"><i className="ti ti-lock"></i></div><div><h4>Source hidden on Free</h4><p>Upgrade to apply directly at the source.</p></div></div>}
+                  ? <a className="btn btn-ghost" style={{ width: '100%' }} href={l.source_url || '#'} target="_blank" rel="noopener noreferrer">
+                      <i className="ti ti-external-link" /> Open original listing
+                    </a>
+                  : <div className="lock-card" style={{ margin: 0 }}>
+                      <div className="lk-icon"><i className="ti ti-lock" /></div>
+                      <div><h4>Source hidden on Free</h4><p>Upgrade to apply directly at the source.</p></div>
+                    </div>}
               </div>
-              <div className="dp-actions">
+
+              {/* ── STICKY FOOTER ── */}
+              <div className="dp-foot">
                 {applied
-                  ? <span className="applied-tag" style={{ justifyContent: 'center' }}><i className="ti ti-circle-check-filled"></i> Tracking in your pipeline</span>
+                  ? <span className="applied-tag" style={{ justifyContent: 'center' }}><i className="ti ti-circle-check-filled" /> Tracking in your pipeline</span>
                   : <>
-                      <button className="btn btn-primary" style={{ width: '100%' }} onClick={() => handleApply(l)}><i className="ti ti-send"></i> Apply & track</button>
-                      <div className="reassure" style={{ borderTop: 'none', paddingTop: 0, marginTop: 2, justifyContent: 'center' }}>
-                        <span><i className="ti ti-shield-check"></i>No fee — ever</span>
-                        <span><i className="ti ti-mail-fast"></i>Avg reply in 2 days</span>
+                      <button className="btn btn-primary" style={{ width: '100%' }} onClick={() => handleApply(l)}><i className="ti ti-send" /> Apply & track</button>
+                      <div className="reassure" style={{ borderTop: 'none', paddingTop: 0, marginTop: 0, justifyContent: 'center' }}>
+                        <span><i className="ti ti-shield-check" />No fee — ever</span>
+                        <span><i className="ti ti-mail-fast" />Avg reply in 2 days</span>
                       </div>
                     </>}
                 <button className="btn btn-ghost" style={{ width: '100%' }} onClick={() => toggleSave(l)}>
-                  {saved ? <><i className="ti ti-bookmark-filled"></i> Saved</> : <><i className="ti ti-bookmark"></i> Save for later</>}
+                  {saved ? <><i className="ti ti-bookmark-filled" /> Saved</> : <><i className="ti ti-bookmark" /> Save for later</>}
                 </button>
               </div>
             </aside>
