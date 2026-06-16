@@ -157,7 +157,7 @@ export default function SignupPage() {
 
             {/* Trust badges */}
             <div className="auth-trust-badges" style={{ gap: 5, marginBottom: 0 }}>
-              <div className="auth-trust-item" style={{ fontSize: '.78rem' }}><i className="ti ti-circle-check" aria-hidden="true"></i> No card required — free forever plan available</div>
+              <div className="auth-trust-item" style={{ fontSize: '.78rem' }}><i className="ti ti-circle-check" aria-hidden="true"></i> Free 7-day Pro trial — cancel any time</div>
               <div className="auth-trust-item" style={{ fontSize: '.78rem' }}><i className="ti ti-circle-check" aria-hidden="true"></i> First leads delivered within 1 hour of setup</div>
               <div className="auth-trust-item" style={{ fontSize: '.78rem' }}><i className="ti ti-circle-check" aria-hidden="true"></i> You apply on the original platform — zero commission</div>
             </div>
@@ -209,7 +209,7 @@ export default function SignupPage() {
 
           <div className="auth-trial-strip" role="note" style={{ marginBottom: 18, padding: '10px 14px' }}>
             <i className="ti ti-gift" aria-hidden="true"></i>
-            <p style={{ fontSize: '.8rem' }}><strong>7-day Pro trial included.</strong> Unlimited leads, skill filtering, daily digest. No card needed — ever.</p>
+            <p style={{ fontSize: '.8rem' }}><strong>7-day Pro trial included.</strong> Unlimited leads, skill filtering, daily digest. Cancel any time before it ends — we&apos;ll remind you first.</p>
           </div>
 
           <div className="auth-step-row" style={{ marginBottom: 18 }}>
@@ -249,7 +249,7 @@ export default function SignupPage() {
             </button>
 
             <p className="auth-legal" style={{ fontSize: '.72rem', marginTop: 10 }}>
-              By continuing you agree to our <a href="/terms">Terms of Service</a> and <a href="/privacy">Privacy Policy</a>. No card needed. Cancel any time.
+              By continuing you agree to our <a href="/terms">Terms of Service</a> and <a href="/privacy">Privacy Policy</a>. Cancel any time before your trial ends.
             </p>
           </form>
 

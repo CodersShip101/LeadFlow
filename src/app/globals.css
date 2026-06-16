@@ -654,13 +654,19 @@ textarea.input { resize: vertical; min-height: 80px; }
 .step-rule::after { content: ""; position: absolute; left: 0; top: 0; height: 100%; width: 34%; background: var(--lime-deep); }
 
 /* ── STATS BAND ── */
-.stats-band { background: var(--ink-900); color: #fff; position: relative; overflow: hidden; }
+.stats-band { background: linear-gradient(160deg, #16201B 0%, #0F1812 100%); color: #fff; position: relative; overflow: hidden; border-top: 1px solid rgba(196,240,0,.14); border-bottom: 1px solid rgba(196,240,0,.14); }
 .stats-band .hero-bg { mask-image: radial-gradient(ellipse 90% 80% at 50% 50%, #000 50%, transparent 100%); }
-.stat { text-align: center; padding: 0 20px; position: relative; z-index: 2; }
-.stat .v { font-family: var(--font-display); font-weight: 700; font-size: 2.7rem; color: var(--lime); line-height: 1; letter-spacing: -.02em; }
+.stats-band .hero-glow { top: 50%; left: 50%; right: auto; transform: translate(-50%, -50%); width: 820px; height: 460px; }
+.stat { text-align: center; padding: 4px 22px; position: relative; z-index: 2; }
+.stat-ico { width: 38px; height: 38px; border-radius: 11px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 16px; background: rgba(196,240,0,.1); border: 1px solid rgba(196,240,0,.2); color: var(--lime); }
+.stat-ico .ti { font-size: 19px; }
+.stat .v { font-family: var(--font-display); font-weight: 700; font-size: 2.7rem; color: var(--lime); line-height: 1; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
 .stat .l { font-family: var(--font-mono); font-size: .78rem; color: var(--slate-400); margin-top: 10px; letter-spacing: .04em; }
+.stat-note { display: inline-flex; align-items: center; gap: 4px; margin-top: 12px; font-family: var(--font-mono); font-size: .66rem; letter-spacing: .03em; color: var(--slate); padding: 3px 9px; border-radius: var(--r-pill); border: 1px solid rgba(255,255,255,.08); }
+.stat-note.up { color: var(--lime); background: rgba(196,240,0,.08); border-color: rgba(196,240,0,.18); }
+.stat-note .ti { font-size: 12px; }
 .grid-stats { display: grid; grid-template-columns: repeat(4, 1fr); }
-.grid-stats > .stat + .stat { border-left: 1px solid var(--ink-700); }
+.grid-stats > .stat + .stat { border-left: 1px solid rgba(255,255,255,.08); }
 
 /* ── DASHBOARD PREVIEW ── */
 .dash { background: linear-gradient(180deg, var(--ink-850), var(--ink-900)); border: 1px solid var(--ink-600); border-radius: var(--r-xl); overflow: hidden; box-shadow: 0 30px 80px rgba(0,0,0,.4); }
@@ -1115,12 +1121,11 @@ textarea.input { resize: vertical; min-height: 80px; }
 @media (max-width: 1100px) { .bill-grid { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 640px) { .bill-grid { grid-template-columns: 1fr; } }
 
-/* ── LANDING PRICING LADDER ──
-   Escalating card size = escalating value: each tier is taller (bottoms aligned,
-   so the tops ascend left→right) and a touch wider than the one before, with a
-   larger price, so "you get more" reads at a glance. The dashboard billing keeps
-   the equal-size .bill-grid above; only the public landing uses this. */
-.tier-ladder { display: grid; grid-template-columns: 0.9fr 1fr 1.1fr 1.2fr; gap: 16px; align-items: end; margin-bottom: 24px; }
+/* ── PRICING LADDER (landing + dashboard billing) ──
+   Escalating card size = escalating value: each tier is taller (tops aligned, so
+   the bottoms step down left→right) and a touch wider than the one before, with a
+   larger price, so "you get more" reads at a glance. */
+.tier-ladder { display: grid; grid-template-columns: 0.9fr 1fr 1.1fr 1.2fr; gap: 16px; align-items: start; margin-bottom: 24px; }
 .tier-ladder .bill-card { min-height: 444px; transition: box-shadow .18s, transform .18s, border-color .18s; }
 .tier-ladder .bill-card:nth-child(2) { min-height: 488px; }
 .tier-ladder .bill-card:nth-child(3) { min-height: 532px; }
@@ -1187,6 +1192,9 @@ textarea.input { resize: vertical; min-height: 80px; }
 .bill-seat-pick button { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; color: #fff; transition: background .12s; border: none; background: none; cursor: pointer; }
 .bill-seat-pick button:hover { background: rgba(255,255,255,.12); }
 .bill-seat-n { font-family: var(--font-mono); font-weight: 700; font-size: 15px; min-width: 36px; text-align: center; color: #fff; border-left: 1px solid rgba(255,255,255,.1); border-right: 1px solid rgba(255,255,255,.1); height: 32px; display: flex; align-items: center; justify-content: center; }
+.bill-seat-input { font-family: var(--font-mono); font-weight: 700; font-size: 15px; width: 52px; text-align: center; color: #fff; background: transparent; border: none; border-left: 1px solid rgba(255,255,255,.1); border-right: 1px solid rgba(255,255,255,.1); height: 32px; outline: none; appearance: textfield; -moz-appearance: textfield; }
+.bill-seat-input::-webkit-outer-spin-button, .bill-seat-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.bill-seat-input:focus { background: rgba(255,255,255,.08); }
 .bill-seat-sum { font-family: var(--font-mono); font-size: 11.5px; color: #A9B5AC; margin-top: 7px; }
 .bill-seat-sum b { color: #fff; }
 

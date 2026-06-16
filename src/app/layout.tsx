@@ -23,7 +23,7 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: "LeadFlow — AI-Scored Freelance Leads, Delivered as Often as Every Hour",
-  description: "LeadFlow finds and scores freelance leads from Reddit, Reed and We Work Remotely, then delivers the best matches to your inbox as often as every hour. Start free — no card required.",
+  description: "LeadFlow finds and scores freelance leads from Reddit, Reed and We Work Remotely, then delivers the best matches to your inbox as often as every hour. Start free with a 7-day Pro trial — cancel any time.",
   openGraph: {
     title: "LeadFlow — AI-Scored Freelance Leads, as Often as Every Hour",
     description: "We find and score freelance leads matched to your skills, then deliver the best ones as often as every hour. Start free.",

@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase-client'
 import type { Profile, Application } from '@/types'
 import { PRICING, ENTITLEMENTS, TIER_ICONS, planFeatures, type Tier } from '@/lib/tiers'
+import SeatControl from '@/components/SeatControl'
 import toast from 'react-hot-toast'
 
 // Order shown in the plan grid. Source of truth for names/prices is lib/tiers.ts.
@@ -59,7 +60,7 @@ export default function BillingContent() {
   const [appsUsed, setAppsUsed] = useState(0)
   const [loading, setLoading] = useState(true)
   const [cycle, setCycle] = useState<'monthly' | 'annual'>('monthly')
-  const [teamSeats, setTeamSeats] = useState(3)
+  const [teamSeats, setTeamSeats] = useState(2)
   const [busy, setBusy] = useState(false)
   const router = useRouter()
   const sp = useSearchParams()
@@ -166,21 +167,12 @@ export default function BillingContent() {
         </div>
       )
     } else if (isTeam) {
-      const total = price * teamSeats
       priceBlock = (
         <>
           <div className="bpc-price-block">
             <div className="bpc-price">&pound;{price}<span className="per"> / seat{isAnnual ? ' · yr' : '/mo'}</span></div>
           </div>
-          <div className="bill-seat">
-            <div className="bill-seat-label">Team size</div>
-            <div className="bill-seat-pick">
-              <button onClick={() => setTeamSeats(s => Math.max(1, s - 1))} aria-label="Fewer seats">&minus;</button>
-              <span className="bill-seat-n">{teamSeats}</span>
-              <button onClick={() => setTeamSeats(s => Math.min(200, s + 1))} aria-label="More seats">+</button>
-            </div>
-            <div className="bill-seat-sum">Total: <b>&pound;{total}/mo</b> for {teamSeats} seat{teamSeats === 1 ? '' : 's'}</div>
-          </div>
+          <SeatControl seats={teamSeats} setSeats={setTeamSeats} price={price} />
         </>
       )
     } else {

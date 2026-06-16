@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import Script from 'next/script'
 import { PRICING, TIER_ICONS, planFeatures } from '@/lib/tiers'
+import SeatControl from '@/components/SeatControl'
 
 const incomingSignals = [
   { src: 'REDDIT', c: 'rgba(255,140,66,.14)', t: '#ff9c5b', title: 'Content Strategist — B2B SaaS, Remote', meta: '£350/day · Notion, Writing · 2-month', score: '8.5', cls: 'score-a' },
@@ -35,7 +36,7 @@ const faqData = [
   { q: 'What does the 1–10 score mean?', a: 'The score weighs budget clarity, scope detail, response-rate signals, and how well a lead matches your profile. A 9+ usually has a clear brief, a stated budget, and a hiring decision within two weeks.' },
   { q: 'Do you take a cut of my contract?', a: 'Never. Every lead links straight to the original post. You apply on the client\'s terms, on the original platform. No middleman, no markup, no commission.' },
   { q: 'How is this different from a job board?', a: 'Job boards show you everything. LeadFlow shows you only what fits your profile, ranked by score, so you act on the best leads in minutes instead of searching for an hour.' },
-  { q: 'What happens when my trial ends?', a: 'You move to the free plan unless you upgrade. We remind you 48 hours before. No card is required to start.' },
+  { q: 'What happens when my trial ends?', a: 'On day 7 your plan continues automatically — but only if you stay. We email you 48 hours before, so you are never charged by surprise. Cancel any time before then in one click and you pay nothing.' },
   { q: 'Can I cancel whenever I want?', a: 'Yes. Cancel from settings anytime and keep access until your billing period ends. No fees, no friction.' },
   { q: 'Which freelancers is this built for?', a: 'Designers, developers, writers, marketers and consultants. The scoring model is tuned for UK and remote markets.' },
   { q: 'Is my profile shared with clients?', a: 'No. Your profile only powers filtering and scoring. Clients never see your LeadFlow profile.' },
@@ -93,6 +94,50 @@ function FaqCheck() {
   )
 }
 
+// Counts up from 0 → target the first time it scrolls into view. The value is
+// parsed from its display string ("2,400+", "9.1", "1h") so the prefix/suffix
+// and decimal/grouping formatting are preserved while only the number animates.
+function CountUp({ value }: { value: string }) {
+  const ref = useRef<HTMLSpanElement>(null)
+  const [display, setDisplay] = useState(value)
+
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const m = value.match(/^(\D*)([\d,]+(?:\.\d+)?)(.*)$/)
+    if (!m) { setDisplay(value); return }
+    const [, prefix, numStr, suffix] = m
+    const grouped = numStr.includes(',')
+    const decimals = numStr.includes('.') ? numStr.split('.')[1].length : 0
+    const target = parseFloat(numStr.replace(/,/g, ''))
+    const fmt = (n: number) => {
+      const s = grouped
+        ? n.toLocaleString('en-GB', { minimumFractionDigits: decimals, maximumFractionDigits: decimals })
+        : n.toFixed(decimals)
+      return `${prefix}${s}${suffix}`
+    }
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) { setDisplay(fmt(target)); return }
+
+    let raf = 0
+    const io = new IntersectionObserver(([e]) => {
+      if (!e.isIntersecting) return
+      io.unobserve(el)
+      const t0 = performance.now()
+      const dur = 1500
+      const tick = (now: number) => {
+        const p = Math.min(1, (now - t0) / dur)
+        setDisplay(fmt(target * (1 - Math.pow(1 - p, 3))))
+        if (p < 1) raf = requestAnimationFrame(tick)
+      }
+      raf = requestAnimationFrame(tick)
+    }, { threshold: 0.4 })
+    io.observe(el)
+    return () => { io.disconnect(); cancelAnimationFrame(raf) }
+  }, [value])
+
+  return <span ref={ref}>{display}</span>
+}
+
 export default function HomePage() {
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -105,6 +150,7 @@ export default function HomePage() {
   ])
   const dbRef = useRef(0)
   const [annual, setAnnual] = useState(false)
+  const [teamSeats, setTeamSeats] = useState(2)
   const [openFaq, setOpenFaq] = useState<number | null>(null)
   const [stickyVisible, setStickyVisible] = useState(false)
   const fiRef = useRef(0)
@@ -191,9 +237,9 @@ export default function HomePage() {
           "url": "https://lead-flow-gpyj.vercel.app/",
           "offers": [
             { "@type": "Offer", "name": PRICING.free.label, "price": String(PRICING.free.monthly), "priceCurrency": "GBP" },
-            { "@type": "Offer", "name": PRICING.pro.label, "price": String(PRICING.pro.monthly), "priceCurrency": "GBP", "description": "Per month. 7-day free trial, no card required." },
-            { "@type": "Offer", "name": PRICING.max.label, "price": String(PRICING.max.monthly), "priceCurrency": "GBP", "description": "Per month. 7-day free trial, no card required." },
-            { "@type": "Offer", "name": PRICING.team.label, "price": String(PRICING.team.monthly), "priceCurrency": "GBP", "description": "Per seat / month. 7-day free trial, no card required." }
+            { "@type": "Offer", "name": PRICING.pro.label, "price": String(PRICING.pro.monthly), "priceCurrency": "GBP", "description": "Per month. 7-day free trial, cancel any time before it ends." },
+            { "@type": "Offer", "name": PRICING.max.label, "price": String(PRICING.max.monthly), "priceCurrency": "GBP", "description": "Per month. 7-day free trial, cancel any time before it ends." },
+            { "@type": "Offer", "name": PRICING.team.label, "price": String(PRICING.team.monthly), "priceCurrency": "GBP", "description": "Per seat / month. 7-day free trial, cancel any time before it ends." }
           ],
           "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.9", "ratingCount": "87" }
         })
@@ -268,7 +314,7 @@ export default function HomePage() {
                   <a href="#how" className="btn-ghost btn-lg"><i className="ti ti-player-play" style={{ fontSize: 16 }} aria-hidden="true"></i> See how it works</a>
                 </div>
                 <ul className="hero-trust" aria-label="Trust points">
-                  <li><i className="ti ti-circle-check" aria-hidden="true"></i> no card required</li>
+                  <li><i className="ti ti-circle-check" aria-hidden="true"></i> 7-day Pro trial</li>
                   <li><i className="ti ti-circle-check" aria-hidden="true"></i> 2-minute setup</li>
                   <li><i className="ti ti-circle-check" aria-hidden="true"></i> first leads within the hour</li>
                 </ul>
@@ -383,7 +429,7 @@ export default function HomePage() {
             </div>
             <div style={{ textAlign: 'center', marginTop: 54 }} className="sr">
               <Link href="/auth/signup" className="btn-line btn-lg">Create your free profile →</Link>
-              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '.76rem', color: 'var(--slate-400)', marginTop: 14 }}>first leads arrive within the hour · no card required</p>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '.76rem', color: 'var(--slate-400)', marginTop: 14 }}>first leads arrive within the hour · cancel any time</p>
             </div>
           </div>
         </section>
@@ -391,12 +437,24 @@ export default function HomePage() {
         {/* ═══ STATS BAND ═══ */}
         <section className="stats-band" aria-label="Platform statistics">
           <div className="hero-bg" aria-hidden="true"></div>
-          <div className="container" style={{ paddingTop: 60, paddingBottom: 60, position: 'relative', zIndex: 2 }}>
+          <div className="hero-glow" aria-hidden="true"></div>
+          <div className="container" style={{ paddingTop: 56, paddingBottom: 56, position: 'relative', zIndex: 2 }}>
             <div className="grid-stats sr">
-              <div className="stat"><div className="v">2,400+</div><div className="l">leads scored</div></div>
-              <div className="stat"><div className="v">340+</div><div className="l">freelancers using it</div></div>
-              <div className="stat"><div className="v">1h</div><div className="l">fastest delivery</div></div>
-              <div className="stat"><div className="v">9.1</div><div className="l">avg top-match score</div></div>
+              {[
+                { v: '2,400+', l: 'leads scored', icon: 'ti-target-arrow', note: 'updating live', up: true },
+                { v: '340+', l: 'freelancers using it', icon: 'ti-users', note: 'growing weekly', up: true },
+                { v: '1h', l: 'fastest delivery', icon: 'ti-bolt', note: 'or sooner', up: false },
+                { v: '9.1', l: 'avg top-match score', icon: 'ti-star-filled', note: 'out of 10', up: false },
+              ].map(s => (
+                <div className="stat" key={s.l}>
+                  <span className="stat-ico" aria-hidden="true"><i className={`ti ${s.icon}`} /></span>
+                  <div className="v"><CountUp value={s.v} /></div>
+                  <div className="l">{s.l}</div>
+                  <span className={`stat-note${s.up ? ' up' : ''}`}>
+                    {s.up && <i className="ti ti-trending-up" aria-hidden="true" />}{s.note}
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
         </section>
@@ -518,14 +576,15 @@ export default function HomePage() {
             <div className="section-head sr" style={{ marginBottom: 40 }}>
               <div className="tag tag-lime tag-bracket">pricing</div>
               <h2 id="price-h">Pricing that grows with you</h2>
-              <p>Start free — no card, no commitment. Each plan builds on the one before, so you only pay for the reach, speed and insight you actually need. We&apos;ll always tell you before anything changes.</p>
+              <p>Start with a 7-day free trial of Pro — cancel any time before it ends and you pay nothing. Each plan builds on the one before, so you only pay for the reach, speed and insight you actually need. We&apos;ll always remind you before anything changes.</p>
             </div>
 
+            <h3 className="sr" style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.05rem', textAlign: 'center', color: 'var(--ink-900)', marginBottom: 20 }}>How your free trial works</h3>
             <div className="trial-timeline sr">
               <div className="trial-step">
                 <div className="trial-day">Today</div>
                 <div className="trial-rail" aria-hidden="true"><span className="trial-dot amber"></span><span className="trial-line"></span></div>
-                <p className="trial-desc"><strong>You unlock everything in Pro.</strong> Unlimited leads, AI scores, skill filtering — all of it, immediately. No card needed.</p>
+                <p className="trial-desc"><strong>You unlock everything in Pro.</strong> Unlimited leads, AI scores, skill filtering — all of it, the moment you sign up.</p>
               </div>
               <div className="trial-step">
                 <div className="trial-day">Day 5</div>
@@ -554,7 +613,7 @@ export default function HomePage() {
                 const v = PRICING[t]
                 const featured = t === 'max'
                 const isTeam = t === 'team'
-                const price = annual ? v.annual : v.monthly
+                const price = (annual ? v.annual : v.monthly) ?? 0
                 const was = annual && !isTeam ? v.monthly : null
                 return (
                   <div key={t} className={`bill-card${featured ? ' feat' : ''}${isTeam ? ' team-card' : ''}`}>
@@ -572,6 +631,7 @@ export default function HomePage() {
                         <div className="bpc-price">£{price}{was ? <span className="was">£{was}</span> : null}<span className="per">{annual ? ' / mo · billed yr' : ' / month'}</span></div>
                       )}
                     </div>
+                    {isTeam && <SeatControl seats={teamSeats} setSeats={setTeamSeats} price={price} />}
                     <p className="bpc-blurb">{v.blurb}</p>
                     <div className="bpc-divider" />
                     <ul className="bpc-feats">
@@ -586,15 +646,16 @@ export default function HomePage() {
                       {t === 'free'
                         ? 'Get started free'
                         : isTeam
-                          ? <><i className="ti ti-users" /> Start Team</>
+                          ? <><i className="ti ti-users" /> Start Team — £{price * teamSeats}/mo</>
                           : featured
-                            ? <><i className="ti ti-crown" /> Start free trial</>
-                            : <><i className="ti ti-arrow-right" /> Start free trial</>}
+                            ? <><i className="ti ti-crown" /> Start my free trial</>
+                            : <><i className="ti ti-arrow-right" /> Start my free trial</>}
                     </Link>
                     {(featured || isTeam) && (
                       <div className="bill-reassure">
-                        <span><i className="ti ti-shield-check" />Cancel anytime</span>
                         <span><i className="ti ti-gift" />7 days free</span>
+                        <span><i className="ti ti-bell" />We email before billing</span>
+                        <span><i className="ti ti-shield-check" />Cancel anytime</span>
                       </div>
                     )}
                   </div>
@@ -635,7 +696,7 @@ export default function HomePage() {
             <div className="sr">
               <div className="tag tag-onink tag-bracket" style={{ marginBottom: 18, justifyContent: 'center' }}>get started</div>
               <h2 className="display" style={{ fontSize: 'clamp(2.1rem, 5vw, 3.4rem)', color: '#fff', marginBottom: 18 }}>Your next client is<br />already out there.</h2>
-              <p style={{ fontSize: '1.1rem', color: 'var(--slate-300)', lineHeight: 1.62, marginBottom: 40 }}>Set up your profile in two minutes and let the right work come to you. First leads within the hour — no card needed.</p>
+              <p style={{ fontSize: '1.1rem', color: 'var(--slate-300)', lineHeight: 1.62, marginBottom: 40 }}>Set up your profile in two minutes and let the right work come to you. First leads within the hour — cancel any time before your trial ends.</p>
               <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 14 }}>
                 <Link href="/auth/signup" className="btn-p btn-lg">Get started free →</Link>
                 <Link href="/auth/login" className="btn-ghost btn-lg">Log in</Link>

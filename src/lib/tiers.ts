@@ -218,7 +218,10 @@ export function planFeatures(tier: Tier): PlanFeature[] {
         { txt: `Everything in ${PRICING.pro.label}` },
         { txt: 'Adjustable scoring weights' },
         { txt: `Priority scanning every ${ENTITLEMENTS.max.scanIntervalHours}h` },
+        { txt: 'Refresh your feed on demand' },
         { txt: 'Full analytics + CSV export' },
+        { txt: 'Saved pitch & application templates' },
+        { txt: 'Follow-up reminders & calendar sync' },
         { txt: 'Priority support' },
       ]
     case 'team':
@@ -226,8 +229,12 @@ export function planFeatures(tier: Tier): PlanFeature[] {
         { txt: `Everything in ${PRICING.max.label}` },
         { txt: 'Shared team lead pool' },
         { txt: 'Team pipeline & assignment' },
+        { txt: 'Shared pitch & template library' },
+        { txt: 'Team analytics & win-rate leaderboard' },
         { txt: 'Admin & member roles' },
+        { txt: 'Slack & email notifications' },
         { txt: 'Centralised billing' },
+        { txt: 'Priority onboarding & data migration' },
       ]
     default:
       return []
