@@ -372,7 +372,7 @@ export default function DashboardPage() {
     const proof = (
       <span className={`proof ${applicants > 5 ? 'hot' : 'cool'}`}>
         <i className={`ti ${applicants > 5 ? 'ti-flame' : 'ti-users'}`}></i>
-        {applicants} applied so far
+        {applicants} applied{applicants > 5 ? ' · apply early' : ' so far'}
       </span>
     )
 
@@ -388,12 +388,13 @@ export default function DashboardPage() {
           <span className="lc-time">{timeAgo(lead.posted_date)}</span>
         </div>
         <div className="lc-title">
-          <ScoreBadge score={sc} />
+          {gaugeSVG(sc)}
           <span className="tt">{lead.title}</span>
         </div>
-        {budget && <div className="lc-budget">{budget}</div>}
         <div className="why-inline"><i className="ti ti-sparkles"></i><span dangerouslySetInnerHTML={{ __html: topReason(lead) }} /></div>
+        <p className="lc-desc">{lead.description}</p>
         <div className="lc-meta">
+          {budget && <span className="budget">{budget}</span>}
           {lead.client_location && <span className="meta-chip"><i className="ti ti-map-pin"></i>{lead.client_location}</span>}
           {proof}
         </div>
@@ -405,11 +406,8 @@ export default function DashboardPage() {
           {applied
             ? <span className="applied-tag"><i className="ti ti-circle-check-filled"></i> In your pipeline</span>
             : <>
-                <div className="apply-wrap">
-                  <button className="btn btn-primary" onClick={() => handleApply(lead)}><i className="ti ti-send"></i> Apply</button>
-                  <span className="apply-note">Direct link · no commission</span>
-                </div>
-                <button className="lc-breakdown" onClick={() => selectLead(lead)}>Full breakdown →</button>
+                <button className="btn btn-primary" title="Direct link · no commission" onClick={() => handleApply(lead)}><i className="ti ti-send"></i> Apply</button>
+                <button className="btn btn-ghost" onClick={() => selectLead(lead)}>Full breakdown</button>
               </>}
         </div>
       </article>
