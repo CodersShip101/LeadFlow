@@ -436,8 +436,6 @@ export default function HomePage() {
 
         {/* ═══ STATS BAND ═══ */}
         <section className="stats-band" aria-label="Platform statistics">
-          <div className="hero-bg" aria-hidden="true"></div>
-          <div className="hero-glow" aria-hidden="true"></div>
           <div className="container" style={{ paddingTop: 56, paddingBottom: 56, position: 'relative', zIndex: 2 }}>
             <div className="grid-stats sr">
               {[
