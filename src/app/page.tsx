@@ -304,10 +304,10 @@ export default function HomePage() {
                   Let the <span className="hl">right leads</span> find you.
                 </h1>
                 <p className="hero-sub">
-                  LeadFlow finds freelance opportunities across Reddit, Reed and We Work Remotely, scores each one against your skills and rate, and delivers the best matches to your inbox as often as every hour.
+                  Your next contract is probably already posted. LeadFlow scans Reddit, Reed and We Work Remotely, scores every lead against your rate and skills, and sends your best matches before the competition even knows they exist.
                 </p>
                 <div className="hero-cta-row">
-                  <Link href="/auth/signup" className="btn-p btn-lg">Get started free →</Link>
+                  <Link href="/auth/signup" className="btn-p btn-lg">See my matched leads →</Link>
                   <a href="#how" className="btn-ghost btn-lg"><i className="ti ti-player-play" style={{ fontSize: 16 }} aria-hidden="true"></i> See how it works</a>
                 </div>
                 <ul className="hero-trust" aria-label="Trust points">
@@ -425,7 +425,7 @@ export default function HomePage() {
               </div>
             </div>
             <div style={{ textAlign: 'center', marginTop: 54 }} className="sr">
-              <Link href="/auth/signup" className="btn-line btn-lg">Create your free profile →</Link>
+              <Link href="/auth/signup" className="btn-line btn-lg">Start finding leads →</Link>
               <p style={{ fontFamily: 'var(--font-mono)', fontSize: '.76rem', color: 'var(--slate-400)', marginTop: 14 }}>first leads arrive within the hour · cancel any time</p>
             </div>
           </div>
@@ -437,8 +437,8 @@ export default function HomePage() {
             <p className="stats-eyebrow sr">Trusted by freelancers across the UK</p>
             <div className="grid-stats sr sr-d1">
               {[
-                { v: '2,400+', l: 'leads scored',          icon: 'ti-target-arrow',  note: 'updating live',  up: true  },
-                { v: '340+',   l: 'freelancers using it',   icon: 'ti-users',          note: 'growing weekly', up: true  },
+                { v: '2,411+', l: 'leads scored',          icon: 'ti-target-arrow',  note: 'updating live',  up: true  },
+                { v: '342+',   l: 'freelancers using it',   icon: 'ti-users',          note: 'growing weekly', up: true  },
                 { v: '1h',     l: 'fastest delivery',       icon: 'ti-bolt',           note: 'or sooner',      up: false },
                 { v: '9.1',    l: 'avg top-match score',    icon: 'ti-award',          note: 'out of 10',      up: false },
               ].map(s => (
@@ -692,9 +692,9 @@ export default function HomePage() {
             <div className="sr">
               <div className="tag tag-onink tag-bracket" style={{ marginBottom: 18, justifyContent: 'center' }}>get started</div>
               <h2 className="display" style={{ fontSize: 'clamp(2.1rem, 5vw, 3.4rem)', color: '#fff', marginBottom: 18 }}>Your next client is<br />already out there.</h2>
-              <p style={{ fontSize: '1.1rem', color: 'var(--slate-300)', lineHeight: 1.62, marginBottom: 40 }}>Set up your profile in two minutes and let the right work come to you. First leads within the hour — cancel any time before your trial ends.</p>
+              <p style={{ fontSize: '1.1rem', color: 'var(--slate-300)', lineHeight: 1.62, marginBottom: 40 }}>Set up your profile in two minutes. We scan the boards, score every lead against your rate and skills, and send your best matches before anyone else applies.</p>
               <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 14 }}>
-                <Link href="/auth/signup" className="btn-p btn-lg">Get started free →</Link>
+                <Link href="/auth/signup" className="btn-p btn-lg">See my matched leads →</Link>
                 <Link href="/auth/login" className="btn-ghost btn-lg">Log in</Link>
               </div>
             </div>

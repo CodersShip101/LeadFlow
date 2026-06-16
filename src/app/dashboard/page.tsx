@@ -368,8 +368,12 @@ export default function DashboardPage() {
       skills.push(<span key="more" className="skill">+{(lead.skills_required?.length || 0) - 3}</span>)
     }
     const budget = formatBudgetGBP(lead.budget_min, lead.budget_max)
+    const applicants = (lead as any).applicants || 3
     const proof = (
-      <span className="proof cool"><i className="ti ti-users"></i>{(lead as any).applicants || 3} applied so far</span>
+      <span className={`proof ${applicants > 5 ? 'hot' : 'cool'}`}>
+        <i className={`ti ${applicants > 5 ? 'ti-flame' : 'ti-users'}`}></i>
+        {applicants} applied so far
+      </span>
     )
 
     return (
@@ -401,7 +405,10 @@ export default function DashboardPage() {
           {applied
             ? <span className="applied-tag"><i className="ti ti-circle-check-filled"></i> In your pipeline</span>
             : <>
-                <button className="btn btn-primary" onClick={() => handleApply(lead)}><i className="ti ti-send"></i> Apply</button>
+                <div className="apply-wrap">
+                  <button className="btn btn-primary" onClick={() => handleApply(lead)}><i className="ti ti-send"></i> Apply</button>
+                  <span className="apply-note">Direct link · no commission</span>
+                </div>
                 <button className="lc-breakdown" onClick={() => selectLead(lead)}>Full breakdown →</button>
               </>}
         </div>
@@ -434,11 +441,11 @@ export default function DashboardPage() {
       </div>
 
       <div className="toolbar">
-        <select className="sort-select" value={sortMode} onChange={e => setSortMode(e.target.value as 'score' | 'recent' | 'budget')} aria-label="Sort leads">
-          <option value="score">⭐ Best match</option>
-          <option value="recent">🕐 Newest</option>
-          <option value="budget">💷 Highest budget</option>
-        </select>
+        <div className="toolbar-group">
+          {([['score', 'Best match'], ['recent', 'Newest'], ['budget', 'Top budget']] as [string, string][]).map(([k, lbl]) => (
+            <button key={k} className={`pill ${sortMode === k ? 'on' : ''}`} onClick={() => setSortMode(k as 'score' | 'recent' | 'budget')}>{lbl}</button>
+          ))}
+        </div>
         <div className="tool-sep"></div>
         <div className="toolbar-group">
           {([['all', 'All'], ['8', '8+'], ['7', '7+'], ['new', 'New'], ['saved', 'Saved']] as [string, string][]).map(([k, lbl]) => (
@@ -468,8 +475,8 @@ export default function DashboardPage() {
       {leads.length === 0 && (
         <div className="empty">
           <div className="empty-icon"><i className="ti ti-radar"></i></div>
-          <h3>We're scanning 4 sources for you</h3>
-          <p>Your first scored leads appear within 30 minutes — we'll email you when they're ready.</p>
+          <h3>Your pipeline starts here</h3>
+          <p>We're scanning Reddit, Reed, We Work Remotely and Remote OK right now. Your first scored leads usually arrive within 30 minutes — we'll email you as soon as they do.</p>
           <div style={{ display: 'flex', gap: 10, marginTop: 18, justifyContent: 'center' }}>
             <button onClick={async () => {
               const res = await fetch('/api/leads/seed?force=1', { method: 'POST' })
