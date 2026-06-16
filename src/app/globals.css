@@ -281,11 +281,12 @@ textarea.input { resize: vertical; min-height: 80px; }
 .profile-banner a{margin-left:auto;font-weight:600;font-size:13px;color:var(--lime-ink);background:#fff;border:1px solid #EAD9A8;padding:7px 14px;border-radius:var(--r-sm);white-space:nowrap;cursor:pointer;font-family:inherit}
 
 /* ---- Greeting ---- */
-.feed-header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:20px;flex-wrap:wrap}
+.feed-header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:24px;flex-wrap:wrap}
 .feed-header-left{min-width:0}
-.feed-title{font-family:var(--font-display);font-size:22px;font-weight:700;letter-spacing:-.025em;margin-bottom:2px}
-.feed-sub{color:var(--slate);font-size:13.5px}
-.feed-sub .hl{color:var(--lime-ink);font-weight:600}
+.feed-title{font-family:var(--font-display);font-size:clamp(1.6rem,3vw,2rem);font-weight:700;letter-spacing:-.03em;margin-bottom:5px;line-height:1.15}
+.feed-sub{color:var(--slate);font-size:14.5px;line-height:1.5}
+.feed-sub .hl{color:var(--ink);font-weight:700}
+.feed-sub b{color:var(--ink);font-weight:700}
 .feed-kpis{display:flex;align-items:center;gap:0;background:var(--card);border:1px solid var(--line);border-radius:var(--r-pill);padding:6px 16px;flex-shrink:0}
 .fk{display:flex;flex-direction:column;align-items:center;padding:0 14px;gap:1px}
 .fk-v{font-family:var(--font-display);font-size:18px;font-weight:700;letter-spacing:-.02em;line-height:1}

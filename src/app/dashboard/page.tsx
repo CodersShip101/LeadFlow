@@ -348,9 +348,9 @@ export default function DashboardPage() {
   }
 
   const subMap: Record<string, string> = {
-    new: `Your profile is matched against <b>1,247 leads</b> scanned this week. Here are your first picks.`,
-    returning: newCount ? `<span class="hl">${newCount} new leads</span> scored since your last visit.` : `You're all caught up — here's your ranked feed.`,
-    power: `<span class="hl">${newCount} new</span> today. You've applied to ${appCount} this month — keep the streak going.`,
+    new: `Your profile is matched against <b>${leads.length || '1,247'} leads</b> scanned this week. Here are your first picks.`,
+    returning: newCount ? `<b>${newCount} new leads</b> scored since your last visit.` : `You're all caught up — here's your ranked feed.`,
+    power: `<b>${newCount} new leads</b> today. You've applied to <b>${appCount}</b> this month — keep the streak going.`,
   }
 
   const leadCards = filtered.map(lead => {
