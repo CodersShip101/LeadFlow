@@ -360,70 +360,26 @@ export default function DashboardPage() {
 
   return (
     <>
-      {!profile?.skills?.length ? (
+      {!profile?.skills?.length && (
         <div className="profile-banner">
           <i className="ti ti-alert-triangle"></i>
           <div className="pb-txt"><b>Finish your profile</b> — add your skills and rate so we can score leads for you.</div>
           <a onClick={() => router.push('/dashboard/profile')}>Complete profile</a>
         </div>
-      ) : (
-        (() => {
-          if (seg === 'new') return (
-            <div className="seg-banner seg-new"><i className="ti ti-rocket"></i>
-              <div className="sb-txt"><b>You're set up.</b> We've scored every open lead against your skills and rate — your strongest matches are crowned below.</div>
-            </div>
-          )
-          if (seg === 'power') return (
-            <div className="seg-banner seg-power"><i className="ti ti-bolt"></i>
-              <div className="sb-txt"><b>You're on a roll.</b> Power users who apply within 2 hours hear back 3× more often — your fastest matches are up top.</div>
-            </div>
-          )
-          return null
-        })()
       )}
 
-      <div className="greeting">
-        <h2>{greetMap[seg]}</h2>
-        <p dangerouslySetInnerHTML={{ __html: subMap[seg] }} />
-      </div>
-
-      <div className="stat-row">
-        <div className="stat">
-          <div className="s-label"><i className="ti ti-radar-2"></i> Scanned this week</div>
-          <div className="s-val">1,247</div>
-          <span className="s-delta up"><i className="ti ti-trending-up"></i> 12% vs last week</span>
+      <div className="feed-header">
+        <div className="feed-header-left">
+          <h2 className="feed-title">{greetMap[seg]}</h2>
+          <p className="feed-sub" dangerouslySetInnerHTML={{ __html: subMap[seg] }} />
         </div>
-        <div className="stat">
-          <div className="s-label"><i className="ti ti-flame"></i> Matched 7+</div>
-          <div className="s-val">{score7plus}</div>
-          <span className="s-delta up"><i className="ti ti-arrow-up-right"></i> 3 new today</span>
+        <div className="feed-kpis">
+          <span className="fk"><span className="fk-v">{leads.length}</span><span className="fk-l">leads</span></span>
+          <span className="fk-sep" />
+          <span className="fk"><span className="fk-v">{score7plus}</span><span className="fk-l">scored 7+</span></span>
+          <span className="fk-sep" />
+          <span className="fk"><span className="fk-v" style={{ color: topScore >= 8 ? 'var(--hi)' : 'var(--mid)' }}>{topScore > 0 ? topScore : '—'}</span><span className="fk-l">top score</span></span>
         </div>
-        <div className="stat">
-          <div className="s-label"><i className="ti ti-award"></i> Top score</div>
-          <div className="s-val">{topScore > 0 ? topScore : '—'}<span className="unit">/10</span></div>
-          <span className="s-delta" style={{ color: 'var(--slate-2)' }}>your best match</span>
-        </div>
-        <div className="stat">
-          <div className="s-label"><i className="ti ti-bookmark"></i> Saved</div>
-          <div className="s-val">{savedIds.size}</div>
-          <span className="s-delta" style={{ color: 'var(--slate-2)' }}>{savedIds.size ? 'ready to revisit' : 'none yet'}</span>
-        </div>
-      </div>
-
-      <div className="source-strip">
-        {sourceStatus.map(s => {
-          const si = SRC[s.key as keyof typeof SRC] || { name: s.key }
-          const labelMap: Record<string, string> = { ok: '', slow: '', down: 'awaiting first scan' }
-          return (
-            <div key={s.key} className="src-tile">
-              <span className={`src-dot ${s.health}`}></span>
-              <div>
-                <div className="st-name">{si.name}</div>
-                <div className="st-time">{s.health === 'down' ? labelMap[s.health] : `Last scan: ${s.time}`}</div>
-              </div>
-            </div>
-          )
-        })}
       </div>
 
       <div className="toolbar">

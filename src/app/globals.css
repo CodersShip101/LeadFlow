@@ -281,13 +281,19 @@ textarea.input { resize: vertical; min-height: 80px; }
 .profile-banner a{margin-left:auto;font-weight:600;font-size:13px;color:var(--lime-ink);background:#fff;border:1px solid #EAD9A8;padding:7px 14px;border-radius:var(--r-sm);white-space:nowrap;cursor:pointer;font-family:inherit}
 
 /* ---- Greeting ---- */
-.greeting{margin-bottom:20px}
-.greeting h2{font-family:var(--font-display);font-size:25px;font-weight:700;letter-spacing:-.025em;margin-bottom:3px}
-.greeting p{color:var(--slate);font-size:14px}
-.greeting .hl{color:var(--lime-ink);font-weight:600}
+.feed-header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:20px;flex-wrap:wrap}
+.feed-header-left{min-width:0}
+.feed-title{font-family:var(--font-display);font-size:22px;font-weight:700;letter-spacing:-.025em;margin-bottom:2px}
+.feed-sub{color:var(--slate);font-size:13.5px}
+.feed-sub .hl{color:var(--lime-ink);font-weight:600}
+.feed-kpis{display:flex;align-items:center;gap:0;background:var(--card);border:1px solid var(--line);border-radius:var(--r-pill);padding:6px 16px;flex-shrink:0}
+.fk{display:flex;flex-direction:column;align-items:center;padding:0 14px;gap:1px}
+.fk-v{font-family:var(--font-display);font-size:18px;font-weight:700;letter-spacing:-.02em;line-height:1}
+.fk-l{font-family:var(--font-mono);font-size:10px;color:var(--slate-2);letter-spacing:.04em}
+.fk-sep{width:1px;height:28px;background:var(--line)}
 
 /* ---- Stat tiles ---- */
-.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+.stat-row{display:none}
 .stat{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);padding:15px 17px}
 .stat .s-label{font-size:12px;color:var(--slate);font-weight:500;margin-bottom:7px;display:flex;align-items:center;gap:6px}
 .stat .s-label .ti{font-size:14px;color:var(--slate-2)}
@@ -295,8 +301,8 @@ textarea.input { resize: vertical; min-height: 80px; }
 .stat .s-val .unit{font-size:14px;color:var(--slate-2);font-weight:500}
 
 /* ---- Source strip ---- */
-.source-strip{display:flex;gap:10px;margin-bottom:20px;overflow-x:auto;padding-bottom:2px}
-.src-tile{flex:1;min-width:150px;background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);padding:12px 14px;display:flex;align-items:center;gap:11px}
+.source-strip{display:none}
+.src-tile{display:none}
 .src-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;position:relative}
 .src-dot.ok{background:var(--hi)}
 .src-dot.ok::after{content:"";position:absolute;inset:-3px;border-radius:50%;border:1.5px solid var(--hi);opacity:.4;animation:ping 2s ease-out infinite}
@@ -397,7 +403,7 @@ textarea.input { resize: vertical; min-height: 80px; }
 .applied-tag { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--hi); }
 
 /* ── FEED SPECIFIC ── */
-.seg-banner{display:flex;align-items:center;gap:13px;border-radius:var(--r-md);padding:13px 16px;margin-bottom:18px}
+.seg-banner{display:none}
 .seg-new{background:var(--lime-dim);border:1px solid #DDEFA8}
 .seg-power{background:#EEF6FF;border:1px solid #CFE3FA}
 .seg-banner .ti{font-size:22px;flex-shrink:0}
