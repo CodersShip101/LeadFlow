@@ -43,6 +43,13 @@ function barColor(v: number) {
   return 'var(--coral)'
 }
 
+// Compact inline badge for the lead list
+function ScoreBadge({ score }: { score: number }) {
+  const { c, bg } = scoreColor(score)
+  return <span className="score-badge" style={{ color: c, background: bg }}>{score}</span>
+}
+
+// Full ring for the detail panel where there's more room
 function gaugeSVG(score: number) {
   const pct = score / 10, r = 18, circ = 2 * Math.PI * r, off = circ * (1 - pct), col = scoreColor(score).c
   return (
@@ -53,6 +60,37 @@ function gaugeSVG(score: number) {
           strokeDasharray={circ} strokeDashoffset={off} style={{ transition: 'stroke-dashoffset .6s var(--ease)' }} />
       </svg>
       <span className="gauge-num" style={{ color: col }}>{score}</span>
+    </div>
+  )
+}
+
+function SkeletonFeed() {
+  return (
+    <div className="feed-list">
+      {[0, 1, 2, 3].map(i => (
+        <div key={i} className="lead-card" style={{ pointerEvents: 'none' }}>
+          <div className="lc-top" style={{ marginBottom: 14 }}>
+            <div className="skel" style={{ width: 22, height: 22, borderRadius: 6 }} />
+            <div className="skel" style={{ width: 54, height: 20, borderRadius: 5 }} />
+            <div className="skel" style={{ width: 36, height: 16, borderRadius: 4, marginLeft: 'auto' }} />
+          </div>
+          <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start', marginBottom: 10 }}>
+            <div className="skel" style={{ width: 36, height: 36, borderRadius: 8, flexShrink: 0 }} />
+            <div style={{ flex: 1 }}>
+              <div className="skel" style={{ height: 16, borderRadius: 5, marginBottom: 6 }} />
+              <div className="skel" style={{ height: 14, width: '65%', borderRadius: 5 }} />
+            </div>
+          </div>
+          <div className="skel" style={{ height: 34, borderRadius: 6, marginBottom: 12 }} />
+          <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+            <div className="skel" style={{ width: 72, height: 22, borderRadius: 5 }} />
+            <div className="skel" style={{ width: 90, height: 22, borderRadius: 5 }} />
+          </div>
+          <div style={{ display: 'flex', gap: 6 }}>
+            {[60, 72, 54].map(w => <div key={w} className="skel" style={{ width: w, height: 22, borderRadius: 99 }} />)}
+          </div>
+        </div>
+      ))}
     </div>
   )
 }
@@ -282,11 +320,7 @@ export default function DashboardPage() {
     })
   }, [leads])
 
-  if (loading) {
-    return (
-      <div style={{ height: 18 }}></div>
-    )
-  }
+  if (loading) return <SkeletonFeed />
 
   const greetMap: Record<string, string> = {
     new: `Welcome, ${firstName} 👋`,
@@ -322,7 +356,7 @@ export default function DashboardPage() {
 
     return (
       <article key={lead.id} onClick={() => selectLead(lead)}
-        className={`lead-card ${selected?.id === lead.id ? 'sel' : ''} ${isTop ? 'top-match' : ''}`}>
+        className={`lead-card ${selected?.id === lead.id ? 'sel' : ''} ${isTop ? 'top-match' : ''} ${state === 'new' ? 'is-new' : ''}`}>
         <div className="lc-top">
           <span className="src-ava" style={{ background: si.ava }}>{si.ini}</span>
           <span className={`src-badge ${si.cls}`}>{si.name.toUpperCase()}</span>
@@ -332,13 +366,12 @@ export default function DashboardPage() {
           <span className="lc-time">{timeAgo(lead.posted_date)}</span>
         </div>
         <div className="lc-title">
-          {gaugeSVG(sc)}
+          <ScoreBadge score={sc} />
           <span className="tt">{lead.title}</span>
         </div>
+        {budget && <div className="lc-budget">{budget}</div>}
         <div className="why-inline"><i className="ti ti-sparkles"></i><span dangerouslySetInnerHTML={{ __html: topReason(lead) }} /></div>
-        <p className="lc-desc">{lead.description}</p>
         <div className="lc-meta">
-          {budget && <span className="budget">{budget}</span>}
           {lead.client_location && <span className="meta-chip"><i className="ti ti-map-pin"></i>{lead.client_location}</span>}
           {proof}
         </div>
@@ -351,7 +384,7 @@ export default function DashboardPage() {
             ? <span className="applied-tag"><i className="ti ti-circle-check-filled"></i> In your pipeline</span>
             : <>
                 <button className="btn btn-primary" onClick={() => handleApply(lead)}><i className="ti ti-send"></i> Apply</button>
-                <button className="btn btn-ghost" onClick={() => selectLead(lead)}>Full breakdown</button>
+                <button className="lc-breakdown" onClick={() => selectLead(lead)}>Full breakdown →</button>
               </>}
         </div>
       </article>
@@ -383,18 +416,30 @@ export default function DashboardPage() {
       </div>
 
       <div className="toolbar">
-        {([['all', 'All'], ['8', 'Score 8+'], ['7', 'Score 7+'], ['new', 'New'], ['saved', 'Saved']] as [string, string][]).map(([k, lbl]) => (
-          <button key={k} className={`pill ${scoreFilter === k ? 'on' : ''}`} onClick={() => setScoreFilter(k)}>
-            {lbl}{counts[k as keyof typeof counts] != null && <span className="ct">{counts[k as keyof typeof counts]}</span>}
-          </button>
-        ))}
+        <div className="toolbar-group">
+          {([['all', 'All'], ['8', '8+'], ['7', '7+'], ['new', 'New'], ['saved', 'Saved']] as [string, string][]).map(([k, lbl]) => (
+            <button key={k} className={`pill ${scoreFilter === k ? 'on' : ''}`} onClick={() => setScoreFilter(k)}>
+              {lbl}{counts[k as keyof typeof counts] != null && <span className="ct">{counts[k as keyof typeof counts]}</span>}
+            </button>
+          ))}
+        </div>
         <div className="tool-sep"></div>
-        {([['all', 'All sources', null], ['reddit', 'Reddit', 'var(--reddit)'], ['reed', 'Reed', 'var(--reed)'], ['wwr', 'WWR', 'var(--wwr)'], ['rok', 'Remote OK', 'var(--rok)']] as [string, string, string | null][]).map(([k, lbl, dot]) => (
-          <button key={k} className={`pill src-pill ${sourceFilter === k ? 'on' : ''}`} onClick={() => setSourceFilter(k)}>
-            {dot && <span className="sd" style={{ background: dot }}></span>}{lbl}
-          </button>
-        ))}
+        <div className="toolbar-group toolbar-sources">
+          {([['all', 'All', null], ['reddit', 'Reddit', 'var(--reddit)'], ['reed', 'Reed', 'var(--reed)'], ['wwr', 'WWR', 'var(--wwr)'], ['rok', 'Remote OK', 'var(--rok)']] as [string, string, string | null][]).map(([k, lbl, dot]) => (
+            <button key={k} className={`pill src-pill ${sourceFilter === k ? 'on' : ''}`} onClick={() => setSourceFilter(k)}>
+              {dot && <span className="sd" style={{ background: dot }}></span>}{lbl}
+            </button>
+          ))}
+        </div>
       </div>
+
+      {filtered.length === 0 && leads.length > 0 && (
+        <div className="empty-filter">
+          <i className="ti ti-filter-off"></i>
+          <p>No leads match this filter.</p>
+          <button className="pill" onClick={() => { setScoreFilter('all'); setSourceFilter('all') }}>Clear filters</button>
+        </div>
+      )}
 
       {leads.length === 0 && (
         <div className="empty">
