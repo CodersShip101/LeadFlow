@@ -94,45 +94,42 @@ function FaqCheck() {
   )
 }
 
-// Counts up from 0 → target the first time it scrolls into view. The value is
-// parsed from its display string ("2,400+", "9.1", "1h") so the prefix/suffix
-// and decimal/grouping formatting are preserved while only the number animates.
 function CountUp({ value }: { value: string }) {
   const ref = useRef<HTMLSpanElement>(null)
-  const [display, setDisplay] = useState(value)
+  const m = value.match(/^(\D*)([\d,]+(?:\.\d+)?)(.*)$/)
+  const grouped = m ? m[2].includes(',') : false
+  const decimals = m ? (m[2].includes('.') ? m[2].split('.')[1].length : 0) : 0
+  const target = m ? parseFloat(m[2].replace(/,/g, '')) : 0
+  const fmt = (n: number) => {
+    if (!m) return value
+    const s = grouped
+      ? n.toLocaleString('en-GB', { minimumFractionDigits: decimals, maximumFractionDigits: decimals })
+      : n.toFixed(decimals)
+    return `${m[1]}${s}${m[3]}`
+  }
+  // initialise at zero so there's no flash from final→0 at animation start
+  const [display, setDisplay] = useState(() => fmt(0))
 
   useEffect(() => {
     const el = ref.current
-    if (!el) return
-    const m = value.match(/^(\D*)([\d,]+(?:\.\d+)?)(.*)$/)
-    if (!m) { setDisplay(value); return }
-    const [, prefix, numStr, suffix] = m
-    const grouped = numStr.includes(',')
-    const decimals = numStr.includes('.') ? numStr.split('.')[1].length : 0
-    const target = parseFloat(numStr.replace(/,/g, ''))
-    const fmt = (n: number) => {
-      const s = grouped
-        ? n.toLocaleString('en-GB', { minimumFractionDigits: decimals, maximumFractionDigits: decimals })
-        : n.toFixed(decimals)
-      return `${prefix}${s}${suffix}`
-    }
+    if (!el || !m) return
     if (matchMedia('(prefers-reduced-motion: reduce)').matches) { setDisplay(fmt(target)); return }
-
     let raf = 0
     const io = new IntersectionObserver(([e]) => {
       if (!e.isIntersecting) return
       io.unobserve(el)
       const t0 = performance.now()
-      const dur = 1500
+      const dur = 1600
       const tick = (now: number) => {
         const p = Math.min(1, (now - t0) / dur)
         setDisplay(fmt(target * (1 - Math.pow(1 - p, 3))))
         if (p < 1) raf = requestAnimationFrame(tick)
       }
       raf = requestAnimationFrame(tick)
-    }, { threshold: 0.4 })
+    }, { threshold: 0.3 })
     io.observe(el)
     return () => { io.disconnect(); cancelAnimationFrame(raf) }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value])
 
   return <span ref={ref}>{display}</span>
@@ -436,19 +433,20 @@ export default function HomePage() {
 
         {/* ═══ STATS BAND ═══ */}
         <section className="stats-band" aria-label="Platform statistics">
-          <div className="container" style={{ paddingTop: 56, paddingBottom: 56, position: 'relative', zIndex: 2 }}>
-            <div className="grid-stats sr">
+          <div className="container" style={{ paddingTop: 52, paddingBottom: 52, position: 'relative', zIndex: 2 }}>
+            <p className="stats-eyebrow sr">Trusted by freelancers across the UK</p>
+            <div className="grid-stats sr sr-d1">
               {[
-                { v: '2,400+', l: 'leads scored', icon: 'ti-target-arrow', note: 'updating live', up: true },
-                { v: '340+', l: 'freelancers using it', icon: 'ti-users', note: 'growing weekly', up: true },
-                { v: '1h', l: 'fastest delivery', icon: 'ti-bolt', note: 'or sooner', up: false },
-                { v: '9.1', l: 'avg top-match score', icon: 'ti-star-filled', note: 'out of 10', up: false },
+                { v: '2,400+', l: 'leads scored',          icon: 'ti-target-arrow',  note: 'updating live',  up: true  },
+                { v: '340+',   l: 'freelancers using it',   icon: 'ti-users',          note: 'growing weekly', up: true  },
+                { v: '1h',     l: 'fastest delivery',       icon: 'ti-bolt',           note: 'or sooner',      up: false },
+                { v: '9.1',    l: 'avg top-match score',    icon: 'ti-star-filled',    note: 'out of 10',      up: false },
               ].map(s => (
                 <div className="stat" key={s.l}>
                   <span className="stat-ico" aria-hidden="true"><i className={`ti ${s.icon}`} /></span>
                   <div className="v"><CountUp value={s.v} /></div>
                   <div className="l">{s.l}</div>
-                  <span className={`stat-note${s.up ? ' up' : ''}`}>
+                  <span className={`stat-note${s.up ? ' up' : ' dim'}`}>
                     {s.up && <i className="ti ti-trending-up" aria-hidden="true" />}{s.note}
                   </span>
                 </div>
