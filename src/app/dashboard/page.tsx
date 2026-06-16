@@ -106,6 +106,7 @@ export default function DashboardPage() {
   const [applications, setApplications] = useState<Application[]>([])
   const [newCount, setNewCount] = useState(0)
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set())
+  const [sortMode, setSortMode] = useState<'score' | 'recent' | 'budget'>('score')
   const [viewedIds, setViewedIds] = useState<Set<string>>(new Set())
   const router = useRouter()
   const supabase = createClient()
@@ -160,8 +161,25 @@ export default function DashboardPage() {
     else if (scoreFilter === '7') ls = ls.filter(l => computeMatchExplanation(l, profile).score >= 7)
     else if (scoreFilter === 'new') ls = ls.filter(l => leadState(l) === 'new')
     else if (scoreFilter === 'saved') ls = ls.filter(l => leadState(l) === 'saved' || savedIds.has(l.id))
-    return ls.sort((a, b) => computeMatchExplanation(b, profile).score - computeMatchExplanation(a, profile).score)
-  }, [leads, search, sourceFilter, scoreFilter, profile, viewedIds, savedIds])
+    if (sortMode === 'recent') {
+      ls.sort((a, b) => new Date(b.posted_date).getTime() - new Date(a.posted_date).getTime())
+    } else if (sortMode === 'budget') {
+      ls.sort((a, b) => {
+        const bv = b.budget_max || b.budget_min || 0
+        const av = a.budget_max || a.budget_min || 0
+        return bv - av
+      })
+    } else {
+      // Best match: score DESC, recency as tiebreaker
+      ls.sort((a, b) => {
+        const sa = computeMatchExplanation(a, profile).score
+        const sb = computeMatchExplanation(b, profile).score
+        if (sb !== sa) return sb - sa
+        return new Date(b.posted_date).getTime() - new Date(a.posted_date).getTime()
+      })
+    }
+    return ls
+  }, [leads, search, sourceFilter, scoreFilter, profile, viewedIds, savedIds, sortMode])
 
   const topScore = useMemo(() => leads.reduce((m, l) => Math.max(m, computeMatchExplanation(l, profile).score), 0), [leads, profile])
   const topId = useMemo(() => {
@@ -341,7 +359,7 @@ export default function DashboardPage() {
     const stateBadge: Record<string, [string, string]> = { new: ['NEW', 'st-new'], viewed: ['VIEWED', 'st-viewed'], saved: ['SAVED', 'st-saved'], applied: ['APPLIED', 'st-applied'] }
     const saved = savedIds.has(lead.id)
     const applied = state === 'applied'
-    const isTop = lead.id === topId && scoreFilter === 'all' && sourceFilter === 'all' && !search
+    const isTop = lead.id === topId && scoreFilter === 'all' && sourceFilter === 'all' && !search && sortMode === 'score'
     const skills = (lead.skills_required || []).slice(0, 3).map(sk => {
       const m = profile?.skills?.some(ps => ps.toLowerCase() === sk.toLowerCase())
       return <span key={sk} className={`skill ${m ? 'match' : ''}`}>{m ? <i className="ti ti-check"></i> : ''}{sk}</span>
@@ -416,6 +434,12 @@ export default function DashboardPage() {
       </div>
 
       <div className="toolbar">
+        <select className="sort-select" value={sortMode} onChange={e => setSortMode(e.target.value as 'score' | 'recent' | 'budget')} aria-label="Sort leads">
+          <option value="score">⭐ Best match</option>
+          <option value="recent">🕐 Newest</option>
+          <option value="budget">💷 Highest budget</option>
+        </select>
+        <div className="tool-sep"></div>
         <div className="toolbar-group">
           {([['all', 'All'], ['8', '8+'], ['7', '7+'], ['new', 'New'], ['saved', 'Saved']] as [string, string][]).map(([k, lbl]) => (
             <button key={k} className={`pill ${scoreFilter === k ? 'on' : ''}`} onClick={() => setScoreFilter(k)}>

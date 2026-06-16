@@ -439,6 +439,9 @@ textarea.input { resize: vertical; min-height: 80px; }
 .empty-filter{text-align:center;padding:48px 20px;display:flex;flex-direction:column;align-items:center;gap:12px}
 .empty-filter .ti{font-size:32px;color:var(--slate-2)}
 .empty-filter p{color:var(--slate);font-size:14px;margin:0}
+.sort-select{font-size:12.5px;font-weight:500;padding:6px 28px 6px 10px;border-radius:var(--r-pill);background:var(--card);border:1px solid var(--line);color:var(--ink-2);cursor:pointer;font-family:inherit;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7689' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;flex-shrink:0;transition:border-color .15s}
+.sort-select:hover{border-color:var(--slate-2)}
+.sort-select:focus{outline:none;border-color:var(--lime-deep);box-shadow:0 0 0 3px var(--lime-dim)}
 .score-gauge{display:flex;align-items:center;gap:9px;flex-shrink:0}
 .crown{display:inline-flex;align-items:center;gap:5px;font-family:var(--font-mono);font-size:10px;font-weight:700;letter-spacing:.06em;background:linear-gradient(90deg,#FFE08A,#F6C453);color:#5E4609;padding:3px 9px;border-radius:5px}
 .crown .ti{font-size:12px}

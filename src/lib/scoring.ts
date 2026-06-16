@@ -33,16 +33,42 @@ export interface ScoredLead {
   skillDetail: { have: string[]; miss: string[] };
 }
 
-export const WEIGHTS = { skill: 0.4, rate: 0.3, recency: 0.2, detail: 0.1 } as const;
+export const WEIGHTS = { skill: 0.45, rate: 0.30, recency: 0.15, detail: 0.10 } as const;
 
 const norm = (s: string) => s.trim().toLowerCase();
+
+const SKILL_ALIASES: Record<string, string[]> = {
+  javascript: ['js', 'es6', 'ecmascript', 'vanilla js'],
+  typescript: ['ts'],
+  react: ['reactjs', 'react.js', 'react js'],
+  'next.js': ['nextjs', 'next js', 'next'],
+  'node.js': ['node', 'nodejs'],
+  python: ['py'],
+  postgresql: ['postgres', 'psql', 'pg'],
+  css: ['css3', 'scss', 'sass', 'less'],
+  html: ['html5'],
+  aws: ['amazon web services'],
+  gcp: ['google cloud', 'google cloud platform'],
+  azure: ['microsoft azure'],
+  'vue.js': ['vue', 'vuejs'],
+  kubernetes: ['k8s'],
+  graphql: ['graph ql'],
+};
+
+function fuzzyMatch(a: string, b: string): boolean {
+  const na = norm(a), nb = norm(b);
+  if (na === nb) return true;
+  if (na.includes(nb) || nb.includes(na)) return true;
+  if ((SKILL_ALIASES[na] || []).includes(nb)) return true;
+  if ((SKILL_ALIASES[nb] || []).includes(na)) return true;
+  return false;
+}
 
 function skillMatch(lead: ScoringLead, profile: ScoringProfile) {
   const have: string[] = [];
   const miss: string[] = [];
-  const mine = new Set(profile.skills.map(norm));
   for (const req of lead.skills_required) {
-    (mine.has(norm(req)) ? have : miss).push(req);
+    (profile.skills.some(ps => fuzzyMatch(ps, req)) ? have : miss).push(req);
   }
   const total = lead.skills_required.length || 1;
   const score = Math.round((have.length / total) * 10);
@@ -55,20 +81,22 @@ function rateMatch(lead: ScoringLead, profile: ScoringProfile): number {
   const budget = lead.budget_max ?? lead.budget_min;
   if (!budget) return 5;
   const ratio = budget / dayRate;
-  if (ratio >= 1) return 10;
-  if (ratio >= 0.9) return 8;
-  if (ratio >= 0.75) return 6;
-  if (ratio >= 0.6) return 4;
-  return 2;
+  if (ratio >= 1.2) return 10;
+  if (ratio >= 1.0) return 9;
+  if (ratio >= 0.85) return 7;
+  if (ratio >= 0.70) return 5;
+  if (ratio >= 0.50) return 3;
+  return 1;
 }
 
 function recency(lead: ScoringLead): number {
   const hours = (Date.now() - new Date(lead.posted_date).getTime()) / 3.6e6;
-  if (hours <= 3) return 10;
-  if (hours <= 12) return 9;
-  if (hours <= 24) return 8;
-  if (hours <= 48) return 6;
-  if (hours <= 96) return 4;
+  if (hours < 6)   return 10;
+  if (hours < 24)  return 9;
+  if (hours < 48)  return 8;
+  if (hours < 96)  return 7;
+  if (hours < 168) return 5;
+  if (hours < 336) return 3;
   return 2;
 }
 
