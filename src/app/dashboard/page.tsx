@@ -211,9 +211,10 @@ export default function DashboardPage() {
     const sorted = [...m.subScores].sort((a, b) => b.value - a.value)
     const top = sorted[0]
     const lo = sorted[sorted.length - 1]
-    const labels: Record<string, string> = { skill: 'skill match', rate: 'rate match', recency: 'freshness', detail: 'detail' }
-    if (lo.value <= 4) return `Strong ${labels[top.label.toLowerCase()] || top.label} (${top.value}/10), weaker on ${labels[lo.label.toLowerCase()] || lo.label}`
-    return `Strong ${labels[top.label.toLowerCase()] || top.label} — scores ${top.value}/10 on fit`
+    const label = top.label.toLowerCase()
+    if (lo.value <= 3)
+      return `<strong>Strong ${label}</strong> — ${top.value}/10 on fit · weaker on ${lo.label.toLowerCase()}`
+    return `<strong>Strong ${label}</strong> — scores ${top.value}/10 on fit`
   }
 
   function subBars(lead: Lead, full: boolean) {
