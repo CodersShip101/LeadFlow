@@ -433,28 +433,13 @@ export default function DashboardPage() {
 
     if (isLocked) {
       return (
-        <article key={lead.id} className="lead-card lead-card-locked">
-          <div className="lc-top">
-            <span className="src-ava" style={{ background: si.ava }}>{si.ini}</span>
-            <span className={`src-badge ${si.cls}`}>{si.name.toUpperCase()}</span>
-            <span className="lc-time">{timeAgo(lead.posted_date)}</span>
-          </div>
-          <div className="lc-title">
-            {gaugeSVG(sc)}
-            <span className="tt">{lead.title}</span>
-          </div>
-          <p className="lc-desc">{lead.description}</p>
-          <div className="lc-meta">
-            {budget && <span className="budget">{budget}</span>}
-            {lead.client_location && <span className="meta-chip"><i className="ti ti-map-pin"></i>{lead.client_location}</span>}
-          </div>
-          <div className="skills-row">{skills}</div>
-          <div className="lc-actions">
-            <div className="lc-save-btn"><i className="ti ti-bookmark" /></div>
-            <div className="btn btn-primary"><i className="ti ti-send"></i> Apply</div>
-            <div className="btn btn-ghost">Full breakdown</div>
-          </div>
-        </article>
+        <div key={lead.id} className="locked-tab">
+          <span className="locked-tab-score" style={{ color: sc >= 8 ? 'var(--hi)' : sc >= 5 ? 'var(--mid)' : 'var(--slate)' }}>{sc}</span>
+          <span className={`src-badge ${si.cls}`}>{si.name.toUpperCase()}</span>
+          <span className="locked-tab-title">{lead.title}</span>
+          {budget && <span className="locked-tab-budget">{budget}</span>}
+          <i className="ti ti-lock locked-tab-lock" />
+        </div>
       )
     }
 
@@ -578,14 +563,15 @@ export default function DashboardPage() {
                     {leadCards.slice(FREE_LIMIT)}
                   </div>
                   <div className="free-wall-overlay">
-                    <div className="free-wall-cta" onClick={() => router.push('/dashboard/billing')}>
+                    <div className="free-wall-cta">
                       <div className="free-wall-lock"><i className="ti ti-lock" /></div>
-                      <h3 className="free-wall-heading"><span>{filtered.length - FREE_LIMIT} more leads</span> scored for you</h3>
-                      <p className="free-wall-sub">Unlock source links, unlimited applications, and your weekly match report.</p>
-                      <button className="btn btn-primary free-wall-btn">
-                        <i className="ti ti-bolt" /> Unlock all leads — from £15/mo
+                      <div className="free-wall-text">
+                        <p className="free-wall-heading"><span>{filtered.length - FREE_LIMIT} more leads</span> matched your profile</p>
+                        <p className="free-wall-sub">From £15/mo · no lock-in · cancel any time</p>
+                      </div>
+                      <button className="btn btn-primary free-wall-btn" onClick={() => router.push('/dashboard/billing')}>
+                        <i className="ti ti-bolt" /> Unlock
                       </button>
-                      <span className="free-wall-note">No lock-in · cancel any time</span>
                     </div>
                   </div>
                 </div>
