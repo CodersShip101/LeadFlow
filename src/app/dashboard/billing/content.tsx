@@ -11,35 +11,6 @@ import toast from 'react-hot-toast'
 // Order shown in the plan grid. Source of truth for names/prices is lib/tiers.ts.
 const TIER_ORDER: Tier[] = ['free', 'pro', 'max', 'team']
 
-function TrialTimeline() {
-  return (
-    <div className="trial-timeline">
-      <div className="tt-row">
-        <div className="tt-dot tt-dot-now"><i className="ti ti-bolt" /></div>
-        <div className="tt-body">
-          <span className="tt-day">Today</span>
-          <span className="tt-desc">Full access unlocked immediately</span>
-        </div>
-      </div>
-      <div className="tt-line" />
-      <div className="tt-row">
-        <div className="tt-dot"><i className="ti ti-mail" /></div>
-        <div className="tt-body">
-          <span className="tt-day">Day 5</span>
-          <span className="tt-desc">We&apos;ll remind you before your trial ends</span>
-        </div>
-      </div>
-      <div className="tt-line" />
-      <div className="tt-row">
-        <div className="tt-dot"><i className="ti ti-credit-card" /></div>
-        <div className="tt-body">
-          <span className="tt-day">Day 7</span>
-          <span className="tt-desc">First charge — cancel any time before</span>
-        </div>
-      </div>
-    </div>
-  )
-}
 const FREE_APP_LIMIT = ENTITLEMENTS.free.applicationsPerMonth as number
 
 // Full comparison grid. Columns: Free · Pro · Max · Team.
@@ -221,7 +192,6 @@ export default function BillingContent() {
     }
 
     // CTA
-    const isPaidUpgrade = !isCurrent && t !== 'free' && !isDowngrade
     let cta
     if (isCurrent) {
       cta = <div className="bill-cta bill-cta-current"><i className="ti ti-circle-check" /> Your current plan</div>
@@ -268,7 +238,6 @@ export default function BillingContent() {
         {priceBlock}
         <p className="bpc-blurb">{v.blurb}</p>
         <div className="bpc-divider" />
-        {isPaidUpgrade && <TrialTimeline />}
         <ul className="bpc-feats">
           {planFeatures(t).map(f => (
             <li key={f.txt} className={`bpc-feat${f.muted ? ' muted' : ''}`}>
@@ -303,9 +272,39 @@ export default function BillingContent() {
         </span>
       </div>
 
-      {/* Plan cards — escalating ladder: each tier larger than the last */}
+      {/* Plan cards */}
       <div className="tier-ladder">
         {TIER_ORDER.map(renderCard)}
+      </div>
+
+      {/* Trial timeline — single section, not repeated per card */}
+      <div className="bill-trial-band">
+        <div className="bill-trial-step">
+          <div className="bill-trial-dot bill-trial-now"><i className="ti ti-bolt" /></div>
+          <div className="bill-trial-body">
+            <span className="bill-trial-day">Today</span>
+            <span className="bill-trial-desc">Full access unlocked immediately</span>
+          </div>
+        </div>
+        <div className="bill-trial-connector" />
+        <div className="bill-trial-step">
+          <div className="bill-trial-dot"><i className="ti ti-mail" /></div>
+          <div className="bill-trial-body">
+            <span className="bill-trial-day">Day 5</span>
+            <span className="bill-trial-desc">We&apos;ll remind you before your trial ends</span>
+          </div>
+        </div>
+        <div className="bill-trial-connector" />
+        <div className="bill-trial-step">
+          <div className="bill-trial-dot"><i className="ti ti-credit-card" /></div>
+          <div className="bill-trial-body">
+            <span className="bill-trial-day">Day 7</span>
+            <span className="bill-trial-desc">First charge — cancel any time before</span>
+          </div>
+        </div>
+        <div className="bill-trial-note">
+          <i className="ti ti-shield-check" /> No surprises. We will always warn you before charging.
+        </div>
       </div>
 
       {/* Enterprise */}

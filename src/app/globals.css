@@ -1350,20 +1350,18 @@ textarea.input { resize: vertical; min-height: 80px; }
 .bill-cta-current { background: var(--lime-dim); color: var(--lime-ink); border: 1.5px solid #DDEFA8; cursor: default; font-weight: 600; }
 
 /* reassure strip under featured/team CTA */
-/* Trial timeline */
-.trial-timeline { display: flex; flex-direction: column; margin-bottom: 16px; }
-.tt-row { display: flex; align-items: flex-start; gap: 10px; }
-.tt-dot { width: 26px; height: 26px; border-radius: 50%; border: 1.5px solid var(--line); background: var(--paper-2); color: var(--slate-2); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 12px; }
-.tt-dot.tt-dot-now { background: var(--lime); border-color: var(--lime); color: var(--ink-950); }
-.bill-card.team-card .tt-dot { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.15); color: #7A9285; }
-.bill-card.team-card .tt-dot.tt-dot-now { background: var(--lime); border-color: var(--lime); color: var(--ink-950); }
-.tt-body { padding-top: 3px; }
-.tt-day { display: block; font-family: var(--font-mono); font-size: 10.5px; font-weight: 700; letter-spacing: .05em; color: var(--ink-2); }
-.tt-desc { display: block; font-size: 11.5px; color: var(--slate); line-height: 1.35; margin-top: 1px; }
-.bill-card.team-card .tt-day { color: #C8D0CA; }
-.bill-card.team-card .tt-desc { color: #7A9285; }
-.tt-line { width: 1px; height: 14px; background: var(--line); margin-left: 12px; }
-.bill-card.team-card .tt-line { background: rgba(255,255,255,.1); }
+/* Trial band — single horizontal section below plan grid */
+.bill-trial-band { display: flex; align-items: center; gap: 0; background: var(--card); border: 1px solid var(--line); border-radius: var(--r-xl); padding: 22px 28px; margin-bottom: 16px; flex-wrap: wrap; gap: 0; }
+.bill-trial-step { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 160px; }
+.bill-trial-dot { width: 36px; height: 36px; border-radius: 50%; border: 1.5px solid var(--line); background: var(--paper-2); color: var(--slate-2); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 15px; }
+.bill-trial-now { background: var(--lime); border-color: var(--lime); color: var(--ink-950); }
+.bill-trial-body { display: flex; flex-direction: column; gap: 1px; }
+.bill-trial-day { font-family: var(--font-mono); font-size: 11px; font-weight: 800; letter-spacing: .06em; color: var(--ink-2); text-transform: uppercase; }
+.bill-trial-desc { font-size: 12.5px; color: var(--slate); line-height: 1.35; }
+.bill-trial-connector { width: 32px; height: 2px; background: var(--line); flex-shrink: 0; margin: 0 8px; }
+.bill-trial-note { width: 100%; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line-2); font-family: var(--font-mono); font-size: 11px; color: var(--slate-2); display: flex; align-items: center; gap: 6px; }
+.bill-trial-note .ti { color: var(--hi); font-size: 14px; }
+@media (max-width: 640px) { .bill-trial-connector { display: none; } .bill-trial-step { flex-basis: 100%; padding: 8px 0; border-bottom: 1px solid var(--line-2); } .bill-trial-step:last-of-type { border-bottom: none; } }
 
 /* CTA stack + sub-note */
 .bill-cta-stack { display: flex; flex-direction: column; gap: 6px; }
