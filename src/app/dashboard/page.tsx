@@ -405,7 +405,9 @@ export default function DashboardPage() {
     power: `<b>${newCount} new leads</b> today. You've applied to <b>${appCount}</b> this month — keep the streak going.`,
   }
 
-  const leadCards = filtered.map(lead => {
+  const FREE_LIMIT = 5
+  const leadCards = filtered.map((lead, idx) => {
+    const isLocked = isFree && idx >= FREE_LIMIT
     const sc = computeMatchExplanation(lead, profile).score
     const si = srcInfo(lead.source_url)
     const state = leadState(lead)
@@ -428,6 +430,31 @@ export default function DashboardPage() {
         {applicants} applied{applicants > 5 ? ' · apply early' : ' so far'}
       </span>
     )
+
+    if (isLocked) {
+      return (
+        <article key={lead.id} className="lead-card lead-card-locked">
+          <div className="lc-top">
+            <span className="src-ava" style={{ background: si.ava }}>{si.ini}</span>
+            <span className={`src-badge ${si.cls}`}>{si.name.toUpperCase()}</span>
+            <span className="lc-time">{timeAgo(lead.posted_date)}</span>
+          </div>
+          <div className="lc-title">
+            {gaugeSVG(sc)}
+            <span className="tt">{lead.title}</span>
+          </div>
+          <div className="lc-meta">
+            {budget && <span className="budget">{budget}</span>}
+            {lead.client_location && <span className="meta-chip"><i className="ti ti-map-pin"></i>{lead.client_location}</span>}
+          </div>
+          <div className="skills-row">{skills}</div>
+          <div className="locked-overlay" onClick={() => router.push('/dashboard/billing')}>
+            <i className="ti ti-lock"></i>
+            <span>Upgrade to unlock</span>
+          </div>
+        </article>
+      )
+    }
 
     return (
       <article key={lead.id} onClick={() => selectLead(lead)}
@@ -540,7 +567,22 @@ export default function DashboardPage() {
 
       <div className={`feed-wrap ${selected ? 'detail-open' : ''}`}>
         <div className="feed-list">
-          {leadCards}
+          {isFree && filtered.length > FREE_LIMIT
+            ? <>
+                {leadCards.slice(0, FREE_LIMIT)}
+                <div className="free-gate">
+                  <div className="free-gate-icon"><i className="ti ti-bolt"></i></div>
+                  <div className="free-gate-body">
+                    <h3>{filtered.length - FREE_LIMIT} more leads matched your profile</h3>
+                    <p>Upgrade to unlock every match with direct source links, unlimited applications, and weekly analytics.</p>
+                  </div>
+                  <button onClick={() => router.push('/dashboard/billing')} className="btn btn-primary">
+                    Unlock all leads <i className="ti ti-arrow-right" />
+                  </button>
+                </div>
+                {leadCards.slice(FREE_LIMIT)}
+              </>
+            : leadCards}
         </div>
 
         {selected && (() => {
@@ -668,18 +710,6 @@ export default function DashboardPage() {
         )}
       </div>
 
-      {isFree && filtered.length > 5 && (
-        <div className="upgrade-card">
-          <div className="upgrade-icon"><i className="ti ti-sparkles" /></div>
-          <div className="upgrade-body">
-            <h3>More leads scored for you</h3>
-            <p>Upgrade to see every match with direct source links, unlimited applications, and weekly analytics.</p>
-          </div>
-          <button onClick={() => router.push('/dashboard/billing')} className="btn btn-primary upgrade-btn">
-            View plans <i className="ti ti-arrow-right" />
-          </button>
-        </div>
-      )}
     </>
   )
 }

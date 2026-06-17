@@ -617,15 +617,20 @@ textarea.input { resize: vertical; min-height: 80px; }
 .src-tile.idle .src-tile-name { color: var(--slate); }
 .src-tile.idle .src-tile-meta { color: var(--slate-2); }
 
-/* ── UPGRADE BANNER ── */
-.upgrade-card { display: flex; align-items: center; gap: 16px; padding: 18px 20px; border-radius: var(--r-lg); background: linear-gradient(135deg, var(--ink-900), #1a2636); color: #fff; margin-top: 16px; }
-.upgrade-icon { width: 44px; height: 44px; border-radius: var(--r-md); background: rgba(196,240,0,.15); color: var(--lime); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.upgrade-icon .ti { font-size: 22px; }
-.upgrade-body { flex: 1; min-width: 0; }
-.upgrade-body h3 { font-family: var(--font-display); font-size: 15px; font-weight: 700; margin-bottom: 3px; }
-.upgrade-body p { font-size: 12.5px; color: #A9B5AC; line-height: 1.45; }
-.upgrade-btn { flex-shrink: 0; }
-@media (max-width: 640px) { .upgrade-card { flex-direction: column; text-align: center; } }
+/* ── FREE-TIER GATE ── */
+.free-gate { display: flex; align-items: center; gap: 16px; padding: 20px 22px; border-radius: var(--r-lg); background: linear-gradient(135deg, var(--ink-900) 0%, #111d17 100%); border: 1px solid rgba(196,240,0,.2); color: #fff; margin: 8px 0; position: relative; overflow: hidden; }
+.free-gate::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 80% 50%, rgba(196,240,0,.06) 0%, transparent 70%); pointer-events: none; }
+.free-gate-icon { width: 46px; height: 46px; border-radius: var(--r-md); background: rgba(196,240,0,.12); color: var(--lime); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 22px; }
+.free-gate-body { flex: 1; min-width: 0; }
+.free-gate-body h3 { font-family: var(--font-display); font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+.free-gate-body p { font-size: 12.5px; color: #A9B5AC; line-height: 1.45; }
+@media (max-width: 640px) { .free-gate { flex-direction: column; text-align: center; } }
+
+/* ── LOCKED LEAD CARD ── */
+.lead-card-locked { position: relative; cursor: default; user-select: none; pointer-events: none; }
+.lead-card-locked > *:not(.locked-overlay) { filter: blur(3.5px); opacity: .55; }
+.locked-overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 8px; border-radius: inherit; background: rgba(15,24,18,.35); pointer-events: auto; cursor: pointer; font-family: var(--font-display); font-size: 13px; font-weight: 700; color: var(--lime); letter-spacing: .03em; }
+.locked-overlay .ti { font-size: 16px; }
 
 /* ── EMPTY / LOCK ── */
 .empty { text-align: center; padding: 60px 20px; }
