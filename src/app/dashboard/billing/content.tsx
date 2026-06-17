@@ -10,6 +10,36 @@ import toast from 'react-hot-toast'
 
 // Order shown in the plan grid. Source of truth for names/prices is lib/tiers.ts.
 const TIER_ORDER: Tier[] = ['free', 'pro', 'max', 'team']
+
+function TrialTimeline() {
+  return (
+    <div className="trial-timeline">
+      <div className="tt-row">
+        <div className="tt-dot tt-dot-now"><i className="ti ti-bolt" /></div>
+        <div className="tt-body">
+          <span className="tt-day">Today</span>
+          <span className="tt-desc">Full access unlocked immediately</span>
+        </div>
+      </div>
+      <div className="tt-line" />
+      <div className="tt-row">
+        <div className="tt-dot"><i className="ti ti-mail" /></div>
+        <div className="tt-body">
+          <span className="tt-day">Day 5</span>
+          <span className="tt-desc">We&apos;ll remind you before your trial ends</span>
+        </div>
+      </div>
+      <div className="tt-line" />
+      <div className="tt-row">
+        <div className="tt-dot"><i className="ti ti-credit-card" /></div>
+        <div className="tt-body">
+          <span className="tt-day">Day 7</span>
+          <span className="tt-desc">First charge — cancel any time before</span>
+        </div>
+      </div>
+    </div>
+  )
+}
 const FREE_APP_LIMIT = ENTITLEMENTS.free.applicationsPerMonth as number
 
 // Full comparison grid. Columns: Free · Pro · Max · Team.
@@ -158,6 +188,8 @@ export default function BillingContent() {
     const price = priceOf(t)
     const wasPrice = isAnnual ? v.monthly : null
 
+    const savePct = isAnnual && wasPrice ? Math.round((1 - price / wasPrice) * 100) : null
+
     // Price block
     let priceBlock
     if (t === 'free') {
@@ -178,15 +210,18 @@ export default function BillingContent() {
     } else {
       priceBlock = (
         <div className="bpc-price-block">
-          <div className="bpc-price">
-            &pound;{price}{wasPrice ? <span className="was">&pound;{wasPrice}</span> : null}
-            <span className="per">{isAnnual ? ' / mo · billed yr' : ' / month'}</span>
+          <div className="bpc-price-row">
+            {wasPrice && <span className="bpc-was">&pound;{wasPrice}</span>}
+            <div className="bpc-price">&pound;{price}<span className="per">/mo</span></div>
+            {savePct && <span className="bpc-save-badge">–{savePct}%</span>}
           </div>
+          {isAnnual && <div className="bpc-annual-note">billed annually</div>}
         </div>
       )
     }
 
     // CTA
+    const isPaidUpgrade = !isCurrent && t !== 'free' && !isDowngrade
     let cta
     if (isCurrent) {
       cta = <div className="bill-cta bill-cta-current"><i className="ti ti-circle-check" /> Your current plan</div>
@@ -195,11 +230,32 @@ export default function BillingContent() {
     } else if (isDowngrade) {
       cta = <button className="bill-cta bill-cta-ghost" disabled={busy} onClick={() => handleUpgrade(t)}>Switch to {v.label}</button>
     } else if (isTeam) {
-      cta = <button className="bill-cta bill-cta-warm" disabled={busy} onClick={() => handleUpgrade(t)}><i className="ti ti-users" /> Start Team &mdash; &pound;{price * teamSeats}/mo</button>
+      cta = (
+        <div className="bill-cta-stack">
+          <button className="bill-cta bill-cta-warm" disabled={busy} onClick={() => handleUpgrade(t)}>
+            <i className="ti ti-users" /> Start my free trial
+          </button>
+          <span className="bill-cta-sub">Complete in 2 steps · &pound;{price * teamSeats}/mo after</span>
+        </div>
+      )
     } else if (featured) {
-      cta = <button className="bill-cta bill-cta-warm" disabled={busy} onClick={() => handleUpgrade(t)}><i className="ti ti-crown" /> Upgrade to Pro</button>
+      cta = (
+        <div className="bill-cta-stack">
+          <button className="bill-cta bill-cta-warm" disabled={busy} onClick={() => handleUpgrade(t)}>
+            <i className="ti ti-bolt" /> Start my free trial
+          </button>
+          <span className="bill-cta-sub">Complete in 2 steps · &pound;{price}/mo after Day 7</span>
+        </div>
+      )
     } else {
-      cta = <button className="bill-cta bill-cta-primary" disabled={busy} onClick={() => handleUpgrade(t)}><i className="ti ti-arrow-right" /> Upgrade to {v.label}</button>
+      cta = (
+        <div className="bill-cta-stack">
+          <button className="bill-cta bill-cta-primary" disabled={busy} onClick={() => handleUpgrade(t)}>
+            Start my free trial
+          </button>
+          <span className="bill-cta-sub">Complete in 2 steps · &pound;{price}/mo after Day 7</span>
+        </div>
+      )
     }
 
     return (
@@ -212,6 +268,7 @@ export default function BillingContent() {
         {priceBlock}
         <p className="bpc-blurb">{v.blurb}</p>
         <div className="bpc-divider" />
+        {isPaidUpgrade && <TrialTimeline />}
         <ul className="bpc-feats">
           {planFeatures(t).map(f => (
             <li key={f.txt} className={`bpc-feat${f.muted ? ' muted' : ''}`}>
@@ -221,12 +278,6 @@ export default function BillingContent() {
           ))}
         </ul>
         {cta}
-        {(featured || isTeam) && (
-          <div className="bill-reassure">
-            <span><i className="ti ti-shield-check" />Cancel anytime</span>
-            <span><i className="ti ti-gift" />7 days free</span>
-          </div>
-        )}
       </div>
     )
   }
