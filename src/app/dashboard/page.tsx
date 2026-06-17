@@ -449,8 +449,10 @@ export default function DashboardPage() {
           </div>
           <div className="skills-row">{skills}</div>
           <div className="locked-overlay" onClick={() => router.push('/dashboard/billing')}>
-            <i className="ti ti-lock"></i>
-            <span>Upgrade to unlock</span>
+            <div className="locked-overlay-inner">
+              <i className="ti ti-lock"></i>
+              <span>Unlock this lead</span>
+            </div>
           </div>
         </article>
       )
@@ -571,14 +573,17 @@ export default function DashboardPage() {
             ? <>
                 {leadCards.slice(0, FREE_LIMIT)}
                 <div className="free-gate">
-                  <div className="free-gate-icon"><i className="ti ti-bolt"></i></div>
                   <div className="free-gate-body">
-                    <h3>{filtered.length - FREE_LIMIT} more leads matched your profile</h3>
-                    <p>Upgrade to unlock every match with direct source links, unlimited applications, and weekly analytics.</p>
+                    <div className="free-gate-eyebrow"><i className="ti ti-lock"></i>Free plan limit reached</div>
+                    <h3><span>{filtered.length - FREE_LIMIT} more leads</span> scored for your profile</h3>
+                    <p>Unlock source links, unlimited applications, and your weekly match report — from £15/mo. Cancel any time.</p>
                   </div>
-                  <button onClick={() => router.push('/dashboard/billing')} className="btn btn-primary">
-                    Unlock all leads <i className="ti ti-arrow-right" />
-                  </button>
+                  <div className="free-gate-cta">
+                    <button onClick={() => router.push('/dashboard/billing')} className="btn btn-primary">
+                      <i className="ti ti-bolt" /> Unlock all leads
+                    </button>
+                    <span className="free-gate-note">No lock-in · cancel any time</span>
+                  </div>
                 </div>
                 {leadCards.slice(FREE_LIMIT)}
               </>
