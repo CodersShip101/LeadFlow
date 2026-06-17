@@ -1238,10 +1238,40 @@ textarea.input { resize: vertical; min-height: 80px; }
    with the dashboard's or the landing page's `.price-card`/`.cmp-table`.
    ─────────────────────────────────────────────────────────────── */
 .bill-page { max-width: 1180px; }
-.bill-header { margin-bottom: 22px; }
+.bill-header { margin-bottom: 22px; display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
 .bill-header h1 { font-family: var(--font-display); font-weight: 700; font-size: 1.6rem; letter-spacing: -.025em; color: var(--ink); margin-bottom: 4px; }
 .bill-header p { color: var(--slate); font-size: 14px; line-height: 1.5; }
 .bill-header .hl { color: var(--ink); font-weight: 600; }
+
+/* Context nudge */
+.bill-nudge { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; padding: 10px 14px; border-radius: var(--r-md); background: var(--paper-2); color: var(--ink-2); border: 1px solid var(--line); max-width: 380px; line-height: 1.4; }
+.bill-nudge .ti { font-size: 15px; color: var(--slate); flex-shrink: 0; }
+.bill-nudge.warn { background: var(--mid-bg); border-color: #F0D9A0; color: #5E4609; }
+.bill-nudge.warn .ti { color: var(--mid); }
+.bill-nudge.crit { background: rgba(229,87,61,.08); border-color: rgba(229,87,61,.3); color: var(--coral); }
+.bill-nudge.crit .ti { color: var(--coral); }
+
+/* Social proof under CTA */
+.bill-social-proof { display: flex; align-items: center; justify-content: center; gap: 6px; font-family: var(--font-mono); font-size: 10.5px; color: var(--slate-2); margin-top: 8px; }
+.bill-social-proof .ti { font-size: 12px; }
+
+/* FAQ */
+.bill-faq { background: var(--card); border: 1px solid var(--line); border-radius: var(--r-xl); padding: 24px 26px; margin-bottom: 20px; }
+.bill-faq-title { font-family: var(--font-display); font-size: 15px; font-weight: 700; letter-spacing: -.01em; color: var(--ink); margin-bottom: 16px; }
+.bill-faq-list { display: flex; flex-direction: column; gap: 0; }
+.bill-faq-row { padding: 14px 0; border-bottom: 1px solid var(--line-2); }
+.bill-faq-row:last-child { border-bottom: none; padding-bottom: 0; }
+.bill-faq-q { display: flex; align-items: flex-start; gap: 8px; font-size: 13.5px; font-weight: 600; color: var(--ink); margin-bottom: 5px; }
+.bill-faq-q .ti { font-size: 15px; color: var(--lime-deep); margin-top: 1px; flex-shrink: 0; }
+.bill-faq-a { font-size: 13px; color: var(--slate); line-height: 1.55; padding-left: 23px; }
+
+/* Collapsible comparison table */
+.bill-cmp-toggle { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 14px 22px; background: var(--card); border: 1px solid var(--line); border-radius: var(--r-lg); font-family: var(--font-display); font-size: 14px; font-weight: 600; color: var(--ink); cursor: pointer; transition: background .15s; margin-bottom: 0; }
+.bill-cmp-toggle:hover { background: var(--paper-2); }
+.bill-cmp-toggle .ti { color: var(--slate-2); font-size: 16px; }
+.bill-cmp { margin-bottom: 20px; display: flex; flex-direction: column; gap: 0; border-radius: var(--r-lg); overflow: hidden; border: 1px solid var(--line); }
+.bill-cmp .bill-cmp-toggle { border: none; border-radius: 0; }
+.bill-cmp .bill-cmp-scroll { border-top: 1px solid var(--line); }
 
 /* cycle toggle */
 .cycle-row { display: flex; align-items: center; gap: 14px; margin-bottom: 26px; flex-wrap: wrap; }

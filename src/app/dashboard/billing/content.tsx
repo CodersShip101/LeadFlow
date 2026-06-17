@@ -8,52 +8,43 @@ import { PRICING, ENTITLEMENTS, TIER_ICONS, planFeatures, type Tier } from '@/li
 import SeatControl from '@/components/SeatControl'
 import toast from 'react-hot-toast'
 
-// Order shown in the plan grid. Source of truth for names/prices is lib/tiers.ts.
 const TIER_ORDER: Tier[] = ['free', 'pro', 'max', 'team']
-
 const FREE_APP_LIMIT = ENTITLEMENTS.free.applicationsPerMonth as number
 
-// Full comparison grid. Columns: Free · Pro · Max · Team.
 type CmpVal = boolean | string
 const CMP_GROUPS: { label: string; rows: [string, CmpVal, CmpVal, CmpVal, CmpVal][] }[] = [
-  {
-    label: 'Lead feed',
-    rows: [
-      ['Scored lead feed', true, true, true, true],
-      ['Applications / month', String(FREE_APP_LIMIT), '∞', '∞', '∞'],
-      ['Direct source links', false, true, true, true],
-      ['Scan frequency', '5h', '2h', '1h', '1h'],
-      ['Manual refresh', false, false, true, true],
-    ],
-  },
-  {
-    label: 'Insight',
-    rows: [
-      ['Daily email digest', false, true, true, true],
-      ['Custom lead alerts', false, true, true, true],
-      ['Basic analytics', false, true, true, true],
-      ['Advanced analytics', false, false, true, true],
-      ['CSV export', false, false, true, true],
-      ['Adjustable scoring weights', false, false, true, true],
-    ],
-  },
-  {
-    label: 'Team',
-    rows: [
-      ['Shared lead pool', false, false, false, true],
-      ['Team pipeline & assignment', false, false, false, true],
-      ['Admin & member roles', false, false, false, true],
-      ['Centralised billing', false, false, false, true],
-    ],
-  },
-  {
-    label: 'Support',
-    rows: [
-      ['Standard support', true, true, true, true],
-      ['Priority support', false, false, true, true],
-      ['Dedicated account manager', false, false, false, 'Enterprise'],
-    ],
-  },
+  { label: 'Lead feed', rows: [
+    ['Scored lead feed', true, true, true, true],
+    ['Applications / month', String(FREE_APP_LIMIT), '∞', '∞', '∞'],
+    ['Direct source links', false, true, true, true],
+    ['Scan frequency', '5h', '2h', '1h', '1h'],
+    ['Manual refresh', false, false, true, true],
+  ]},
+  { label: 'Insight', rows: [
+    ['Daily email digest', false, true, true, true],
+    ['Custom lead alerts', false, true, true, true],
+    ['Basic analytics', false, true, true, true],
+    ['Advanced analytics', false, false, true, true],
+    ['CSV export', false, false, true, true],
+    ['Adjustable scoring weights', false, false, true, true],
+  ]},
+  { label: 'Team', rows: [
+    ['Shared lead pool', false, false, false, true],
+    ['Team pipeline & assignment', false, false, false, true],
+    ['Admin & member roles', false, false, false, true],
+    ['Centralised billing', false, false, false, true],
+  ]},
+  { label: 'Support', rows: [
+    ['Standard support', true, true, true, true],
+    ['Priority support', false, false, true, true],
+    ['Dedicated account manager', false, false, false, 'Enterprise'],
+  ]},
+]
+
+const FAQS = [
+  { q: 'Can I cancel before Day 7?', a: 'Yes — one click in account settings. You pay nothing and keep access until the trial ends.' },
+  { q: 'What payment methods do you accept?', a: 'All major cards via Stripe. No PayPal, no invoicing on paid plans (enterprise excepted).' },
+  { q: 'What if I don\'t use it much?', a: 'Downgrade or cancel any time. There\'s no minimum term on monthly plans.' },
 ]
 
 export default function BillingContent() {
@@ -63,6 +54,7 @@ export default function BillingContent() {
   const [cycle, setCycle] = useState<'monthly' | 'annual'>('monthly')
   const [teamSeats, setTeamSeats] = useState(2)
   const [busy, setBusy] = useState(false)
+  const [cmpOpen, setCmpOpen] = useState(false)
   const router = useRouter()
   const sp = useSearchParams()
   const supabase = createClient()
@@ -85,7 +77,7 @@ export default function BillingContent() {
         const res = await fetch('/api/applications')
         const apps: Application[] = res.ok ? await res.json() : []
         setAppsUsed(apps.filter(a => a.status !== 'saved').length)
-      } catch { /* ignore — usage just shows 0 */ }
+      } catch { /* ignore */ }
       setLoading(false)
     }
     load()
@@ -113,36 +105,34 @@ export default function BillingContent() {
       const data = await res.json()
       if (data.url) window.location.href = data.url
       else toast.error(data.error || 'Something went wrong')
-    } catch {
-      toast.error('Network error')
-    } finally {
-      setBusy(false)
-    }
+    } catch { toast.error('Network error') }
+    finally { setBusy(false) }
   }, [cycle, teamSeats, plan, busy])
 
   if (loading) return (
-    <div className="flex-1 flex items-center justify-center pt-16">
-      <div className="flex items-center gap-3" style={{ color: 'var(--slate)' }}>
-        <div className="w-2.5 h-2.5 rounded-full animate-pulse" style={{ background: 'var(--lime)' }} />
-        <span className="text-sm">Loading&hellip;</span>
-      </div>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '50vh', gap: 10, color: 'var(--slate)' }}>
+      <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--lime)', animation: 'pulse 1.2s ease-in-out infinite' }} />
+      <span style={{ fontSize: 14 }}>Loading&hellip;</span>
     </div>
   )
 
   const curName = PRICING[plan]?.label || 'Free'
   const curIdx = TIER_ORDER.indexOf(plan)
-
-  // Usage figures
   const isFree = plan === 'free'
-  const appPct = isFree ? Math.min(100, Math.round((appsUsed / FREE_APP_LIMIT) * 100)) : 100
+  const appsLeft = FREE_APP_LIMIT - appsUsed
   const atLimit = isFree && appsUsed >= FREE_APP_LIMIT
-  const nearLimit = isFree && appsUsed >= FREE_APP_LIMIT - 1 && !atLimit
+  const nearLimit = isFree && appsLeft <= 1 && !atLimit
+  const appPct = isFree ? Math.min(100, Math.round((appsUsed / FREE_APP_LIMIT) * 100)) : 100
   const appFillCls = atLimit ? 'crit' : nearLimit ? 'warn' : ''
   const scanHours = ENTITLEMENTS[plan]?.scanIntervalHours ?? 5
   const scanFill = scanHours <= 1 ? 100 : scanHours <= 2 ? 66 : 33
-  const reset = new Date()
-  const resetLabel = new Date(reset.getFullYear(), reset.getMonth() + 1, 1)
+  const resetLabel = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1)
     .toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+
+  // Annual savings in £ for the featured plan
+  const proMonthly = PRICING.max.monthly ?? 0
+  const proAnnual = PRICING.max.annual ?? 0
+  const annualSaving = (proMonthly - proAnnual) * 12
 
   const cmpCell = (v: CmpVal) =>
     v === true ? <span className="bill-cmp-yes">&#10003;</span>
@@ -158,17 +148,11 @@ export default function BillingContent() {
     const isDowngrade = idx < curIdx
     const price = priceOf(t)
     const wasPrice = isAnnual ? v.monthly : null
-
     const savePct = isAnnual && wasPrice ? Math.round((1 - price / wasPrice) * 100) : null
 
-    // Price block
     let priceBlock
     if (t === 'free') {
-      priceBlock = (
-        <div className="bpc-price-block">
-          <div className="bpc-price">&pound;0<span className="per"> / month</span></div>
-        </div>
-      )
+      priceBlock = <div className="bpc-price-block"><div className="bpc-price">&pound;0<span className="per"> / month</span></div></div>
     } else if (isTeam) {
       priceBlock = (
         <>
@@ -191,7 +175,6 @@ export default function BillingContent() {
       )
     }
 
-    // CTA
     let cta
     if (isCurrent) {
       cta = <div className="bill-cta bill-cta-current"><i className="ti ti-circle-check" /> Your current plan</div>
@@ -199,31 +182,14 @@ export default function BillingContent() {
       cta = <button className="bill-cta bill-cta-ghost" disabled>Base plan</button>
     } else if (isDowngrade) {
       cta = <button className="bill-cta bill-cta-ghost" disabled={busy} onClick={() => handleUpgrade(t)}>Switch to {v.label}</button>
-    } else if (isTeam) {
-      cta = (
-        <div className="bill-cta-stack">
-          <button className="bill-cta bill-cta-warm" disabled={busy} onClick={() => handleUpgrade(t)}>
-            <i className="ti ti-users" /> Start my free trial
-          </button>
-          <span className="bill-cta-sub">Complete in 2 steps · &pound;{price * teamSeats}/mo after</span>
-        </div>
-      )
-    } else if (featured) {
-      cta = (
-        <div className="bill-cta-stack">
-          <button className="bill-cta bill-cta-warm" disabled={busy} onClick={() => handleUpgrade(t)}>
-            <i className="ti ti-bolt" /> Start my free trial
-          </button>
-          <span className="bill-cta-sub">Complete in 2 steps · &pound;{price}/mo after Day 7</span>
-        </div>
-      )
     } else {
+      const isWarm = featured || isTeam
       cta = (
         <div className="bill-cta-stack">
-          <button className="bill-cta bill-cta-primary" disabled={busy} onClick={() => handleUpgrade(t)}>
-            Start my free trial
+          <button className={`bill-cta ${isWarm ? 'bill-cta-warm' : 'bill-cta-primary'}`} disabled={busy} onClick={() => handleUpgrade(t)}>
+            <i className={`ti ${isTeam ? 'ti-users' : featured ? 'ti-bolt' : 'ti-arrow-right'}`} /> Start my free trial
           </button>
-          <span className="bill-cta-sub">Complete in 2 steps · &pound;{price}/mo after Day 7</span>
+          <span className="bill-cta-sub">2 steps · &pound;{isTeam ? price * teamSeats : price}/mo after Day 7</span>
         </div>
       )
     }
@@ -247,75 +213,91 @@ export default function BillingContent() {
           ))}
         </ul>
         {cta}
+        {!isCurrent && t !== 'free' && !isDowngrade && (
+          <div className="bill-social-proof">
+            <i className="ti ti-users" /> Join 340+ UK freelancers on a paid plan
+          </div>
+        )}
       </div>
     )
   }
 
   return (
     <div className="flex-1 dash-page bill-page">
+
+      {/* ── HEADER with context nudge ── */}
       <div className="bill-header">
-        <h1>Plan &amp; billing</h1>
-        <p>
-          You&apos;re on <span className="hl">{curName}</span>.{' '}
-          <span style={{ color: 'var(--slate)' }}>Join <span className="hl">340+ UK freelancers</span> on a paid plan.</span>
-        </p>
+        <div>
+          <h1>Plan &amp; billing</h1>
+          <p>You&apos;re on <span className="hl">{curName}</span>.</p>
+        </div>
+        {/* Context nudge — shows what's happening right now */}
+        {isFree && (
+          <div className={`bill-nudge ${atLimit ? 'crit' : nearLimit ? 'warn' : ''}`}>
+            {atLimit
+              ? <><i className="ti ti-alert-circle" /> You&apos;ve used all {FREE_APP_LIMIT} applications this month — upgrade to keep going.</>
+              : nearLimit
+              ? <><i className="ti ti-alert-triangle" /> Only {appsLeft} application left this month. Upgrade for unlimited.</>
+              : <><i className="ti ti-info-circle" /> You have {appsLeft} of {FREE_APP_LIMIT} applications left this month.</>}
+          </div>
+        )}
       </div>
 
-      {/* Billing cycle */}
+      {/* ── CYCLE TOGGLE with specific saving ── */}
       <div className="cycle-row">
         <div className="bill-toggle">
           <button className={isAnnual ? '' : 'on'} onClick={() => setCycle('monthly')}>Monthly</button>
           <button className={isAnnual ? 'on' : ''} onClick={() => setCycle('annual')}>Annual</button>
         </div>
         <span className="save-badge" style={{ opacity: isAnnual ? 1 : 0.45 }}>
-          <i className="ti ti-tag" />Save 20% &mdash; pay yearly
+          <i className="ti ti-tag" />Save &pound;{annualSaving}/yr on Pro &mdash; pay annually
         </span>
       </div>
 
-      {/* Plan cards */}
+      {/* ── PLAN CARDS ── */}
       <div className="tier-ladder">
         {TIER_ORDER.map(renderCard)}
       </div>
 
+      {/* ── TRIAL TIMELINE ── */}
       <aside className="bill-trial-aside">
-          <h3 className="bill-trial-aside-title">How your free trial works</h3>
-          <div className="trial-timeline">
-            <div className="trial-step">
-              <div className="trial-day">Today</div>
-              <div className="trial-rail" aria-hidden="true">
-                <span className="trial-dot amber" />
-                <span className="trial-line" />
-              </div>
-              <p className="trial-desc">
-                <strong>You unlock your plan in full.</strong> Unlimited leads, direct source links, skill filtering — all of it, the moment you sign up.
-              </p>
-            </div>
-            <div className="trial-step">
-              <div className="trial-day">Day 5</div>
-              <div className="trial-rail" aria-hidden="true">
-                <span className="trial-dot lime" />
-                <span className="trial-line" />
-              </div>
-              <p className="trial-desc hl">
-                <strong>We email you a reminder — before any charge.</strong> Two full days before the trial ends, so you can decide on your own terms. We&apos;d rather remind you than surprise you.
-              </p>
-            </div>
-            <div className="trial-step">
-              <div className="trial-day">Day 7</div>
-              <div className="trial-rail" aria-hidden="true">
-                <span className="trial-dot" />
-              </div>
-              <p className="trial-desc">
-                <strong>Your first charge, only if you stay.</strong> Cancel any time before then and you pay nothing. One click in your account settings.
-              </p>
-            </div>
+        <h3 className="bill-trial-aside-title">How your free trial works</h3>
+        <div className="trial-timeline">
+          <div className="trial-step">
+            <div className="trial-day">Today</div>
+            <div className="trial-rail" aria-hidden="true"><span className="trial-dot amber" /><span className="trial-line" /></div>
+            <p className="trial-desc"><strong>You unlock your plan in full.</strong> Unlimited leads, direct source links, skill filtering — all of it, the moment you sign up.</p>
           </div>
-          <div className="bill-trial-shield">
-            <i className="ti ti-shield-check" /> No surprises. We will always warn you before charging.
+          <div className="trial-step">
+            <div className="trial-day">Day 5</div>
+            <div className="trial-rail" aria-hidden="true"><span className="trial-dot lime" /><span className="trial-line" /></div>
+            <p className="trial-desc hl"><strong>We email you a reminder — before any charge.</strong> Two full days before the trial ends, so you can decide on your own terms. We&apos;d rather remind you than surprise you.</p>
           </div>
+          <div className="trial-step">
+            <div className="trial-day">Day 7</div>
+            <div className="trial-rail" aria-hidden="true"><span className="trial-dot" /></div>
+            <p className="trial-desc"><strong>Your first charge, only if you stay.</strong> Cancel any time before then and you pay nothing. One click in your account settings.</p>
+          </div>
+        </div>
+        <div className="bill-trial-shield">
+          <i className="ti ti-shield-check" /> No surprises. We will always warn you before charging.
+        </div>
       </aside>
 
-      {/* Enterprise */}
+      {/* ── FAQ ── */}
+      <div className="bill-faq">
+        <h3 className="bill-faq-title">Common questions</h3>
+        <div className="bill-faq-list">
+          {FAQS.map(f => (
+            <div key={f.q} className="bill-faq-row">
+              <p className="bill-faq-q"><i className="ti ti-help-circle" />{f.q}</p>
+              <p className="bill-faq-a">{f.a}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── ENTERPRISE ── */}
       <div className="bill-ent">
         <div className="bill-ent-icon"><i className="ti ti-building" /></div>
         <div className="bill-ent-body">
@@ -325,7 +307,7 @@ export default function BillingContent() {
         <a className="bill-ent-btn" href="mailto:sales@leadflow.dev?subject=Enterprise%20plan%20inquiry"><i className="ti ti-mail" /> Talk to us</a>
       </div>
 
-      {/* Usage */}
+      {/* ── USAGE ── */}
       <div className="bill-usage">
         <div className="bill-usage-head">
           <h3>This month&apos;s usage</h3>
@@ -340,11 +322,8 @@ export default function BillingContent() {
               </span>
             </div>
             <div className="bill-usage-track"><div className={`bill-usage-fill ${appFillCls}`} style={{ width: `${appPct}%` }} /></div>
-            {atLimit ? (
-              <div className="bill-usage-note crit"><i className="ti ti-alert-circle" /> Limit reached &mdash; upgrade to keep applying this month</div>
-            ) : nearLimit ? (
-              <div className="bill-usage-note warn"><i className="ti ti-alert-triangle" /> {FREE_APP_LIMIT - appsUsed} application{FREE_APP_LIMIT - appsUsed === 1 ? '' : 's'} remaining this month</div>
-            ) : null}
+            {atLimit && <div className="bill-usage-note crit"><i className="ti ti-alert-circle" /> Limit reached — upgrade to keep applying this month</div>}
+            {nearLimit && <div className="bill-usage-note warn"><i className="ti ti-alert-triangle" /> {appsLeft} application{appsLeft === 1 ? '' : 's'} remaining</div>}
           </div>
           <div>
             <div className="bill-usage-meta">
@@ -356,42 +335,45 @@ export default function BillingContent() {
         </div>
       </div>
 
-      {/* Comparison table */}
+      {/* ── COMPARISON TABLE (collapsible) ── */}
       <div className="bill-cmp">
-        <div className="bill-cmp-head">
-          <h3>Compare all plans</h3>
-          <p>Every feature, side by side.</p>
-        </div>
-        <div className="bill-cmp-scroll">
-          <table>
-            <thead>
-              <tr>
-                <th>Feature</th>
-                <th><span className="bill-cmp-pname">{PRICING.free.label}</span><span className="bill-cmp-pprice">&pound;0</span></th>
-                <th><span className="bill-cmp-pname">{PRICING.pro.label}</span><span className="bill-cmp-pprice">&pound;{PRICING.pro.monthly}/mo</span></th>
-                <th className="feat-col"><span className="bill-cmp-pname">{PRICING.max.label}</span><span className="bill-cmp-pprice">&pound;{PRICING.max.monthly}/mo</span></th>
-                <th><span className="bill-cmp-pname">{PRICING.team.label}</span><span className="bill-cmp-pprice">&pound;{PRICING.team.monthly}/seat</span></th>
-              </tr>
-            </thead>
-            <tbody>
-              {CMP_GROUPS.map(g => (
-                <Fragment key={g.label}>
-                  <tr className="bill-cmp-grp"><td colSpan={5}>{g.label}</td></tr>
-                  {g.rows.map(([label, f, p, m, tm]) => (
-                    <tr key={label}>
-                      <td>{label}</td>
-                      <td>{cmpCell(f)}</td>
-                      <td>{cmpCell(p)}</td>
-                      <td>{cmpCell(m)}</td>
-                      <td>{cmpCell(tm)}</td>
-                    </tr>
-                  ))}
-                </Fragment>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <button className="bill-cmp-toggle" onClick={() => setCmpOpen(v => !v)}>
+          <span>Compare all plans in detail</span>
+          <i className={`ti ${cmpOpen ? 'ti-chevron-up' : 'ti-chevron-down'}`} />
+        </button>
+        {cmpOpen && (
+          <div className="bill-cmp-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Feature</th>
+                  <th><span className="bill-cmp-pname">{PRICING.free.label}</span><span className="bill-cmp-pprice">&pound;0</span></th>
+                  <th><span className="bill-cmp-pname">{PRICING.pro.label}</span><span className="bill-cmp-pprice">&pound;{PRICING.pro.monthly}/mo</span></th>
+                  <th className="feat-col"><span className="bill-cmp-pname">{PRICING.max.label}</span><span className="bill-cmp-pprice">&pound;{PRICING.max.monthly}/mo</span></th>
+                  <th><span className="bill-cmp-pname">{PRICING.team.label}</span><span className="bill-cmp-pprice">&pound;{PRICING.team.monthly}/seat</span></th>
+                </tr>
+              </thead>
+              <tbody>
+                {CMP_GROUPS.map(g => (
+                  <Fragment key={g.label}>
+                    <tr className="bill-cmp-grp"><td colSpan={5}>{g.label}</td></tr>
+                    {g.rows.map(([label, f, p, m, tm]) => (
+                      <tr key={label}>
+                        <td>{label}</td>
+                        <td>{cmpCell(f)}</td>
+                        <td>{cmpCell(p)}</td>
+                        <td>{cmpCell(m)}</td>
+                        <td>{cmpCell(tm)}</td>
+                      </tr>
+                    ))}
+                  </Fragment>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
+
     </div>
   )
 }
