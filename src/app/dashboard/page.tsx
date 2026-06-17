@@ -482,8 +482,9 @@ export default function DashboardPage() {
         </div>
         <div className="skills-row">{skills}</div>
         <div className="lc-actions" onClick={e => e.stopPropagation()}>
-          <button className={`btn-icon tip ${saved ? 'on' : ''}`} data-tip={saved ? 'Remove from saved' : 'Save for later'} aria-label={saved ? 'Remove from saved' : 'Save for later'} onClick={() => toggleSave(lead)}>
-            <i className={`ti ti-bookmark${saved ? '-filled' : ''}`}></i>
+          <button className={`lc-save-btn ${saved ? 'on' : ''}`} aria-label={saved ? 'Remove from saved' : 'Save for later'} onClick={() => toggleSave(lead)}>
+            <i className="ti ti-bookmark"></i>
+            {saved && <span className="lc-save-lbl">Saved</span>}
           </button>
           {applied
             ? <button className="applied-tag applied-tag-btn" onClick={() => router.push('/dashboard/applied')}><i className="ti ti-circle-check-filled"></i> In your pipeline <i className="ti ti-arrow-right applied-tag-arrow"></i></button>
