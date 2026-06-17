@@ -697,7 +697,7 @@ export default function DashboardPage() {
                       <i className="ti ti-send" /> Apply & track
                     </button>}
                 <button className="btn btn-ghost" style={{ width: '100%' }} onClick={() => toggleSave(l)}>
-                  {saved ? <><i className="ti ti-bookmark-filled" /> Saved</> : <><i className="ti ti-bookmark" /> Save for later</>}
+                  {saved ? <><i className="ti ti-bookmark" /> Saved</> : <><i className="ti ti-bookmark" /> Save for later</>}
                 </button>
                 {!applied && <p className="dp-foot-note">Direct link · no commission · no fee</p>}
               </div>
