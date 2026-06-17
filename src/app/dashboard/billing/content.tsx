@@ -287,7 +287,7 @@ export default function BillingContent() {
                 <span className="trial-line" />
               </div>
               <p className="trial-desc">
-                <strong>You unlock everything in Pro.</strong> Unlimited leads, AI scores, skill filtering — all of it, the moment you sign up.
+                <strong>You unlock your plan in full.</strong> Unlimited leads, direct source links, skill filtering — all of it, the moment you sign up.
               </p>
             </div>
             <div className="trial-step">
