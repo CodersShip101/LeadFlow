@@ -20,7 +20,7 @@ body {
   overflow-x: hidden;
 }
 
-.ti { font-weight: 600; }
+.ti { font-weight: 700; -webkit-text-stroke: 0.35px currentColor; }
 a { text-decoration: none; color: inherit; }
 button { font-family: inherit; cursor: pointer; }
 :focus-visible { outline: 2px solid var(--lime-deep); outline-offset: 2px; border-radius: var(--r-sm); }

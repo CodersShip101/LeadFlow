@@ -304,16 +304,16 @@ export default function HomePage() {
                   Let the <span className="hl">right leads</span> find you.
                 </h1>
                 <p className="hero-sub">
-                  Your next contract is probably already posted. LeadFlow scans Reddit, Reed and We Work Remotely, scores every lead against your rate and skills, and sends your best matches before the competition even knows they exist.
+                  LeadFlow scans Reddit, Reed and We Work Remotely every hour, scores every lead against your rate and skills, and puts your best matches in front of you — before the competition even sees them.
                 </p>
                 <div className="hero-cta-row">
-                  <Link href="/auth/signup" className="btn-p btn-lg">See my matched leads →</Link>
-                  <a href="#how" className="btn-ghost btn-lg"><i className="ti ti-player-play" style={{ fontSize: 16 }} aria-hidden="true"></i> See how it works</a>
+                  <Link href="/auth/signup" className="btn-p btn-lg"><i className="ti ti-bolt" aria-hidden="true"></i> Start free — 7 days Pro trial</Link>
+                  <a href="#how" className="btn-ghost btn-lg"><i className="ti ti-player-play" aria-hidden="true"></i> See how it works</a>
                 </div>
                 <ul className="hero-trust" aria-label="Trust points">
-                  <li><i className="ti ti-circle-check" aria-hidden="true"></i> 7-day Pro trial</li>
+                  <li><i className="ti ti-circle-check" aria-hidden="true"></i> No card needed to start</li>
                   <li><i className="ti ti-circle-check" aria-hidden="true"></i> 2-minute setup</li>
-                  <li><i className="ti ti-circle-check" aria-hidden="true"></i> first leads within the hour</li>
+                  <li><i className="ti ti-circle-check" aria-hidden="true"></i> First leads within the hour</li>
                 </ul>
               </div>
 
@@ -364,6 +364,35 @@ export default function HomePage() {
               <span className="source-item"><i className="ti ti-world" aria-hidden="true"></i> We Work Remotely</span>
               <span className="source-item"><i className="ti ti-device-laptop" aria-hidden="true"></i> Remote OK</span>
               <span style={{ fontFamily: 'var(--font-mono)', fontSize: '.72rem', color: 'var(--lime-deep)' }}>+ more added weekly</span>
+            </div>
+          </div>
+        </section>
+
+        {/* ═══ SOCIAL PROOF STRIP ═══ */}
+        <section className="section-py paper-2" aria-labelledby="test-h-top">
+          <div className="container">
+            <div className="section-head sr" style={{ marginBottom: 32 }}>
+              <div className="tag tag-lime tag-bracket">freelancers who switched</div>
+              <h2 id="test-h-top">Real results, real people</h2>
+            </div>
+            <div className="grid-3">
+              {[
+                { initials: 'SJ', name: 'Sarah J.', role: 'UX Designer · London', text: '"Landed a £2,400 contract in my first week. I ignored anything under 8 and applied to three. Two replied. The score sorts the list for you."' },
+                { initials: 'MT', name: 'Marcus T.', role: 'Full-Stack Dev · Manchester', text: '"Sunday afternoons used to vanish into job boards. Now it\'s 10 minutes on Monday. Made back the Pro plan in a single contract."' },
+                { initials: 'PK', name: 'Priya K.', role: 'Brand Designer · Edinburgh', text: '"The budget filter alone earns its keep. I stopped chasing leads that can\'t pay my rate. Healthiest pipeline I\'ve had in three years."' },
+              ].map((t, i) => (
+                <figure key={t.name} className={`quote-card sr ${i === 0 ? 'sr-d1' : i === 1 ? 'sr-d2' : 'sr-d3'}`}>
+                  <div className="quote-stars" aria-label="5 out of 5">★★★★★</div>
+                  <blockquote style={{ fontSize: '.96rem', color: 'var(--slate-700)', lineHeight: 1.7, marginBottom: 22, border: 'none' }}>{t.text}</blockquote>
+                  <figcaption style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <span className="avatar" aria-hidden="true">{t.initials}</span>
+                    <span>
+                      <span style={{ display: 'block', fontWeight: 600, fontSize: '.88rem' }}>{t.name}</span>
+                      <span style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: '.76rem', color: 'var(--slate-500)' }}>{t.role}</span>
+                    </span>
+                  </figcaption>
+                </figure>
+              ))}
             </div>
           </div>
         </section>
@@ -425,7 +454,7 @@ export default function HomePage() {
               </div>
             </div>
             <div style={{ textAlign: 'center', marginTop: 54 }} className="sr">
-              <Link href="/auth/signup" className="btn-line btn-lg">Start finding leads →</Link>
+              <Link href="/auth/signup" className="btn-line btn-lg"><i className="ti ti-bolt" aria-hidden="true"></i> Start finding leads</Link>
               <p style={{ fontFamily: 'var(--font-mono)', fontSize: '.76rem', color: 'var(--slate-400)', marginTop: 14 }}>first leads arrive within the hour · cancel any time</p>
             </div>
           </div>
@@ -437,10 +466,10 @@ export default function HomePage() {
             <p className="stats-eyebrow sr">Trusted by freelancers across the UK</p>
             <div className="grid-stats sr sr-d1">
               {[
-                { v: '2,411+', l: 'leads scored',          icon: 'ti-target-arrow',  note: 'updating live',  up: true  },
-                { v: '342+',   l: 'freelancers using it',   icon: 'ti-users',          note: 'growing weekly', up: true  },
-                { v: '1h',     l: 'fastest delivery',       icon: 'ti-bolt',           note: 'or sooner',      up: false },
-                { v: '9.1',    l: 'avg top-match score',    icon: 'ti-award',          note: 'out of 10',      up: false },
+                { v: '2,411+', l: 'leads scored this week',   icon: 'ti-target-arrow',  note: 'updating live',  up: true  },
+                { v: '342+',   l: 'active freelancers',      icon: 'ti-users',          note: 'growing weekly', up: true  },
+                { v: '1h',     l: 'fastest delivery',        icon: 'ti-bolt',           note: 'or sooner',      up: false },
+                { v: '9.1',    l: 'avg top-match score',     icon: 'ti-award',          note: 'out of 10',      up: false },
               ].map(s => (
                 <div className="stat" key={s.l}>
                   <span className="stat-ico" aria-hidden="true"><i className={`ti ${s.icon}`} /></span>
@@ -500,7 +529,7 @@ export default function HomePage() {
                     </li>
                   ))}
                 </ul>
-                <Link href="/auth/signup" className="btn-p btn-lg">Try it free →</Link>
+                <Link href="/auth/signup" className="btn-p btn-lg"><i className="ti ti-bolt" aria-hidden="true"></i> Try it free</Link>
               </div>
               <div className="sr sr-d2">
                 <div className="dash" role="img" aria-label="LeadFlow dashboard preview, filtered to high-scoring leads">
@@ -533,35 +562,6 @@ export default function HomePage() {
                   })()}
                 </div>
               </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ═══ TESTIMONIALS ═══ */}
-        <section className="section-py paper-2" aria-labelledby="test-h">
-          <div className="container">
-            <div className="section-head sr">
-              <div className="tag tag-lime tag-bracket">testimonials</div>
-              <h2 id="test-h">Freelancers who made the switch</h2>
-            </div>
-            <div className="grid-3">
-              {[
-                { initials: 'SJ', name: 'Sarah J.', role: 'UX Designer · London', text: '"Landed a £2,400 contract in my first week. I ignored anything under 8 and applied to three. Two replied. The score sorts the list for you."' },
-                { initials: 'MT', name: 'Marcus T.', role: 'Full-Stack Dev · Manchester', text: '"Sunday afternoons used to vanish into job boards. Now it\'s 10 minutes on Monday. Made back the Pro plan in a single contract."' },
-                { initials: 'PK', name: 'Priya K.', role: 'Brand Designer · Edinburgh', text: '"The budget filter alone earns its keep. I stopped chasing leads that can\'t pay my rate. Healthiest pipeline I\'ve had in three years."' },
-              ].map((t, i) => (
-                <figure key={t.name} className={`quote-card sr ${i === 0 ? 'sr-d1' : i === 1 ? 'sr-d2' : 'sr-d3'}`}>
-                  <div className="quote-stars" aria-label="5 out of 5">★★★★★</div>
-                  <blockquote style={{ fontSize: '.96rem', color: 'var(--slate-700)', lineHeight: 1.7, marginBottom: 22, border: 'none' }}>{t.text}</blockquote>
-                  <figcaption style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <span className="avatar" aria-hidden="true">{t.initials}</span>
-                    <span>
-                      <span style={{ display: 'block', fontWeight: 600, fontSize: '.88rem' }}>{t.name}</span>
-                      <span style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: '.76rem', color: 'var(--slate-500)' }}>{t.role}</span>
-                    </span>
-                  </figcaption>
-                </figure>
-              ))}
             </div>
           </div>
         </section>
@@ -638,22 +638,18 @@ export default function HomePage() {
                         </li>
                       ))}
                     </ul>
-                    <Link href="/auth/signup" className={`bill-cta ${t === 'free' ? 'bill-cta-ghost' : featured || isTeam ? 'bill-cta-warm' : 'bill-cta-primary'}`}>
-                      {t === 'free'
-                        ? 'Get started free'
-                        : isTeam
-                          ? <><i className="ti ti-users" /> Start Team — £{price * teamSeats}/mo</>
-                          : featured
-                            ? <><i className="ti ti-crown" /> Start my free trial</>
-                            : <><i className="ti ti-arrow-right" /> Start my free trial</>}
-                    </Link>
-                    {(featured || isTeam) && (
-                      <div className="bill-reassure">
-                        <span><i className="ti ti-gift" />7 days free</span>
-                        <span><i className="ti ti-bell" />We email before billing</span>
-                        <span><i className="ti ti-shield-check" />Cancel anytime</span>
-                      </div>
-                    )}
+                    <div className="bill-cta-stack">
+                      <Link href="/auth/signup" className={`bill-cta ${t === 'free' ? 'bill-cta-ghost' : featured || isTeam ? 'bill-cta-warm' : 'bill-cta-primary'}`}>
+                        {t === 'free'
+                          ? <><i className="ti ti-arrow-right" /> Get started free</>
+                          : isTeam
+                            ? <><i className="ti ti-users" /> Start Team — £{price * teamSeats}/mo</>
+                            : featured
+                              ? <><i className="ti ti-bolt" /> Start my free trial</>
+                              : <><i className="ti ti-bolt" /> Start my free trial</>}
+                      </Link>
+                      {t !== 'free' && <span className="bill-cta-sub">2 steps · £{isTeam ? price * teamSeats : price}/mo after Day 7</span>}
+                    </div>
                   </div>
                 )
               })}
@@ -661,7 +657,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ═══ FAQ ═══ */}
+        {/* ═══ FAQ — directly after pricing so objections are answered at decision point ═══ */}
         <section className="section-py paper-2" id="faq" aria-labelledby="faq-h">
           <div className="container">
             <div className="section-head sr">
@@ -694,8 +690,8 @@ export default function HomePage() {
               <h2 className="display" style={{ fontSize: 'clamp(2.1rem, 5vw, 3.4rem)', color: '#fff', marginBottom: 18 }}>Your next client is<br />already out there.</h2>
               <p style={{ fontSize: '1.1rem', color: 'var(--slate-300)', lineHeight: 1.62, marginBottom: 40 }}>Set up your profile in two minutes. We scan the boards, score every lead against your rate and skills, and send your best matches before anyone else applies.</p>
               <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 14 }}>
-                <Link href="/auth/signup" className="btn-p btn-lg">See my matched leads →</Link>
-                <Link href="/auth/login" className="btn-ghost btn-lg">Log in</Link>
+                <Link href="/auth/signup" className="btn-p btn-lg"><i className="ti ti-bolt" aria-hidden="true"></i> Start free — 7 days Pro trial</Link>
+                <Link href="/auth/login" className="btn-ghost btn-lg"><i className="ti ti-login" aria-hidden="true"></i> Log in</Link>
               </div>
             </div>
           </div>
@@ -705,8 +701,8 @@ export default function HomePage() {
       {/* ═══ STICKY CTA BAR ═══ */}
       <div id="sticky-bar" className={stickyVisible ? 'visible' : ''} aria-hidden="true">
         <div className="sticky-inner">
-          <span className="sticky-txt"><b>12 new leads</b> matched today — see yours in minutes.</span>
-          <Link href="/auth/signup" className="btn-p btn-sm">Get started free →</Link>
+          <span className="sticky-txt"><b>12 new leads</b> scored today — yours are waiting.</span>
+          <Link href="/auth/signup" className="btn-p btn-sm"><i className="ti ti-bolt" aria-hidden="true"></i> Start free</Link>
         </div>
       </div>
 

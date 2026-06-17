@@ -41,11 +41,6 @@ const CMP_GROUPS: { label: string; rows: [string, CmpVal, CmpVal, CmpVal, CmpVal
   ]},
 ]
 
-const FAQS = [
-  { q: 'Can I cancel before Day 7?', a: 'Yes — one click in account settings. You pay nothing and keep access until the trial ends.' },
-  { q: 'What payment methods do you accept?', a: 'All major cards via Stripe. No PayPal, no invoicing on paid plans (enterprise excepted).' },
-  { q: 'What if I don\'t use it much?', a: 'Downgrade or cancel any time. There\'s no minimum term on monthly plans.' },
-]
 
 export default function BillingContent() {
   const [profile, setProfile] = useState<Profile | null>(null)
@@ -283,19 +278,6 @@ export default function BillingContent() {
           <i className="ti ti-shield-check" /> No surprises. We will always warn you before charging.
         </div>
       </aside>
-
-      {/* ── FAQ ── */}
-      <div className="bill-faq">
-        <h3 className="bill-faq-title">Common questions</h3>
-        <div className="bill-faq-list">
-          {FAQS.map(f => (
-            <div key={f.q} className="bill-faq-row">
-              <p className="bill-faq-q"><i className="ti ti-help-circle" />{f.q}</p>
-              <p className="bill-faq-a">{f.a}</p>
-            </div>
-          ))}
-        </div>
-      </div>
 
       {/* ── ENTERPRISE ── */}
       <div className="bill-ent">
