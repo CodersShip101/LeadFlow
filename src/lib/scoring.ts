@@ -17,6 +17,7 @@ export interface ScoringLead {
 export interface ScoringProfile {
   skills: string[];
   hourly_rate: number | null;
+  weights?: ScoringWeights | null;
 }
 
 export interface SubScores {
@@ -34,6 +35,8 @@ export interface ScoredLead {
 }
 
 export const WEIGHTS = { skill: 0.45, rate: 0.30, recency: 0.15, detail: 0.10 } as const;
+
+export type ScoringWeights = { skill: number; rate: number; recency: number; detail: number };
 
 const norm = (s: string) => s.trim().toLowerCase();
 
@@ -105,6 +108,7 @@ function detailScore(lead: ScoringLead): number {
 }
 
 export function scoreLead(lead: ScoringLead, profile: ScoringProfile): ScoredLead {
+  const w = profile.weights ?? WEIGHTS;
   const skill = skillMatch(lead, profile);
   const sub: SubScores = {
     skill: skill.score,
@@ -114,10 +118,10 @@ export function scoreLead(lead: ScoringLead, profile: ScoringProfile): ScoredLea
   };
   const score =
     Math.round(
-      (sub.skill * WEIGHTS.skill +
-        sub.rate * WEIGHTS.rate +
-        sub.recency * WEIGHTS.recency +
-        sub.detail * WEIGHTS.detail) *
+      (sub.skill * w.skill +
+        sub.rate * w.rate +
+        sub.recency * w.recency +
+        sub.detail * w.detail) *
         10,
     ) / 10;
 
@@ -152,4 +156,9 @@ export function rankLeads(leads: ScoringLead[], profile: ScoringProfile) {
   return leads
     .map((l) => ({ lead: l, ...scoreLead(l, profile) }))
     .sort((a, b) => b.score - a.score);
+}
+
+/** Alias for external callers that only need the numeric score */
+export function scoreLeadNumeric(lead: ScoringLead, profile: ScoringProfile): number {
+  return scoreLead(lead, profile).score;
 }

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createServerSupabase, createAdminSupabase } from '@/lib/supabase-server'
+import { ENTITLEMENTS, type Tier } from '@/lib/tiers'
 
 export async function GET() {
   const supabase = await createServerSupabase()
@@ -31,6 +32,47 @@ export async function POST(req: Request) {
   }
 
   const admin = createAdminSupabase()
+
+  // Enforce application limit for free users (saved leads don't count)
+  if (status !== 'saved') {
+    const { data: prof } = await admin
+      .from('profiles')
+      .select('subscription_status')
+      .eq('id', user.id)
+      .single()
+
+    const plan = (prof?.subscription_status ?? 'free') as Tier
+    const limit = ENTITLEMENTS[plan].applicationsPerMonth
+
+    if (limit !== 'unlimited') {
+      // Count non-saved applications this calendar month
+      const monthStart = new Date()
+      monthStart.setDate(1); monthStart.setHours(0, 0, 0, 0)
+      const { count } = await admin
+        .from('applications')
+        .select('*', { count: 'exact', head: true })
+        .eq('freelancer_id', user.id)
+        .neq('status', 'saved')
+        .gte('created_at', monthStart.toISOString())
+
+      // Only block if this is a NEW application (not updating an existing one)
+      const { data: existing } = await admin
+        .from('applications')
+        .select('id')
+        .eq('freelancer_id', user.id)
+        .eq('lead_id', lead_id)
+        .maybeSingle()
+
+      if (!existing && (count ?? 0) >= limit) {
+        return NextResponse.json({
+          error: `Free plan limit reached — ${limit} applications per month. Upgrade to continue.`,
+          limitReached: true,
+          limit,
+          used: count,
+        }, { status: 403 })
+      }
+    }
+  }
 
   const { data: existing } = await admin
     .from('applications')

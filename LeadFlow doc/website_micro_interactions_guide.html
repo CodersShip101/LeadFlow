@@ -1,0 +1,375 @@
+
+<style>
+  .guide-root { padding: 1.5rem 0; font-family: var(--font-sans); }
+  .category { margin-bottom: 2rem; }
+  .category-title { font-size: 13px; font-weight: 500; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: .08em; margin: 0 0 1rem; }
+  .demos { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
+  .demo-card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1rem; display: flex; flex-direction: column; gap: 10px; }
+  .demo-label { font-size: 12px; font-weight: 500; color: var(--color-text-secondary); }
+  .demo-area { min-height: 52px; display: flex; align-items: center; justify-content: center; }
+
+  /* === HOVER LIFT === */
+  .lift-btn {
+    padding: 8px 18px; border-radius: var(--border-radius-md);
+    background: var(--color-background-secondary);
+    border: 0.5px solid var(--color-border-secondary);
+    font-size: 14px; cursor: pointer; color: var(--color-text-primary);
+    transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+  }
+  .lift-btn:hover { transform: translateY(-3px); box-shadow: 0 6px 18px rgba(0,0,0,.12); border-color: var(--color-border-primary); }
+  .lift-btn:active { transform: translateY(0); box-shadow: none; }
+
+  /* === SCALE PRESS === */
+  .press-btn {
+    padding: 8px 18px; border-radius: var(--border-radius-md);
+    background: #534AB7; color: #EEEDFE;
+    border: none; font-size: 14px; cursor: pointer;
+    transition: transform 120ms ease, filter 120ms ease;
+  }
+  .press-btn:hover { filter: brightness(1.1); }
+  .press-btn:active { transform: scale(0.94); }
+
+  /* === UNDERLINE SLIDE === */
+  .underline-link {
+    font-size: 15px; color: var(--color-text-primary); text-decoration: none;
+    position: relative; display: inline-block; cursor: pointer;
+  }
+  .underline-link::after {
+    content: ''; position: absolute; bottom: -2px; left: 0; width: 0; height: 1.5px;
+    background: #534AB7; transition: width 240ms ease;
+  }
+  .underline-link:hover::after { width: 100%; }
+
+  /* === ICON NUDGE === */
+  .nudge-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 14px; border-radius: var(--border-radius-md);
+    background: transparent; border: 0.5px solid var(--color-border-secondary);
+    font-size: 14px; cursor: pointer; color: var(--color-text-primary);
+    transition: gap 200ms ease, border-color 200ms ease;
+  }
+  .nudge-btn:hover { gap: 10px; border-color: var(--color-border-primary); }
+
+  /* === FILL SWEEP === */
+  .sweep-btn {
+    padding: 8px 18px; border-radius: var(--border-radius-md);
+    background: transparent; border: 1.5px solid #534AB7;
+    font-size: 14px; cursor: pointer; color: #534AB7;
+    position: relative; overflow: hidden; transition: color 260ms ease;
+  }
+  .sweep-btn::before {
+    content: ''; position: absolute; inset: 0;
+    background: #534AB7; transform: translateX(-100%);
+    transition: transform 260ms ease;
+  }
+  .sweep-btn:hover { color: #EEEDFE; }
+  .sweep-btn:hover::before { transform: translateX(0); }
+  .sweep-btn span { position: relative; }
+
+  /* === TOGGLE === */
+  .toggle-wrap { display: flex; align-items: center; gap: 10px; }
+  .toggle { width: 42px; height: 24px; border-radius: 12px; background: var(--color-background-secondary); border: 0.5px solid var(--color-border-secondary); position: relative; cursor: pointer; transition: background 240ms ease, border-color 240ms ease; }
+  .toggle.on { background: #1D9E75; border-color: #0F6E56; }
+  .toggle-thumb { width: 18px; height: 18px; border-radius: 50%; background: var(--color-background-primary); position: absolute; top: 2px; left: 2px; transition: transform 240ms cubic-bezier(.34,1.56,.64,1); }
+  .toggle.on .toggle-thumb { transform: translateX(18px); }
+  .toggle-label { font-size: 14px; color: var(--color-text-secondary); }
+
+  /* === RIPPLE === */
+  .ripple-btn {
+    padding: 8px 18px; border-radius: var(--border-radius-md);
+    background: #185FA5; color: #E6F1FB;
+    border: none; font-size: 14px; cursor: pointer;
+    position: relative; overflow: hidden;
+  }
+  .ripple { position: absolute; border-radius: 50%; transform: scale(0); background: rgba(255,255,255,0.35); animation: rippleAnim 500ms ease-out forwards; pointer-events: none; }
+  @keyframes rippleAnim { to { transform: scale(4); opacity: 0; } }
+
+  /* === FOCUS RING === */
+  .focus-input {
+    padding: 8px 12px; border-radius: var(--border-radius-md);
+    border: 0.5px solid var(--color-border-secondary);
+    background: var(--color-background-secondary);
+    color: var(--color-text-primary); font-size: 14px;
+    outline: none; transition: border-color 180ms ease, box-shadow 180ms ease;
+    width: 140px;
+  }
+  .focus-input:focus { border-color: #534AB7; box-shadow: 0 0 0 3px rgba(83,74,183,0.18); }
+
+  /* === SKELETON === */
+  .skeleton { border-radius: 6px; background: var(--color-background-secondary); overflow: hidden; position: relative; }
+  .skeleton::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, transparent 25%, rgba(255,255,255,.18) 50%, transparent 75%); animation: shimmer 1.4s infinite; }
+  @keyframes shimmer { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
+
+  /* === TOOLTIP === */
+  .tooltip-wrap { position: relative; display: inline-block; }
+  .tooltip-target { padding: 7px 14px; border-radius: var(--border-radius-md); background: var(--color-background-secondary); border: 0.5px solid var(--color-border-secondary); font-size: 14px; cursor: default; color: var(--color-text-primary); }
+  .tooltip-box { position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%) translateY(4px); background: var(--color-background-primary); border: 0.5px solid var(--color-border-primary); border-radius: var(--border-radius-md); padding: 6px 10px; font-size: 12px; white-space: nowrap; color: var(--color-text-primary); opacity: 0; pointer-events: none; transition: opacity 160ms ease, transform 160ms ease; z-index: 10; }
+  .tooltip-wrap:hover .tooltip-box { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* === SCROLL FADE === */
+  .scroll-item { padding: 8px 12px; border-radius: var(--border-radius-md); background: var(--color-background-secondary); font-size: 13px; color: var(--color-text-secondary); opacity: 0; transform: translateY(14px); transition: opacity 420ms ease, transform 420ms ease; }
+  .scroll-item.visible { opacity: 1; transform: translateY(0); }
+
+  /* === COUNTER === */
+  .counter-val { font-size: 28px; font-weight: 500; color: var(--color-text-primary); font-variant-numeric: tabular-nums; transition: color 200ms; }
+  .counter-btns { display: flex; gap: 8px; }
+  .counter-btn { width: 30px; height: 30px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-secondary); background: transparent; font-size: 18px; cursor: pointer; color: var(--color-text-primary); display: flex; align-items: center; justify-content: center; transition: background 140ms, transform 100ms; }
+  .counter-btn:hover { background: var(--color-background-secondary); }
+  .counter-btn:active { transform: scale(0.90); }
+
+  /* === LIKE HEART === */
+  .heart-btn { background: none; border: none; font-size: 26px; cursor: pointer; transition: transform 200ms cubic-bezier(.34,1.56,.64,1); display: flex; align-items: center; gap: 8px; }
+  .heart-btn:active { transform: scale(1.35); }
+  .heart-icon { transition: color 200ms; }
+  .heart-count { font-size: 14px; color: var(--color-text-secondary); font-variant-numeric: tabular-nums; }
+
+  /* === PROGRESS === */
+  .progress-bar { height: 6px; border-radius: 3px; background: var(--color-background-secondary); overflow: hidden; width: 100%; }
+  .progress-fill { height: 100%; border-radius: 3px; background: #534AB7; width: 0%; transition: width 600ms cubic-bezier(.4,0,.2,1); }
+
+  /* === COLOR SWATCH === */
+  .swatches { display: flex; gap: 8px; }
+  .swatch { width: 28px; height: 28px; border-radius: 50%; cursor: pointer; transition: transform 200ms, outline 120ms; outline: 2px solid transparent; outline-offset: 3px; }
+  .swatch.active { transform: scale(1.18); outline: 2px solid var(--color-border-primary); }
+  .swatch-preview { width: 60px; height: 28px; border-radius: var(--border-radius-md); transition: background 280ms ease; border: 0.5px solid var(--color-border-tertiary); }
+
+  /* === COPY === */
+  .copy-row { display: flex; align-items: center; gap: 8px; }
+  .copy-code { font-family: var(--font-mono); font-size: 12px; background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: 6px 10px; color: var(--color-text-secondary); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .copy-btn { padding: 6px 10px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-secondary); background: transparent; font-size: 12px; cursor: pointer; color: var(--color-text-secondary); transition: color 160ms, border-color 160ms, background 160ms; white-space: nowrap; }
+  .copy-btn.copied { color: #0F6E56; border-color: #0F6E56; background: #E1F5EE; }
+</style>
+
+<div class="guide-root">
+  <h2 class="sr-only">Interactive website micro-interaction demos</h2>
+
+  <div class="category">
+    <p class="category-title">Button &amp; click effects</p>
+    <div class="demos">
+
+      <div class="demo-card">
+        <p class="demo-label">Hover lift</p>
+        <div class="demo-area"><button class="lift-btn">Hover me</button></div>
+      </div>
+
+      <div class="demo-card">
+        <p class="demo-label">Scale press</p>
+        <div class="demo-area"><button class="press-btn">Click me</button></div>
+      </div>
+
+      <div class="demo-card">
+        <p class="demo-label">Fill sweep</p>
+        <div class="demo-area"><button class="sweep-btn"><span>Hover me</span></button></div>
+      </div>
+
+      <div class="demo-card">
+        <p class="demo-label">Ripple click</p>
+        <div class="demo-area"><button class="ripple-btn" id="rippleBtn">Click me</button></div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="category">
+    <p class="category-title">Links &amp; navigation</p>
+    <div class="demos">
+
+      <div class="demo-card">
+        <p class="demo-label">Underline slide</p>
+        <div class="demo-area"><span class="underline-link">Hover this link</span></div>
+      </div>
+
+      <div class="demo-card">
+        <p class="demo-label">Icon nudge (arrow)</p>
+        <div class="demo-area">
+          <button class="nudge-btn">Read more <i class="ti ti-arrow-right" aria-hidden="true"></i></button>
+        </div>
+      </div>
+
+      <div class="demo-card">
+        <p class="demo-label">Tooltip on hover</p>
+        <div class="demo-area">
+          <div class="tooltip-wrap">
+            <div class="tooltip-target">Hover for tip</div>
+            <div class="tooltip-box">Saved 3 mins ago ✓</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="category">
+    <p class="category-title">Form &amp; input</p>
+    <div class="demos">
+
+      <div class="demo-card">
+        <p class="demo-label">Focus ring</p>
+        <div class="demo-area"><input class="focus-input" placeholder="Click to focus…" /></div>
+      </div>
+
+      <div class="demo-card">
+        <p class="demo-label">Toggle switch</p>
+        <div class="demo-area">
+          <div class="toggle-wrap">
+            <div class="toggle" id="tog" onclick="this.classList.toggle('on'); document.getElementById('tog-lbl').textContent = this.classList.contains('on') ? 'On' : 'Off';">
+              <div class="toggle-thumb"></div>
+            </div>
+            <span class="toggle-label" id="tog-lbl">Off</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="demo-card">
+        <p class="demo-label">Copy to clipboard</p>
+        <div class="demo-area" style="width:100%">
+          <div class="copy-row">
+            <div class="copy-code">npm install @acme/ui</div>
+            <button class="copy-btn" id="copyBtn" onclick="
+              const b = document.getElementById('copyBtn');
+              b.textContent = 'Copied!';
+              b.classList.add('copied');
+              setTimeout(() => { b.textContent = 'Copy'; b.classList.remove('copied'); }, 1800);
+            ">Copy</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="category">
+    <p class="category-title">Feedback &amp; state</p>
+    <div class="demos">
+
+      <div class="demo-card">
+        <p class="demo-label">Like / heart</p>
+        <div class="demo-area">
+          <button class="heart-btn" id="heartBtn" onclick="
+            const b = document.getElementById('heartBtn');
+            const liked = b.dataset.liked === '1';
+            b.dataset.liked = liked ? '0' : '1';
+            const icon = b.querySelector('.heart-icon');
+            const cnt = b.querySelector('.heart-count');
+            icon.textContent = liked ? '🤍' : '❤️';
+            cnt.textContent = (parseInt(cnt.textContent) + (liked ? -1 : 1));
+            b.style.transform = 'scale(1.35)';
+            setTimeout(() => b.style.transform = '', 200);
+          " data-liked="0">
+            <span class="heart-icon">🤍</span>
+            <span class="heart-count">142</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="demo-card">
+        <p class="demo-label">Animated counter</p>
+        <div class="demo-area" style="flex-direction: column; gap: 10px;">
+          <div class="counter-val" id="counterVal">0</div>
+          <div class="counter-btns">
+            <button class="counter-btn" onclick="
+              const el = document.getElementById('counterVal');
+              const v = parseInt(el.textContent) - 1;
+              el.textContent = v;
+              el.style.color = v < 0 ? '#E24B4A' : 'var(--color-text-primary)';
+            ">−</button>
+            <button class="counter-btn" onclick="
+              const el = document.getElementById('counterVal');
+              const v = parseInt(el.textContent) + 1;
+              el.textContent = v;
+              el.style.color = v > 0 ? '#1D9E75' : 'var(--color-text-primary)';
+            ">+</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="demo-card">
+        <p class="demo-label">Progress bar</p>
+        <div class="demo-area" style="flex-direction: column; gap: 12px; width: 100%;">
+          <div class="progress-bar"><div class="progress-fill" id="progFill"></div></div>
+          <button class="lift-btn" style="font-size:13px;" onclick="
+            const fill = document.getElementById('progFill');
+            const current = parseInt(fill.style.width) || 0;
+            const next = current >= 100 ? 0 : Math.min(current + 25, 100);
+            fill.style.width = next + '%';
+          ">Advance →</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="category">
+    <p class="category-title">Visual &amp; layout polish</p>
+    <div class="demos">
+
+      <div class="demo-card">
+        <p class="demo-label">Skeleton loading</p>
+        <div class="demo-area" style="flex-direction: column; gap: 8px; width: 100%;">
+          <div class="skeleton" style="height: 14px; width: 80%;"></div>
+          <div class="skeleton" style="height: 14px; width: 60%;"></div>
+          <div class="skeleton" style="height: 14px; width: 70%;"></div>
+        </div>
+      </div>
+
+      <div class="demo-card">
+        <p class="demo-label">Scroll fade-in</p>
+        <div class="demo-area" style="flex-direction: column; gap: 6px; width: 100%;" id="scrollArea">
+          <div class="scroll-item" id="si1">Item one appears</div>
+          <div class="scroll-item" id="si2">Item two follows</div>
+          <div class="scroll-item" id="si3">Item three joins</div>
+          <button class="lift-btn" style="font-size:12px; margin-top:4px;" onclick="
+            ['si1','si2','si3'].forEach((id,i) => {
+              const el = document.getElementById(id);
+              el.classList.remove('visible');
+              setTimeout(() => el.classList.add('visible'), i * 130 + 40);
+            });
+          ">Replay</button>
+        </div>
+      </div>
+
+      <div class="demo-card">
+        <p class="demo-label">Color swatch select</p>
+        <div class="demo-area" style="flex-direction: column; gap: 10px;">
+          <div class="swatches" id="swatchRow">
+            <div class="swatch active" style="background:#534AB7" data-col="#534AB7" onclick="pickSwatch(this)"></div>
+            <div class="swatch" style="background:#1D9E75" data-col="#1D9E75" onclick="pickSwatch(this)"></div>
+            <div class="swatch" style="background:#D85A30" data-col="#D85A30" onclick="pickSwatch(this)"></div>
+            <div class="swatch" style="background:#BA7517" data-col="#BA7517" onclick="pickSwatch(this)"></div>
+            <div class="swatch" style="background:#888780" data-col="#888780" onclick="pickSwatch(this)"></div>
+          </div>
+          <div class="swatch-preview" id="swatchPreview" style="background:#534AB7;"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+function pickSwatch(el) {
+  document.querySelectorAll('.swatch').forEach(s => s.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('swatchPreview').style.background = el.dataset.col;
+}
+
+document.getElementById('rippleBtn').addEventListener('click', function(e) {
+  const btn = this;
+  const circle = document.createElement('span');
+  const diameter = Math.max(btn.clientWidth, btn.clientHeight);
+  const rect = btn.getBoundingClientRect();
+  circle.style.cssText = `width:${diameter}px;height:${diameter}px;left:${e.clientX-rect.left-diameter/2}px;top:${e.clientY-rect.top-diameter/2}px;`;
+  circle.classList.add('ripple');
+  btn.querySelectorAll('.ripple').forEach(r => r.remove());
+  btn.appendChild(circle);
+});
+
+setTimeout(() => {
+  ['si1','si2','si3'].forEach((id,i) => {
+    setTimeout(() => document.getElementById(id).classList.add('visible'), i * 130 + 300);
+  });
+}, 600);
+
+setTimeout(() => { document.getElementById('progFill').style.width = '50%'; }, 400);
+</script>

@@ -1,0 +1,525 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500;12..96,600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0b0b0d;
+  --s1:#111114;
+  --s2:#16161a;
+  --s3:#1c1c22;
+  --s4:#222229;
+  --b1:rgba(255,255,255,0.05);
+  --b2:rgba(255,255,255,0.09);
+  --b3:rgba(255,255,255,0.15);
+  --t1:#f2f0eb;
+  --t2:#8c8a9a;
+  --t3:#48464f;
+  --acc:#c2f23a;
+  --acc2:rgba(194,242,58,0.08);
+  --acc3:rgba(194,242,58,0.15);
+  --amber:#f5a623;
+  --amberD:rgba(245,166,35,0.1);
+  --blue:#7aabff;
+  --blueD:rgba(122,171,255,0.1);
+  --red:#ff5f5f;
+  --display:'Syne',sans-serif;
+  --body:'Bricolage Grotesque',sans-serif;
+  --serif:'Instrument Serif',serif;
+  --r:10px;--rL:14px;
+}
+body{background:var(--bg);color:var(--t1);font-family:var(--body);font-size:13px;line-height:1.5;-webkit-font-smoothing:antialiased}
+
+.shell{display:grid;grid-template-columns:200px 1fr 252px;min-height:820px;max-height:820px;overflow:hidden}
+
+/* ────── SIDEBAR ────── */
+.sidebar{background:var(--s1);border-right:1px solid var(--b1);padding:0;display:flex;flex-direction:column}
+
+.sb-brand{padding:22px 20px 18px;border-bottom:1px solid var(--b1)}
+.sb-wordmark{font-family:var(--display);font-size:18px;font-weight:800;letter-spacing:-.5px;color:var(--t1);line-height:1}
+.sb-wordmark span{color:var(--acc)}
+.sb-tagline{font-family:var(--body);font-size:10px;color:var(--t3);letter-spacing:.06em;text-transform:uppercase;margin-top:3px}
+
+.sb-nav{padding:14px 10px;flex:1;display:flex;flex-direction:column;gap:1px}
+.sb-label{font-family:var(--display);font-size:9.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--t3);padding:10px 10px 4px;margin-top:4px}
+.sb-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:9px;color:var(--t2);font-family:var(--body);font-size:12.5px;font-weight:400;cursor:pointer;transition:all .15s;position:relative}
+.sb-item:hover{background:var(--s3);color:var(--t1)}
+.sb-item.active{background:var(--acc2);color:var(--acc)}
+.sb-item.active i{color:var(--acc)}
+.sb-item i{font-size:16px;flex-shrink:0;color:var(--t3)}
+.sb-item:hover i{color:var(--t2)}
+.chip{margin-left:auto;font-family:var(--display);font-size:9px;font-weight:700;padding:2px 6px;border-radius:8px;letter-spacing:.04em}
+.chip-g{background:var(--acc);color:#071200}
+.chip-d{background:var(--s4);color:var(--t3)}
+
+.sb-spacer{flex:1}
+.sb-footer{padding:14px 14px;border-top:1px solid var(--b1);margin:0 6px 8px}
+.sb-user{display:flex;align-items:center;gap:9px}
+.sb-ava{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#1a2e0a,#3a5e1a);display:flex;align-items:center;justify-content:center;font-family:var(--display);font-size:11px;font-weight:700;color:var(--acc);border:1.5px solid rgba(194,242,58,.2);flex-shrink:0}
+.sb-uinfo{flex:1;min-width:0}
+.sb-uname{font-family:var(--body);font-size:12px;font-weight:500;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sb-uplan{font-family:var(--display);font-size:9px;font-weight:700;letter-spacing:.06em;color:var(--acc);text-transform:uppercase}
+
+/* ────── MAIN ────── */
+.main{overflow-y:auto;background:var(--bg);display:flex;flex-direction:column}
+
+/* HERO HEADER — big typographic moment */
+.hero{padding:28px 28px 0;position:relative}
+.hero-eyebrow{font-family:var(--display);font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--t3);margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.hero-eyebrow::after{content:'';flex:0 0 40px;height:1px;background:var(--b2)}
+.hero-heading{font-family:var(--display);font-size:34px;font-weight:800;letter-spacing:-1.5px;line-height:.95;color:var(--t1);margin-bottom:4px}
+.hero-heading .accent{color:var(--acc);font-style:normal}
+.hero-heading .serif-word{font-family:var(--serif);font-style:italic;font-weight:400;font-size:38px;letter-spacing:-.5px;color:var(--t2)}
+.hero-sub{font-family:var(--body);font-size:12px;color:var(--t3);margin-top:8px}
+.hero-actions{display:flex;gap:8px;margin-top:16px;align-items:center}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;font-family:var(--display);font-size:11px;font-weight:700;letter-spacing:.04em;padding:8px 16px;border-radius:9px;cursor:pointer;transition:all .15s;border:none;text-transform:uppercase}
+.btn-primary{background:var(--acc);color:#071200}
+.btn-primary:hover{background:#d4ff4a}
+.btn-primary:active{transform:scale(.97)}
+.btn-ghost{background:transparent;border:1px solid var(--b2);color:var(--t2)}
+.btn-ghost:hover{border-color:var(--b3);color:var(--t1);background:var(--s2)}
+.btn i{font-size:14px}
+
+/* SCRAPE STRIP */
+.scrape{margin:20px 28px 0;background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);padding:9px 14px;display:flex;align-items:center;gap:10px}
+.src-pip{font-family:var(--display);font-size:9px;font-weight:700;letter-spacing:.06em;padding:2px 7px;border-radius:4px}
+.pip-ok{background:rgba(194,242,58,.1);color:var(--acc)}
+.pip-on{background:rgba(245,166,35,.12);color:var(--amber);animation:blink .9s ease-in-out infinite}
+.pip-q{background:var(--s4);color:var(--t3)}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.4}}
+.scrape-track{flex:1;height:2px;background:var(--s4);border-radius:2px;overflow:hidden}
+.scrape-fill{height:100%;width:67%;background:var(--acc);border-radius:2px}
+.scrape-meta{font-family:var(--body);font-size:11px;color:var(--t3);white-space:nowrap}
+
+/* STAT CARDS */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:16px 28px 0}
+.stat{background:var(--s1);border:1px solid var(--b1);border-radius:var(--rL);padding:14px 16px;transition:border-color .15s;overflow:hidden;position:relative}
+.stat:hover{border-color:var(--b2)}
+.stat-lbl{font-family:var(--display);font-size:9.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3)}
+.stat-num{font-family:var(--display);font-size:36px;font-weight:800;letter-spacing:-2px;line-height:1;margin-top:3px;color:var(--t1)}
+.stat-num.g{color:var(--acc)}
+.stat-row{display:flex;align-items:flex-end;justify-content:space-between}
+.stat-spark{width:56px;height:26px}
+.stat-delta{font-family:var(--body);font-size:10.5px;margin-top:5px;display:flex;align-items:center;gap:3px}
+.dg{color:var(--acc)}.dn{color:var(--t3)}
+
+/* FILTER ROW */
+.filter-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:16px 28px 0}
+.search{position:relative;flex:0 0 176px}
+.search i{position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:14px;color:var(--t3);pointer-events:none}
+.search input{width:100%;background:var(--s2);border:1px solid var(--b1);border-radius:20px;padding:6px 12px 6px 30px;font-size:12px;color:var(--t1);outline:none;font-family:var(--body);transition:border-color .15s}
+.search input:focus{border-color:var(--b3)}
+.search input::placeholder{color:var(--t3)}
+.fsep{width:1px;height:18px;background:var(--b1);flex-shrink:0}
+.fpill{font-family:var(--display);font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:5px 11px;border-radius:20px;border:1px solid var(--b1);background:transparent;color:var(--t3);cursor:pointer;transition:all .15s;white-space:nowrap}
+.fpill:hover{border-color:var(--b2);color:var(--t1)}
+.fpill.on{background:var(--acc2);border-color:rgba(194,242,58,.28);color:var(--acc)}
+.sort-sel{background:var(--s2);border:1px solid var(--b1);color:var(--t2);font-family:var(--display);font-size:10px;font-weight:700;letter-spacing:.04em;padding:5px 10px;border-radius:20px;outline:none;cursor:pointer;margin-left:auto;text-transform:uppercase}
+
+/* ────── LEAD CARDS ────── */
+.leads{padding:12px 28px 40px;display:flex;flex-direction:column;gap:6px}
+.card{background:var(--s1);border:1px solid var(--b1);border-radius:var(--rL);padding:15px 18px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.card:hover{border-color:var(--b2);background:var(--s2);transform:translateY(-1px)}
+.card.int{border-left:2px solid var(--acc)}
+.card.int::before{content:'';position:absolute;left:0;top:0;bottom:0;width:90px;background:linear-gradient(to right,rgba(194,242,58,.03),transparent);pointer-events:none}
+
+.ct{display:flex;align-items:center;gap:7px;margin-bottom:10px}
+.sbadge{font-family:var(--display);font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:2px 8px;border-radius:4px;flex-shrink:0}
+.b-reddit{background:rgba(255,90,20,.14);color:#ff7545}
+.b-reed{background:rgba(122,171,255,.12);color:var(--blue)}
+.b-indeed{background:rgba(245,166,35,.12);color:var(--amber)}
+.b-cwjobs{background:rgba(160,120,255,.12);color:#b08fff}
+.bnew{font-family:var(--display);font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:4px;background:rgba(194,242,58,.1);color:var(--acc)}
+.ct-r{margin-left:auto;display:flex;align-items:center;gap:6px}
+.mscore{font-family:var(--display);font-size:10px;font-weight:800;letter-spacing:.04em;padding:3px 9px;border-radius:6px}
+.ms-hi{background:rgba(194,242,58,.1);color:var(--acc)}
+.ms-mid{background:rgba(245,166,35,.1);color:var(--amber)}
+.ibtn{width:28px;height:28px;border-radius:8px;border:1px solid var(--b1);background:transparent;color:var(--t3);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;font-size:14px}
+.ibtn:hover{border-color:var(--b2);color:var(--t2);background:var(--s3)}
+.ibtn:active{transform:scale(.92)}
+.ibtn.bk{color:var(--blue);border-color:rgba(122,171,255,.25);background:var(--blueD)}
+
+/* CARD TITLE — Syne display font */
+.card-title{font-family:var(--display);font-size:13.5px;font-weight:700;letter-spacing:-.3px;color:var(--t1);line-height:1.25;margin-bottom:5px}
+.card-desc{font-family:var(--body);font-size:11.5px;color:var(--t2);line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:10px;font-weight:300}
+
+.cmeta{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.mpill{font-family:var(--body);font-size:11px;padding:3px 8px;border-radius:6px;background:var(--s3);color:var(--t2);display:flex;align-items:center;gap:4px}
+.mpill i{font-size:12px}
+.mpill.bud{background:rgba(194,242,58,.07);color:var(--acc);font-weight:500}
+.mpill.loc i{color:var(--blue)}
+.mpill.typ i{color:var(--amber)}
+
+.cf{display:flex;align-items:center;justify-content:space-between;margin-top:11px;padding-top:11px;border-top:1px solid var(--b1)}
+.skills{display:flex;gap:4px;flex-wrap:wrap}
+.sk{font-family:var(--display);font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:4px;background:var(--s3);color:var(--t3);border:1px solid var(--b1)}
+.sk.m{background:rgba(194,242,58,.08);color:var(--acc);border-color:rgba(194,242,58,.18)}
+.cf-r{display:flex;align-items:center;gap:8px}
+.btn-int{font-family:var(--display);font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:5px 13px;border-radius:8px;border:1px solid rgba(194,242,58,.25);background:var(--acc2);color:var(--acc);cursor:pointer;transition:all .15s}
+.btn-int:hover{background:var(--acc3)}
+.btn-int:active{transform:scale(.96)}
+.btn-int.on{background:var(--acc);color:#071200;border-color:var(--acc)}
+.tago{font-family:var(--body);font-size:10.5px;color:var(--t3)}
+
+.card.locked{opacity:.4;pointer-events:none}
+
+/* UPGRADE BANNER */
+.upg{border:1px dashed rgba(194,242,58,.18);border-radius:var(--rL);padding:16px 20px;background:linear-gradient(120deg,rgba(194,242,58,.035),transparent 60%);display:flex;align-items:center;justify-content:space-between;gap:12px}
+.upg-left{}
+.upg-eyebrow{font-family:var(--display);font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--t3);margin-bottom:4px}
+.upg-title{font-family:var(--display);font-size:14px;font-weight:800;letter-spacing:-.3px;color:var(--t1)}
+.upg-title span{color:var(--acc)}
+.upg-sub{font-family:var(--body);font-size:11px;color:var(--t3);margin-top:3px}
+.upg-sub b{color:var(--t2);font-weight:400}
+.btn-upg{font-family:var(--display);font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;background:var(--acc);color:#071200;padding:9px 18px;border-radius:9px;border:none;cursor:pointer;white-space:nowrap}
+
+/* ────── RIGHT PANEL ────── */
+.panel{background:var(--s1);border-left:1px solid var(--b1);padding:22px 18px;overflow-y:auto;display:flex;flex-direction:column;gap:24px}
+.phead{font-family:var(--display);font-size:9.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--t3);margin-bottom:12px}
+
+/* CALENDAR */
+.cal-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.cal-mo{font-family:var(--display);font-size:13px;font-weight:700;letter-spacing:-.2px;color:var(--t1)}
+.cal-navs{display:flex;gap:6px}
+.cal-navs i{font-size:15px;color:var(--t3);cursor:pointer;transition:color .15s}
+.cal-navs i:hover{color:var(--t2)}
+.cgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px}
+.cdow{font-family:var(--display);font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--t3);text-align:center;padding:2px 0;margin-bottom:2px}
+.cday{font-family:var(--body);font-size:11px;text-align:center;padding:5px 2px;border-radius:6px;color:var(--t2);cursor:pointer;position:relative;transition:all .12s}
+.cday:hover{background:var(--s3);color:var(--t1)}
+.cday.dot::after{content:'';position:absolute;bottom:2px;left:50%;transform:translateX(-50%);width:3px;height:3px;border-radius:50%;background:var(--acc)}
+.cday.today{background:var(--acc);color:#071200;font-weight:600}
+.cday.today::after{background:#071200}
+.cday.empty{pointer-events:none}
+
+/* SKILLS CLOUD */
+.cloud{display:flex;flex-wrap:wrap;gap:5px}
+.cpill{font-family:var(--display);font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:4px 10px;border-radius:20px;border:1px solid var(--b1);color:var(--t3);cursor:pointer;background:transparent;transition:all .15s}
+.cpill:hover{border-color:var(--b2);color:var(--t2)}
+.cpill.on{background:var(--acc2);border-color:rgba(194,242,58,.25);color:var(--acc)}
+
+/* ACTIVITY */
+.acts{display:flex;flex-direction:column}
+.act{display:flex;gap:9px;padding:9px 0;border-bottom:1px solid var(--b1);align-items:flex-start}
+.act:last-child{border-bottom:none}
+.aico{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;margin-top:1px}
+.aico.g{background:rgba(194,242,58,.1);color:var(--acc)}
+.aico.a{background:var(--amberD);color:var(--amber)}
+.aico.b{background:var(--blueD);color:var(--blue)}
+.act-body{}
+.act-txt{font-family:var(--body);font-size:11.5px;color:var(--t2);line-height:1.4}
+.act-txt strong{font-family:var(--display);font-size:11px;font-weight:700;color:var(--t1);letter-spacing:-.1px}
+.act-time{font-family:var(--body);font-size:10px;color:var(--t3);margin-top:2px}
+
+svg.spark path{fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+</style>
+
+<div class="shell">
+
+<!-- ── SIDEBAR ── -->
+<div class="sidebar">
+  <div class="sb-brand">
+    <div class="sb-wordmark">Lead<span>flow</span></div>
+    <div class="sb-tagline">UK freelance intelligence</div>
+  </div>
+  <div class="sb-nav">
+    <div class="sb-label">Workspace</div>
+    <div class="sb-item active"><i class="ti ti-layout-dashboard"></i>Feed<span class="chip chip-g">14</span></div>
+    <div class="sb-item"><i class="ti ti-bookmark"></i>Saved<span class="chip chip-d">6</span></div>
+    <div class="sb-item"><i class="ti ti-send"></i>Applications<span class="chip chip-d">3</span></div>
+    <div class="sb-item"><i class="ti ti-chart-line"></i>Analytics</div>
+    <div class="sb-label">Tools</div>
+    <div class="sb-item"><i class="ti ti-calendar-event"></i>Calendar</div>
+    <div class="sb-item"><i class="ti ti-message-2"></i>Messages</div>
+    <div class="sb-spacer"></div>
+    <div class="sb-item"><i class="ti ti-settings"></i>Settings</div>
+    <div class="sb-item"><i class="ti ti-help-circle"></i>Help</div>
+  </div>
+  <div class="sb-footer">
+    <div class="sb-user">
+      <div class="sb-ava">JD</div>
+      <div class="sb-uinfo">
+        <div class="sb-uname">James Dalton</div>
+        <div class="sb-uplan">Pro plan</div>
+      </div>
+      <i class="ti ti-dots" style="font-size:16px;color:var(--t3);cursor:pointer"></i>
+    </div>
+  </div>
+</div>
+
+<!-- ── MAIN ── -->
+<div class="main">
+
+  <!-- HERO HEADER — big typographic moment -->
+  <div class="hero">
+    <div class="hero-eyebrow">Monday, 8 June 2026</div>
+    <div class="hero-heading">
+      14 <span class="serif-word">fresh</span><br>
+      <span class="accent">leads</span> today
+    </div>
+    <div class="hero-sub">Scraped from 6 UK sources · updated 2 min ago</div>
+    <div class="hero-actions">
+      <button class="btn btn-primary"><i class="ti ti-plus"></i>New alert</button>
+      <button class="btn btn-ghost"><i class="ti ti-adjustments-horizontal"></i>Filters</button>
+    </div>
+  </div>
+
+  <!-- SCRAPE STRIP -->
+  <div class="scrape">
+    <i class="ti ti-radar" style="font-size:14px;color:var(--acc)"></i>
+    <span class="src-pip pip-ok">Reddit</span>
+    <span class="src-pip pip-ok">Reed</span>
+    <span class="src-pip pip-ok">Remotive</span>
+    <span class="src-pip pip-ok">WWR</span>
+    <span class="src-pip pip-on">Indeed</span>
+    <span class="src-pip pip-q">CWJobs</span>
+    <div class="scrape-track"><div class="scrape-fill"></div></div>
+    <span class="scrape-meta">5 of 6 · 14 found</span>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-lbl">New today</div>
+      <div class="stat-row">
+        <div class="stat-num g">14</div>
+        <svg class="stat-spark spark" viewBox="0 0 56 26" preserveAspectRatio="none">
+          <path d="M2 22 L8 18 L16 20 L24 13 L32 15 L40 7 L48 9 L54 3" stroke="#c2f23a" opacity=".65"/>
+        </svg>
+      </div>
+      <div class="stat-delta dg"><i class="ti ti-arrow-up" style="font-size:10px"></i>+6 vs yesterday</div>
+    </div>
+    <div class="stat">
+      <div class="stat-lbl">Applied</div>
+      <div class="stat-row">
+        <div class="stat-num">3</div>
+        <svg class="stat-spark spark" viewBox="0 0 56 26" preserveAspectRatio="none">
+          <path d="M2 20 L10 20 L18 16 L26 16 L34 11 L42 11 L50 8 L54 6" stroke="#7aabff" opacity=".6"/>
+        </svg>
+      </div>
+      <div class="stat-delta dn">2 awaiting reply</div>
+    </div>
+    <div class="stat">
+      <div class="stat-lbl">Saved</div>
+      <div class="stat-row">
+        <div class="stat-num">6</div>
+        <svg class="stat-spark spark" viewBox="0 0 56 26" preserveAspectRatio="none">
+          <path d="M2 22 L10 19 L18 17 L26 17 L34 13 L42 13 L50 10 L54 10" stroke="#7aabff" opacity=".45"/>
+        </svg>
+      </div>
+      <div class="stat-delta dn">review backlog</div>
+    </div>
+    <div class="stat">
+      <div class="stat-lbl">Won this month</div>
+      <div class="stat-row">
+        <div class="stat-num g">1</div>
+        <svg class="stat-spark spark" viewBox="0 0 56 26" preserveAspectRatio="none">
+          <path d="M2 24 L10 24 L18 24 L26 13 L34 13 L42 13 L50 13 L54 13" stroke="#c2f23a" opacity=".65"/>
+        </svg>
+      </div>
+      <div class="stat-delta dg"><i class="ti ti-trophy" style="font-size:10px"></i>£3,200 earned</div>
+    </div>
+  </div>
+
+  <!-- FILTER ROW -->
+  <div class="filter-row">
+    <div class="search">
+      <i class="ti ti-search"></i>
+      <input placeholder="Search leads…">
+    </div>
+    <div class="fsep"></div>
+    <button class="fpill on">React</button>
+    <button class="fpill">TypeScript</button>
+    <button class="fpill">Node.js</button>
+    <button class="fpill">Figma</button>
+    <div class="fsep"></div>
+    <button class="fpill">Contract</button>
+    <button class="fpill">£500+</button>
+    <select class="sort-sel">
+      <option>Newest</option>
+      <option>Best match</option>
+      <option>Top budget</option>
+    </select>
+  </div>
+
+  <!-- LEAD CARDS -->
+  <div class="leads">
+
+    <div class="card int">
+      <div class="ct">
+        <span class="sbadge b-reddit">Reddit</span>
+        <span class="bnew">New</span>
+        <div class="ct-r">
+          <span class="mscore ms-hi">9 / 10</span>
+          <button class="ibtn bk"><i class="ti ti-bookmark-filled"></i></button>
+          <button class="ibtn"><i class="ti ti-dots"></i></button>
+        </div>
+      </div>
+      <div class="card-title">Senior React Developer — SaaS dashboard redesign, 3-month contract</div>
+      <div class="card-desc">Looking for an experienced React dev to overhaul our analytics dashboard. Complex state management and data visualisation required. Full-time hours, fully remote UK.</div>
+      <div class="cmeta">
+        <span class="mpill bud"><i class="ti ti-currency-pound"></i>600–800/day</span>
+        <span class="mpill loc"><i class="ti ti-map-pin"></i>Remote UK</span>
+        <span class="mpill typ"><i class="ti ti-file-description"></i>Contract</span>
+      </div>
+      <div class="cf">
+        <div class="skills">
+          <span class="sk m">React</span><span class="sk m">TypeScript</span><span class="sk">Redux</span><span class="sk">D3.js</span>
+        </div>
+        <div class="cf-r">
+          <button class="btn-int on"><i class="ti ti-check" style="font-size:11px"></i>Interested</button>
+          <span class="tago">2h ago</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ct">
+        <span class="sbadge b-reed">Reed</span>
+        <span class="bnew">New</span>
+        <div class="ct-r">
+          <span class="mscore ms-mid">7 / 10</span>
+          <button class="ibtn"><i class="ti ti-bookmark"></i></button>
+          <button class="ibtn"><i class="ti ti-dots"></i></button>
+        </div>
+      </div>
+      <div class="card-title">Freelance UI/UX Designer — fintech startup, day rate + equity</div>
+      <div class="card-desc">Early-stage fintech looking for a designer to own the product end-to-end. Work directly with the founding team. Figma essential, strong systems thinking a big plus.</div>
+      <div class="cmeta">
+        <span class="mpill bud"><i class="ti ti-currency-pound"></i>400–550/day</span>
+        <span class="mpill loc"><i class="ti ti-map-pin"></i>London / Remote</span>
+        <span class="mpill typ"><i class="ti ti-file-description"></i>Contract</span>
+      </div>
+      <div class="cf">
+        <div class="skills">
+          <span class="sk m">Figma</span><span class="sk">User research</span><span class="sk">Prototyping</span>
+        </div>
+        <div class="cf-r">
+          <button class="btn-int">Interested</button>
+          <span class="tago">5h ago</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ct">
+        <span class="sbadge b-indeed">Indeed</span>
+        <div class="ct-r">
+          <span class="mscore ms-hi">8 / 10</span>
+          <button class="ibtn"><i class="ti ti-bookmark"></i></button>
+          <button class="ibtn"><i class="ti ti-dots"></i></button>
+        </div>
+      </div>
+      <div class="card-title">Node.js Backend Engineer — 6-month healthcare project, SC clearance bonus</div>
+      <div class="card-desc">Greenfield healthcare platform needs a senior backend engineer. REST APIs, PostgreSQL, AWS required. SC clearance a bonus but not mandatory. Fully remote.</div>
+      <div class="cmeta">
+        <span class="mpill bud"><i class="ti ti-currency-pound"></i>500/day</span>
+        <span class="mpill loc"><i class="ti ti-map-pin"></i>Remote UK</span>
+        <span class="mpill typ"><i class="ti ti-refresh"></i>6-month</span>
+      </div>
+      <div class="cf">
+        <div class="skills">
+          <span class="sk m">Node.js</span><span class="sk">PostgreSQL</span><span class="sk">AWS</span><span class="sk">REST API</span>
+        </div>
+        <div class="cf-r">
+          <button class="btn-int">Interested</button>
+          <span class="tago">1d ago</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="upg">
+      <div class="upg-left">
+        <div class="upg-eyebrow">Pro unlock</div>
+        <div class="upg-title"><span>11 more leads</span> available now</div>
+        <div class="upg-sub">Includes <b>CWJobs React role · £650/day</b> and 10 others</div>
+      </div>
+      <button class="btn-upg">Unlock Pro →</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── RIGHT PANEL ── -->
+<div class="panel">
+
+  <div>
+    <div class="phead">June 2026</div>
+    <div class="cal-hd">
+      <span class="cal-mo">June 2026</span>
+      <div class="cal-navs"><i class="ti ti-chevron-left"></i><i class="ti ti-chevron-right"></i></div>
+    </div>
+    <div class="cgrid">
+      <div class="cdow">M</div><div class="cdow">T</div><div class="cdow">W</div><div class="cdow">T</div><div class="cdow">F</div><div class="cdow">S</div><div class="cdow">S</div>
+      <div class="cday empty"></div><div class="cday empty"></div><div class="cday empty"></div><div class="cday empty"></div><div class="cday empty"></div><div class="cday">1</div><div class="cday">2</div>
+      <div class="cday dot">3</div><div class="cday dot">4</div><div class="cday dot">5</div><div class="cday dot">6</div><div class="cday">7</div><div class="cday today dot">8</div><div class="cday">9</div>
+      <div class="cday">10</div><div class="cday">11</div><div class="cday dot">12</div><div class="cday">13</div><div class="cday">14</div><div class="cday">15</div><div class="cday">16</div>
+      <div class="cday">17</div><div class="cday">18</div><div class="cday">19</div><div class="cday">20</div><div class="cday">21</div><div class="cday">22</div><div class="cday">23</div>
+      <div class="cday">24</div><div class="cday">25</div><div class="cday">26</div><div class="cday">27</div><div class="cday">28</div><div class="cday">29</div><div class="cday">30</div>
+    </div>
+  </div>
+
+  <div>
+    <div class="phead">Filter by skill</div>
+    <div class="cloud">
+      <button class="cpill on">React</button>
+      <button class="cpill">TypeScript</button>
+      <button class="cpill">Node.js</button>
+      <button class="cpill">Figma</button>
+      <button class="cpill">Python</button>
+      <button class="cpill">AWS</button>
+      <button class="cpill">Next.js</button>
+      <button class="cpill">Vue</button>
+      <button class="cpill">UX</button>
+    </div>
+  </div>
+
+  <div>
+    <div class="phead">Recent activity</div>
+    <div class="acts">
+      <div class="act">
+        <div class="aico g"><i class="ti ti-sparkles"></i></div>
+        <div class="act-body">
+          <div class="act-txt"><strong>14 new leads</strong> across 6 sources</div>
+          <div class="act-time">2 min ago</div>
+        </div>
+      </div>
+      <div class="act">
+        <div class="aico a"><i class="ti ti-heart"></i></div>
+        <div class="act-body">
+          <div class="act-txt">Interested in <strong>React SaaS role</strong></div>
+          <div class="act-time">2 hours ago</div>
+        </div>
+      </div>
+      <div class="act">
+        <div class="aico b"><i class="ti ti-bookmark"></i></div>
+        <div class="act-body">
+          <div class="act-txt">Saved <strong>Fintech UI Designer</strong></div>
+          <div class="act-time">5 hours ago</div>
+        </div>
+      </div>
+      <div class="act">
+        <div class="aico a"><i class="ti ti-send"></i></div>
+        <div class="act-body">
+          <div class="act-txt">Applied to <strong>E-comm React role</strong></div>
+          <div class="act-time">Yesterday</div>
+        </div>
+      </div>
+      <div class="act">
+        <div class="aico g"><i class="ti ti-trophy"></i></div>
+        <div class="act-body">
+          <div class="act-txt">Won <strong>E-commerce redesign</strong> · £3,200</div>
+          <div class="act-time">2 days ago</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabase } from '@/lib/supabase-server'
-import { rankLeads, type ScoringLead } from '@/lib/scoring'
+import { rankLeads, type ScoringLead, type ScoringWeights } from '@/lib/scoring'
 import { segmentOf, SEGMENT_CONFIG } from '@/lib/segment'
 
 export async function GET(req: NextRequest) {
@@ -10,7 +10,7 @@ export async function GET(req: NextRequest) {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('full_name, skills, hourly_rate, plan, applications_total, days_active')
+    .select('full_name, skills, hourly_rate, subscription_status, applications_total, days_active, scoring_weights')
     .eq('id', user.id)
     .single()
 
@@ -36,6 +36,7 @@ export async function GET(req: NextRequest) {
   const ranked = rankLeads(rows as unknown as ScoringLead[], {
     skills: profile.skills ?? [],
     hourly_rate: profile.hourly_rate,
+    weights: (profile.scoring_weights as ScoringWeights | null) ?? undefined,
   })
 
   const noFilters = !sourceFilter && !scoreFilter && !q
@@ -52,7 +53,8 @@ export async function GET(req: NextRequest) {
     )
   }
 
-  const isPro = profile.plan === 'pro'
+  const plan = (profile.subscription_status ?? 'free') as string
+  const isPaid = plan !== 'free'
   const byId = new Map((rows as any[]).map((x) => [x.id, x]))
 
   const leads = visible.map((r) => {
@@ -73,7 +75,8 @@ export async function GET(req: NextRequest) {
       sub: r.sub,
       why: r.why,
       skillDetail: r.skillDetail,
-      sourceUrl: isPro ? row.source_url : null,
+      sourceUrl: isPaid ? row.source_url : null,
+      sourceLocked: !isPaid,
       isTopMatch: row.id === topMatchId,
     }
   })
@@ -87,7 +90,7 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({
     leads,
     meta: {
-      plan: profile.plan,
+      plan,
       segment: seg,
       greeting: cfg.greeting(profile.full_name?.split(' ')[0] || 'there'),
       banner: cfg.banner ?? null,

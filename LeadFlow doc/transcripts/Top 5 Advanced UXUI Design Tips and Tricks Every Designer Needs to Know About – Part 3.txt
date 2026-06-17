@@ -1,0 +1,280 @@
+00:01 Most UXUI advice out there teaches you
+00:03 the same surface level stuff. Use white
+00:06 space, align your text, pick better
+00:08 colors. But if you want to actually
+00:10 become a great designer, the kind who
+00:13 creates interfaces people love to use
+00:15 and remember, you need more than that.
+00:18 In this video, we'll be sharing five
+00:20 advanced UXUI design tips you won't hear
+00:23 in most courses or tutorials. Let's get
+00:25 into it. One, personalize the experience
+00:28 based on user behavior. When you're
+00:31 designing a product, it's important to
+00:33 remember that not all users are the
+00:34 same. Some are brand new, some are
+00:37 coming back after a few uses, and others
+00:39 are deeply engaged. But what many
+00:42 beginner designers do is show everyone
+00:44 the same screen, no matter where they
+00:46 are in their journey. That's a missed
+00:48 opportunity. Designing experiences that
+00:51 adapt to different types of users can
+00:53 make your products feel smarter, more
+00:55 personal, and way more useful. Let me
+00:57 show you what this looks like using a
+00:59 fitness app. The first screen is for a
+01:01 new user. They've just signed up, so the
+01:04 app keeps things really simple. It
+01:06 welcomes them and encourages them to set
+01:08 their weekly goals. Underneath, there
+01:10 are a few trending programs and some
+01:12 easy categories. It's just enough to
+01:15 explore, but not overwhelming, which is
+01:17 exactly what a firsttime user needs.
+01:19 Next, we've got a repeat user. This
+01:22 person has used the app before and is
+01:24 starting to build a routine. Instead of
+01:25 onboarding content, they get a clear
+01:27 workout plan for the day with helpful
+01:29 details like duration and calories
+01:31 burned. Now, here's a super user,
+01:34 someone who's fully engaged and
+01:36 committed to their fitness goals. The
+01:37 app experience becomes more advanced. We
+01:40 start with useful stats like daily
+01:42 steps, calories burned, and heart rate.
+01:44 Then it moves into their workout plan
+01:46 and personalized diet suggestions. At
+01:49 this stage, it's not about helping them
+01:51 get started. It's about helping them
+01:53 optimize and stay on track. Great design
+01:56 meets people where they are. Instead of
+01:58 creating one generic experience for
+02:00 everyone, think about how your interface
+02:02 can adapt to what the user needs right
+02:04 now. Small changes like personalized
+02:07 messages, tailored content, or progress
+02:09 tracking can make your product feel more
+02:11 human, more helpful, and more valuable.
+02:15 Two, design smarter search. Search is
+02:18 one of the most critical features in any
+02:20 product. But it's also one of the most
+02:22 overlooked in design. Most designers
+02:24 just drop in a search bar and move on.
+02:26 But good search design isn't just about
+02:29 function. It's about how it feels, how
+02:31 fast it helps users get what they need,
+02:33 and how much effort it saves them. Think
+02:35 about what happens when a user taps into
+02:37 a search bar. That's a moment of intent.
+02:40 They're looking for something, but they
+02:42 may not know exactly what. That's where
+02:44 your design can do one of two things.
+02:46 Give them a blank screen and expect them
+02:48 to do all the work. Or offer helpful
+02:51 suggestions that make the experience
+02:53 easier, faster, and smarter. Let's look
+02:56 at the first version, the standard blank
+02:58 screen search. Technically, it works,
+02:60 but there's no guidance. It's a dead end
+03:03 unless they know exactly what they want.
+03:05 Now, let's look at a smarter version of
+03:06 the same screen. The search bar is still
+03:09 there, ready to use, but underneath it,
+03:11 the interface offers subtle, useful
+03:13 suggestions. Things like recent
+03:16 searches, so the user can quickly pick
+03:18 up where they left off. Popular items,
+03:20 which gives them a sense of what others
+03:22 are finding useful. Personalized
+03:24 recommendations based on their past
+03:26 behavior or interest. These suggestions
+03:28 don't get in the way. They quietly
+03:30 support the user. And if they already
+03:32 know what they want, they can ignore
+03:34 them and just type. But if they're
+03:36 unsure, these small hints reduce
+03:38 friction and give them somewhere to
+03:39 start. Three, smarter order tracking
+03:42 design. Here's something a lot of
+03:44 designers overlook. Post-purchase
+03:46 experiences matter just as much as the
+03:48 purchase itself. Think about it. When
+03:50 someone places an order, they've already
+03:52 made a decision. They've paid,
+03:54 committed, and now they're waiting. That
+03:57 moment between payment and delivery is
+03:59 full of expectation and uncertainty. And
+04:02 how you design for that moment says a
+04:04 lot about your product. Now, let's take
+04:06 a look at a very basic order screen. It
+04:08 shows the order number, a plain list of
+04:10 items, some courier info, and a timeline
+04:14 made up of simple dates. Technically,
+04:16 the information is there, but visually
+04:19 there's no structure, no prioritization,
+04:21 no guidance, just data dumped onto a
+04:24 screen. The user has to scan, interpret,
+04:27 and piece everything together
+04:28 themselves. Now, compare that to this
+04:31 upgraded design. From the very first
+04:33 glance, this screen makes you feel like
+04:35 everything is under control. It opens
+04:37 with a confident message. Your order is
+04:39 on the way, paired with clear delivery
+04:41 details and visual icons that help
+04:43 communicate the time window and address
+04:45 instantly. The courier section is no
+04:47 longer just a name and number. It's
+04:50 human. There's a photo, a name, and
+04:52 quick access buttons to call or message,
+04:54 which not only adds trust, but makes the
+04:57 experience feel more personal and
+04:59 responsive. The items, no more long text
+05:02 lists. And one of the best touches, the
+05:04 order history is now a visual timeline.
+05:07 Instead of scanning a block of text and
+05:09 dates, users can instantly see what
+05:11 stage the order is in. This isn't just a
+05:14 UI upgrade. It's a completely different
+05:17 experience because great design doesn't
+05:20 just display information. It reduces
+05:22 stress and answers questions before
+05:24 they're asked. Speaking of great
+05:27 designs, a lot of people ask us, "How do
+05:29 I make my UI designs actually look good?
+05:32 Not just functional, not just okay, but
+05:35 clean, modern, and something people
+05:37 actually want to use." If you're trying
+05:39 to figure that out, I really recommend
+05:41 checking out our UX UI design playbook.
+05:43 It's packed with the exact principles,
+05:45 visual tips, and layout rules that
+05:47 helped thousands of new designers, and
+05:49 also developers finally understand how
+05:52 to design great UI designs. You'll find
+05:54 real examples, prolevel shortcuts, and
+05:56 simple things you can apply right away
+05:58 to make your designs feel way more
+06:00 polished and confident. In fact, a lot
+06:02 of our students said this was the best
+06:04 UI design ebook that finally helped them
+06:06 to improve their UI designs. We just
+06:08 crossed 17,000 downloads of the free
+06:10 preview and full version, which is
+06:12 honestly amazing. The price may go up
+06:14 soon, but right now you can get 40% off
+06:17 with the code love peak 40. So, if you
+06:19 haven't grabbed your copy yet, this is
+06:21 the perfect time. Links in the
+06:22 description. And when you try it, I'd
+06:24 love to hear how it helped your designs.
+06:26 We've already seen some amazing
+06:27 transformations.
+06:28 [Music]
+06:30 Four, category screens. Category screens
+06:33 might seem simple, just a list of
+06:35 options, right? but they actually play a
+06:37 huge role in how users move through your
+06:39 product. Let's look at three different
+06:41 versions of this screen and how the
+06:43 design affects the experience. The first
+06:45 version is very basic, just a list of
+06:47 category names and C selection links.
+06:50 There's nothing wrong with it. It's
+06:51 clean and minimal. But the problem is it
+06:54 puts all the effort on the user. Every
+06:56 line looks the same. There's no visual
+06:58 rhythm, no hierarchy, and no cues that
+07:00 help guide the eye. You have to read
+07:02 through every label to find what you
+07:03 want. Now, the second version is
+07:05 something we see a lot from junior
+07:07 designers. It looks more designed and
+07:09 might even seem impressive at first
+07:11 glance, but here's the thing. It focuses
+07:13 more on appearance than on usability.
+07:15 Even though there's a dark overlay to
+07:17 help with some text readability, it
+07:18 doesn't fully fix the contrast issue.
+07:20 Some of the text is still hard to read.
+07:22 On top of that, the images don't match.
+07:25 One is bright, another is moody, another
+07:27 feels like a magazine photo. There's no
+07:29 visual consistency. It doesn't feel like
+07:31 these images belong to the same product
+07:33 or brand, more like a random mix of
+07:35 stock photos. And because every block is
+07:37 so visually busy, it takes longer for
+07:40 users to understand what they're looking
+07:41 at. Now, let's look at the third
+07:43 version. And this is where things come
+07:45 together in a much more thoughtful,
+07:47 professional way. This design uses
+07:49 color-coded charts, each with a soft,
+07:51 solid background and a clean, isolated
+07:54 image that represents the category.
+07:56 Because the images are stylistically
+07:57 unified and the background colors are
+07:59 well balanced, the whole screen feels
+08:01 cohesive and branded. There's a rhythm
+08:04 to the layout that makes scanning
+08:05 effortless. You can glance at the screen
+08:08 and understand the options in just
+08:10 seconds. Five, choose the right input
+08:12 method for the moment, not just the
+08:14 data. Not all number inputs are created
+08:17 equal, and they shouldn't be treated the
+08:19 same. Entering your weight, age,
+08:21 calories, or daily steps might seem
+08:23 similar on the surface, but the way
+08:25 those values are entered can completely
+08:27 change how smooth or frustrating the
+08:29 experience feels. Let's walk through a
+08:31 few real examples and break down what
+08:33 works best and why. First, consider the
+08:36 type of input. There are two kinds of
+08:38 numeric input scenarios. onetime setup
+08:41 like entering your weight when first
+08:42 signing up or setting your age, height
+08:44 or weight and frequent repeated entry
+08:48 like locking food to track calories or
+08:50 macros. These are completely different
+08:52 use cases and they require completely
+08:55 different UI patterns. Let's look at the
+08:57 screen where the user is asked to enter
+08:58 personal details like weight or height.
+09:01 In these cases, scroll wheels and
+09:03 sliders work beautifully. Why? Because
+09:05 users aren't entering this data often.
+09:08 They just want to get through the setup
+09:09 quickly and these values usually fall
+09:11 within a known range. And most
+09:13 importantly, they are low effort. Users
+09:16 don't need to type or think too much.
+09:18 Now, let's compare that to logging your
+09:19 food every day to track calories or
+09:21 macros. This is where sliders and scroll
+09:24 wheels break down. They're too slow, too
+09:26 fiddly, and don't offer the kind of
+09:28 control users need. If you want to log
+09:30 food quantity like 350 g, I don't want
+09:33 to scroll endlessly or try to drag a
+09:35 slider to the perfect number. Text
+09:37 fields are better here because they're
+09:39 faster, more precise, and less
+09:41 frustrating when used repeatedly. So,
+09:43 how do you choose? Here is a simple rule
+09:46 of thumb. Use sliders or scroll wheels
+09:48 for casual one-time inputs where
+09:50 precision isn't critical. Use text
+09:52 fields, steppers, or number inputs for
+09:54 frequent, precise, or repetitive tasks.
+09:57 It's not about which component looks
+09:59 nicer. It's about reducing friction and
+10:01 matching the input method to the
+10:03 context. That's all for today. We hope
+10:06 you found these tips helpful. Let us
+10:07 know in the comments which one was your
+10:09 favorite. We'll see you on the next one.

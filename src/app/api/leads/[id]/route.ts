@@ -13,7 +13,7 @@ export async function GET(
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('skills, hourly_rate, plan')
+    .select('skills, hourly_rate, subscription_status, scoring_weights')
     .eq('id', user.id)
     .single()
 
@@ -30,7 +30,7 @@ export async function GET(
     hourly_rate: profile?.hourly_rate ?? null,
   })
 
-  const isPro = profile?.plan === 'pro'
+  const isPaid = (profile?.subscription_status ?? 'free') !== 'free'
 
   return NextResponse.json({
     id: row.id,
@@ -48,7 +48,7 @@ export async function GET(
     sub: scored.sub,
     why: scored.why,
     skillDetail: scored.skillDetail,
-    sourceUrl: isPro ? row.source_url : null,
-    sourceLocked: !isPro,
+    sourceUrl: isPaid ? row.source_url : null,
+    sourceLocked: !isPaid,
   })
 }

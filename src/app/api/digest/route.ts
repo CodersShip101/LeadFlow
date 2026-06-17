@@ -1,17 +1,23 @@
 import { NextResponse } from 'next/server'
 import { createAdminSupabase } from '@/lib/supabase-server'
+import { ENTITLEMENTS, type Tier } from '@/lib/tiers'
 
 export async function POST() {
   const results: { email: string; success: boolean; error?: string }[] = []
   const supabase = createAdminSupabase()
 
+  // Only fetch users whose plan includes emailDigest
+  const eligiblePlans = (Object.keys(ENTITLEMENTS) as Tier[])
+    .filter(p => ENTITLEMENTS[p].emailDigest)
+
   const { data: profiles } = await supabase
     .from('profiles')
-    .select('id, email, skills')
+    .select('id, email, skills, subscription_status')
     .not('email', 'is', null)
+    .in('subscription_status', eligiblePlans)
 
   if (!profiles || profiles.length === 0) {
-    return NextResponse.json({ sent: 0, message: 'No users found' })
+    return NextResponse.json({ sent: 0, message: 'No eligible users found' })
   }
 
   for (const profile of profiles) {
