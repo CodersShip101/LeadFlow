@@ -15,17 +15,37 @@ const SKILL_OPTIONS = [
   { group: 'Ops', items: ['Project Management','Virtual Assistance','Bookkeeping','Consulting'] },
 ]
 
+const DEFAULT_WEIGHTS = { skill: 0.45, rate: 0.30, recency: 0.15, detail: 0.10 }
+type Weights = typeof DEFAULT_WEIGHTS
+
 function completionScore(fields: Record<string, unknown>): number {
   const checks = [
-    !!fields.fullName,
-    !!fields.location,
-    !!fields.rate,
-    !!fields.exp,
-    !!fields.avail,
-    !!fields.portfolio,
+    !!fields.fullName, !!fields.location, !!fields.rate,
+    !!fields.exp, !!fields.avail, !!fields.portfolio,
     (fields.skills as string[]).length >= 3,
   ]
   return Math.round((checks.filter(Boolean).length / checks.length) * 100)
+}
+
+function WeightSlider({ label, desc, value, onChange, disabled }: {
+  label: string; desc: string; value: number; onChange: (v: number) => void; disabled: boolean
+}) {
+  return (
+    <div className="st-weight-row">
+      <div className="st-weight-meta">
+        <span className="st-weight-label">{label}</span>
+        <span className="st-weight-val">{Math.round(value * 100)}%</span>
+      </div>
+      <p className="st-weight-desc">{desc}</p>
+      <input
+        type="range" min={5} max={70} step={5}
+        value={Math.round(value * 100)}
+        onChange={e => onChange(parseInt(e.target.value) / 100)}
+        disabled={disabled}
+        className="st-weight-slider"
+      />
+    </div>
+  )
 }
 
 export default function SettingsPage() {
@@ -39,6 +59,19 @@ export default function SettingsPage() {
   const [portfolio, setPortfolio] = useState('')
   const [saving, setSaving] = useState(false)
   const [dirty, setDirty] = useState(false)
+
+  // Scoring weights
+  const [weights, setWeights] = useState<Weights>(DEFAULT_WEIGHTS)
+  const [weightsDirty, setWeightsDirty] = useState(false)
+  const [savingWeights, setSavingWeights] = useState(false)
+
+  // Alert preferences
+  const [alertEnabled, setAlertEnabled] = useState(false)
+  const [alertScore, setAlertScore] = useState(8)
+  const [alertKeywords, setAlertKeywords] = useState('')
+  const [alertsDirty, setAlertsDirty] = useState(false)
+  const [savingAlerts, setSavingAlerts] = useState(false)
+
   const router = useRouter()
   const supabase = createClient()
 
@@ -56,6 +89,13 @@ export default function SettingsPage() {
         setExp(data.experience_level || '')
         setAvail(data.availability || '')
         setPortfolio(data.portfolio_url || '')
+        if (data.scoring_weights) setWeights(data.scoring_weights as Weights)
+        if (data.alert_preferences) {
+          const p = data.alert_preferences as any
+          setAlertEnabled(p.enabled ?? false)
+          setAlertScore(p.minScore ?? 8)
+          setAlertKeywords((p.keywords ?? []).join(', '))
+        }
       }
     }
     load()
@@ -63,6 +103,14 @@ export default function SettingsPage() {
 
   const mark = () => setDirty(true)
   const toggleSkill = (s: string) => { setSkills(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s]); mark() }
+
+  const weightSum = Math.round((weights.skill + weights.rate + weights.recency + weights.detail) * 100)
+  const weightsValid = weightSum === 100
+
+  const updateWeight = (key: keyof Weights, val: number) => {
+    setWeights(prev => ({ ...prev, [key]: val }))
+    setWeightsDirty(true)
+  }
 
   const handleSave = async () => {
     setSaving(true)
@@ -79,18 +127,50 @@ export default function SettingsPage() {
     setDirty(false)
   }
 
+  const handleSaveWeights = async () => {
+    if (!weightsValid) { toast.error('Weights must add up to 100%'); return }
+    setSavingWeights(true)
+    const res = await fetch('/api/scoring-weights', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ weights }),
+    })
+    if (res.ok) { toast.success('Scoring weights saved'); setWeightsDirty(false) }
+    else { const d = await res.json(); toast.error(d.error || 'Failed to save') }
+    setSavingWeights(false)
+  }
+
+  const handleResetWeights = async () => {
+    await fetch('/api/scoring-weights', { method: 'DELETE' })
+    setWeights(DEFAULT_WEIGHTS)
+    setWeightsDirty(false)
+    toast('Reset to defaults')
+  }
+
+  const handleSaveAlerts = async () => {
+    setSavingAlerts(true)
+    const keywords = alertKeywords.split(',').map(k => k.trim()).filter(Boolean)
+    const res = await fetch('/api/alerts', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ enabled: alertEnabled, minScore: alertScore, sources: [], keywords }),
+    })
+    if (res.ok) { toast.success('Alert preferences saved'); setAlertsDirty(false) }
+    else { const d = await res.json(); toast.error(d.error || 'Failed to save') }
+    setSavingAlerts(false)
+  }
+
   const tier = (profile?.subscription_status as Tier) || 'free'
   const plan = PRICING[tier]
   const ent = ENTITLEMENTS[tier]
   const completion = completionScore({ fullName, location, rate, exp, avail, portfolio, skills })
-
   const completionColor = completion >= 80 ? 'var(--hi)' : completion >= 50 ? 'var(--mid)' : 'var(--coral)'
   const completionLabel = completion >= 80 ? 'Great — your matches will be very accurate' : completion >= 50 ? 'Add more info to improve your match scores' : 'Incomplete — scoring is limited'
 
   return (
     <div className="st-page">
 
-      {/* ── PAGE HEADER ── */}
+      {/* ── HEADER ── */}
       <div className="st-header">
         <div>
           <h2 className="st-title">Settings</h2>
@@ -103,7 +183,7 @@ export default function SettingsPage() {
         )}
       </div>
 
-      {/* ── PROFILE COMPLETION ── */}
+      {/* ── COMPLETION ── */}
       <div className="st-completion">
         <div className="st-completion-head">
           <span className="st-completion-lbl">Profile strength</span>
@@ -115,7 +195,7 @@ export default function SettingsPage() {
         <p className="st-completion-note">{completionLabel}</p>
       </div>
 
-      {/* ── SECTION: IDENTITY ── */}
+      {/* ── IDENTITY ── */}
       <div className="st-card">
         <div className="st-card-head">
           <span className="st-card-icon"><i className="ti ti-user" /></span>
@@ -142,7 +222,7 @@ export default function SettingsPage() {
         </div>
       </div>
 
-      {/* ── SECTION: MATCHING ── */}
+      {/* ── MATCHING ── */}
       <div className="st-card">
         <div className="st-card-head">
           <span className="st-card-icon"><i className="ti ti-target-arrow" /></span>
@@ -183,7 +263,7 @@ export default function SettingsPage() {
         </div>
       </div>
 
-      {/* ── SECTION: SKILLS ── */}
+      {/* ── SKILLS ── */}
       <div className="st-card">
         <div className="st-card-head">
           <span className="st-card-icon"><i className="ti ti-code" /></span>
@@ -210,7 +290,124 @@ export default function SettingsPage() {
         </div>
       </div>
 
-      {/* ── SECTION: PLAN ── */}
+      {/* ── SCORING WEIGHTS (Pro/Max) ── */}
+      <div className="st-card">
+        <div className="st-card-head">
+          <span className="st-card-icon" style={{ background: ent.adjustableScoring ? 'var(--lime-dim)' : 'var(--paper-2)' }}>
+            <i className="ti ti-adjustments" style={{ color: ent.adjustableScoring ? 'var(--lime-deep)' : 'var(--slate-2)' }} />
+          </span>
+          <div>
+            <h3 className="st-card-title">Scoring weights</h3>
+            <p className="st-card-desc">
+              {ent.adjustableScoring
+                ? 'Adjust how much each factor counts toward your lead score. Must add up to 100%.'
+                : 'Upgrade to Pro to adjust how skills, rate, recency and detail are weighted.'}
+            </p>
+          </div>
+          {!ent.adjustableScoring && (
+            <button className="btn btn-primary" style={{ flexShrink: 0 }} onClick={() => router.push('/dashboard/billing')}>
+              <i className="ti ti-bolt" /> Upgrade
+            </button>
+          )}
+        </div>
+
+        <div className="st-weights-body" style={{ opacity: ent.adjustableScoring ? 1 : 0.5, pointerEvents: ent.adjustableScoring ? 'auto' : 'none' }}>
+          <WeightSlider label="Skills" desc="How closely your skills match what the lead requires." value={weights.skill} onChange={v => updateWeight('skill', v)} disabled={!ent.adjustableScoring} />
+          <WeightSlider label="Rate" desc="Whether the budget fits your day rate." value={weights.rate} onChange={v => updateWeight('rate', v)} disabled={!ent.adjustableScoring} />
+          <WeightSlider label="Recency" desc="How recently the lead was posted." value={weights.recency} onChange={v => updateWeight('recency', v)} disabled={!ent.adjustableScoring} />
+          <WeightSlider label="Detail" desc="How much useful information is in the brief." value={weights.detail} onChange={v => updateWeight('detail', v)} disabled={!ent.adjustableScoring} />
+
+          <div className="st-weights-footer">
+            <div className={`st-weights-total ${weightsValid ? 'ok' : 'err'}`}>
+              Total: <strong>{weightSum}%</strong>
+              {!weightsValid && <span> — must equal 100%</span>}
+            </div>
+            {ent.adjustableScoring && (
+              <div className="st-weights-actions">
+                <button className="btn btn-ghost" onClick={handleResetWeights}>Reset defaults</button>
+                <button className="btn btn-primary" onClick={handleSaveWeights}
+                  disabled={savingWeights || !weightsDirty || !weightsValid}>
+                  <i className="ti ti-check" /> {savingWeights ? 'Saving…' : 'Save weights'}
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* ── LEAD ALERTS (Starter+) ── */}
+      <div className="st-card">
+        <div className="st-card-head">
+          <span className="st-card-icon" style={{ background: ent.customAlerts ? 'var(--lime-dim)' : 'var(--paper-2)' }}>
+            <i className="ti ti-bell" style={{ color: ent.customAlerts ? 'var(--lime-deep)' : 'var(--slate-2)' }} />
+          </span>
+          <div>
+            <h3 className="st-card-title">Lead alerts</h3>
+            <p className="st-card-desc">
+              {ent.customAlerts
+                ? 'Get emailed the moment a lead above your score threshold appears.'
+                : 'Upgrade to Starter to receive instant alerts for high-scoring leads.'}
+            </p>
+          </div>
+          {!ent.customAlerts && (
+            <button className="btn btn-primary" style={{ flexShrink: 0 }} onClick={() => router.push('/dashboard/billing')}>
+              <i className="ti ti-bolt" /> Upgrade
+            </button>
+          )}
+        </div>
+
+        <div className="st-fields" style={{ opacity: ent.customAlerts ? 1 : 0.5, pointerEvents: ent.customAlerts ? 'auto' : 'none' }}>
+          <div className="st-alert-toggle-row">
+            <div>
+              <p className="st-label">Email alerts</p>
+              <p className="st-field-hint">Send me an email when a matching lead is scored above my threshold.</p>
+            </div>
+            <button
+              className={`st-toggle ${alertEnabled ? 'on' : ''}`}
+              onClick={() => { setAlertEnabled(v => !v); setAlertsDirty(true) }}
+              disabled={!ent.customAlerts}
+              aria-pressed={alertEnabled}>
+              <span className="st-toggle-knob" />
+            </button>
+          </div>
+
+          {alertEnabled && (
+            <>
+              <div className="st-field">
+                <label className="st-label">
+                  Minimum score threshold
+                  <span className="st-label-unit" style={{ marginLeft: 8, fontSize: 13, color: 'var(--lime-deep)', fontWeight: 700 }}>{alertScore}/10</span>
+                </label>
+                <input type="range" min={5} max={10} step={1}
+                  value={alertScore}
+                  onChange={e => { setAlertScore(Number(e.target.value)); setAlertsDirty(true) }}
+                  className="st-weight-slider" />
+                <p className="st-field-hint">Only alert me for leads scoring {alertScore} or above.</p>
+              </div>
+
+              <div className="st-field">
+                <label className="st-label">Keywords <span className="st-label-unit">(optional)</span></label>
+                <input
+                  value={alertKeywords}
+                  onChange={e => { setAlertKeywords(e.target.value); setAlertsDirty(true) }}
+                  className="input"
+                  placeholder="React, Figma, fintech — comma separated"
+                />
+                <p className="st-field-hint">Only alert me if the lead contains at least one of these words.</p>
+              </div>
+            </>
+          )}
+
+          {ent.customAlerts && (
+            <button className="btn btn-primary" style={{ alignSelf: 'flex-start' }}
+              onClick={handleSaveAlerts} disabled={savingAlerts || !alertsDirty}>
+              <i className="ti ti-check" /> {savingAlerts ? 'Saving…' : 'Save alerts'}
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* ── PLAN ── */}
       <div className="st-card">
         <div className="st-card-head">
           <span className="st-card-icon"><i className={`ti ${TIER_ICONS[tier]}`} /></span>
@@ -227,11 +424,11 @@ export default function SettingsPage() {
         <div className="st-plan-ents">
           {[
             { label: 'Applications / mo', val: ent.applicationsPerMonth === 'unlimited' ? 'Unlimited' : String(ent.applicationsPerMonth), on: ent.applicationsPerMonth === 'unlimited' },
-            { label: 'Source links',       val: ent.sourceLinks ? 'Included' : 'Locked',   on: ent.sourceLinks },
-            { label: 'Email digest',        val: ent.emailDigest ? 'Weekly' : 'Off',         on: ent.emailDigest },
-            { label: 'Analytics',           val: ent.basicAnalytics ? (ent.advancedAnalytics ? 'Advanced' : 'Basic') : 'None', on: ent.basicAnalytics },
-            { label: 'Scan frequency',      val: `Every ${ent.scanIntervalHours}h`,          on: ent.scanIntervalHours <= 2 },
-            { label: 'CSV export',          val: ent.csvExport ? 'Available' : 'Locked',     on: ent.csvExport },
+            { label: 'Source links',      val: ent.sourceLinks ? 'Included' : 'Locked',  on: ent.sourceLinks },
+            { label: 'Email digest',      val: ent.emailDigest ? 'Weekly' : 'Off',        on: ent.emailDigest },
+            { label: 'Analytics',         val: ent.basicAnalytics ? (ent.advancedAnalytics ? 'Advanced' : 'Basic') : 'None', on: ent.basicAnalytics },
+            { label: 'Scan frequency',    val: `Every ${ent.scanIntervalHours}h`,         on: ent.scanIntervalHours <= 2 },
+            { label: 'CSV export',        val: ent.csvExport ? 'Available' : 'Locked',    on: ent.csvExport },
           ].map(e => (
             <div key={e.label} className="st-plan-ent">
               <span className="st-plan-ent-label">{e.label}</span>
@@ -241,7 +438,7 @@ export default function SettingsPage() {
         </div>
       </div>
 
-      {/* ── SECTION: ACCOUNT ── */}
+      {/* ── ACCOUNT ── */}
       <div className="st-card">
         <div className="st-card-head">
           <span className="st-card-icon"><i className="ti ti-shield" /></span>
@@ -259,8 +456,9 @@ export default function SettingsPage() {
         </div>
       </div>
 
-      {/* ── SAVE BUTTON ── */}
-      <button onClick={handleSave} disabled={saving || !dirty} className={`btn btn-primary st-save-main ${!dirty ? 'st-save-idle' : ''}`}>
+      {/* ── SAVE ── */}
+      <button onClick={handleSave} disabled={saving || !dirty}
+        className={`btn btn-primary st-save-main ${!dirty ? 'st-save-idle' : ''}`}>
         <i className="ti ti-check" /> {saving ? 'Saving…' : 'Save changes'}
       </button>
 
