@@ -621,7 +621,7 @@ export default function DashboardPage() {
                   {sc}
                 </span>
                 <div className="dp-header-actions">
-                  {l.source_url && (
+                  {l.source_url && isPro && (
                     <button className="dp-icon-btn" title={panelCopied ? 'Copied!' : 'Copy link'}
                       onClick={async () => { await navigator.clipboard.writeText(l.source_url!); setPanelCopied(true); setTimeout(() => setPanelCopied(false), 2000) }}>
                       <i className={`ti ${panelCopied ? 'ti-check' : 'ti-copy'}`} />
