@@ -486,7 +486,7 @@ export default function DashboardPage() {
             <i className={`ti ti-bookmark${saved ? '-filled' : ''}`}></i>
           </button>
           {applied
-            ? <span className="applied-tag"><i className="ti ti-circle-check-filled"></i> In your pipeline</span>
+            ? <button className="applied-tag applied-tag-btn" onClick={() => router.push('/dashboard/applied')}><i className="ti ti-circle-check-filled"></i> In your pipeline <i className="ti ti-arrow-right applied-tag-arrow"></i></button>
             : <>
                 <button className="btn btn-primary" title="Direct link · no commission" onClick={() => handleApply(lead)}><i className="ti ti-send"></i> Apply</button>
                 <button className="btn btn-ghost" onClick={() => selectLead(lead)}>Full breakdown</button>
@@ -690,9 +690,9 @@ export default function DashboardPage() {
               {/* ── STICKY FOOTER ── */}
               <div className="dp-foot">
                 {applied
-                  ? <span className="applied-tag" style={{ justifyContent: 'center' }}>
-                      <i className="ti ti-circle-check-filled" /> Tracking in your pipeline
-                    </span>
+                  ? <button className="applied-tag applied-tag-btn" style={{ width: '100%', justifyContent: 'center' }} onClick={() => router.push('/dashboard/applied')}>
+                      <i className="ti ti-circle-check-filled" /> Tracking in your pipeline <i className="ti ti-arrow-right applied-tag-arrow" />
+                    </button>
                   : <button className="btn btn-primary" style={{ width: '100%' }} onClick={() => handleApply(l)}>
                       <i className="ti ti-send" /> Apply & track
                     </button>}
