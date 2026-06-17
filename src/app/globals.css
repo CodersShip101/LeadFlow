@@ -561,29 +561,56 @@ textarea.input { resize: vertical; min-height: 80px; }
 .gauge-ring svg { transform: rotate(-90deg); }
 .gauge-num { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-weight: 700; font-size: 14px; }
 
+/* ── PIPELINE HEADER ── */
+.pipe-header { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 22px; flex-wrap: wrap; }
+.pipe-title { font-family: var(--font-display); font-size: clamp(1.5rem,3vw,1.9rem); font-weight: 800; letter-spacing: -.03em; color: var(--ink); }
+.pipe-sub { font-size: 13px; color: var(--slate); margin-top: 3px; }
+.pipe-stats { display: flex; align-items: center; gap: 0; background: var(--card); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 10px 18px; }
+.pipe-stat { text-align: center; padding: 0 14px; }
+.pipe-stat-v { display: block; font-family: var(--font-mono); font-size: 20px; font-weight: 800; letter-spacing: -.02em; color: var(--ink); line-height: 1.1; }
+.pipe-stat-l { display: block; font-size: 10.5px; font-weight: 600; color: var(--slate-2); letter-spacing: .04em; text-transform: uppercase; margin-top: 2px; }
+.pipe-stat-sep { width: 1px; height: 32px; background: var(--line); }
+
 /* ── PIPELINE (kanban) ── */
-.kanban { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; height: calc(100vh - 180px); min-height: 420px; }
+.kanban { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; height: calc(100vh - 220px); min-height: 420px; }
 @media (max-width: 860px) { .kanban { grid-template-columns: 1fr; height: auto; } }
-.kan-col { background: var(--paper-2); border-radius: var(--r-lg); display: flex; flex-direction: column; min-height: 0; }
-.kan-head { padding: 16px 18px; display: flex; align-items: center; gap: 9px; border-bottom: 1px solid var(--line); flex-shrink: 0; }
-.kan-dot { width: 9px; height: 9px; border-radius: 50%; }
-.kan-title { font-family: var(--font-display); font-weight: 700; font-size: 14px; color: var(--ink); }
-.kan-count { margin-left: auto; font-family: var(--font-mono); font-size: 12px; font-weight: 600; color: var(--slate); background: var(--card); padding: 2px 9px; border-radius: var(--r-pill); }
-.kan-body { padding: 14px; display: flex; flex-direction: column; gap: 12px; overflow-y: auto; flex: 1; min-height: 120px; }
-.kan-body.dragover { background: var(--lime-dim); outline: 2px dashed var(--lime-deep); outline-offset: -6px; border-radius: var(--r-md); }
-.kan-card { background: var(--card); border: 1px solid var(--line); border-radius: var(--r-md); padding: 16px; cursor: grab; transition: box-shadow .15s, transform .15s; }
-.kan-card:hover { box-shadow: var(--sh-sm); border-color: var(--slate-2); }
-.kan-card.dragging { opacity: .4; cursor: grabbing; transform: rotate(2deg); }
-.kan-card .kc-top { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
-.kan-card .kc-meta-right { display: flex; align-items: center; gap: 8px; margin-left: auto; }
-.kan-card .kc-title { font-weight: 600; font-size: 13.5px; line-height: 1.4; margin-bottom: 10px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; color: var(--ink); }
-.kan-card .kc-meta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
-.kan-card .kc-chip { font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 5px; display: inline-flex; align-items: center; gap: 3px; }
-.kan-card .kc-skills { display: flex; gap: 4px; flex-wrap: wrap; }
-.kan-card .kc-skill { font-size: 10px; font-weight: 500; padding: 2px 7px; border-radius: 4px; background: var(--paper-2); color: var(--slate); }
-.kan-card .kc-skill-more { font-family: var(--font-mono); background: var(--card); border: 1px solid var(--line); color: var(--slate-2); }
-.kan-empty { text-align: center; color: var(--slate-2); font-size: 13px; padding: 30px 10px; }
-.kan-empty::before { content: '\2193'; display: block; font-size: 18px; margin-bottom: 6px; }
+
+.kan-col { background: var(--card); border: 1px solid var(--line); border-radius: var(--r-xl); display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
+
+.kan-head { padding: 14px 16px 13px; display: flex; align-items: center; gap: 9px; border-bottom: 2px solid transparent; flex-shrink: 0; background: var(--card); }
+.kan-head-icon { width: 28px; height: 28px; border-radius: var(--r-sm); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 14px; }
+.kan-title { font-family: var(--font-display); font-weight: 800; font-size: 13.5px; color: var(--ink); letter-spacing: -.01em; }
+.kan-count { margin-left: auto; font-family: var(--font-mono); font-size: 11.5px; font-weight: 700; padding: 3px 9px; border-radius: var(--r-pill); }
+
+.kan-body { padding: 12px; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; flex: 1; min-height: 120px; transition: background .15s; }
+.kan-body.dragover { outline: 2px dashed var(--lime-deep); outline-offset: -6px; border-radius: var(--r-lg); background: var(--lime-dim) !important; }
+
+.kan-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 7px; color: var(--slate-2); font-size: 12.5px; font-weight: 500; padding: 36px 10px; text-align: center; opacity: .7; }
+.kan-empty .ti { font-size: 22px; opacity: .4; }
+
+/* ── KANBAN CARDS ── */
+.kan-card { background: var(--paper); border: 1px solid var(--line); border-radius: var(--r-md); padding: 14px 14px 12px; cursor: grab; transition: box-shadow .15s, border-color .15s, transform .1s; border-left-width: 3px; }
+.kan-card:hover { box-shadow: var(--sh-md); border-color: var(--slate-2); }
+.kan-card.dragging { opacity: .35; cursor: grabbing; transform: rotate(1.5deg) scale(.98); }
+
+.kc-top { display: flex; align-items: center; gap: 7px; margin-bottom: 9px; }
+.kc-age { margin-left: auto; font-family: var(--font-mono); font-size: 10.5px; font-weight: 600; display: flex; align-items: center; gap: 3px; }
+.kc-age .ti { font-size: 11px; }
+
+.kc-title { font-family: var(--font-display); font-weight: 700; font-size: 13px; line-height: 1.4; color: var(--ink); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 9px; letter-spacing: -.01em; }
+
+.kc-budget { display: inline-flex; align-items: center; gap: 4px; font-family: var(--font-mono); font-size: 11.5px; font-weight: 700; color: var(--lime-ink); background: var(--lime-dim); padding: 3px 8px; border-radius: var(--r-sm); margin-bottom: 10px; }
+.kc-budget .ti { font-size: 12px; }
+
+.kc-actions { padding-top: 10px; border-top: 1px solid var(--line-2); }
+.kc-advance-btn { display: flex; align-items: center; gap: 6px; width: 100%; padding: 7px 10px; border-radius: var(--r-sm); border: 1.5px solid var(--line); background: var(--paper-2); color: var(--ink-2); font-family: var(--font-display); font-size: 11.5px; font-weight: 700; cursor: pointer; transition: all .15s; }
+.kc-advance-btn:hover { background: var(--ink); color: #fff; border-color: var(--ink); }
+.kc-advance-btn .ti { font-size: 13px; }
+
+.kan-card-won { background: var(--hi-bg) !important; border-color: rgba(91,160,46,.3) !important; }
+.kan-card-won .kc-title { color: var(--hi); }
+.kc-won-badge { display: flex; align-items: center; gap: 5px; font-family: var(--font-mono); font-size: 11px; font-weight: 700; color: var(--hi); margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(91,160,46,.2); }
+.kc-won-badge .ti { font-size: 13px; }
 
 /* stage-track pipeline timeline */
 .stage-track{display:flex;align-items:center;gap:4px;margin-top:10px}

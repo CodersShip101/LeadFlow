@@ -9,35 +9,24 @@ import { formatBudgetGBP, timeAgo } from '@/lib/utils'
 
 const SRC: Record<string, { name: string; cls: string; ava: string; ini: string }> = {
   reddit: { name: 'Reddit', cls: 'sb-reddit', ava: '#FF5A3C', ini: 'R' },
-  reed: { name: 'Reed', cls: 'sb-reed', ava: '#3B7BE0', ini: 'R' },
-  wwr: { name: 'WWR', cls: 'sb-wwr', ava: '#E8A020', ini: 'W' },
-  rok: { name: 'Remote OK', cls: 'sb-rok', ava: '#9B6BE0', ini: 'O' },
+  reed:   { name: 'Reed',   cls: 'sb-reed',   ava: '#3B7BE0', ini: 'R' },
+  wwr:    { name: 'WWR',    cls: 'sb-wwr',     ava: '#E8A020', ini: 'W' },
+  rok:    { name: 'Remote OK', cls: 'sb-rok',  ava: '#9B6BE0', ini: 'O' },
 }
 
-function srcKey(surl: string | null): string {
-  const l = (surl || '').toLowerCase()
+function srcKey(url: string | null): string {
+  const l = (url || '').toLowerCase()
   if (l.includes('reddit')) return 'reddit'
   if (l.includes('reed')) return 'reed'
   if (l.includes('weworkremotely') || l.includes('wwr')) return 'wwr'
   return 'rok'
 }
 
-function srcInfo(surl: string | null) { return SRC[srcKey(surl)] || SRC.reddit }
-
-interface Column {
-  key: string
-  label: string
-  color: string
-}
-
-const columns: Column[] = [
-  { key: 'interested', label: 'Interested', color: 'var(--lime-deep)' },
-  { key: 'applied', label: 'Applied', color: 'var(--mid)' },
-  { key: 'hired', label: 'Won', color: 'var(--hi)' },
+const COLS = [
+  { key: 'interested', label: 'Interested', icon: 'ti-eye',    color: 'var(--lime-deep)', tint: 'rgba(196,240,0,.05)', next: 'applied',  nextLabel: 'Mark applied' },
+  { key: 'applied',    label: 'Applied',    icon: 'ti-send',   color: 'var(--mid)',       tint: 'rgba(216,146,10,.05)', next: 'hired',  nextLabel: 'Mark as won' },
+  { key: 'hired',      label: 'Won',        icon: 'ti-trophy', color: 'var(--hi)',        tint: 'rgba(91,160,46,.07)', next: null,      nextLabel: '' },
 ]
-
-const stageIdxMap: Record<string, number> = { interested: 0, applied: 1, hired: 2 }
-const stageLabels = ['Interested', 'Applied', 'Won']
 
 export default function PipelinePage() {
   const [leads, setLeads] = useState<Lead[]>([])
@@ -57,10 +46,10 @@ export default function PipelinePage() {
       if (!res.ok) return
       const apps: Application[] = await res.json()
       setApplications(apps)
-      const activeLeadIds = apps.filter(a => a.status !== 'saved').map(a => a.lead_id)
-      if (activeLeadIds.length > 0) {
-        const { data: leads } = await supabase.from('leads').select('*').in('id', activeLeadIds).eq('status', 'active')
-        setLeads((leads || []).filter(lead => true))
+      const activeIds = apps.filter(a => a.status !== 'saved').map(a => a.lead_id)
+      if (activeIds.length > 0) {
+        const { data } = await supabase.from('leads').select('*').in('id', activeIds).eq('status', 'active')
+        setLeads(data || [])
       }
       setLoading(false)
     }
@@ -74,20 +63,19 @@ export default function PipelinePage() {
   }, [applications])
 
   const grouped = useMemo(() => {
-    const groups: Record<string, Lead[]> = { interested: [], applied: [], hired: [] }
-    leads.forEach(lead => {
-      const app = appMap.get(lead.id)
-      if (app && app.status !== 'saved' && groups[app.status]) {
-        groups[app.status].push(lead)
-      }
+    const g: Record<string, Lead[]> = { interested: [], applied: [], hired: [] }
+    leads.forEach(l => {
+      const app = appMap.get(l.id)
+      if (app && app.status !== 'saved' && g[app.status]) g[app.status].push(l)
     })
-    return groups
+    return g
   }, [leads, appMap])
 
   const totalActive = applications.filter(a => a.status !== 'saved').length
   const wonCount = grouped.hired.length
+  const appliedCount = grouped.applied.length
 
-  const updateApplication = useCallback(async (leadId: string, status: string) => {
+  const updateApp = useCallback(async (leadId: string, status: string) => {
     const res = await fetch('/api/applications', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -95,48 +83,27 @@ export default function PipelinePage() {
     })
     if (res.ok) {
       const app = await res.json()
-      setApplications(prev => {
-        const filtered = prev.filter(a => a.lead_id !== leadId)
-        return [...filtered, app]
-      })
-      toast.success(status === 'applied' ? 'Marked as applied' : status === 'hired' ? 'Nice — marked as hired!' : 'Marked as interested')
+      setApplications(prev => [...prev.filter(a => a.lead_id !== leadId), app])
+      if (status === 'hired') toast.success('Marked as won!')
+      else if (status === 'applied') toast.success('Marked as applied')
+      else toast('Moved back to interested')
     }
   }, [])
 
   const handleDragStart = (e: React.DragEvent, leadId: string, col: string) => {
-    setDragId(leadId)
-    setDragCol(col)
+    setDragId(leadId); setDragCol(col)
     e.dataTransfer.effectAllowed = 'move'
-    requestAnimationFrame(() => {
-      const el = e.currentTarget as HTMLElement
-      el.classList.add('dragging')
-    })
+    requestAnimationFrame(() => (e.currentTarget as HTMLElement).classList.add('dragging'))
   }
-
   const handleDragEnd = (e: React.DragEvent) => {
-    const el = e.currentTarget as HTMLElement
-    el.classList.remove('dragging')
-    setDragId(null)
-    setDragCol(null)
-    setOverCol(null)
+    ;(e.currentTarget as HTMLElement).classList.remove('dragging')
+    setDragId(null); setDragCol(null); setOverCol(null)
   }
-
-  const handleDragOver = (e: React.DragEvent, col: string) => {
-    e.preventDefault()
-    e.dataTransfer.dropEffect = 'move'
-    setOverCol(col)
-  }
-
-  const handleDragLeave = () => setOverCol(null)
-
+  const handleDragOver = (e: React.DragEvent, col: string) => { e.preventDefault(); setOverCol(col) }
   const handleDrop = (e: React.DragEvent, toCol: string) => {
-    e.preventDefault()
-    setOverCol(null)
-    if (dragCol && toCol && dragCol !== toCol && dragId) {
-      updateApplication(dragId, toCol)
-    }
-    setDragId(null)
-    setDragCol(null)
+    e.preventDefault(); setOverCol(null)
+    if (dragCol && toCol && dragCol !== toCol && dragId) updateApp(dragId, toCol)
+    setDragId(null); setDragCol(null)
   }
 
   if (loading) return null
@@ -145,10 +112,10 @@ export default function PipelinePage() {
     return (
       <div className="empty">
         <div className="empty-icon"><i className="ti ti-send"></i></div>
-        <h3>No leads in your pipeline yet</h3>
-        <p>Browse the feed and click Apply on leads you like.</p>
+        <h3>Your pipeline is empty</h3>
+        <p>Click Apply on any lead in the feed to start tracking it here.</p>
         <button className="btn btn-primary" style={{ display: 'inline-flex' }} onClick={() => router.push('/dashboard')}>
-          <i className="ti ti-arrow-left"></i> Go to feed
+          <i className="ti ti-arrow-left"></i> Browse leads
         </button>
       </div>
     )
@@ -156,58 +123,114 @@ export default function PipelinePage() {
 
   return (
     <>
-      <div className="greeting">
-        <h2>Pipeline</h2>
-        <p>{totalActive} active · {wonCount} won. Drag cards between stages as things progress.</p>
+      {/* ── HEADER ── */}
+      <div className="pipe-header">
+        <div className="pipe-header-left">
+          <h2 className="pipe-title">Pipeline</h2>
+          <p className="pipe-sub">Drag cards to advance stages, or use the quick-action buttons.</p>
+        </div>
+        <div className="pipe-stats">
+          <div className="pipe-stat">
+            <span className="pipe-stat-v">{totalActive}</span>
+            <span className="pipe-stat-l">active</span>
+          </div>
+          <div className="pipe-stat-sep" />
+          <div className="pipe-stat">
+            <span className="pipe-stat-v" style={{ color: 'var(--mid)' }}>{appliedCount}</span>
+            <span className="pipe-stat-l">applied</span>
+          </div>
+          <div className="pipe-stat-sep" />
+          <div className="pipe-stat">
+            <span className="pipe-stat-v" style={{ color: 'var(--hi)' }}>{wonCount}</span>
+            <span className="pipe-stat-l">won</span>
+          </div>
+        </div>
       </div>
+
+      {/* ── KANBAN ── */}
       <div className="kanban">
-        {columns.map(col => {
+        {COLS.map(col => {
           const colLeads = grouped[col.key] || []
           return (
             <div key={col.key} className="kan-col"
+              style={{ '--col-tint': col.tint } as React.CSSProperties}
               onDragOver={e => handleDragOver(e, col.key)}
-              onDragLeave={handleDragLeave}
+              onDragLeave={() => setOverCol(null)}
               onDrop={e => handleDrop(e, col.key)}>
-              <div className="kan-head">
-                <span className="kan-dot" style={{ background: col.color }} />
+
+              {/* Column header */}
+              <div className="kan-head" style={{ borderBottom: `2px solid ${col.color}22` }}>
+                <span className="kan-head-icon" style={{ color: col.color, background: `${col.color}18` }}>
+                  <i className={`ti ${col.icon}`} />
+                </span>
                 <span className="kan-title">{col.label}</span>
-                <span className="kan-count">{colLeads.length}</span>
+                <span className="kan-count" style={{ color: col.color, background: `${col.color}15` }}>
+                  {colLeads.length}
+                </span>
               </div>
-              <div className={`kan-body ${overCol === col.key ? 'dragover' : ''}`}>
-                {colLeads.length === 0 ? (
-                  <div className="kan-empty">Drop leads here</div>
-                ) : (
-                  colLeads.map(lead => {
-                    const si = srcInfo(lead.source_url)
-                    const budget = formatBudgetGBP(lead.budget_min, lead.budget_max)
-                    const stageIdx = stageIdxMap[col.key] ?? 0
-                    const stageLbl = stageLabels[stageIdx]
-                    return (
-                      <div key={lead.id}
-                        className="kan-card"
-                        draggable
-                        onDragStart={e => handleDragStart(e, lead.id, col.key)}
-                        onDragEnd={handleDragEnd}
-                        onClick={() => router.push(`/dashboard/lead/${lead.id}`)}>
-                        <div className="kc-top">
-                          <span className="src-ava" style={{ background: si.ava, width: 18, height: 18, fontSize: 9 }}>{si.ini}</span>
-                          <span className={`src-badge ${si.cls}`}>{si.name.toUpperCase()}</span>
-                          <span className="lc-time" style={{ marginLeft: 'auto' }}>{timeAgo(lead.posted_date)}</span>
+
+              {/* Column body */}
+              <div className={`kan-body ${overCol === col.key ? 'dragover' : ''}`}
+                style={{ background: col.tint }}>
+                {colLeads.length === 0
+                  ? <div className="kan-empty">
+                      <i className={`ti ${col.icon}`} />
+                      <span>Drop leads here</span>
+                    </div>
+                  : colLeads.map(lead => {
+                      const si = SRC[srcKey(lead.source_url)] || SRC.reddit
+                      const budget = formatBudgetGBP(lead.budget_min, lead.budget_max)
+                      const app = appMap.get(lead.id)
+                      const daysSince = app ? Math.floor((Date.now() - new Date(app.created_at).getTime()) / 86400000) : 0
+                      const isStale = daysSince >= 7 && col.key !== 'hired'
+
+                      return (
+                        <div key={lead.id}
+                          className={`kan-card ${col.key === 'hired' ? 'kan-card-won' : ''}`}
+                          style={{ borderLeft: `3px solid ${col.color}` }}
+                          draggable
+                          onDragStart={e => handleDragStart(e, lead.id, col.key)}
+                          onDragEnd={handleDragEnd}
+                          onClick={() => router.push(`/dashboard/lead/${lead.id}`)}>
+
+                          {/* Card top */}
+                          <div className="kc-top">
+                            <span className="src-ava" style={{ background: si.ava, width: 18, height: 18, fontSize: 9 }}>{si.ini}</span>
+                            <span className={`src-badge ${si.cls}`}>{si.name.toUpperCase()}</span>
+                            <span className="kc-age" style={{ color: isStale ? 'var(--coral)' : 'var(--slate-2)' }}>
+                              {isStale && <i className="ti ti-alert-triangle" />}
+                              {daysSince === 0 ? 'Today' : `${daysSince}d`}
+                            </span>
+                          </div>
+
+                          {/* Title */}
+                          <div className="kc-title">{lead.title}</div>
+
+                          {/* Budget */}
+                          {budget && (
+                            <div className="kc-budget">
+                              <i className="ti ti-currency-pound" />{budget}
+                            </div>
+                          )}
+
+                          {/* Quick-advance + detail */}
+                          {col.next && (
+                            <div className="kc-actions" onClick={e => e.stopPropagation()}>
+                              <button className="kc-advance-btn" onClick={() => updateApp(lead.id, col.next!)}>
+                                <i className={`ti ${COLS.find(c => c.key === col.next)?.icon}`} />
+                                {col.nextLabel}
+                              </button>
+                            </div>
+                          )}
+
+                          {col.key === 'hired' && (
+                            <div className="kc-won-badge">
+                              <i className="ti ti-trophy" /> Won
+                            </div>
+                          )}
                         </div>
-                        <div className="kc-title">{lead.title}</div>
-                        {budget && <div className="kc-foot"><span className="budget">{budget}</span></div>}
-                        <div className="stage-track">
-                          <span className={`stage-dot ${stageIdx >= 0 ? 'done' : ''} ${stageIdx === 0 ? 'now' : ''}`}></span>
-                          <span className={`stage-line ${stageIdx >= 1 ? 'done' : ''}`}></span>
-                          <span className={`stage-dot ${stageIdx >= 1 ? 'done' : ''} ${stageIdx === 1 ? 'now' : ''}`}></span>
-                          <span className={`stage-line ${stageIdx >= 2 ? 'done' : ''}`}></span>
-                          <span className={`stage-dot ${stageIdx >= 2 ? 'done' : ''} ${stageIdx === 2 ? 'now' : ''}`}></span>
-                          <span className="stage-lbl">{stageLbl}</span>
-                        </div>
-                      </div>
-                    )
-                  })
-                )}
+                      )
+                    })}
               </div>
             </div>
           )
