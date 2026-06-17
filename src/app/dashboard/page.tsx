@@ -443,16 +443,16 @@ export default function DashboardPage() {
             {gaugeSVG(sc)}
             <span className="tt">{lead.title}</span>
           </div>
+          <p className="lc-desc">{lead.description}</p>
           <div className="lc-meta">
             {budget && <span className="budget">{budget}</span>}
             {lead.client_location && <span className="meta-chip"><i className="ti ti-map-pin"></i>{lead.client_location}</span>}
           </div>
           <div className="skills-row">{skills}</div>
-          <div className="locked-overlay" onClick={() => router.push('/dashboard/billing')}>
-            <div className="locked-overlay-inner">
-              <i className="ti ti-lock"></i>
-              <span>Unlock this lead</span>
-            </div>
+          <div className="lc-actions">
+            <div className="lc-save-btn"><i className="ti ti-bookmark" /></div>
+            <div className="btn btn-primary"><i className="ti ti-send"></i> Apply</div>
+            <div className="btn btn-ghost">Full breakdown</div>
           </div>
         </article>
       )
@@ -573,20 +573,22 @@ export default function DashboardPage() {
           {isFree && filtered.length > FREE_LIMIT
             ? <>
                 {leadCards.slice(0, FREE_LIMIT)}
-                <div className="free-gate">
-                  <div className="free-gate-body">
-                    <div className="free-gate-eyebrow"><i className="ti ti-lock"></i>Free plan limit reached</div>
-                    <h3><span>{filtered.length - FREE_LIMIT} more leads</span> scored for your profile</h3>
-                    <p>Unlock source links, unlimited applications, and your weekly match report — from £15/mo. Cancel any time.</p>
+                <div className="free-wall">
+                  <div className="free-wall-cards">
+                    {leadCards.slice(FREE_LIMIT)}
                   </div>
-                  <div className="free-gate-cta">
-                    <button onClick={() => router.push('/dashboard/billing')} className="btn btn-primary">
-                      <i className="ti ti-bolt" /> Unlock all leads
-                    </button>
-                    <span className="free-gate-note">No lock-in · cancel any time</span>
+                  <div className="free-wall-overlay">
+                    <div className="free-wall-cta" onClick={() => router.push('/dashboard/billing')}>
+                      <div className="free-wall-lock"><i className="ti ti-lock" /></div>
+                      <h3 className="free-wall-heading"><span>{filtered.length - FREE_LIMIT} more leads</span> scored for you</h3>
+                      <p className="free-wall-sub">Unlock source links, unlimited applications, and your weekly match report.</p>
+                      <button className="btn btn-primary free-wall-btn">
+                        <i className="ti ti-bolt" /> Unlock all leads — from £15/mo
+                      </button>
+                      <span className="free-wall-note">No lock-in · cancel any time</span>
+                    </div>
                   </div>
                 </div>
-                {leadCards.slice(FREE_LIMIT)}
               </>
             : leadCards}
         </div>
