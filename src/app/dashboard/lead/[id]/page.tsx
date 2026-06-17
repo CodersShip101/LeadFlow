@@ -6,17 +6,32 @@ import { createClient } from '@/lib/supabase-client'
 import toast from 'react-hot-toast'
 import type { Lead, Profile, Application } from '@/types'
 import { computeMatchExplanation } from '@/types'
-import { getSourceInfo, formatBudgetGBP, isNewLead, formatDate } from '@/lib/utils'
-import ScoreGauge from '@/components/ScoreGauge'
+import { getSourceInfo, formatBudgetGBP, formatDate } from '@/lib/utils'
 
-const statusConfig: Record<string, { label: string, color: string, bg: string }> = {
-  saved:      { label: 'Saved', color: 'var(--lime-ink)', bg: 'var(--lime-dim)' },
-  interested: { label: 'Interested', color: 'var(--lime-deep)', bg: 'var(--lime-dim)' },
-  applied:    { label: 'Applied', color: 'var(--mid)', bg: 'var(--mid-bg)' },
-  hired:      { label: 'Won', color: 'var(--hi)', bg: 'var(--hi-bg)' },
+const SRC: Record<string, { name: string; cls: string; ava: string }> = {
+  reddit: { name: 'Reddit', cls: 'sb-reddit', ava: '#FF5A3C' },
+  reed:   { name: 'Reed',   cls: 'sb-reed',   ava: '#3B7BE0' },
+  wwr:    { name: 'WWR',    cls: 'sb-wwr',     ava: '#E8A020' },
+  rok:    { name: 'Remote OK', cls: 'sb-rok',  ava: '#9B6BE0' },
 }
 
-function barColor(v: number) {
+function srcKey(url: string | null): string {
+  const l = (url || '').toLowerCase()
+  if (l.includes('reddit')) return 'reddit'
+  if (l.includes('reed')) return 'reed'
+  if (l.includes('weworkremotely') || l.includes('wwr')) return 'wwr'
+  return 'rok'
+}
+
+const STAGES = [
+  { key: 'interested', label: 'Interested', icon: 'ti-eye' },
+  { key: 'applied',    label: 'Applied',    icon: 'ti-send' },
+  { key: 'hired',      label: 'Won',        icon: 'ti-trophy' },
+]
+
+const stageIdx = (s: string) => STAGES.findIndex(x => x.key === s)
+
+function scoreColor(v: number) {
   if (v >= 8) return 'var(--hi)'
   if (v >= 5) return 'var(--mid)'
   return 'var(--slate)'
@@ -28,7 +43,8 @@ export default function LeadDetailPage() {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [application, setApplication] = useState<Application | null>(null)
   const [loading, setLoading] = useState(true)
-  const [showFullDesc, setShowFullDesc] = useState(false)
+  const [showFull, setShowFull] = useState(false)
+  const [copied, setCopied] = useState(false)
   const router = useRouter()
   const supabase = createClient()
 
@@ -40,11 +56,7 @@ export default function LeadDetailPage() {
         supabase.from('leads').select('*').eq('id', id).single(),
         supabase.from('profiles').select('*').eq('id', user.id).single(),
       ])
-      if (leadRes.error || !leadRes.data) {
-        toast.error('Lead not found')
-        router.push('/dashboard')
-        return
-      }
+      if (leadRes.error || !leadRes.data) { toast.error('Lead not found'); router.push('/dashboard'); return }
       setLead(leadRes.data)
       setProfile(profileRes.data)
       const res = await fetch('/api/applications')
@@ -57,235 +69,231 @@ export default function LeadDetailPage() {
     load()
   }, [id, supabase, router])
 
-  const updateApplication = useCallback(async (status: string) => {
+  const updateApp = useCallback(async (status: string) => {
     if (status === 'remove') {
-      const res = await fetch('/api/applications', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ lead_id: id }),
-      })
-      if (res.ok) { setApplication(null) }
+      const res = await fetch('/api/applications', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ lead_id: id }) })
+      if (res.ok) { setApplication(null); toast('Removed') }
       return
     }
-    const res = await fetch('/api/applications', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ lead_id: id, status }),
-    })
-    if (res.ok) {
-      const app = await res.json()
-      setApplication(app)
-    }
+    const res = await fetch('/api/applications', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ lead_id: id, status }) })
+    if (res.ok) { const app = await res.json(); setApplication(app); toast.success(status === 'hired' ? 'Marked as won!' : 'Stage updated') }
   }, [id])
 
-  const handlePrimaryAction = () => {
-    const isAlreadyInPipeline = application && application.status !== 'saved'
-    if (isAlreadyInPipeline) {
-      router.push('/dashboard/applied')
-    } else if (application?.status === 'saved') {
-      updateApplication('interested')
-      toast.success('Added to pipeline')
-    } else {
-      updateApplication('interested')
-      toast.success('Added to pipeline')
-    }
-  }
-
-  const toggleSave = () => {
-    if (application?.status === 'saved') {
-      updateApplication('remove')
-      toast('Removed from saved')
-    } else {
-      updateApplication('saved')
-      toast.success('Saved')
-    }
-  }
+  const saveOutcome = useCallback(async (outcome: string) => {
+    const res = await fetch('/api/applications', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ lead_id: id, outcome }) })
+    if (res.ok) { setApplication(await res.json()); toast.success('Saved') }
+  }, [id])
 
   if (loading) return (
-    <div className="flex items-center justify-center min-h-screen" style={{ background: 'var(--paper)' }}>
-      <div className="flex items-center gap-3" style={{ color: 'var(--slate)' }}>
-        <div className="w-2.5 h-2.5 rounded-full animate-pulse" style={{ background: 'var(--lime)' }} />
-        <span className="text-sm">Loading&hellip;</span>
-      </div>
+    <div className="ld-loading">
+      <div className="ld-loading-dot" />
+      <span>Loading lead&hellip;</span>
     </div>
   )
 
   if (!lead) return null
 
-  const isFree = profile?.subscription_status === 'free'
-  const source = getSourceInfo(lead.source_url)
-  const matchInfo = computeMatchExplanation(lead, profile)
-  const score = matchInfo.score
+  const isPro = profile?.subscription_status !== 'free'
+  const si = SRC[srcKey(lead.source_url)]
+  const m = computeMatchExplanation(lead, profile)
+  const sc = m.score
   const budget = formatBudgetGBP(lead.budget_min, lead.budget_max)
-  const isInPipeline = application && application.status !== 'saved'
-  const isSaved = application?.status === 'saved'
-  const descShort = (lead.description || '').length > 350
-
+  const appStatus = application?.status
+  const currentStageIdx = appStatus && appStatus !== 'saved' ? stageIdx(appStatus) : -1
+  const isSaved = appStatus === 'saved'
+  const isInPipeline = appStatus && appStatus !== 'saved'
   const daysSince = application ? Math.floor((Date.now() - new Date(application.created_at).getTime()) / 86400000) : 0
   const showOutcomePrompt = application && daysSince >= 14 && !application.outcome
+  const descLong = (lead.description || '').length > 400
+
+  const ageH = (Date.now() - new Date(lead.posted_date).getTime()) / 3600000
+  const ageLabel = ageH < 1 ? `${Math.round(ageH * 60)}m ago` : ageH < 24 ? `${Math.round(ageH)}h ago` : `${Math.round(ageH / 24)}d ago`
 
   return (
-    <div className="flex-1 pb-20 md:pb-0" style={{ background: 'var(--paper)' }}>
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6 md:py-10">
+    <div className="ld-page">
 
-        <button onClick={() => router.push('/dashboard')}
-          className="flex items-center gap-1.5 text-xs font-semibold mb-6 transition-opacity hover:opacity-70"
-          style={{ color: 'var(--slate)' }}>
-          <i className="ti ti-arrow-left" /> Back to feed
-        </button>
+      {/* Back nav */}
+      <button className="ld-back" onClick={() => router.back()}>
+        <i className="ti ti-arrow-left" /> Back
+      </button>
 
-        {/* ── HEADER CARD ── */}
-        <div className="rounded-xl p-5 md:p-7" style={{ background: 'var(--card)', border: '1px solid var(--line)' }}>
-          <div className="flex items-start gap-5">
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2 mb-2.5">
-                <span className="text-[11px] font-semibold px-2.5 py-1 rounded-md"
-                  style={{ background: source.bg, color: source.color }}>{source.label}</span>
-                {isNewLead(lead.posted_date) && <span className="lead-state st-new text-[10px]">New</span>}
-                {isInPipeline && (
-                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded"
-                    style={{ background: statusConfig[application!.status]?.bg, color: statusConfig[application!.status]?.color }}>
-                    {statusConfig[application!.status]?.label}
-                  </span>
-                )}
-              </div>
-              <h1 className="text-xl md:text-2xl font-bold leading-tight pr-2" style={{ color: 'var(--ink)' }}>{lead.title}</h1>
-            </div>
-            <div className="flex flex-col items-center gap-0.5 shrink-0">
-              <ScoreGauge score={score} />
-              <span className="text-[10px] font-medium tracking-wider" style={{ color: 'var(--slate-2)' }}>SCORE</span>
-            </div>
-          </div>
-
-          {/* Meta chips */}
-          <div className="flex flex-wrap items-center gap-2 mt-4 pt-4" style={{ borderTop: '1px solid var(--line-2)' }}>
-            {budget && (
-              <span className="text-xs font-semibold px-2.5 py-1 rounded-md" style={{ background: 'var(--lime-dim)', color: 'var(--lime-ink)' }}>
-                {budget}
-              </span>
-            )}
-            {lead.client_location && (
-              <span className="text-xs px-2.5 py-1 rounded-md flex items-center gap-1" style={{ background: 'var(--paper-2)', color: 'var(--slate)' }}>
-                <i className="ti ti-map-pin" style={{ fontSize: 12 }} /> {lead.client_location}
-              </span>
-            )}
-            {lead.project_type && (
-              <span className="text-xs px-2.5 py-1 rounded-md capitalize" style={{ background: 'var(--paper-2)', color: 'var(--slate)' }}>
-                {lead.project_type}
-              </span>
-            )}
-            <span className="text-xs px-2.5 py-1 rounded-md flex items-center gap-1" style={{ background: 'var(--paper-2)', color: 'var(--slate)' }}>
-              <i className="ti ti-calendar" style={{ fontSize: 12 }} /> Posted {formatDate(lead.posted_date)}
+      {/* ── HERO CARD ── */}
+      <div className="ld-hero">
+        <div className="ld-hero-top">
+          <span className={`src-badge ${si.cls}`}>{si.name.toUpperCase()}</span>
+          {isInPipeline && (
+            <span className="ld-status-pill">
+              <i className={`ti ${STAGES[currentStageIdx]?.icon}`} />
+              {STAGES[currentStageIdx]?.label}
             </span>
-          </div>
-        </div>
-
-        {/* ── ACTIONS ── */}
-        <div className="flex items-center gap-3 mt-4">
-          <button onClick={handlePrimaryAction} className="btn btn-primary" style={{ flex: 1 }}>
-            <i className={`ti ${isInPipeline ? 'ti-send-2' : 'ti-send'}`} />
-            {isInPipeline ? 'View in pipeline' : 'Apply & track'}
-          </button>
-          <button onClick={toggleSave} className={`btn-icon ${isSaved ? 'on' : ''}`} title={isSaved ? 'Saved' : 'Save'}
-            style={{ width: 44, height: 44 }}>
-            <i className={`ti ti-bookmark${isSaved ? '-filled' : ''}`} />
-          </button>
-          {!isFree && lead.source_url && (
-            <a href={lead.source_url} target="_blank" rel="noopener noreferrer" className="btn btn-ghost">
-              <i className="ti ti-external-link" /> Open source
-            </a>
           )}
+          <span className="ld-score-chip" style={{ color: scoreColor(sc), borderColor: `${scoreColor(sc)}40` }}>
+            {sc}<span className="ld-score-denom">/10</span>
+          </span>
         </div>
 
-        {/* ── DESCRIPTION ── */}
-        <div className="rounded-xl p-5 mt-5" style={{ background: 'var(--card)', border: '1px solid var(--line)' }}>
-          <h2 className="text-xs font-semibold tracking-wider mb-3 uppercase" style={{ color: 'var(--slate)' }}>Description</h2>
-          <div className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: 'var(--ink-2)' }}>
-            {showFullDesc || !descShort ? lead.description : `${lead.description?.slice(0, 350)}...`}
-          </div>
-          {descShort && (
-            <button onClick={() => setShowFullDesc(v => !v)} className="text-xs font-semibold mt-2 transition-opacity hover:opacity-70"
-              style={{ color: 'var(--lime-deep)' }}>
-              {showFullDesc ? 'Show less' : 'Read more'} <i className="ti ti-chevron-down" style={{ fontSize: 10 }} />
-            </button>
-          )}
+        <h1 className="ld-title">{lead.title}</h1>
+
+        <div className="ld-meta">
+          {budget && <span className="ld-meta-budget"><i className="ti ti-currency-pound" />{budget}</span>}
+          {lead.client_location && <span className="ld-meta-chip"><i className="ti ti-map-pin" />{lead.client_location}</span>}
+          {lead.project_type && <span className="ld-meta-chip"><i className="ti ti-briefcase" />{lead.project_type}</span>}
+          <span className="ld-meta-chip"><i className="ti ti-clock" />{ageLabel}</span>
         </div>
 
-        {/* ── SKILLS ── */}
-        {lead.skills_required && lead.skills_required.length > 0 && (
-          <div className="rounded-xl p-5 mt-4" style={{ background: 'var(--card)', border: '1px solid var(--line)' }}>
-            <h2 className="text-xs font-semibold tracking-wider mb-3 uppercase" style={{ color: 'var(--slate)' }}>Skills</h2>
-            <div className="flex flex-wrap gap-2">
-              {lead.skills_required.map(sk => {
-                const matched = profile?.skills?.some(ps => ps.toLowerCase() === sk.toLowerCase())
-                return (
-                  <span key={sk} className={`skill ${matched ? 'match' : ''}`}>
-                    {matched && <i className="ti ti-check" style={{ fontSize: 11 }} />}{sk}
-                    {!matched && <span className="ml-1 text-[9px] opacity-50">missing</span>}
-                  </span>
-                )
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* ── SCORE BREAKDOWN ── */}
-        <div className="rounded-xl p-5 mt-4" style={{ background: 'var(--card)', border: '1px solid var(--line)' }}>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xs font-semibold tracking-wider uppercase" style={{ color: 'var(--slate)' }}>Match breakdown</h2>
-            <span className="text-[11px] font-medium" style={{ color: 'var(--slate)', fontStyle: 'italic' }}>{matchInfo.why}</span>
-          </div>
-          <div className="flex flex-col gap-3">
-            {matchInfo.subScores.map(s => (
-              <div key={s.label}>
-                <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-xs font-semibold" style={{ color: 'var(--ink)' }}>{s.label}</span>
-                  <span className="font-mono text-xs font-bold" style={{ color: s.value >= 8 ? 'var(--hi)' : s.value >= 5 ? 'var(--mid)' : 'var(--slate)' }}>{s.value}/10</span>
+        {/* Stage tracker */}
+        {isInPipeline && (
+          <div className="ld-stage-track">
+            {STAGES.map((st, i) => {
+              const done = currentStageIdx >= i
+              const now = currentStageIdx === i
+              const isNext = i === currentStageIdx + 1
+              return (
+                <div key={st.key} className="ld-stage-item">
+                  {i > 0 && <div className={`ld-stage-line ${currentStageIdx >= i ? 'done' : ''}`} />}
+                  <button
+                    className={`ld-stage-dot ${done ? 'done' : ''} ${now ? 'now' : ''}`}
+                    title={isNext ? `Move to ${st.label}` : st.label}
+                    onClick={() => isNext && updateApp(st.key)}>
+                    {done ? <i className={`ti ${now ? st.icon : 'ti-check'}`} /> : <span className="ld-stage-num">{i + 1}</span>}
+                  </button>
+                  <span className={`ld-stage-lbl ${now ? 'now' : ''}`}>{st.label}</span>
                 </div>
-                <div className="h-2 rounded-full" style={{ background: 'var(--line)' }}>
-                  <div className="h-full rounded-full transition-all" style={{ width: `${s.value * 10}%`, background: barColor(s.value) }} />
-                </div>
-                <div className="text-[11px] mt-1" style={{ color: 'var(--slate)' }}>{s.detail}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* ── OUTCOME ── */}
-        {showOutcomePrompt && (
-          <div className="rounded-xl p-5 mt-4" style={{ background: 'var(--mid-bg)', border: '1px solid #F0D9A0' }}>
-            <p className="text-xs font-semibold mb-3" style={{ color: '#5E4609' }}>Did you get this project?</p>
-            <div className="flex gap-2">
-              {[
-                { outcome: 'won' as const, label: 'Got it!', icon: 'ti-thumb-up', color: 'var(--hi)', bg: 'var(--hi-bg)' },
-                { outcome: 'lost' as const, label: 'Didn\'t get it', icon: 'ti-thumb-down', color: 'var(--coral)', bg: 'rgba(229,87,61,.1)' },
-                { outcome: 'pending' as const, label: 'Still waiting', icon: 'ti-clock', color: 'var(--mid)', bg: 'var(--mid-bg)' },
-              ].map(opt => (
-                <button key={opt.outcome} onClick={async () => {
-                  const res = await fetch('/api/applications', {
-                    method: 'PATCH',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ lead_id: id, outcome: opt.outcome }),
-                  })
-                  if (res.ok) { setApplication(await res.json()); toast.success('Saved!') }
-                }}
-                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold transition-all hover:opacity-80"
-                  style={{ background: opt.bg, color: opt.color }}>
-                  <i className={`ti ${opt.icon}`} style={{ fontSize: 13 }} /> {opt.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {application?.outcome && (
-          <div className="mt-4 flex items-center gap-2 text-sm font-medium px-1"
-            style={{ color: application.outcome === 'won' ? 'var(--hi)' : application.outcome === 'lost' ? 'var(--coral)' : 'var(--mid)' }}>
-            <i className={`ti ${application.outcome === 'won' ? 'ti-thumb-up' : application.outcome === 'lost' ? 'ti-thumb-down' : 'ti-clock'}`} style={{ fontSize: 15 }} />
-            {application.outcome === 'won' ? 'You got this project' : application.outcome === 'lost' ? 'Did not get it' : 'Still waiting'}
+              )
+            })}
           </div>
         )}
       </div>
+
+      {/* ── PRIMARY ACTIONS ── */}
+      <div className="ld-actions">
+        {!isInPipeline
+          ? <button className="btn btn-primary ld-act-main" onClick={() => updateApp('interested')}>
+              <i className="ti ti-send" /> Add to pipeline
+            </button>
+          : currentStageIdx < STAGES.length - 1
+            ? <button className="btn btn-primary ld-act-main" onClick={() => updateApp(STAGES[currentStageIdx + 1].key)}>
+                <i className={`ti ${STAGES[currentStageIdx + 1].icon}`} /> Mark as {STAGES[currentStageIdx + 1].label}
+              </button>
+            : <div className="ld-act-won"><i className="ti ti-trophy" /> Marked as won</div>}
+
+        {isPro && lead.source_url && (
+          <a href={lead.source_url} target="_blank" rel="noopener noreferrer" className="btn btn-ghost">
+            <i className="ti ti-external-link" /> Open listing
+          </a>
+        )}
+
+        {isPro && lead.source_url && (
+          <button className="btn-icon" title={copied ? 'Copied!' : 'Copy link'} onClick={async () => { await navigator.clipboard.writeText(lead.source_url!); setCopied(true); setTimeout(() => setCopied(false), 2000) }}>
+            <i className={`ti ${copied ? 'ti-check' : 'ti-copy'}`} />
+          </button>
+        )}
+
+        <button className={`btn-icon ${isSaved ? 'on' : ''}`} title={isSaved ? 'Saved' : 'Save for later'} onClick={() => updateApp(isSaved ? 'remove' : 'saved')}>
+          <i className={`ti ti-bookmark${isSaved ? '-filled' : ''}`} />
+        </button>
+      </div>
+
+      {/* ── MATCH VERDICT ── */}
+      <div className="ld-card ld-verdict" style={{ borderLeftColor: scoreColor(sc) }}>
+        <div className="ld-verdict-label"><i className="ti ti-target-arrow" />Match verdict</div>
+        <p className="ld-verdict-text">{m.why}</p>
+        <div className="ld-subscores">
+          {m.subScores.map(s => (
+            <div key={s.label} className="ld-subscore-row">
+              <div className="ld-subscore-head">
+                <span className="ld-subscore-lbl">{s.label}</span>
+                <span className="ld-subscore-val" style={{ color: scoreColor(s.value) }}>{s.value}/10</span>
+              </div>
+              <div className="ld-subscore-track">
+                <div className="ld-subscore-fill" style={{ width: `${s.value * 10}%`, background: scoreColor(s.value) }} />
+              </div>
+              <p className="ld-subscore-detail">{s.detail}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── SKILLS ── */}
+      {(lead.skills_required?.length ?? 0) > 0 && (
+        <div className="ld-card">
+          <div className="ld-section-label">
+            <i className="ti ti-code" />Skills
+            <span className="ld-section-sub" style={{ color: m.skillMatch.matched.length === lead.skills_required!.length ? 'var(--hi)' : 'var(--mid)' }}>
+              {m.skillMatch.matched.length} of {lead.skills_required!.length} matched
+            </span>
+          </div>
+          <div className="ld-skills">
+            {m.skillMatch.matched.map(s => <span key={s} className="skill match"><i className="ti ti-check" />{s}</span>)}
+            {m.skillMatch.missing.map(s => <span key={s} className="skill">{s}</span>)}
+          </div>
+        </div>
+      )}
+
+      {/* ── DESCRIPTION ── */}
+      {lead.description && (
+        <div className="ld-card">
+          <div className="ld-section-label"><i className="ti ti-align-left" />Brief</div>
+          <p className="ld-desc">{showFull || !descLong ? lead.description : `${lead.description.slice(0, 400)}…`}</p>
+          {descLong && (
+            <button className="ld-read-more" onClick={() => setShowFull(v => !v)}>
+              {showFull ? 'Show less' : 'Read full brief'} <i className={`ti ${showFull ? 'ti-chevron-up' : 'ti-chevron-down'}`} />
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* ── SOURCE — TIER GATED ── */}
+      <div className="ld-card">
+        <div className="ld-section-label"><i className="ti ti-link" />Source</div>
+        {isPro
+          ? <a href={lead.source_url || '#'} target="_blank" rel="noopener noreferrer" className="btn btn-ghost" style={{ width: '100%' }}>
+              <i className="ti ti-external-link" /> Open original listing on {si.name}
+            </a>
+          : <div className="ld-lock-row">
+              <div className="ld-lock-icon"><i className="ti ti-lock" /></div>
+              <div>
+                <p className="ld-lock-head">Source hidden on Free</p>
+                <p className="ld-lock-sub">Upgrade to see where to apply — from £15/mo.</p>
+              </div>
+              <button className="btn btn-primary" onClick={() => router.push('/dashboard/billing')} style={{ flexShrink: 0 }}>
+                Upgrade
+              </button>
+            </div>}
+      </div>
+
+      {/* ── OUTCOME PROMPT (14 days) ── */}
+      {showOutcomePrompt && (
+        <div className="ld-outcome-card">
+          <p className="ld-outcome-q"><i className="ti ti-help-circle" />It's been {daysSince} days — did you get this project?</p>
+          <div className="ld-outcome-btns">
+            {[
+              { o: 'won',     label: 'Got it',        icon: 'ti-trophy',     color: 'var(--hi)',  bg: 'var(--hi-bg)' },
+              { o: 'lost',    label: "Didn't get it", icon: 'ti-x',          color: 'var(--coral)', bg: 'rgba(229,87,61,.1)' },
+              { o: 'pending', label: 'Still waiting', icon: 'ti-clock',      color: 'var(--mid)', bg: 'var(--mid-bg)' },
+            ].map(opt => (
+              <button key={opt.o} className="ld-outcome-btn" style={{ color: opt.color, background: opt.bg }} onClick={() => saveOutcome(opt.o)}>
+                <i className={`ti ${opt.icon}`} /> {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {application?.outcome && (
+        <div className="ld-outcome-result" style={{ color: application.outcome === 'won' ? 'var(--hi)' : application.outcome === 'lost' ? 'var(--coral)' : 'var(--mid)' }}>
+          <i className={`ti ${application.outcome === 'won' ? 'ti-trophy' : application.outcome === 'lost' ? 'ti-x' : 'ti-clock'}`} />
+          {application.outcome === 'won' ? 'You got this project' : application.outcome === 'lost' ? 'Did not get it' : 'Still waiting on a response'}
+        </div>
+      )}
+
+      {/* Remove from pipeline */}
+      {isInPipeline && (
+        <button className="ld-remove-btn" onClick={() => { updateApp('remove'); router.back() }}>
+          <i className="ti ti-trash" /> Remove from pipeline
+        </button>
+      )}
+
     </div>
   )
 }
