@@ -272,15 +272,12 @@ export default function BillingContent() {
         </span>
       </div>
 
-      {/* Two-column: plan cards left, trial timeline right */}
-      <div className="bill-plans-row">
-        <div className="bill-plans-left">
-          <div className="tier-ladder">
-            {TIER_ORDER.map(renderCard)}
-          </div>
-        </div>
+      {/* Plan cards */}
+      <div className="tier-ladder">
+        {TIER_ORDER.map(renderCard)}
+      </div>
 
-        <aside className="bill-trial-aside">
+      <aside className="bill-trial-aside">
           <h3 className="bill-trial-aside-title">How your free trial works</h3>
           <div className="trial-timeline">
             <div className="trial-step">
@@ -316,8 +313,7 @@ export default function BillingContent() {
           <div className="bill-trial-shield">
             <i className="ti ti-shield-check" /> No surprises. We will always warn you before charging.
           </div>
-        </aside>
-      </div>
+      </aside>
 
       {/* Enterprise */}
       <div className="bill-ent">
