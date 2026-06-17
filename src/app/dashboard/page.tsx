@@ -431,17 +431,7 @@ export default function DashboardPage() {
       </span>
     )
 
-    if (isLocked) {
-      return (
-        <div key={lead.id} className="locked-tab">
-          <span className="locked-tab-score" style={{ color: sc >= 8 ? 'var(--hi)' : sc >= 5 ? 'var(--mid)' : 'var(--slate)' }}>{sc}</span>
-          <span className={`src-badge ${si.cls}`}>{si.name.toUpperCase()}</span>
-          <span className="locked-tab-title">{lead.title}</span>
-          {budget && <span className="locked-tab-budget">{budget}</span>}
-          <i className="ti ti-lock locked-tab-lock" />
-        </div>
-      )
-    }
+    if (isLocked) return null
 
     return (
       <article key={lead.id} onClick={() => selectLead(lead)}
@@ -558,22 +548,15 @@ export default function DashboardPage() {
           {isFree && filtered.length > FREE_LIMIT
             ? <>
                 {leadCards.slice(0, FREE_LIMIT)}
-                <div className="free-wall">
-                  <div className="free-wall-cards">
-                    {leadCards.slice(FREE_LIMIT)}
-                  </div>
-                  <div className="free-wall-overlay">
-                    <div className="free-wall-cta">
-                      <div className="free-wall-lock"><i className="ti ti-lock" /></div>
-                      <div className="free-wall-text">
-                        <p className="free-wall-heading"><span>{filtered.length - FREE_LIMIT} more leads</span> matched your profile</p>
-                        <p className="free-wall-sub">From £15/mo · no lock-in · cancel any time</p>
-                      </div>
-                      <button className="btn btn-primary free-wall-btn" onClick={() => router.push('/dashboard/billing')}>
-                        <i className="ti ti-bolt" /> Unlock
-                      </button>
-                    </div>
-                  </div>
+                <div className="free-gate-row">
+                  <span className="free-gate-row-icon"><i className="ti ti-lock" /></span>
+                  <span className="free-gate-row-text">
+                    <strong>{filtered.length - FREE_LIMIT} more leads</strong> are scored for you — unlock to see them
+                  </span>
+                  <span className="free-gate-row-hint">From £15/mo · cancel any time</span>
+                  <button className="btn btn-primary free-gate-row-btn" onClick={() => router.push('/dashboard/billing')}>
+                    <i className="ti ti-bolt" /> Unlock
+                  </button>
                 </div>
               </>
             : leadCards}
