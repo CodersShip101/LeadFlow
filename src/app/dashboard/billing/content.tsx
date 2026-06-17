@@ -272,12 +272,7 @@ export default function BillingContent() {
         </span>
       </div>
 
-      {/* Plan cards */}
-      <div className="tier-ladder">
-        {TIER_ORDER.map(renderCard)}
-      </div>
-
-      {/* Trial timeline — single section, not repeated per card */}
+      {/* Trial timeline — shown first so users see it before price */}
       <div className="bill-trial-band">
         <div className="bill-trial-step">
           <div className="bill-trial-dot bill-trial-now"><i className="ti ti-bolt" /></div>
@@ -305,6 +300,11 @@ export default function BillingContent() {
         <div className="bill-trial-note">
           <i className="ti ti-shield-check" /> No surprises. We will always warn you before charging.
         </div>
+      </div>
+
+      {/* Plan cards */}
+      <div className="tier-ladder">
+        {TIER_ORDER.map(renderCard)}
       </div>
 
       {/* Enterprise */}
