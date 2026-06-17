@@ -272,39 +272,51 @@ export default function BillingContent() {
         </span>
       </div>
 
-      {/* Trial timeline — shown first so users see it before price */}
-      <div className="bill-trial-band">
-        <div className="bill-trial-step">
-          <div className="bill-trial-dot bill-trial-now"><i className="ti ti-bolt" /></div>
-          <div className="bill-trial-body">
-            <span className="bill-trial-day">Today</span>
-            <span className="bill-trial-desc">Full access unlocked immediately</span>
+      {/* Two-column: plan cards left, trial timeline right */}
+      <div className="bill-plans-row">
+        <div className="bill-plans-left">
+          <div className="tier-ladder">
+            {TIER_ORDER.map(renderCard)}
           </div>
         </div>
-        <div className="bill-trial-connector" />
-        <div className="bill-trial-step">
-          <div className="bill-trial-dot"><i className="ti ti-mail" /></div>
-          <div className="bill-trial-body">
-            <span className="bill-trial-day">Day 5</span>
-            <span className="bill-trial-desc">We&apos;ll remind you before your trial ends</span>
-          </div>
-        </div>
-        <div className="bill-trial-connector" />
-        <div className="bill-trial-step">
-          <div className="bill-trial-dot"><i className="ti ti-credit-card" /></div>
-          <div className="bill-trial-body">
-            <span className="bill-trial-day">Day 7</span>
-            <span className="bill-trial-desc">First charge — cancel any time before</span>
-          </div>
-        </div>
-        <div className="bill-trial-note">
-          <i className="ti ti-shield-check" /> No surprises. We will always warn you before charging.
-        </div>
-      </div>
 
-      {/* Plan cards */}
-      <div className="tier-ladder">
-        {TIER_ORDER.map(renderCard)}
+        <aside className="bill-trial-aside">
+          <h3 className="bill-trial-aside-title">How your free trial works</h3>
+          <div className="trial-timeline">
+            <div className="trial-step">
+              <div className="trial-day">Today</div>
+              <div className="trial-rail" aria-hidden="true">
+                <span className="trial-dot amber" />
+                <span className="trial-line" />
+              </div>
+              <p className="trial-desc">
+                <strong>You unlock everything in Pro.</strong> Unlimited leads, AI scores, skill filtering — all of it, the moment you sign up.
+              </p>
+            </div>
+            <div className="trial-step">
+              <div className="trial-day">Day 5</div>
+              <div className="trial-rail" aria-hidden="true">
+                <span className="trial-dot lime" />
+                <span className="trial-line" />
+              </div>
+              <p className="trial-desc hl">
+                <strong>We email you a reminder — before any charge.</strong> Two full days before the trial ends, so you can decide on your own terms. We&apos;d rather remind you than surprise you.
+              </p>
+            </div>
+            <div className="trial-step">
+              <div className="trial-day">Day 7</div>
+              <div className="trial-rail" aria-hidden="true">
+                <span className="trial-dot" />
+              </div>
+              <p className="trial-desc">
+                <strong>Your first charge, only if you stay.</strong> Cancel any time before then and you pay nothing. One click in your account settings.
+              </p>
+            </div>
+          </div>
+          <div className="bill-trial-shield">
+            <i className="ti ti-shield-check" /> No surprises. We will always warn you before charging.
+          </div>
+        </aside>
       </div>
 
       {/* Enterprise */}

@@ -1260,15 +1260,8 @@ textarea.input { resize: vertical; min-height: 80px; }
    Escalating card size = escalating value: each tier is taller (tops aligned, so
    the bottoms step down left→right) and a touch wider than the one before, with a
    larger price, so "you get more" reads at a glance. */
-.tier-ladder { display: grid; grid-template-columns: 0.9fr 1fr 1.1fr 1.2fr; gap: 16px; align-items: start; margin-bottom: 24px; }
-.tier-ladder .bill-card { min-height: 444px; transition: box-shadow .18s, transform .18s, border-color .18s; }
-.tier-ladder .bill-card:nth-child(2) { min-height: 488px; }
-.tier-ladder .bill-card:nth-child(3) { min-height: 532px; }
-.tier-ladder .bill-card:nth-child(4) { min-height: 576px; }
-.tier-ladder .bill-card:nth-child(1) .bpc-price { font-size: 31px; }
-.tier-ladder .bill-card:nth-child(2) .bpc-price { font-size: 36px; }
-.tier-ladder .bill-card:nth-child(3) .bpc-price { font-size: 40px; }
-.tier-ladder .bill-card:nth-child(4) .bpc-price { font-size: 45px; }
+.tier-ladder { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; align-items: start; margin-bottom: 24px; }
+.tier-ladder .bill-card { transition: box-shadow .18s, transform .18s, border-color .18s; }
 @media (max-width: 1100px) {
   .tier-ladder { grid-template-columns: 1fr 1fr; align-items: stretch; }
   .tier-ladder .bill-card,
@@ -1350,18 +1343,24 @@ textarea.input { resize: vertical; min-height: 80px; }
 .bill-cta-current { background: var(--lime-dim); color: var(--lime-ink); border: 1.5px solid #DDEFA8; cursor: default; font-weight: 600; }
 
 /* reassure strip under featured/team CTA */
-/* Trial band — single horizontal section below plan grid */
-.bill-trial-band { display: flex; align-items: center; gap: 0; background: var(--card); border: 1px solid var(--line); border-radius: var(--r-xl); padding: 22px 28px; margin-bottom: 16px; flex-wrap: wrap; gap: 0; }
-.bill-trial-step { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 160px; }
-.bill-trial-dot { width: 36px; height: 36px; border-radius: 50%; border: 1.5px solid var(--line); background: var(--paper-2); color: var(--slate-2); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 15px; }
-.bill-trial-now { background: var(--lime); border-color: var(--lime); color: var(--ink-950); }
-.bill-trial-body { display: flex; flex-direction: column; gap: 1px; }
-.bill-trial-day { font-family: var(--font-mono); font-size: 11px; font-weight: 800; letter-spacing: .06em; color: var(--ink-2); text-transform: uppercase; }
-.bill-trial-desc { font-size: 12.5px; color: var(--slate); line-height: 1.35; }
-.bill-trial-connector { width: 32px; height: 2px; background: var(--line); flex-shrink: 0; margin: 0 8px; }
-.bill-trial-note { width: 100%; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line-2); font-family: var(--font-mono); font-size: 11px; color: var(--slate-2); display: flex; align-items: center; gap: 6px; }
-.bill-trial-note .ti { color: var(--hi); font-size: 14px; }
-@media (max-width: 640px) { .bill-trial-connector { display: none; } .bill-trial-step { flex-basis: 100%; padding: 8px 0; border-bottom: 1px solid var(--line-2); } .bill-trial-step:last-of-type { border-bottom: none; } }
+/* Two-column plans + trial layout */
+.bill-plans-row { display: grid; grid-template-columns: 1fr 280px; gap: 28px; align-items: start; margin-bottom: 24px; }
+@media (max-width: 1080px) { .bill-plans-row { grid-template-columns: 1fr; } .bill-trial-aside { order: -1; } }
+
+.bill-plans-left .tier-ladder { margin-bottom: 0; }
+
+.bill-trial-aside { position: sticky; top: 24px; background: var(--card); border: 1px solid var(--line); border-radius: var(--r-xl); padding: 24px 22px; }
+.bill-trial-aside-title { font-family: var(--font-display); font-size: 14px; font-weight: 700; letter-spacing: -.01em; color: var(--ink); margin-bottom: 22px; }
+
+/* Override landing trial-timeline inside the aside to remove max-width */
+.bill-trial-aside .trial-timeline { max-width: none; margin: 0; }
+.bill-trial-aside .trial-step { grid-template-columns: 48px 22px 1fr; gap: 10px; }
+.bill-trial-aside .trial-day { font-size: .75rem; }
+.bill-trial-aside .trial-desc { font-size: .82rem; padding-bottom: 16px; }
+.bill-trial-aside .trial-line { min-height: 20px; }
+
+.bill-trial-shield { display: flex; align-items: center; gap: 7px; font-family: var(--font-mono); font-size: 10.5px; color: var(--slate-2); margin-top: 6px; padding-top: 16px; border-top: 1px solid var(--line-2); }
+.bill-trial-shield .ti { color: var(--hi); font-size: 14px; flex-shrink: 0; }
 
 /* CTA stack + sub-note */
 .bill-cta-stack { display: flex; flex-direction: column; gap: 6px; }
