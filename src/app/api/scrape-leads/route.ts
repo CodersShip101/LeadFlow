@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { createAdminSupabase } from '@/lib/supabase-server'
 import { processLeadWithAI } from '@/lib/zen'
+import { scoreLead, type ScoringLead, type ScoringWeights } from '@/lib/scoring'
+import { ENTITLEMENTS, type Tier } from '@/lib/tiers'
 
 async function fetchRedditPosts() {
   try {
@@ -173,96 +175,93 @@ export async function POST() {
       }
     }
 
-    // #1: Email alerts — notify users about high-match leads
-    if (insertedLeads.length > 0) {
+    // ── Alert dispatch: notify users whose score threshold is met ──
+    if (insertedLeads.length > 0 && process.env.RESEND_API_KEY) {
       try {
+        const eligiblePlans = (Object.keys(ENTITLEMENTS) as Tier[])
+          .filter(p => ENTITLEMENTS[p].customAlerts)
+
         const { data: profiles } = await supabase
           .from('profiles')
-          .select('id, email, skills, hourly_rate')
+          .select('id, email, skills, hourly_rate, subscription_status, scoring_weights, alert_preferences')
           .not('email', 'is', null)
+          .in('subscription_status', eligiblePlans)
 
-        if (profiles) {
-          for (const profile of profiles) {
-            if (!profile.email) continue
-            const ps = (profile.skills || []).map((s: string) => s.toLowerCase())
+        for (const profile of (profiles ?? [])) {
+          const prefs = profile.alert_preferences as {
+            enabled: boolean; minScore: number; sources: string[]; keywords: string[]
+          } | null
+          if (!prefs?.enabled) continue
 
-            const matches: { title: string; score: number; matched: number; url: string; budget: string }[] = []
-
-            for (const lead of insertedLeads) {
-              let matched = 0
-              for (const s of (lead.skills_required || [])) {
-                if (ps.includes((s as string).toLowerCase())) matched++
-              }
-
-              let score = 5
-              if (lead.budget_min || lead.budget_max) score += 2
-              if (lead.skills_required && lead.skills_required.length > 0) score += 2
-              if (lead.client_location) score += 1
-              score = Math.max(1, Math.min(10, score))
-
-              if (score >= 7 && matched > 0) {
-                const budget = lead.budget_min && lead.budget_max
-                  ? `£${lead.budget_min}—${lead.budget_max}`
-                  : lead.budget_min ? `From £${lead.budget_min}` : ''
-                matches.push({ title: lead.title, score, matched, url: lead.source_url, budget })
-              }
-            }
-
-            if (matches.length > 0) {
-              const topMatch = matches.sort((a, b) => b.score - a.score || b.matched - a.matched)[0]
-              const matchHtml = `
-<!DOCTYPE html>
-<html>
-<body style="margin:0;padding:0;background:#F5F5F7;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">
-  <table width="100%" cellpadding="0" cellspacing="0">
-    <tr><td align="center" style="padding:32px 16px">
-      <table width="480" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:12px;border:1px solid #E5E7EB">
-        <tr><td style="padding:32px 32px 16px">
-          <h1 style="font-size:20px;font-weight:700;margin:0;color:#1A1D23">New lead matches your skills</h1>
-          <p style="font-size:13px;color:#6B7280;margin:6px 0 0">${matches.length} new lead${matches.length > 1 ? 's' : ''} matched your profile on LeadFlow</p>
-        </td></tr>
-        ${matches.slice(0, 3).map((m, i) => `
-        <tr><td style="padding:${i === 0 ? '8' : '4'}px 32px">
-          <table width="100%" cellpadding="0" cellspacing="0" style="background:#F9FAFB;border-radius:8px;padding:12px">
-            <tr><td>
-              <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
-                <span style="font-size:13px;font-weight:600;color:#1A1D23">${m.title}</span>
-                <span style="font-size:10px;font-weight:600;padding:2px 6px;border-radius:4px;background:${m.score >= 8 ? '#EBF5F0' : '#FEF3E2'};color:${m.score >= 8 ? '#1B6B4A' : '#D97706'}">${m.score}/10</span>
-              </div>
-              <div style="font-size:11px;color:#9CA3AF">${m.budget} · ${m.matched} skill${m.matched > 1 ? 's' : ''} match</div>
-            </td></tr>
-          </table>
-        </td></tr>
-        `).join('')}
-        <tr><td style="padding:24px 32px 32px;text-align:center">
-          <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://lead-flow-gpyj.vercel.app'}/dashboard"
-             style="display:inline-block;padding:12px 24px;background:#1B6B4A;color:white;text-decoration:none;font-size:14px;font-weight:600;border-radius:8px">
-            View on LeadFlow
-          </a>
-        </td></tr>
-      </table>
-    </td></tr>
-  </table>
-</body>
-</html>`
-
-              await fetch('https://api.resend.com/emails', {
-                method: 'POST',
-                headers: {
-                  'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                  from: 'LeadFlow <onboarding@resend.dev>',
-                  to: [profile.email],
-                  subject: `New lead: ${topMatch.title} (${topMatch.score}/10 match)`,
-                  html: matchHtml,
-                }),
-              }).catch(() => {})
-            }
+          const userProfile = {
+            skills: profile.skills ?? [],
+            hourly_rate: profile.hourly_rate ?? null,
+            weights: (profile.scoring_weights as ScoringWeights | null) ?? undefined,
           }
+
+          const matches = insertedLeads.filter(lead => {
+            if (prefs.sources.length > 0 && !prefs.sources.includes(lead.source)) return false
+            if (prefs.keywords.length > 0) {
+              const text = `${lead.title} ${lead.description}`.toLowerCase()
+              if (!prefs.keywords.some((kw: string) => text.includes(kw.toLowerCase()))) return false
+            }
+            return scoreLead(lead as unknown as ScoringLead, userProfile).score >= prefs.minScore
+          })
+
+          if (!matches.length) continue
+
+          const topMatch = matches
+            .map(l => ({ lead: l, score: scoreLead(l as unknown as ScoringLead, userProfile).score }))
+            .sort((a, b) => b.score - a.score)[0]
+
+          const rows = matches.slice(0, 3).map((l, i) => {
+            const sc = scoreLead(l as unknown as ScoringLead, userProfile).score
+            const budget = l.budget_max ? `£${l.budget_min ?? 0}–${l.budget_max}` : l.budget_min ? `From £${l.budget_min}` : ''
+            return `<tr><td style="padding:${i === 0 ? '8' : '4'}px 28px">
+              <table width="100%" cellpadding="0" cellspacing="0" style="background:#F9FAFB;border-radius:8px;padding:12px">
+                <tr><td>
+                  <span style="font-size:13px;font-weight:600;color:#111827">${l.title}</span>
+                  <span style="font-size:10px;font-weight:700;padding:1px 6px;border-radius:4px;margin-left:6px;background:${sc >= 8 ? '#EBF5F0' : '#FEF3E2'};color:${sc >= 8 ? '#1B6B4A' : '#D97706'}">${sc}/10</span>
+                  <div style="font-size:11px;color:#6B7280;margin-top:3px">${budget}${budget ? ' · ' : ''}${l.client_location ?? 'Remote'}</div>
+                </td></tr>
+              </table>
+            </td></tr>`
+          }).join('')
+
+          const html = `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#F5F5F7;font-family:-apple-system,sans-serif">
+            <table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:28px 16px">
+              <table width="480" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:12px;border:1px solid #E5E7EB">
+                <tr><td style="padding:28px 28px 12px">
+                  <h1 style="font-size:18px;font-weight:700;margin:0;color:#111827">⚡ ${matches.length} new lead${matches.length > 1 ? 's' : ''} scored ${prefs.minScore}+</h1>
+                  <p style="font-size:13px;color:#6B7280;margin:5px 0 0">Just scraped — apply early for the best response rate.</p>
+                </td></tr>
+                ${rows}
+                <tr><td style="padding:20px 28px 28px;text-align:center">
+                  <a href="${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://lead-flow-gpyj.vercel.app'}/dashboard"
+                     style="background:#111827;color:#C4F000;padding:11px 24px;border-radius:8px;font-weight:600;font-size:13px;text-decoration:none;display:inline-block">
+                    View all leads
+                  </a>
+                </td></tr>
+                <tr><td style="padding:0 28px 20px;text-align:center;font-size:11px;color:#9CA3AF">
+                  You're receiving this because you set a score alert on LeadFlow.<br>
+                  <a href="${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://lead-flow-gpyj.vercel.app'}/dashboard/profile" style="color:#9CA3AF">Manage alerts</a>
+                </td></tr>
+              </table>
+            </td></tr></table>
+          </body></html>`
+
+          await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              from: 'LeadFlow Alerts <alerts@leadflow.dev>',
+              to: [profile.email],
+              subject: `${matches.length} new lead${matches.length > 1 ? 's' : ''} hit your ${prefs.minScore}+ alert — ${topMatch.lead.title}`,
+              html,
+            }),
+          }).catch(() => {})
         }
-      } catch {}
+      } catch { /* non-blocking — don't fail scrape if alerts error */ }
     }
 
     return NextResponse.json({
