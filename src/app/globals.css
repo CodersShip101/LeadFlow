@@ -660,10 +660,9 @@ textarea.input { resize: vertical; min-height: 80px; }
 .free-wall { position: relative; margin-top: 4px; }
 
 .free-wall-cards { display: flex; flex-direction: column; gap: 14px; }
-.free-wall-cards .lead-card-locked { filter: blur(3px) grayscale(.25); opacity: .7; }
-.free-wall-cards .lead-card-locked:nth-child(2) { filter: blur(5px) grayscale(.4); opacity: .5; }
-.free-wall-cards .lead-card-locked:nth-child(3) { filter: blur(7px) grayscale(.55); opacity: .35; }
-.free-wall-cards .lead-card-locked:nth-child(n+4) { filter: blur(9px) grayscale(.7); opacity: .2; }
+.free-wall-cards .lead-card-locked { filter: blur(2.5px) grayscale(.2); opacity: .75; }
+.free-wall-cards .lead-card-locked:nth-child(2) { filter: blur(2.5px) grayscale(.2); opacity: .6; }
+.free-wall-cards .lead-card-locked:nth-child(n+3) { filter: blur(2.5px) grayscale(.2); opacity: .45; }
 
 .free-wall-overlay { position: absolute; inset: 0; display: flex; align-items: flex-start; justify-content: center; padding-top: 32px;
   background: linear-gradient(to bottom,
