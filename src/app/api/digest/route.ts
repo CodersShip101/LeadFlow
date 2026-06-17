@@ -1,8 +1,14 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createAdminSupabase } from '@/lib/supabase-server'
 import { ENTITLEMENTS, type Tier } from '@/lib/tiers'
 
-export async function POST() {
+export async function POST(req: NextRequest) {
+  const isVercelCron = req.headers.get('x-vercel-cron') === '1'
+  const auth = req.headers.get('authorization')
+  const hasSecret = process.env.CRON_SECRET && auth === `Bearer ${process.env.CRON_SECRET}`
+  if (!isVercelCron && !hasSecret) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
   const results: { email: string; success: boolean; error?: string }[] = []
   const supabase = createAdminSupabase()
 

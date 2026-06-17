@@ -10,9 +10,12 @@ import { scoreLead, type ScoringLead, type ScoringWeights } from '@/lib/scoring'
 import { ENTITLEMENTS, type Tier } from '@/lib/tiers'
 
 export async function POST(req: NextRequest) {
-  // Protect with cron secret
+  // Vercel cron sends this header automatically on production
+  const isVercelCron = req.headers.get('x-vercel-cron') === '1'
+  // Also allow manual trigger with CRON_SECRET for testing
   const auth = req.headers.get('authorization')
-  if (auth !== `Bearer ${process.env.CRON_SECRET}`) {
+  const hasSecret = process.env.CRON_SECRET && auth === `Bearer ${process.env.CRON_SECRET}`
+  if (!isVercelCron && !hasSecret) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
