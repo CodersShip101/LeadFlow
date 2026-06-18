@@ -17,6 +17,7 @@ async function fetchRedditPosts() {
   try {
     const res = await fetch('https://www.reddit.com/r/forhire/new.json?limit=10', {
       headers: { 'User-Agent': 'LeadFlow/1.0' },
+      signal: AbortSignal.timeout(8000),
     })
     if (!res.ok) return []
     const data = await res.json()
@@ -31,7 +32,7 @@ async function fetchRedditPosts() {
 
 async function fetchRemotivePosts() {
   try {
-    const res = await fetch('https://remotive.com/api/remote-jobs')
+    const res = await fetch('https://remotive.com/api/remote-jobs', { signal: AbortSignal.timeout(8000) })
     if (!res.ok) return []
     const data = await res.json()
     return (data.jobs || []).slice(0, 15).map((job: any) => ({
@@ -43,7 +44,7 @@ async function fetchRemotivePosts() {
 
 async function fetchWWRPosts() {
   try {
-    const res = await fetch('https://weworkremotely.com/remote-jobs.rss')
+    const res = await fetch('https://weworkremotely.com/remote-jobs.rss', { signal: AbortSignal.timeout(8000) })
     if (!res.ok) return []
     const text = await res.text()
     const items = text.match(/<item>[\s\S]*?<\/item>/g) || []
@@ -61,6 +62,7 @@ async function fetchReedPosts() {
   try {
     const res = await fetch('https://www.reed.co.uk/jobs/rss/freelance?keywords=developer+designer+writer+marketing', {
       headers: { 'User-Agent': 'LeadFlow/1.0' },
+      signal: AbortSignal.timeout(8000),
     })
     if (!res.ok) return []
     const text = await res.text()
@@ -79,6 +81,7 @@ async function fetchCWJobsPosts() {
   try {
     const res = await fetch('https://www.cwjobs.co.uk/jobs/rss?keywords=contract+freelance', {
       headers: { 'User-Agent': 'LeadFlow/1.0' },
+      signal: AbortSignal.timeout(8000),
     })
     if (!res.ok) return []
     const text = await res.text()
@@ -97,6 +100,7 @@ async function fetchIndeedPosts() {
   try {
     const res = await fetch('https://uk.indeed.com/rss?q=freelance+contract&l=United+Kingdom', {
       headers: { 'User-Agent': 'LeadFlow/1.0' },
+      signal: AbortSignal.timeout(8000),
     })
     if (!res.ok) return []
     const text = await res.text()
@@ -115,6 +119,7 @@ async function fetchRemoteOKPosts() {
   try {
     const res = await fetch('https://remoteok.com/api', {
       headers: { 'User-Agent': 'LeadFlow/1.0' },
+      signal: AbortSignal.timeout(8000),
     })
     if (!res.ok) return []
     const data = await res.json()
@@ -130,6 +135,7 @@ async function fetchHimalayasPosts() {
   try {
     const res = await fetch('https://himalayas.app/jobs/api', {
       headers: { 'User-Agent': 'LeadFlow/1.0' },
+      signal: AbortSignal.timeout(8000),
     })
     if (!res.ok) return []
     const data = await res.json()
@@ -144,6 +150,7 @@ async function fetchArbeitnowPosts() {
   try {
     const res = await fetch('https://www.arbeitnow.com/api/job-board-api', {
       headers: { 'User-Agent': 'LeadFlow/1.0' },
+      signal: AbortSignal.timeout(8000),
     })
     if (!res.ok) return []
     const data = await res.json()
