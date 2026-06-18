@@ -33,7 +33,6 @@ export default function LoginPage() {
         <div className="panel-glow" aria-hidden="true"></div>
         <div className="panel-content">
           <div className="auth-logo">
-            <span className="auth-logo-mark"><span>fl</span></span>
             <span className="auth-logo-name">fl<span className="brand-ai">ai</span>ir</span>
           </div>
           <div className="panel-hero">

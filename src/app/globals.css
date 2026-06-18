@@ -129,7 +129,7 @@ button { font-family: inherit; cursor: pointer; }
 #navbar { position: fixed; top: 0; left: 0; right: 0; z-index: 100; transition: background .3s, box-shadow .3s, border-color .3s; border-bottom: 1px solid transparent; }
 #navbar.scrolled { background: rgba(11,18,32,.82); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-bottom-color: rgba(255,255,255,.07); }
 .nav-inner { max-width: 1200px; margin: 0 auto; padding: 0 24px; height: 68px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
-.nav-logo { display: flex; align-items: center; gap: 10px; font-family: var(--font-display); font-weight: 700; font-size: 1.1rem; letter-spacing: -.02em; color: #fff; }
+.nav-logo { display: flex; align-items: center; gap: 10px; font-family: var(--font-display); font-weight: 700; font-size: 1.45rem; letter-spacing: -.02em; color: #fff; }
 .nav-logo-mark { width: 34px; height: 34px; border-radius: 9px; background: var(--lime); display: flex; align-items: center; justify-content: center; flex-shrink: 0; position: relative; overflow: hidden; }
 .nav-logo-mark span { font-family: var(--font-mono); font-weight: 700; font-size: .82rem; color: var(--ink-950); z-index: 1; }
 .nav-link { padding: 8px 14px; border-radius: var(--r-sm); font-size: .92rem; font-weight: 500; color: var(--slate-300); transition: background .15s, color .15s; }
@@ -240,7 +240,7 @@ textarea.input { resize: vertical; min-height: 80px; }
 .brand{display:flex;align-items:center;gap:10px;padding:6px 8px 18px}
 .brand-mark{width:32px;height:32px;border-radius:8px;background:var(--lime);display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .brand-mark span{font-family:var(--font-mono);font-weight:700;font-size:14px;color:var(--sidebar)}
-.brand-name{font-family:var(--font-display);font-weight:700;font-size:17px;color:#fff;letter-spacing:-.02em}
+.brand-name{font-family:var(--font-display);font-weight:700;font-size:21px;color:#fff;letter-spacing:-.02em}
 /* lowercase "flaiir" wordmark — highlight the "ai" in lime */
 .brand-ai{color:var(--lime)}
 #mobile-top .brand-ai{color:var(--lime-deep)}
@@ -1025,7 +1025,7 @@ textarea.input { resize: vertical; min-height: 80px; }
 .auth-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 56px; }
 .auth-logo-mark { width: 36px; height: 36px; border-radius: 9px; background: var(--lime); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .auth-logo-mark span { font-family: var(--font-mono); font-weight: 700; font-size: .84rem; color: var(--ink-950); }
-.auth-logo-name { font-family: var(--font-display); font-weight: 700; font-size: 1.1rem; letter-spacing: -.02em; color: #fff; }
+.auth-logo-name { font-family: var(--font-display); font-weight: 700; font-size: 1.5rem; letter-spacing: -.02em; color: #fff; }
 
 .panel-hero { flex: 1; display: flex; flex-direction: column; justify-content: center; }
 .panel-eyebrow { font-family: var(--font-mono); font-size: .7rem; letter-spacing: .12em; text-transform: uppercase; color: var(--lime); margin-bottom: 18px; }

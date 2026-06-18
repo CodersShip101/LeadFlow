@@ -261,7 +261,6 @@ export default function HomePage() {
         <nav id="navbar" className={scrolled ? 'scrolled' : ''} aria-label="Main navigation">
           <div className="nav-inner">
             <Link href="/" className="nav-logo" aria-label="Flaiir home">
-              <span className="nav-logo-mark"><span>fl</span></span>
               fl<span className="brand-ai">ai</span>ir
             </Link>
             <div className="nav-desktop" style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
@@ -822,8 +821,7 @@ export default function HomePage() {
           <div className="footer-grid" style={{ marginBottom: 48 }}>
             <div>
               <a href="#" style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }} aria-label="Flaiir home">
-                <span className="nav-logo-mark"><span>fl</span></span>
-                <span style={{ fontFamily: "'Space Grotesk',sans-serif", color: '#fff', fontWeight: 700, fontSize: '1.05rem', letterSpacing: '-.02em' }}>fl<span className="brand-ai">ai</span>ir</span>
+                <span style={{ fontFamily: "'Space Grotesk',sans-serif", color: '#fff', fontWeight: 700, fontSize: '1.3rem', letterSpacing: '-.02em' }}>fl<span className="brand-ai">ai</span>ir</span>
               </a>
               <p style={{ fontSize: '.875rem', color: 'var(--slate-400)', lineHeight: 1.65, maxWidth: 250 }}>AI-scored freelance leads, matched to your skills and delivered as often as every hour.</p>
             </div>

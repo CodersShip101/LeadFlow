@@ -103,7 +103,6 @@ export default function SignupPage() {
 
         <div className="panel-content">
           <div className="auth-logo" style={{ marginBottom: 28 }}>
-            <span className="auth-logo-mark"><span>fl</span></span>
             <span className="auth-logo-name">fl<span className="brand-ai">ai</span>ir</span>
           </div>
 

@@ -167,7 +167,6 @@ export default function OnboardingPage() {
     <div className="ob-wrap">
       <div className="ob-card">
         <div className="ob-head">
-          <span className="ob-logo">fl</span>
           <div className="ob-progress">
             {STEPS.map((s, i) => (
               <div key={s} className="ob-progress-item">
