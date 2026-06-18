@@ -5,6 +5,14 @@ import { scoreLead, type ScoringLead, type ScoringWeights } from '@/lib/scoring'
 import { ENTITLEMENTS, type Tier } from '@/lib/tiers'
 import { isDirectApply } from '@/lib/lead-filters'
 
+// Vercel Hobby caps function duration at 60s. Stay just under it.
+export const maxDuration = 60
+
+// Most leads we attempt to AI-process per invocation. Higher concurrency means
+// more leads fit in the time budget; remaining ones get picked up next run
+// (dedup ensures we never reprocess). Tune if you upgrade the Vercel plan.
+const MAX_PER_RUN = 30
+
 async function fetchRedditPosts() {
   try {
     const res = await fetch('https://www.reddit.com/r/forhire/new.json?limit=10', {
@@ -219,13 +227,20 @@ export async function POST() {
     result.skipped_duplicates = allPosts.length - deduped.length
 
     // ── Direct Apply Only: drop posts that funnel to bidding marketplaces ──
-    const newPosts = deduped.filter((p: any) => isDirectApply(p.source_url, p.rawText))
-    result.skipped_bidding = deduped.length - newPosts.length
+    const directPosts = deduped.filter((p: any) => isDirectApply(p.source_url, p.rawText))
+    result.skipped_bidding = deduped.length - directPosts.length
+
+    // Cap per run so we always finish inside the 60s function budget.
+    const newPosts = directPosts.slice(0, MAX_PER_RUN)
 
     const insertedLeads: any[] = []
 
-    const batchSize = 3
+    // Higher concurrency packs more AI calls into the time budget.
+    const batchSize = 6
+    // Leave headroom before Vercel kills the function (60s cap).
+    const deadline = startTime + 52_000
     for (let i = 0; i < newPosts.length; i += batchSize) {
+      if (Date.now() > deadline) break // stop gracefully; rest picked up next run
       const batch = newPosts.slice(i, i + batchSize)
       const results = await Promise.all(batch.map((post: any) =>
         processLeadWithAI(post.rawText).then(parsed => ({ parsed, post })).catch(e => ({ error: e instanceof Error ? e.message.substring(0, 100) : 'Unknown error', post }))
