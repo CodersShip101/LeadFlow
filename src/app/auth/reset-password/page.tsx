@@ -148,8 +148,8 @@ export default function ResetPasswordPage() {
               </div>
             </div>
             <button type="submit" className="btn-p btn-full" disabled={loading}>
-              <i className="ti ti-arrow-right" aria-hidden="true"></i>
-              {loading ? 'Updating\u2026' : 'Update Password \u2192'}
+              {loading ? 'Updating\u2026' : 'Update password'}
+              {!loading && <i className="ti ti-arrow-right" aria-hidden="true"></i>}
             </button>
           </form>
           <div className="auth-signup-nudge">
@@ -211,8 +211,8 @@ export default function ResetPasswordPage() {
               <input type="email" id="email" className="auth-input" placeholder="alex@yoursite.co.uk" autoComplete="email" required value={email} onChange={e => setEmail(e.target.value)} />
             </div>
             <button type="submit" className="btn-p btn-full" disabled={loading}>
-              <i className="ti ti-arrow-right" aria-hidden="true"></i>
-              {loading ? 'Sending\u2026' : 'Send Reset Link \u2192'}
+              {loading ? 'Sending\u2026' : 'Send reset link'}
+              {!loading && <i className="ti ti-arrow-right" aria-hidden="true"></i>}
             </button>
           </form>
           <div className="auth-signup-nudge">

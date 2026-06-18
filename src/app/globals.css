@@ -1074,8 +1074,8 @@ textarea.input { resize: vertical; min-height: 80px; }
 .auth-field label { display: block; font-size: .83rem; font-weight: 600; color: var(--ink-800); margin-bottom: 6px; font-family: var(--font-display); }
 .auth-label-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
 .auth-label-row label { margin-bottom: 0; }
-.auth-forgot-link { font-family: var(--font-mono); font-size: .72rem; color: var(--lime-dim); text-decoration: underline; text-underline-offset: 2px; }
-.auth-forgot-link:hover { color: var(--lime-deep); }
+.auth-forgot-link { font-family: var(--font-mono); font-size: .72rem; color: var(--slate); text-decoration: underline; text-underline-offset: 2px; }
+.auth-forgot-link:hover { color: var(--ink-900); }
 .auth-input { width: 100%; padding: 12px 14px; background: var(--paper-card); border: 1.5px solid var(--slate-200); border-radius: var(--r-md); font-family: var(--font-body); font-size: .94rem; color: var(--ink-900); transition: border-color .15s, box-shadow .15s; outline: none; }
 .auth-input:focus { border-color: var(--lime-deep); box-shadow: 0 0 0 3px rgba(155,192,0,.15); }
 .auth-input.err { border-color: var(--coral); }
@@ -1099,12 +1099,12 @@ textarea.input { resize: vertical; min-height: 80px; }
 
 .auth-magic-line { text-align: center; margin-top: 18px; font-size: .82rem; color: var(--slate-500); }
 .auth-magic-link { background: none; border: none; padding: 0; font: inherit; color: var(--ink-700); font-weight: 600; text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
-.auth-magic-link:hover { color: var(--lime-dim); }
+.auth-magic-link:hover { color: var(--lime-deep); }
 
 .auth-signup-nudge { text-align: center; margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--slate-200); }
 .auth-signup-nudge p { font-size: .87rem; color: var(--slate-500); margin-bottom: 4px; }
 .auth-cta-link { display: inline-flex; align-items: center; gap: 5px; font-family: var(--font-display); font-weight: 700; font-size: .9rem; color: var(--ink-800); text-decoration: underline; text-underline-offset: 2px; }
-.auth-cta-link:hover { color: var(--lime-dim); }
+.auth-cta-link:hover { color: var(--lime-deep); }
 
 /* signup-specific */
 .auth-field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }

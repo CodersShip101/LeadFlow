@@ -244,8 +244,8 @@ export default function SignupPage() {
             </div>
 
             <button type="submit" className="btn-p btn-full" disabled={loading} style={{ marginTop: 4 }}>
-              <i className="ti ti-arrow-right" aria-hidden="true"></i>
-              {loading ? 'Creating account\u2026' : 'Create my account \u2192'}
+              {loading ? 'Creating account\u2026' : 'Create my account'}
+              {!loading && <i className="ti ti-arrow-right" aria-hidden="true"></i>}
             </button>
 
             <p className="auth-legal" style={{ fontSize: '.72rem', marginTop: 10 }}>

@@ -119,8 +119,8 @@ export default function LoginPage() {
               <label htmlFor="remember">Keep me logged in for 30 days</label>
             </div>
             <button type="submit" className="btn-p btn-full" disabled={loading}>
-              <i className="ti ti-arrow-right" aria-hidden="true"></i>
-              {loading ? 'Logging in\u2026' : 'Log in to my feed \u2192'}
+              {loading ? 'Logging in\u2026' : 'Log in to my feed'}
+              {!loading && <i className="ti ti-arrow-right" aria-hidden="true"></i>}
             </button>
           </form>
 
