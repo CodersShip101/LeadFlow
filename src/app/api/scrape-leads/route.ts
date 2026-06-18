@@ -245,9 +245,9 @@ export async function POST() {
 
     // Higher concurrency packs more AI calls into the time budget.
     const batchSize = 6
-    // Stop starting new batches at 45s; a final batch can run up to the 12s
+    // Stop starting new batches at 40s; a final batch can run up to the 15s
     // per-call timeout, keeping us safely under the 60s function cap.
-    const deadline = startTime + 45_000
+    const deadline = startTime + 40_000
     for (let i = 0; i < newPosts.length; i += batchSize) {
       if (Date.now() > deadline) break // stop gracefully; rest picked up next run
       const batch = newPosts.slice(i, i + batchSize)

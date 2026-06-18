@@ -48,6 +48,9 @@ ${rawText}`
       },
       body: JSON.stringify({
         model: "deepseek-v4-flash-free",
+        // Pure extraction needs no chain-of-thought. "low" cuts response time
+        // from ~21s to ~7s, keeping us well inside the function time budget.
+        reasoning_effort: "low",
         messages: [
           {
             role: "system",
@@ -60,7 +63,7 @@ ${rawText}`
         ],
       }),
       // Fail fast so one slow call never hangs the whole scrape run.
-      signal: AbortSignal.timeout(12000),
+      signal: AbortSignal.timeout(15000),
     },
   )
 
