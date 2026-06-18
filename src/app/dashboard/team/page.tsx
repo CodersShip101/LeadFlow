@@ -8,6 +8,10 @@ import toast from 'react-hot-toast'
 
 interface Member { user_id: string; role: string; created_at: string; profile: { full_name: string | null } | null }
 interface Invite { email: string; role: string; created_at: string }
+interface PoolLead {
+  id: string; status: string; assigned_to: string | null
+  lead: { id: string; title: string; client_location: string | null } | null
+}
 interface TeamData {
   org: { id: string; plan: string; seats: number; myRole: string } | null
   seatsUsed: number
@@ -25,6 +29,22 @@ export default function TeamPage() {
   const [role, setRole] = useState<'member' | 'admin'>('member')
   const [inviting, setInviting] = useState(false)
   const [myId, setMyId] = useState<string | null>(null)
+  const [pool, setPool] = useState<{ leads: PoolLead[]; members: { user_id: string; name: string }[] } | null>(null)
+
+  const loadPool = useCallback(async () => {
+    try {
+      const res = await fetch('/api/team/pool')
+      if (res.ok) setPool(await res.json())
+    } catch { /* ignore */ }
+  }, [])
+
+  const assign = async (applicationId: string, assignTo: string) => {
+    const res = await fetch('/api/team/pool', {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ applicationId, assignTo: assignTo || null }),
+    })
+    if (res.ok) { toast.success('Assigned'); loadPool() } else toast.error('Could not assign')
+  }
 
   const load = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser()
@@ -37,7 +57,7 @@ export default function TeamPage() {
     setLoading(false)
   }, [supabase, router])
 
-  useEffect(() => { load() }, [load])
+  useEffect(() => { load(); loadPool() }, [load, loadPool])
 
   useEffect(() => {
     const inv = sp.get('invite')
@@ -186,6 +206,30 @@ export default function TeamPage() {
           </div>
         </div>
       )}
+
+      {/* Shared lead pool */}
+      <div className="tm-card">
+        <h3 className="tm-card-title">Shared lead pool</h3>
+        {!pool || pool.leads.length === 0 ? (
+          <p className="tm-note">Leads your team tracks appear here. Track a lead from the feed to add it to the pool.</p>
+        ) : (
+          <div className="tm-list">
+            {pool.leads.map(l => (
+              <div key={l.id} className="tm-row">
+                <span className="tm-avatar pending"><i className="ti ti-briefcase" /></span>
+                <div className="tm-row-info">
+                  <span className="tm-row-name">{l.lead?.title ?? 'Lead'}</span>
+                  <span className="tm-row-role">{l.status}{l.lead?.client_location ? ` · ${l.lead.client_location}` : ''}</span>
+                </div>
+                <select className="tm-select" value={l.assigned_to ?? ''} onChange={e => assign(l.id, e.target.value)}>
+                  <option value="">Unassigned</option>
+                  {pool.members.map(m => <option key={m.user_id} value={m.user_id}>{m.name}</option>)}
+                </select>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </>
   )
 }

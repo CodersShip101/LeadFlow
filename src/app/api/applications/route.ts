@@ -93,9 +93,14 @@ export async function POST(req: Request) {
     return NextResponse.json(data)
   }
 
+  // If the user is on a team, tag the lead into the shared pool.
+  const { data: membership } = await admin
+    .from('org_members').select('org_id').eq('user_id', user.id).maybeSingle()
+  const orgId = membership?.org_id ?? null
+
   const { data, error } = await admin
     .from('applications')
-    .insert({ freelancer_id: user.id, lead_id, status })
+    .insert({ freelancer_id: user.id, lead_id, status, org_id: orgId })
     .select()
     .single()
 
