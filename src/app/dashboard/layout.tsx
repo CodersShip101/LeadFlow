@@ -94,6 +94,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <i className="ti ti-arrows-split"></i> Pipeline
         </button>
 
+        {plan === 'team' && (
+          <button className={`nav-item ${isActive('/dashboard/team') ? 'active' : ''}`} onClick={() => navTo('/dashboard/team')}>
+            <i className="ti ti-users-group"></i> Team
+          </button>
+        )}
+
         <div className="rail-label">Account</div>
         <button className={`nav-item ${isActive('/dashboard/profile') ? 'active' : ''}`} onClick={() => navTo('/dashboard/profile')}>
           <i className="ti ti-adjustments"></i> Settings
