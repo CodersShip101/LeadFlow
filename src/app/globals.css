@@ -1059,7 +1059,7 @@ textarea.input { resize: vertical; min-height: 80px; }
 
 .panel-right { background: var(--paper); padding: 48px 52px; display: flex; flex-direction: column; justify-content: center; animation: fadeIn .5s ease both; }
 .auth-form-wrap { max-width: 380px; width: 100%; margin: 0 auto; }
-.auth-form-eyebrow { font-family: var(--font-mono); font-size: .7rem; letter-spacing: .12em; text-transform: uppercase; color: var(--lime-dim); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+.auth-form-eyebrow { font-family: var(--font-mono); font-size: .7rem; letter-spacing: .12em; text-transform: uppercase; color: var(--lime-deep); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
 .auth-form-eyebrow::before { content: "["; opacity: .5; }
 .auth-form-eyebrow::after { content: "]"; opacity: .5; }
 .auth-form-wrap h1 { font-family: var(--font-display); font-weight: 700; font-size: 1.9rem; letter-spacing: -.025em; line-height: 1.1; color: var(--ink-900); margin-bottom: 6px; }
@@ -1121,7 +1121,7 @@ textarea.input { resize: vertical; min-height: 80px; }
 .auth-skills-grid { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 4px; }
 .auth-skill-pill { padding: 5px 12px; border-radius: var(--r-pill); font-family: var(--font-mono); font-size: .72rem; font-weight: 600; background: var(--paper-card); border: 1.5px solid var(--slate-200); color: var(--slate-600); cursor: pointer; transition: background .15s, border-color .15s, color .15s; user-select: none; }
 .auth-skill-pill:hover { border-color: var(--lime-deep); color: var(--ink-900); }
-.auth-skill-pill.selected { background: rgba(196,240,0,.15); border-color: var(--lime-deep); color: var(--lime-dim); }
+.auth-skill-pill.selected { background: rgba(196,240,0,.15); border-color: var(--lime-deep); color: var(--lime-ink); }
 
 .auth-input-prefix { position: relative; }
 .auth-input-prefix .auth-input { padding-left: 30px; }
@@ -1138,7 +1138,8 @@ textarea.input { resize: vertical; min-height: 80px; }
 .auth-step-label { font-family: var(--font-mono); font-size: .7rem; color: var(--slate-400); margin-left: 4px; }
 
 .auth-legal { font-size: .78rem; color: var(--slate-500); text-align: center; margin-top: 14px; line-height: 1.5; }
-.auth-legal a { color: var(--lime-dim); text-decoration: underline; text-underline-offset: 2px; }
+.auth-legal a { color: var(--ink-700); font-weight: 600; text-decoration: underline; text-underline-offset: 2px; transition: color .15s; }
+.auth-legal a:hover { color: var(--lime-deep); }
 
 .auth-login-link { text-align: center; font-size: .88rem; color: var(--slate-500); margin-top: 20px; }
 .auth-login-link a { color: var(--ink-700); font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
