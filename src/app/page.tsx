@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import Script from 'next/script'
 import { PRICING, TIER_ICONS, planFeatures } from '@/lib/tiers'
+import { amountFor, formatPrice } from '@/lib/currency'
+import { useCurrency } from '@/lib/use-currency'
 import SeatControl from '@/components/SeatControl'
 
 const incomingSignals = [
@@ -148,6 +150,7 @@ export default function HomePage() {
   const dbRef = useRef(0)
   const [annual, setAnnual] = useState(false)
   const [teamSeats, setTeamSeats] = useState(2)
+  const { currency } = useCurrency()
   const [openFaq, setOpenFaq] = useState<number | null>(null)
   const [stickyVisible, setStickyVisible] = useState(false)
   const fiRef = useRef(0)
@@ -716,8 +719,8 @@ export default function HomePage() {
                 const v = PRICING[t]
                 const featured = t === 'max'
                 const isTeam = t === 'team'
-                const price = (annual ? v.annual : v.monthly) ?? 0
-                const was = annual && !isTeam ? v.monthly : null
+                const price = amountFor(t, annual ? 'annual' : 'monthly', currency) ?? 0
+                const was = annual && !isTeam ? amountFor(t, 'monthly', currency) : null
                 return (
                   <div key={t} className={`bill-card${featured ? ' feat' : ''}${isTeam ? ' team-card' : ''}`}>
                     {featured && <span className="bill-reco">MOST POPULAR</span>}
@@ -727,14 +730,14 @@ export default function HomePage() {
                     </div>
                     <div className="bpc-price-block">
                       {t === 'free' ? (
-                        <div className="bpc-price">£0<span className="per"> / month</span></div>
+                        <div className="bpc-price">{formatPrice(0, currency)}<span className="per"> / month</span></div>
                       ) : isTeam ? (
-                        <div className="bpc-price">£{price}<span className="per"> / seat{annual ? ' · yr' : '/mo'}</span></div>
+                        <div className="bpc-price">{formatPrice(price, currency)}<span className="per"> / seat{annual ? ' · yr' : '/mo'}</span></div>
                       ) : (
-                        <div className="bpc-price">£{price}{was ? <span className="was">£{was}</span> : null}<span className="per">{annual ? ' / mo · billed yr' : ' / month'}</span></div>
+                        <div className="bpc-price">{formatPrice(price, currency)}{was ? <span className="was">{formatPrice(was, currency)}</span> : null}<span className="per">{annual ? ' / mo · billed yr' : ' / month'}</span></div>
                       )}
                     </div>
-                    {isTeam && <SeatControl seats={teamSeats} setSeats={setTeamSeats} price={price} />}
+                    {isTeam && <SeatControl seats={teamSeats} setSeats={setTeamSeats} price={price} currency={currency} />}
                     <p className="bpc-blurb">{v.blurb}</p>
                     <div className="bpc-divider" />
                     <ul className="bpc-feats">
@@ -750,12 +753,12 @@ export default function HomePage() {
                         {t === 'free'
                           ? <>Get started free</>
                           : isTeam
-                            ? <><i className="ti ti-users" /> Start Team — £{price * teamSeats}/mo</>
+                            ? <><i className="ti ti-users" /> Start Team — {formatPrice(price * teamSeats, currency)}/mo</>
                             : featured
                               ? <><i className="ti ti-bolt" /> Start my free trial</>
                               : <><i className="ti ti-bolt" /> Start my free trial</>}
                       </Link>
-                      {t !== 'free' && <span className="bill-cta-sub">2 steps · £{isTeam ? price * teamSeats : price}/mo after Day 7</span>}
+                      {t !== 'free' && <span className="bill-cta-sub">2 steps · {formatPrice(isTeam ? price * teamSeats : price, currency)}/mo after Day 7</span>}
                     </div>
                   </div>
                 )

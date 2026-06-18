@@ -22,6 +22,9 @@ export async function POST(req: NextRequest) {
   const tier = body.tier as 'pro' | 'max' | 'team'
   const cycle = (body.cycle as 'monthly' | 'annual') ?? 'monthly'
   const seats = Math.max(1, Math.min(200, Number(body.seats) || 1))
+  const currency = ['GBP', 'USD', 'EUR'].includes(body.currency)
+    ? (body.currency as string).toLowerCase()
+    : undefined
 
   if (!['pro', 'max', 'team'].includes(tier)) {
     return NextResponse.json({ error: 'invalid tier' }, { status: 400 })
@@ -51,6 +54,9 @@ export async function POST(req: NextRequest) {
   const session = await stripe.checkout.sessions.create({
     mode: 'subscription',
     customer: customerId,
+    // Requires the Price to have currency_options for this currency in Stripe.
+    // If it doesn't, Stripe falls back to the price's base currency.
+    ...(currency ? { currency } : {}),
     line_items: [{ price, quantity }],
     subscription_data: { trial_period_days: 7 },
     allow_promotion_codes: true,

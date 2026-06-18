@@ -4,6 +4,7 @@
 // billing page. You can click −/+ or type a number directly; minimum 2 seats.
 
 import { useState, useEffect } from 'react'
+import { formatPrice, type CurrencyCode } from '@/lib/currency'
 
 const MIN_SEATS = 2
 const MAX_SEATS = 200
@@ -14,9 +15,10 @@ type Props = {
   seats: number
   setSeats: (n: number) => void
   price: number
+  currency?: CurrencyCode
 }
 
-export default function SeatControl({ seats, setSeats, price }: Props) {
+export default function SeatControl({ seats, setSeats, price, currency = 'GBP' }: Props) {
   // Local text buffer so multi-digit entry (e.g. "15") isn't clamped mid-type;
   // we only clamp on blur / Enter.
   const [text, setText] = useState(String(seats))
@@ -48,7 +50,7 @@ export default function SeatControl({ seats, setSeats, price }: Props) {
         />
         <button type="button" onClick={() => setSeats(clampSeats(seats + 1))} aria-label="More seats">+</button>
       </div>
-      <div className="bill-seat-sum">Total: <b>&pound;{price * seats}/mo</b> for {seats} seats</div>
+      <div className="bill-seat-sum">Total: <b>{formatPrice(price * seats, currency)}/mo</b> for {seats} seats</div>
     </div>
   )
 }

@@ -5,6 +5,8 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase-client'
 import type { Profile, Application } from '@/types'
 import { PRICING, ENTITLEMENTS, TIER_ICONS, planFeatures, type Tier } from '@/lib/tiers'
+import { amountFor, formatPrice } from '@/lib/currency'
+import { useCurrency } from '@/lib/use-currency'
 import SeatControl from '@/components/SeatControl'
 import toast from 'react-hot-toast'
 
@@ -80,16 +82,19 @@ export default function BillingContent() {
   const plan = (profile?.subscription_status ?? 'free') as Tier
   const isAnnual = cycle === 'annual'
 
+  const { currency } = useCurrency()
+
   const priceOf = useCallback((t: Tier) => {
-    const p = PRICING[t]
-    return (isAnnual ? p.annual : p.monthly) ?? 0
-  }, [isAnnual])
+    return amountFor(t, isAnnual ? 'annual' : 'monthly', currency) ?? 0
+  }, [isAnnual, currency])
+
+  const fmt = useCallback((n: number) => formatPrice(n, currency), [currency])
 
   const handleUpgrade = useCallback(async (t: Tier) => {
     if (t === 'free' || t === plan || busy) return
     setBusy(true)
     try {
-      const body: Record<string, unknown> = { tier: t, cycle }
+      const body: Record<string, unknown> = { tier: t, cycle, currency }
       if (t === 'team') body.seats = teamSeats
       const res = await fetch('/api/checkout', {
         method: 'POST',
@@ -101,7 +106,7 @@ export default function BillingContent() {
       else toast.error(data.error || 'Something went wrong')
     } catch { toast.error('Network error') }
     finally { setBusy(false) }
-  }, [cycle, teamSeats, plan, busy])
+  }, [cycle, teamSeats, plan, busy, currency])
 
   if (loading) return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '50vh', gap: 10, color: 'var(--slate)' }}>
@@ -123,10 +128,10 @@ export default function BillingContent() {
   const resetLabel = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1)
     .toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
 
-  // Annual savings in £ for the featured plan
-  const proMonthly = PRICING.max.monthly ?? 0
-  const proAnnual = PRICING.max.annual ?? 0
-  const annualSaving = (proMonthly - proAnnual) * 12
+  // Annual savings for the featured plan, in the active currency
+  const maxMonthly = amountFor('max', 'monthly', currency) ?? 0
+  const maxAnnual = amountFor('max', 'annual', currency) ?? 0
+  const annualSaving = (maxMonthly - maxAnnual) * 12
 
   const cmpCell = (v: CmpVal) =>
     v === true ? <span className="bill-cmp-yes">&#10003;</span>
@@ -141,27 +146,27 @@ export default function BillingContent() {
     const idx = TIER_ORDER.indexOf(t)
     const isDowngrade = idx < curIdx
     const price = priceOf(t)
-    const wasPrice = isAnnual ? v.monthly : null
+    const wasPrice = isAnnual ? amountFor(t, 'monthly', currency) : null
     const savePct = isAnnual && wasPrice ? Math.round((1 - price / wasPrice) * 100) : null
 
     let priceBlock
     if (t === 'free') {
-      priceBlock = <div className="bpc-price-block"><div className="bpc-price">&pound;0<span className="per"> / month</span></div></div>
+      priceBlock = <div className="bpc-price-block"><div className="bpc-price">{fmt(0)}<span className="per"> / month</span></div></div>
     } else if (isTeam) {
       priceBlock = (
         <>
           <div className="bpc-price-block">
-            <div className="bpc-price">&pound;{price}<span className="per"> / seat{isAnnual ? ' · yr' : '/mo'}</span></div>
+            <div className="bpc-price">{fmt(price)}<span className="per"> / seat{isAnnual ? ' · yr' : '/mo'}</span></div>
           </div>
-          <SeatControl seats={teamSeats} setSeats={setTeamSeats} price={price} />
+          <SeatControl seats={teamSeats} setSeats={setTeamSeats} price={price} currency={currency} />
         </>
       )
     } else {
       priceBlock = (
         <div className="bpc-price-block">
           <div className="bpc-price-row">
-            {wasPrice && <span className="bpc-was">&pound;{wasPrice}</span>}
-            <div className="bpc-price">&pound;{price}<span className="per">/mo</span></div>
+            {wasPrice && <span className="bpc-was">{fmt(wasPrice)}</span>}
+            <div className="bpc-price">{fmt(price)}<span className="per">/mo</span></div>
             {savePct && <span className="bpc-save-badge">–{savePct}%</span>}
           </div>
           {isAnnual && <div className="bpc-annual-note">billed annually</div>}
@@ -183,7 +188,7 @@ export default function BillingContent() {
           <button className={`bill-cta ${isWarm ? 'bill-cta-warm' : 'bill-cta-primary'}`} disabled={busy} onClick={() => handleUpgrade(t)}>
             <i className={`ti ${isTeam ? 'ti-users' : featured ? 'ti-bolt' : 'ti-arrow-right'}`} /> Start my free trial
           </button>
-          <span className="bill-cta-sub">2 steps · &pound;{isTeam ? price * teamSeats : price}/mo after Day 7</span>
+          <span className="bill-cta-sub">2 steps · {fmt(isTeam ? price * teamSeats : price)}/mo after Day 7</span>
         </div>
       )
     }
@@ -244,7 +249,7 @@ export default function BillingContent() {
           <button className={isAnnual ? 'on' : ''} onClick={() => setCycle('annual')}>Annual</button>
         </div>
         <span className="save-badge" style={{ opacity: isAnnual ? 1 : 0.45 }}>
-          <i className="ti ti-tag" />Save &pound;{annualSaving}/yr on Pro &mdash; pay annually
+          <i className="ti ti-tag" />Save {fmt(annualSaving)}/yr on Pro &mdash; pay annually
         </span>
       </div>
 
@@ -324,10 +329,10 @@ export default function BillingContent() {
             <thead>
               <tr>
                 <th>Feature</th>
-                <th><span className="bill-cmp-pname">{PRICING.free.label}</span><span className="bill-cmp-pprice">&pound;0</span></th>
-                <th><span className="bill-cmp-pname">{PRICING.pro.label}</span><span className="bill-cmp-pprice">&pound;{PRICING.pro.monthly}/mo</span></th>
-                <th className="feat-col"><span className="bill-cmp-pname">{PRICING.max.label}</span><span className="bill-cmp-pprice">&pound;{PRICING.max.monthly}/mo</span></th>
-                <th><span className="bill-cmp-pname">{PRICING.team.label}</span><span className="bill-cmp-pprice">&pound;{PRICING.team.monthly}/seat</span></th>
+                <th><span className="bill-cmp-pname">{PRICING.free.label}</span><span className="bill-cmp-pprice">{fmt(0)}</span></th>
+                <th><span className="bill-cmp-pname">{PRICING.pro.label}</span><span className="bill-cmp-pprice">{fmt(amountFor('pro','monthly',currency) ?? 0)}/mo</span></th>
+                <th className="feat-col"><span className="bill-cmp-pname">{PRICING.max.label}</span><span className="bill-cmp-pprice">{fmt(amountFor('max','monthly',currency) ?? 0)}/mo</span></th>
+                <th><span className="bill-cmp-pname">{PRICING.team.label}</span><span className="bill-cmp-pprice">{fmt(amountFor('team','monthly',currency) ?? 0)}/seat</span></th>
               </tr>
             </thead>
             <tbody>
