@@ -146,6 +146,46 @@ async function fetchArbeitnowPosts() {
   } catch { return [] }
 }
 
+// ── JSearch (RapidAPI) — aggregates LinkedIn, Indeed, Glassdoor, Google Jobs ──
+// Each query = one API request. Keep this list short to stay inside the free
+// tier (200 req/month). 6 queries × ~30 daily runs ≈ 180 requests/month.
+const JSEARCH_QUERIES = [
+  'freelance developer remote',
+  'freelance designer remote',
+  'freelance writer remote',
+  'remote contract developer',
+  'freelance marketing remote',
+  'contract designer remote',
+]
+
+async function fetchJSearchPosts() {
+  const key = process.env.RAPIDAPI_KEY
+  if (!key) return [] // No key configured — silently skip
+
+  const all: { rawText: string; source_url: string }[] = []
+  for (const query of JSEARCH_QUERIES) {
+    try {
+      const url = `https://jsearch.p.rapidapi.com/search?query=${encodeURIComponent(query)}&page=1&num_pages=1&date_posted=week`
+      const res = await fetch(url, {
+        headers: {
+          'X-RapidAPI-Key': key,
+          'X-RapidAPI-Host': 'jsearch.p.rapidapi.com',
+        },
+      })
+      if (!res.ok) continue
+      const data = await res.json()
+      for (const job of (data.data || [])) {
+        const loc = [job.job_city, job.job_country].filter(Boolean).join(', ')
+        all.push({
+          rawText: `Title: ${job.job_title || ''}\nCompany: ${job.employer_name || ''}\nLocation: ${job.job_is_remote ? 'Remote' : loc || ''}\nEmployment: ${job.job_employment_type || ''}\n\n${(job.job_description || '').replace(/<[^>]*>/g, '').substring(0, 3000)}`,
+          source_url: job.job_apply_link || job.job_google_link || '',
+        })
+      }
+    } catch { /* skip failed query, keep going */ }
+  }
+  return all
+}
+
 export async function POST() {
   const startTime = Date.now()
   const result = { found: 0, passed_filter: 0, inserted: 0, skipped_duplicates: 0, skipped_bidding: 0, errors: [] as string[] }
@@ -153,7 +193,7 @@ export async function POST() {
   try {
     const supabase = await createAdminSupabase()
 
-    const [reddit, remotive, wwr, reed, cwjobs, indeed, remoteok, himalayas, arbeitnow] = await Promise.all([
+    const [reddit, remotive, wwr, reed, cwjobs, indeed, remoteok, himalayas, arbeitnow, jsearch] = await Promise.all([
       fetchRedditPosts(),
       fetchRemotivePosts(),
       fetchWWRPosts(),
@@ -163,9 +203,10 @@ export async function POST() {
       fetchRemoteOKPosts(),
       fetchHimalayasPosts(),
       fetchArbeitnowPosts(),
+      fetchJSearchPosts(),
     ])
 
-    const allPosts = [...reddit, ...remotive, ...wwr, ...reed, ...cwjobs, ...indeed, ...remoteok, ...himalayas, ...arbeitnow]
+    const allPosts = [...reddit, ...remotive, ...wwr, ...reed, ...cwjobs, ...indeed, ...remoteok, ...himalayas, ...arbeitnow, ...jsearch]
     result.found = allPosts.length
 
     const { data: existing } = await supabase
@@ -338,6 +379,7 @@ export async function GET() {
     return NextResponse.json({
       recentLeads: recentLeads || [],
       zenConfigured: !!process.env.ZEN_API_KEY,
+      jsearchConfigured: !!process.env.RAPIDAPI_KEY,
     })
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error'
