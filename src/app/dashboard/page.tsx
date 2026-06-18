@@ -470,9 +470,7 @@ export default function DashboardPage() {
         <div className="why-inline"><i className="ti ti-sparkles"></i><span dangerouslySetInnerHTML={{ __html: topReason(lead) }} /></div>
         <p className="lc-desc">{lead.description}</p>
         <div className="lc-meta">
-          {budget
-            ? <span className="budget"><i className="ti ti-currency-pound"></i>{budget}</span>
-            : <span className="budget budget-na"><i className="ti ti-currency-pound"></i>Budget not listed</span>}
+          {budget && <span className="budget"><i className="ti ti-currency-pound"></i>{budget}</span>}
           {lead.client_location && <span className="meta-chip"><i className="ti ti-map-pin"></i>{lead.client_location}</span>}
           {proof}
         </div>
