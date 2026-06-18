@@ -11,7 +11,7 @@ export const maxDuration = 60
 // Most leads we attempt to AI-process per invocation. Higher concurrency means
 // more leads fit in the time budget; remaining ones get picked up next run
 // (dedup ensures we never reprocess). Tune if you upgrade the Vercel plan.
-const MAX_PER_RUN = 30
+const MAX_PER_RUN = 24
 
 async function fetchRedditPosts() {
   try {
@@ -170,8 +170,8 @@ async function fetchJSearchPosts() {
   const key = process.env.RAPIDAPI_KEY
   if (!key) return [] // No key configured — silently skip
 
-  const all: { rawText: string; source_url: string }[] = []
-  for (const query of JSEARCH_QUERIES) {
+  // Run all queries in parallel so the fetch phase stays short.
+  const perQuery = await Promise.all(JSEARCH_QUERIES.map(async (query) => {
     try {
       const url = `https://jsearch.p.rapidapi.com/search?query=${encodeURIComponent(query)}&page=1&num_pages=1&date_posted=week`
       const res = await fetch(url, {
@@ -179,19 +179,20 @@ async function fetchJSearchPosts() {
           'X-RapidAPI-Key': key,
           'X-RapidAPI-Host': 'jsearch.p.rapidapi.com',
         },
+        signal: AbortSignal.timeout(10000),
       })
-      if (!res.ok) continue
+      if (!res.ok) return []
       const data = await res.json()
-      for (const job of (data.data || [])) {
+      return (data.data || []).map((job: any) => {
         const loc = [job.job_city, job.job_country].filter(Boolean).join(', ')
-        all.push({
+        return {
           rawText: `Title: ${job.job_title || ''}\nCompany: ${job.employer_name || ''}\nLocation: ${job.job_is_remote ? 'Remote' : loc || ''}\nEmployment: ${job.job_employment_type || ''}\n\n${(job.job_description || '').replace(/<[^>]*>/g, '').substring(0, 3000)}`,
           source_url: job.job_apply_link || job.job_google_link || '',
-        })
-      }
-    } catch { /* skip failed query, keep going */ }
-  }
-  return all
+        }
+      })
+    } catch { return [] }
+  }))
+  return perQuery.flat()
 }
 
 export async function POST() {
@@ -237,8 +238,9 @@ export async function POST() {
 
     // Higher concurrency packs more AI calls into the time budget.
     const batchSize = 6
-    // Leave headroom before Vercel kills the function (60s cap).
-    const deadline = startTime + 52_000
+    // Stop starting new batches at 45s; a final batch can run up to the 12s
+    // per-call timeout, keeping us safely under the 60s function cap.
+    const deadline = startTime + 45_000
     for (let i = 0; i < newPosts.length; i += batchSize) {
       if (Date.now() > deadline) break // stop gracefully; rest picked up next run
       const batch = newPosts.slice(i, i + batchSize)

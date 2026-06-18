@@ -59,6 +59,8 @@ ${rawText}`
           },
         ],
       }),
+      // Fail fast so one slow call never hangs the whole scrape run.
+      signal: AbortSignal.timeout(12000),
     },
   )
 
