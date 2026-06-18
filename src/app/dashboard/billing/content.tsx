@@ -8,6 +8,7 @@ import { PRICING, ENTITLEMENTS, TIER_ICONS, planFeatures, type Tier } from '@/li
 import { amountFor, formatPrice } from '@/lib/currency'
 import { useCurrency } from '@/lib/use-currency'
 import SeatControl from '@/components/SeatControl'
+import LoadingDots from '@/components/LoadingDots'
 import toast from 'react-hot-toast'
 
 const TIER_ORDER: Tier[] = ['free', 'pro', 'max', 'team']
@@ -186,7 +187,9 @@ export default function BillingContent() {
       cta = (
         <div className="bill-cta-stack">
           <button className={`bill-cta ${isWarm ? 'bill-cta-warm' : 'bill-cta-primary'}`} disabled={busy} onClick={() => handleUpgrade(t)}>
-            <i className={`ti ${isTeam ? 'ti-users' : featured ? 'ti-bolt' : 'ti-arrow-right'}`} /> Start my free trial
+            {busy
+              ? <LoadingDots label="Starting checkout" />
+              : <><i className={`ti ${isTeam ? 'ti-users' : featured ? 'ti-bolt' : 'ti-bolt'}`} /> Start my free trial</>}
           </button>
           <span className="bill-cta-sub">2 steps · {fmt(isTeam ? price * teamSeats : price)}/mo after Day 7</span>
         </div>

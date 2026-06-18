@@ -1742,3 +1742,34 @@ textarea.input { resize: vertical; min-height: 80px; }
   .an-row-lbl { width: 92px; }
   .an-bar-lbl { font-size: 9px; }
 }
+
+/* ───────── Button interaction feedback ───────── */
+/* Press state — buttons visibly react on click */
+.btn:active:not(:disabled),
+.btn-p:active:not(:disabled),
+.btn-line:active:not(:disabled),
+.btn-ghost:active:not(:disabled),
+.bill-cta:active:not(:disabled),
+.bill-cta-primary:active:not(:disabled),
+.bill-cta-warm:active:not(:disabled),
+.lc-save-btn:active:not(:disabled),
+.sv-pipeline-btn:active:not(:disabled),
+.kc-advance-btn:active:not(:disabled),
+.applied-tag-btn:active:not(:disabled),
+.pill:active {
+  transform: scale(.96);
+  transition: transform .06s ease;
+}
+
+/* Disabled / in-flight buttons read as busy */
+button:disabled { cursor: default; opacity: .85; }
+
+/* 3-dot loading indicator (inherits text colour) */
+@keyframes dotPulse {
+  0%, 80%, 100% { opacity: .25; transform: translateY(0); }
+  40%           { opacity: 1;   transform: translateY(-2px); }
+}
+.dots { display: inline-flex; align-items: center; gap: 4px; }
+.dots span { width: 5px; height: 5px; border-radius: 50%; background: currentColor; animation: dotPulse 1s infinite ease-in-out; }
+.dots span:nth-child(2) { animation-delay: .15s; }
+.dots span:nth-child(3) { animation-delay: .30s; }

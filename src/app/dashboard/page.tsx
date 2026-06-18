@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-client'
 import type { Lead, Profile, Application } from '@/types'
 import { computeMatchExplanation } from '@/types'
+import LoadingDots from '@/components/LoadingDots'
 import { isDirectApply, isBeginnerFriendly, isFresh } from '@/lib/lead-filters'
 import { formatBudgetGBP, timeAgo } from '@/lib/utils'
 import { useSearch } from '@/components/TopbarSearch'
@@ -128,6 +129,7 @@ export default function DashboardPage() {
   const [sourceFilter, setSourceFilter] = useState('all')
   const [scoreFilter, setScoreFilter] = useState<string>('all')
   const [easyFilters, setEasyFilters] = useState<Set<string>>(new Set())
+  const [applyingId, setApplyingId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [selected, setSelected] = useState<Lead | null>(null)
   const [applications, setApplications] = useState<Application[]>([])
@@ -366,16 +368,22 @@ export default function DashboardPage() {
       showLimit()
       return
     }
-    // add to pipeline via API
-    const r = await fetch('/api/applications', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ lead_id: lead.id, status: 'applied' }),
-    })
-    if (r.ok) {
-      const app = await r.json()
-      setApplications(prev => [...prev.filter(a => a.lead_id !== lead.id), app])
-      toast('Applied — added to your pipeline')
+    if (applyingId) return
+    setApplyingId(lead.id)
+    try {
+      // add to pipeline via API
+      const r = await fetch('/api/applications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lead_id: lead.id, status: 'applied' }),
+      })
+      if (r.ok) {
+        const app = await r.json()
+        setApplications(prev => [...prev.filter(a => a.lead_id !== lead.id), app])
+        toast('Applied — added to your pipeline')
+      }
+    } finally {
+      setApplyingId(null)
     }
   }
 
@@ -483,7 +491,9 @@ export default function DashboardPage() {
           {applied
             ? <button className="applied-tag applied-tag-btn" onClick={() => router.push('/dashboard/applied')}><i className="ti ti-circle-check-filled"></i> In your pipeline <i className="ti ti-arrow-right applied-tag-arrow"></i></button>
             : <>
-                <button className="btn btn-primary" title="Direct link · no commission" onClick={() => handleApply(lead)}><i className="ti ti-send"></i> Apply</button>
+                <button className="btn btn-primary" title="Direct link · no commission" disabled={applyingId === lead.id} onClick={() => handleApply(lead)}>
+                  {applyingId === lead.id ? <LoadingDots label="Applying" /> : <><i className="ti ti-send"></i> Apply</>}
+                </button>
                 <button className="btn btn-ghost" onClick={() => selectLead(lead)}>Full breakdown</button>
               </>}
         </div>
@@ -693,8 +703,8 @@ export default function DashboardPage() {
                   ? <button className="applied-tag applied-tag-btn" style={{ width: '100%', justifyContent: 'center' }} onClick={() => router.push('/dashboard/applied')}>
                       <i className="ti ti-circle-check-filled" /> Tracking in your pipeline <i className="ti ti-arrow-right applied-tag-arrow" />
                     </button>
-                  : <button className="btn btn-primary" style={{ width: '100%' }} onClick={() => handleApply(l)}>
-                      <i className="ti ti-send" /> Apply & track
+                  : <button className="btn btn-primary" style={{ width: '100%' }} disabled={applyingId === l.id} onClick={() => handleApply(l)}>
+                      {applyingId === l.id ? <LoadingDots label="Applying" /> : <><i className="ti ti-send" /> Apply &amp; track</>}
                     </button>}
                 <button className="btn btn-ghost" style={{ width: '100%' }} onClick={() => toggleSave(l)}>
                   {saved ? <><i className="ti ti-bookmark" /> Saved</> : <><i className="ti ti-bookmark" /> Save for later</>}
