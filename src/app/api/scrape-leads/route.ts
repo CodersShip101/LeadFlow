@@ -3,6 +3,7 @@ import { createAdminSupabase } from '@/lib/supabase-server'
 import { processLeadWithAI } from '@/lib/zen'
 import { scoreLead, type ScoringLead, type ScoringWeights } from '@/lib/scoring'
 import { ENTITLEMENTS, type Tier } from '@/lib/tiers'
+import { isDirectApply } from '@/lib/lead-filters'
 
 async function fetchRedditPosts() {
   try {
@@ -147,7 +148,7 @@ async function fetchArbeitnowPosts() {
 
 export async function POST() {
   const startTime = Date.now()
-  const result = { found: 0, passed_filter: 0, inserted: 0, skipped_duplicates: 0, errors: [] as string[] }
+  const result = { found: 0, passed_filter: 0, inserted: 0, skipped_duplicates: 0, skipped_bidding: 0, errors: [] as string[] }
 
   try {
     const supabase = await createAdminSupabase()
@@ -173,8 +174,12 @@ export async function POST() {
       .not('source_url', 'is', null)
 
     const existingUrls = new Set(existing?.map((l: any) => l.source_url) || [])
-    const newPosts = allPosts.filter((p: any) => !existingUrls.has(p.source_url))
-    result.skipped_duplicates = allPosts.length - newPosts.length
+    const deduped = allPosts.filter((p: any) => !existingUrls.has(p.source_url))
+    result.skipped_duplicates = allPosts.length - deduped.length
+
+    // ── Direct Apply Only: drop posts that funnel to bidding marketplaces ──
+    const newPosts = deduped.filter((p: any) => isDirectApply(p.source_url, p.rawText))
+    result.skipped_bidding = deduped.length - newPosts.length
 
     const insertedLeads: any[] = []
 

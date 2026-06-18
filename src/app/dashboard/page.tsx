@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-client'
 import type { Lead, Profile, Application } from '@/types'
 import { computeMatchExplanation } from '@/types'
+import { isDirectApply, isBeginnerFriendly, isFresh } from '@/lib/lead-filters'
 import { formatBudgetGBP, timeAgo } from '@/lib/utils'
 import { useSearch } from '@/components/TopbarSearch'
 import toast from 'react-hot-toast'
@@ -126,6 +127,7 @@ export default function DashboardPage() {
   const { query: search, setQuery: setSearch } = useSearch()
   const [sourceFilter, setSourceFilter] = useState('all')
   const [scoreFilter, setScoreFilter] = useState<string>('all')
+  const [easyFilters, setEasyFilters] = useState<Set<string>>(new Set())
   const [loading, setLoading] = useState(true)
   const [selected, setSelected] = useState<Lead | null>(null)
   const [applications, setApplications] = useState<Application[]>([])
@@ -189,6 +191,9 @@ export default function DashboardPage() {
     else if (scoreFilter === '7') ls = ls.filter(l => computeMatchExplanation(l, profile).score >= 7)
     else if (scoreFilter === 'new') ls = ls.filter(l => leadState(l) === 'new')
     else if (scoreFilter === 'saved') ls = ls.filter(l => leadState(l) === 'saved' || savedIds.has(l.id))
+    if (easyFilters.has('direct')) ls = ls.filter(l => isDirectApply(l.source_url, l.description))
+    if (easyFilters.has('beginner')) ls = ls.filter(l => isBeginnerFriendly(`${l.title} ${l.description || ''}`))
+    if (easyFilters.has('fresh')) ls = ls.filter(l => isFresh(l.posted_date, 6))
     if (sortMode === 'recent') {
       ls.sort((a, b) => new Date(b.posted_date).getTime() - new Date(a.posted_date).getTime())
     } else if (sortMode === 'budget') {
@@ -207,7 +212,7 @@ export default function DashboardPage() {
       })
     }
     return ls
-  }, [leads, search, sourceFilter, scoreFilter, profile, viewedIds, savedIds, sortMode])
+  }, [leads, search, sourceFilter, scoreFilter, easyFilters, profile, viewedIds, savedIds, sortMode])
 
   const topScore = useMemo(() => leads.reduce((m, l) => Math.max(m, computeMatchExplanation(l, profile).score), 0), [leads, profile])
   const topId = useMemo(() => {
@@ -224,6 +229,20 @@ export default function DashboardPage() {
     new: leads.filter(l => leadState(l) === 'new').length,
     saved: savedIds.size,
   }), [leads, profile, score7plus, savedIds, leadState])
+
+  const easyCounts = useMemo(() => ({
+    direct: leads.filter(l => isDirectApply(l.source_url, l.description)).length,
+    beginner: leads.filter(l => isBeginnerFriendly(`${l.title} ${l.description || ''}`)).length,
+    fresh: leads.filter(l => isFresh(l.posted_date, 6)).length,
+  }), [leads])
+
+  function toggleEasy(key: string) {
+    setEasyFilters(prev => {
+      const next = new Set(prev)
+      if (next.has(key)) next.delete(key); else next.add(key)
+      return next
+    })
+  }
 
   function userSegment() {
     if (appCount >= 10) return 'power'
@@ -518,13 +537,22 @@ export default function DashboardPage() {
             </button>
           ))}
         </div>
+        <div className="tool-sep"></div>
+        <div className="toolbar-group">
+          {([['direct', 'Direct apply', 'ti-mail-forward'], ['beginner', 'Beginner-friendly', 'ti-seedling'], ['fresh', 'Fresh < 6h', 'ti-flame']] as [string, string, string][]).map(([k, lbl, icon]) => (
+            <button key={k} className={`pill easy-pill ${easyFilters.has(k) ? 'on' : ''}`} onClick={() => toggleEasy(k)} title={lbl}>
+              <i className={`ti ${icon}`}></i>{lbl}
+              {easyCounts[k as keyof typeof easyCounts] != null && <span className="ct">{easyCounts[k as keyof typeof easyCounts]}</span>}
+            </button>
+          ))}
+        </div>
       </div>
 
       {filtered.length === 0 && leads.length > 0 && (
         <div className="empty-filter">
           <i className="ti ti-filter-off"></i>
           <p>No leads match this filter.</p>
-          <button className="pill" onClick={() => { setScoreFilter('all'); setSourceFilter('all') }}>Clear filters</button>
+          <button className="pill" onClick={() => { setScoreFilter('all'); setSourceFilter('all'); setEasyFilters(new Set()) }}>Clear filters</button>
         </div>
       )}
 
@@ -682,7 +710,7 @@ export default function DashboardPage() {
             <div className="empty-icon"><i className="ti ti-filter-off"></i></div>
             <h3>No leads match these filters</h3>
             <p>Try widening your score threshold or switching sources.</p>
-            <button className="btn btn-ghost" style={{ display: 'inline-flex' }} onClick={() => { setScoreFilter('all'); setSourceFilter('all'); setSearch('') }}>Clear filters</button>
+            <button className="btn btn-ghost" style={{ display: 'inline-flex' }} onClick={() => { setScoreFilter('all'); setSourceFilter('all'); setSearch(''); setEasyFilters(new Set()) }}>Clear filters</button>
           </div>
         )}
       </div>

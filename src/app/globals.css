@@ -345,6 +345,10 @@ textarea.input { resize: vertical; min-height: 80px; }
 .tool-sep{width:1px;height:22px;background:var(--line);margin:0 2px;flex-shrink:0}
 .src-pill{display:inline-flex;align-items:center;gap:5px}
 .src-pill .sd{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.easy-pill{display:inline-flex;align-items:center;gap:5px}
+.easy-pill .ti{font-size:14px}
+.easy-pill.on{background:var(--lime);color:var(--ink-950);border-color:var(--lime)}
+.easy-pill.on .ct{opacity:.75}
 .empty-filter{text-align:center;padding:48px 20px;display:flex;flex-direction:column;align-items:center;gap:12px}
 .empty-filter .ti{font-size:32px;color:var(--slate-2)}
 .empty-filter p{color:var(--slate);font-size:14px;margin:0}
@@ -448,6 +452,10 @@ textarea.input { resize: vertical; min-height: 80px; }
 .tool-sep{width:1px;height:22px;background:var(--line);margin:0 2px;flex-shrink:0}
 .src-pill{display:inline-flex;align-items:center;gap:5px}
 .src-pill .sd{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.easy-pill{display:inline-flex;align-items:center;gap:5px}
+.easy-pill .ti{font-size:14px}
+.easy-pill.on{background:var(--lime);color:var(--ink-950);border-color:var(--lime)}
+.easy-pill.on .ct{opacity:.75}
 .empty-filter{text-align:center;padding:48px 20px;display:flex;flex-direction:column;align-items:center;gap:12px}
 .empty-filter .ti{font-size:32px;color:var(--slate-2)}
 .empty-filter p{color:var(--slate);font-size:14px;margin:0}
