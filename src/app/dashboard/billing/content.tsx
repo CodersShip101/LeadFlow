@@ -49,7 +49,6 @@ export default function BillingContent() {
   const [cycle, setCycle] = useState<'monthly' | 'annual'>('monthly')
   const [teamSeats, setTeamSeats] = useState(2)
   const [busy, setBusy] = useState(false)
-  const [cmpOpen, setCmpOpen] = useState(false)
   const router = useRouter()
   const sp = useSearchParams()
   const supabase = createClient()
@@ -317,43 +316,38 @@ export default function BillingContent() {
         </div>
       </div>
 
-      {/* ── COMPARISON TABLE (collapsible) ── */}
+      {/* ── COMPARISON TABLE (always visible) ── */}
       <div className="bill-cmp">
-        <button className="bill-cmp-toggle" onClick={() => setCmpOpen(v => !v)}>
-          <span>Compare all plans in detail</span>
-          <i className={`ti ${cmpOpen ? 'ti-chevron-up' : 'ti-chevron-down'}`} />
-        </button>
-        {cmpOpen && (
-          <div className="bill-cmp-scroll">
-            <table>
-              <thead>
-                <tr>
-                  <th>Feature</th>
-                  <th><span className="bill-cmp-pname">{PRICING.free.label}</span><span className="bill-cmp-pprice">&pound;0</span></th>
-                  <th><span className="bill-cmp-pname">{PRICING.pro.label}</span><span className="bill-cmp-pprice">&pound;{PRICING.pro.monthly}/mo</span></th>
-                  <th className="feat-col"><span className="bill-cmp-pname">{PRICING.max.label}</span><span className="bill-cmp-pprice">&pound;{PRICING.max.monthly}/mo</span></th>
-                  <th><span className="bill-cmp-pname">{PRICING.team.label}</span><span className="bill-cmp-pprice">&pound;{PRICING.team.monthly}/seat</span></th>
-                </tr>
-              </thead>
-              <tbody>
-                {CMP_GROUPS.map(g => (
-                  <Fragment key={g.label}>
-                    <tr className="bill-cmp-grp"><td colSpan={5}>{g.label}</td></tr>
-                    {g.rows.map(([label, f, p, m, tm]) => (
-                      <tr key={label}>
-                        <td>{label}</td>
-                        <td>{cmpCell(f)}</td>
-                        <td>{cmpCell(p)}</td>
-                        <td>{cmpCell(m)}</td>
-                        <td>{cmpCell(tm)}</td>
-                      </tr>
-                    ))}
-                  </Fragment>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+        <h3 className="bill-cmp-heading">Compare all plans in detail</h3>
+        <div className="bill-cmp-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Feature</th>
+                <th><span className="bill-cmp-pname">{PRICING.free.label}</span><span className="bill-cmp-pprice">&pound;0</span></th>
+                <th><span className="bill-cmp-pname">{PRICING.pro.label}</span><span className="bill-cmp-pprice">&pound;{PRICING.pro.monthly}/mo</span></th>
+                <th className="feat-col"><span className="bill-cmp-pname">{PRICING.max.label}</span><span className="bill-cmp-pprice">&pound;{PRICING.max.monthly}/mo</span></th>
+                <th><span className="bill-cmp-pname">{PRICING.team.label}</span><span className="bill-cmp-pprice">&pound;{PRICING.team.monthly}/seat</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              {CMP_GROUPS.map(g => (
+                <Fragment key={g.label}>
+                  <tr className="bill-cmp-grp"><td colSpan={5}>{g.label}</td></tr>
+                  {g.rows.map(([label, f, p, m, tm]) => (
+                    <tr key={label}>
+                      <td>{label}</td>
+                      <td>{cmpCell(f)}</td>
+                      <td>{cmpCell(p)}</td>
+                      <td>{cmpCell(m)}</td>
+                      <td>{cmpCell(tm)}</td>
+                    </tr>
+                  ))}
+                </Fragment>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
     </div>
