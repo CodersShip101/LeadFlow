@@ -1,0 +1,8 @@
+LeadFlow doc
+scripts
+supabase
+tsconfig.tsbuildinfo
+.next
+node_modules
+*.md
+.env.local
