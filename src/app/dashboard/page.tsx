@@ -413,9 +413,9 @@ export default function DashboardPage() {
   if (loading) return <SkeletonFeed />
 
   const greetMap: Record<string, string> = {
-    new: `Welcome, ${firstName} 👋`,
-    returning: `Good to see you, ${firstName} 👋`,
-    power: `Welcome back, ${firstName} 👋`,
+    new: `Welcome, ${firstName}`,
+    returning: `Good to see you, ${firstName}`,
+    power: `Welcome back, ${firstName}`,
   }
 
   const subMap: Record<string, string> = {

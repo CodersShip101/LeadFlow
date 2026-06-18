@@ -128,7 +128,7 @@ export default function OnboardingPage() {
         </div>
         <div className="ob-card ob-win">
           <div className="ob-win-badge"><i className="ti ti-sparkles" /></div>
-          <h1 className="ob-title">You&apos;re all set, {fullName.split(' ')[0]} 🎉</h1>
+          <h1 className="ob-title">You&apos;re all set, {fullName.split(' ')[0]}</h1>
           <p className="ob-sub">
             {instantLeads.length > 0
               ? <>We already found <strong>{instantLeads.length} leads</strong> matched to your profile.</>

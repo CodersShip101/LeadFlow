@@ -1422,7 +1422,7 @@ textarea.input { resize: vertical; min-height: 80px; }
 .bill-cmp-heading { font-family: var(--font-display); font-size: 15px; font-weight: 700; color: var(--ink); padding: 18px 22px 14px; border-bottom: 1px solid var(--line); margin: 0; }
 .bill-cmp-scroll { overflow-x: auto; }
 .bill-cmp table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 560px; }
-.bill-cmp th, .bill-cmp td { padding: 11px 16px; text-align: center; border-bottom: 1px solid var(--line-2); }
+.bill-cmp th, .bill-cmp td { padding: 12px 16px; text-align: center; }
 .bill-cmp th:first-child, .bill-cmp td:first-child { text-align: left; font-weight: 500; color: var(--ink-2); padding-left: 22px; }
 .bill-cmp th:last-child, .bill-cmp td:last-child { padding-right: 22px; }
 .bill-cmp thead th { font-family: var(--font-display); font-weight: 700; font-size: 13px; color: var(--ink); border-bottom: 2px solid var(--line); padding-top: 14px; padding-bottom: 14px; }
