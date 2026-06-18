@@ -282,7 +282,7 @@ export default function HomePage() {
             <a href="#faq" onClick={() => setMobileOpen(false)}>FAQ</a>
             <div style={{ height: '1px', background: 'rgba(255,255,255,.08)', margin: '6px 0' }}></div>
             <Link href="/auth/login" onClick={() => setMobileOpen(false)}>Log in</Link>
-            <Link href="/auth/signup" onClick={() => setMobileOpen(false)} style={{ background: 'var(--lime)', color: 'var(--ink-950)', fontWeight: 700, textAlign: 'center' }}>Start free →</Link>
+            <Link href="/auth/signup" onClick={() => setMobileOpen(false)} style={{ background: 'var(--lime)', color: 'var(--ink-950)', fontWeight: 700, textAlign: 'center' }}>Start free</Link>
           </div>
         </nav>
       </header>
@@ -748,7 +748,7 @@ export default function HomePage() {
                     <div className="bill-cta-stack">
                       <Link href="/auth/signup" className={`bill-cta ${t === 'free' ? 'bill-cta-ghost' : featured || isTeam ? 'bill-cta-warm' : 'bill-cta-primary'}`}>
                         {t === 'free'
-                          ? <><i className="ti ti-arrow-right" /> Get started free</>
+                          ? <>Get started free</>
                           : isTeam
                             ? <><i className="ti ti-users" /> Start Team — £{price * teamSeats}/mo</>
                             : featured

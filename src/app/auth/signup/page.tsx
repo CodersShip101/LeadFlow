@@ -245,7 +245,6 @@ export default function SignupPage() {
 
             <button type="submit" className="btn-p btn-full" disabled={loading} style={{ marginTop: 4 }}>
               {loading ? 'Creating account\u2026' : 'Create my account'}
-              {!loading && <i className="ti ti-arrow-right" aria-hidden="true"></i>}
             </button>
 
             <p className="auth-legal" style={{ fontSize: '.72rem', marginTop: 10 }}>
@@ -253,7 +252,7 @@ export default function SignupPage() {
             </p>
           </form>
 
-          <div className="auth-login-link" style={{ marginTop: 12, fontSize: '.82rem' }}>Already have an account? <Link href="/auth/login">Log in →</Link></div>
+          <div className="auth-login-link" style={{ marginTop: 12, fontSize: '.82rem' }}>Already have an account? <Link href="/auth/login">Log in</Link></div>
         </div>
         )}
       </main>

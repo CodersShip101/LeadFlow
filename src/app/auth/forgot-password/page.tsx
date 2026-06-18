@@ -124,7 +124,6 @@ export default function ForgotPasswordPage() {
             </div>
             <button type="submit" className="btn-p btn-full" disabled={loading}>
               {loading ? 'Sending\u2026' : 'Send reset link'}
-              {!loading && <i className="ti ti-arrow-right" aria-hidden="true"></i>}
             </button>
           </form>
           <div className="auth-signup-nudge">

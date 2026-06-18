@@ -120,7 +120,6 @@ export default function LoginPage() {
             </div>
             <button type="submit" className="btn-p btn-full" disabled={loading}>
               {loading ? 'Logging in\u2026' : 'Log in to my feed'}
-              {!loading && <i className="ti ti-arrow-right" aria-hidden="true"></i>}
             </button>
           </form>
 
@@ -130,7 +129,7 @@ export default function LoginPage() {
           </p>
 
           <div className="auth-signup-nudge">
-            <p>No account? <Link href="/auth/signup" className="auth-cta-link">Sign up free →</Link></p>
+            <p>No account? <Link href="/auth/signup" className="auth-cta-link">Sign up free</Link></p>
           </div>
         </div>
       </main>

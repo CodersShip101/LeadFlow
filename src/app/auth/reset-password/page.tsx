@@ -90,7 +90,6 @@ export default function ResetPasswordPage() {
                 <p style={{ fontFamily: 'var(--font-mono)', fontSize: '.78rem', color: 'var(--slate-500)' }}>Resend in {countdown}s</p>
               ) : (
                 <button className="btn-p" onClick={handleSendEmail}>
-                  <i className="ti ti-arrow-right" aria-hidden="true"></i>
                   Resend email
                 </button>
               )}
@@ -149,7 +148,6 @@ export default function ResetPasswordPage() {
             </div>
             <button type="submit" className="btn-p btn-full" disabled={loading}>
               {loading ? 'Updating\u2026' : 'Update password'}
-              {!loading && <i className="ti ti-arrow-right" aria-hidden="true"></i>}
             </button>
           </form>
           <div className="auth-signup-nudge">
@@ -212,7 +210,6 @@ export default function ResetPasswordPage() {
             </div>
             <button type="submit" className="btn-p btn-full" disabled={loading}>
               {loading ? 'Sending\u2026' : 'Send reset link'}
-              {!loading && <i className="ti ti-arrow-right" aria-hidden="true"></i>}
             </button>
           </form>
           <div className="auth-signup-nudge">

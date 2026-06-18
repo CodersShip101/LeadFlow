@@ -102,7 +102,6 @@ export default function MagicLinkPage() {
               </div>
               <button type="submit" className="btn-p btn-full" disabled={loading}>
                 {loading ? 'Sending…' : 'Send magic link'}
-                {!loading && <i className="ti ti-arrow-right" aria-hidden="true"></i>}
               </button>
             </form>
 
