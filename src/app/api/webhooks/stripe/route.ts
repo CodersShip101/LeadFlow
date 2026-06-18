@@ -29,22 +29,34 @@ export async function POST(req: NextRequest) {
       const customerId = s.customer as string
 
       if (tier === 'team' && userId) {
-        const { data: org } = await admin
-          .from('organizations')
-          .insert({
-            name: s.metadata?.org_name ?? 'My team',
-            plan: 'team',
-            seats,
-            owner_id: userId,
-            stripe_customer_id: customerId,
-            stripe_subscription_id: (s.subscription as string) ?? null,
-          })
-          .select('id')
-          .single()
-        if (org) {
+        // Don't create a second org if this customer already has one — update it.
+        const { data: existingOrg } = await admin
+          .from('organizations').select('id').eq('stripe_customer_id', customerId).maybeSingle()
+
+        let orgId = existingOrg?.id as string | undefined
+        if (orgId) {
+          await admin.from('organizations')
+            .update({ seats, stripe_subscription_id: (s.subscription as string) ?? null })
+            .eq('id', orgId)
+        } else {
+          const { data: org } = await admin
+            .from('organizations')
+            .insert({
+              name: s.metadata?.org_name ?? 'My team',
+              plan: 'team',
+              seats,
+              owner_id: userId,
+              stripe_customer_id: customerId,
+              stripe_subscription_id: (s.subscription as string) ?? null,
+            })
+            .select('id')
+            .single()
+          orgId = org?.id
+        }
+        if (orgId) {
           await admin
             .from('org_members')
-            .upsert({ org_id: org.id, user_id: userId, role: 'admin' }, { onConflict: 'org_id,user_id' })
+            .upsert({ org_id: orgId, user_id: userId, role: 'admin' }, { onConflict: 'org_id,user_id' })
         }
         // Put the owner's profile on the team plan so the UI unlocks Team.
         await admin.from('profiles').update({ subscription_status: 'team' }).eq('id', userId)
@@ -82,6 +94,13 @@ export async function POST(req: NextRequest) {
     case 'customer.subscription.deleted': {
       const sub = event.data.object as Stripe.Subscription
       const customerId = sub.customer as string
+      // Only downgrade if this customer has no other active/trialing subscription
+      // (avoids a duplicate/cancelled sub knocking a paying user back to free).
+      const remaining = await stripe.subscriptions.list({ customer: customerId, status: 'all', limit: 10 })
+      const stillActive = remaining.data.some(
+        x => x.id !== sub.id && (x.status === 'active' || x.status === 'trialing'),
+      )
+      if (stillActive) break
       await setProfilePlan(customerId, 'free')
       break
     }
