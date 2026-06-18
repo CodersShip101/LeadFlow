@@ -1,4 +1,7 @@
 export async function processLeadWithAI(rawText: string) {
+  // Smaller input = faster extraction. 1200 chars is plenty to capture title,
+  // budget, skills and scope — the fields we extract.
+  rawText = (rawText || '').substring(0, 1200)
   const prompt = `Extract structured data from this freelance/contract job post.
 Return only valid JSON with these exact fields:
 {
@@ -63,7 +66,7 @@ ${rawText}`
         ],
       }),
       // Fail fast so one slow call never hangs the whole scrape run.
-      signal: AbortSignal.timeout(15000),
+      signal: AbortSignal.timeout(18000),
     },
   )
 
