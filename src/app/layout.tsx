@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, Space_Grotesk, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
@@ -33,6 +33,9 @@ export const metadata: Metadata = {
   },
   robots: "index, follow, max-image-preview:large",
   keywords: "freelance leads, freelance work UK, lead generation freelancers, AI lead scoring, freelance client acquisition, remote freelance jobs",
+};
+
+export const viewport: Viewport = {
   themeColor: "#0B1220",
 };
 
