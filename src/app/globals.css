@@ -1799,3 +1799,22 @@ button:disabled { cursor: default; opacity: .85; }
 .tm-row-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
 .tm-remove { color: var(--coral); }
 .tm-remove:hover { background: rgba(255,107,94,.1); border-color: rgba(255,107,94,.3); }
+
+/* ───────── Pitch templates ───────── */
+.tpl-empty { text-align: center; padding: 48px 20px; display: flex; flex-direction: column; align-items: center; gap: 12px; background: var(--card); border: 1px solid var(--line); border-radius: var(--r-lg); }
+.tpl-empty > .ti { font-size: 30px; color: var(--lime-deep); }
+.tpl-empty p { font-size: 14px; color: var(--slate); }
+.tpl-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+.tpl-card { background: var(--card); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 18px; display: flex; flex-direction: column; gap: 10px; }
+.tpl-card-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.tpl-card-title { font-family: var(--font-display); font-weight: 700; font-size: 15px; color: var(--ink); }
+.tpl-shared { display: inline-flex; align-items: center; gap: 4px; font-size: 10.5px; font-weight: 700; color: var(--lime-ink); background: var(--lime-dim); padding: 2px 7px; border-radius: var(--r-pill); white-space: nowrap; }
+.tpl-card-body { font-size: 13px; color: var(--slate); line-height: 1.55; flex: 1; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; white-space: pre-wrap; }
+.tpl-card-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+.tpl-modal-bg { position: fixed; inset: 0; background: rgba(21,32,26,.5); z-index: 150; display: flex; align-items: center; justify-content: center; padding: 20px; }
+.tpl-modal { background: var(--card); border-radius: var(--r-xl); padding: 26px; max-width: 540px; width: 100%; box-shadow: var(--sh-lg); max-height: 90vh; overflow-y: auto; }
+.tpl-label { display: block; font-size: 12px; font-weight: 600; color: var(--ink-2); margin: 14px 0 6px; }
+.tpl-textarea { width: 100%; padding: 12px 14px; border: 1.5px solid var(--line); border-radius: var(--r-md); font-family: inherit; font-size: 14px; line-height: 1.5; color: var(--ink); resize: vertical; background: var(--card); }
+.tpl-textarea:focus { outline: none; border-color: var(--lime-deep); box-shadow: 0 0 0 3px var(--lime-dim); }
+.tpl-share-row { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ink-2); margin-top: 14px; cursor: pointer; }
+.tpl-modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 22px; }

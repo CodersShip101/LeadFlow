@@ -29,6 +29,7 @@ export type Entitlements = {
   advancedAnalytics: boolean
   csvExport: boolean
   adjustableScoring: boolean
+  pitchTemplates: boolean
   customAlerts: boolean
   prioritySupport: boolean
   sharedLeadPool: boolean
@@ -53,6 +54,7 @@ export const ENTITLEMENTS: Record<Tier, Entitlements> = {
     advancedAnalytics: false,
     csvExport: false,
     adjustableScoring: false,
+    pitchTemplates: false,
     customAlerts: false,
     prioritySupport: false,
     sharedLeadPool: false,
@@ -75,6 +77,7 @@ export const ENTITLEMENTS: Record<Tier, Entitlements> = {
     advancedAnalytics: false,
     csvExport: false,
     adjustableScoring: false,
+    pitchTemplates: false,
     customAlerts: true,
     prioritySupport: false,
     sharedLeadPool: false,
@@ -97,6 +100,7 @@ export const ENTITLEMENTS: Record<Tier, Entitlements> = {
     advancedAnalytics: true,
     csvExport: true,
     adjustableScoring: true,
+    pitchTemplates: true,
     customAlerts: true,
     prioritySupport: true,
     sharedLeadPool: false,
@@ -119,6 +123,7 @@ export const ENTITLEMENTS: Record<Tier, Entitlements> = {
     advancedAnalytics: true,
     csvExport: true,
     adjustableScoring: true,
+    pitchTemplates: true,
     customAlerts: true,
     prioritySupport: true,
     sharedLeadPool: true,
@@ -141,6 +146,7 @@ export const ENTITLEMENTS: Record<Tier, Entitlements> = {
     advancedAnalytics: true,
     csvExport: true,
     adjustableScoring: true,
+    pitchTemplates: true,
     customAlerts: true,
     prioritySupport: true,
     sharedLeadPool: true,
