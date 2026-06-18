@@ -105,18 +105,24 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className="rail-spacer"></div>
 
         <div className="rail-foot">
-          <div className="usage-mini">
-            <div className="um-top">
-              <span className="um-label">Applications</span>
-              <span className="um-val">{isFree ? `${appCount} / 5` : 'Unlimited'}</span>
+          {isFree ? (
+            <div className="usage-mini">
+              <div className="um-top">
+                <span className="um-label">Applications</span>
+                <span className="um-val">{appCount} / 5</span>
+              </div>
+              <div className="usage-track">
+                <div className="usage-fill" style={{ width: `${usagePct}%` }}></div>
+              </div>
+              <button className="upgrade-link" onClick={() => navTo('/dashboard/billing')}>
+                <i className="ti ti-bolt"></i> Upgrade
+              </button>
             </div>
-            <div className="usage-track">
-              <div className="usage-fill" style={{ width: `${isFree ? usagePct : 100}%` }}></div>
-            </div>
-            <button className="upgrade-link" onClick={() => navTo('/dashboard/billing')}>
-              <i className="ti ti-bolt"></i> Upgrade to Pro
+          ) : (
+            <button className="nav-item" onClick={() => navTo('/dashboard/billing')}>
+              <i className="ti ti-sparkles"></i> Manage plan
             </button>
-          </div>
+          )}
           <button className="nav-item" onClick={handleLogout}><i className="ti ti-logout"></i> Sign out</button>
         </div>
       </aside>
