@@ -221,6 +221,8 @@ button { font-family: inherit; cursor: pointer; }
 .sources-inner { display: flex; align-items: center; justify-content: center; gap: 38px; flex-wrap: wrap; }
 .source-item { display: flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: .82rem; color: var(--slate-400); font-weight: 500; }
 .source-item .ti { color: var(--lime-deep); font-size: 17px; }
+.source-item-link { text-decoration: none; transition: color .15s; }
+.source-item-link:hover { color: var(--lime); }
 
 /* ── GENERIC FORM INPUTS ── */
 .input { width: 100%; padding: 12px 14px; background: var(--paper-card); border: 1.5px solid var(--slate-200); border-radius: var(--r-md); font-family: var(--font-body); font-size: .94rem; color: var(--ink-900); transition: border-color .15s, box-shadow .15s; outline: none; }

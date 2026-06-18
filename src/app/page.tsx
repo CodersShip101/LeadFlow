@@ -359,11 +359,118 @@ export default function HomePage() {
           <div className="container">
             <div className="sources-inner">
               <span style={{ fontFamily: 'var(--font-mono)', fontSize: '.72rem', letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--slate-600)' }}>Sourcing from:</span>
-              <span className="source-item"><i className="ti ti-brand-reddit" aria-hidden="true"></i> Reddit</span>
-              <span className="source-item"><i className="ti ti-briefcase" aria-hidden="true"></i> Reed.co.uk</span>
-              <span className="source-item"><i className="ti ti-world" aria-hidden="true"></i> We Work Remotely</span>
-              <span className="source-item"><i className="ti ti-device-laptop" aria-hidden="true"></i> Remote OK</span>
+              <a href="https://reddit.com/r/forhire" target="_blank" rel="noopener noreferrer" className="source-item source-item-link"><i className="ti ti-brand-reddit" aria-hidden="true"></i> Reddit</a>
+              <a href="https://reed.co.uk/jobs/freelance" target="_blank" rel="noopener noreferrer" className="source-item source-item-link"><i className="ti ti-briefcase" aria-hidden="true"></i> Reed.co.uk</a>
+              <a href="https://weworkremotely.com" target="_blank" rel="noopener noreferrer" className="source-item source-item-link"><i className="ti ti-world" aria-hidden="true"></i> We Work Remotely</a>
+              <a href="https://remoteok.com" target="_blank" rel="noopener noreferrer" className="source-item source-item-link"><i className="ti ti-device-laptop" aria-hidden="true"></i> Remote OK</a>
+              <a href="https://remotive.com" target="_blank" rel="noopener noreferrer" className="source-item source-item-link"><i className="ti ti-satellite" aria-hidden="true"></i> Remotive</a>
               <span style={{ fontFamily: 'var(--font-mono)', fontSize: '.72rem', color: 'var(--lime-deep)' }}>+ more added weekly</span>
+            </div>
+          </div>
+        </section>
+
+        {/* ═══ PLATFORMS — APPLY TO CLIENT ═══ */}
+        <section className="section-py paper" aria-labelledby="platforms-h">
+          <div className="container">
+            <div className="section-head sr">
+              <div className="tag tag-lime tag-bracket">where we source</div>
+              <h2 id="platforms-h">You pitch to clients — you don&apos;t wait for them</h2>
+              <p>Every platform LeadFlow monitors lets you reach out directly. No platform rating needed, no algorithm burying your profile. Your pitch and speed win the job.</p>
+            </div>
+            <div className="grid-3 sr">
+              {[
+                {
+                  icon: 'ti-brand-reddit',
+                  name: 'Reddit',
+                  sub: 'r/forhire · r/hiring · r/freelance',
+                  href: 'https://reddit.com/r/forhire',
+                  desc: 'Clients post public briefs. You reply directly in the thread — first reply often gets the contract. No platform tier, no ratings wall.',
+                  tag: 'Apply in thread',
+                  tagColor: 'rgba(255,140,66,.14)',
+                  tagText: '#ff9c5b',
+                },
+                {
+                  icon: 'ti-world',
+                  name: 'We Work Remotely',
+                  sub: 'weworkremotely.com',
+                  href: 'https://weworkremotely.com',
+                  desc: 'A traditional job board for contract work. You apply with a CV and portfolio — your lack of a platform rating is completely irrelevant.',
+                  tag: 'CV + portfolio',
+                  tagColor: 'rgba(110,168,212,.16)',
+                  tagText: '#7fb6e6',
+                },
+                {
+                  icon: 'ti-briefcase',
+                  name: 'Reed.co.uk',
+                  sub: 'reed.co.uk/jobs/freelance',
+                  href: 'https://reed.co.uk/jobs/freelance',
+                  desc: 'UK\'s largest job board for freelance and contract roles. Apply directly to the hiring manager — your application lands in their inbox, not a ranked queue.',
+                  tag: 'Direct to hiring manager',
+                  tagColor: 'rgba(176,138,219,.16)',
+                  tagText: '#c4a3ec',
+                },
+                {
+                  icon: 'ti-device-laptop',
+                  name: 'Remote OK',
+                  sub: 'remoteok.com',
+                  href: 'https://remoteok.com',
+                  desc: 'Global remote work board. Apply directly via email or link — no middleman, no platform algorithm between you and the decision-maker.',
+                  tag: 'Email direct',
+                  tagColor: 'rgba(196,240,0,.16)',
+                  tagText: 'var(--lime-deep)',
+                },
+                {
+                  icon: 'ti-satellite',
+                  name: 'Remotive',
+                  sub: 'remotive.com',
+                  href: 'https://remotive.com',
+                  desc: 'Curated remote tech and creative roles. Each listing links straight to the company\'s own jobs page — apply before they even finish promoting it.',
+                  tag: 'Company-direct',
+                  tagColor: 'rgba(110,212,168,.16)',
+                  tagText: '#5ec49e',
+                },
+                {
+                  icon: 'ti-clock-bolt',
+                  name: 'Apply in the first three',
+                  sub: 'The LeadFlow edge',
+                  href: null,
+                  desc: 'Being one of the first three applicants dramatically improves your reply rate. LeadFlow scores and surfaces new posts within the hour — so you act before the crowd.',
+                  tag: 'LeadFlow advantage',
+                  tagColor: 'rgba(196,240,0,.2)',
+                  tagText: 'var(--lime-deep)',
+                },
+              ].map((p, i) => (
+                <article key={p.name} className={`card sr ${i < 3 ? 'sr-d1' : 'sr-d2'}`} style={{ padding: 28, display: 'flex', flexDirection: 'column', gap: 14 }}>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 10 }}>
+                    <div className="icon-box" style={{ background: p.tagColor }}>
+                      <i className={`ti ${p.icon}`} style={{ fontSize: 22, color: p.tagText }} aria-hidden="true"></i>
+                    </div>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '.68rem', fontWeight: 700, padding: '3px 9px', borderRadius: 'var(--r-pill)', background: p.tagColor, color: p.tagText, whiteSpace: 'nowrap' }}>{p.tag}</span>
+                  </div>
+                  <div>
+                    <h3 className="display" style={{ fontSize: '1.08rem', marginBottom: 3 }}>{p.name}</h3>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '.72rem', color: 'var(--slate-500)' }}>{p.sub}</span>
+                  </div>
+                  <p style={{ fontSize: '.9rem', color: 'var(--slate-500)', lineHeight: 1.62, flex: 1 }}>{p.desc}</p>
+                  {p.href && (
+                    <a href={p.href} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: '.82rem', fontWeight: 600, color: p.tagText, textDecoration: 'none' }}>
+                      <i className="ti ti-external-link" style={{ fontSize: 13 }} aria-hidden="true"></i> Visit {p.name}
+                    </a>
+                  )}
+                </article>
+              ))}
+            </div>
+
+            <div className="sr" style={{ marginTop: 48, background: 'var(--ink-850)', borderRadius: 'var(--r-xl)', padding: '28px 36px', display: 'flex', alignItems: 'flex-start', gap: 22 }}>
+              <div style={{ flexShrink: 0, width: 44, height: 44, borderRadius: 12, background: 'rgba(196,240,0,.16)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <i className="ti ti-bulb" style={{ fontSize: 22, color: 'var(--lime)' }} aria-hidden="true"></i>
+              </div>
+              <div>
+                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', fontWeight: 700, color: '#fff', marginBottom: 6 }}>The zero-review trick: apply within the first 20 minutes</h3>
+                <p style={{ fontSize: '.92rem', color: 'var(--slate-300)', lineHeight: 1.65, margin: 0 }}>
+                  On every platform, the first three applicants get the most attention. Filter for posts under 20 minutes old, lead with a specific insight about their project, and you&apos;ll outcompete accounts with dozens of reviews. LeadFlow alerts you the moment qualifying leads are posted.
+                </p>
+              </div>
             </div>
           </div>
         </section>
