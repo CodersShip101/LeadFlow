@@ -65,16 +65,6 @@ export default function MagicLinkPage() {
             <h2 className="panel-heading">One link.<br />Straight to your feed.</h2>
             <p className="panel-sub">We&apos;ll email you a secure sign-in link. Click it and you&apos;re in — no password to remember.</p>
           </div>
-          <div className="auth-testimonial">
-            <p>The magic link login is so smooth. I just click the email and I&apos;m straight into my leads.</p>
-            <div className="auth-testimonial-author">
-              <div className="auth-author-av" aria-hidden="true">AR</div>
-              <div className="auth-author-info">
-                <div className="auth-author-name">Aisha R.</div>
-                <div className="auth-author-role">Freelance Designer · Leeds</div>
-              </div>
-            </div>
-          </div>
         </div>
       </aside>
 
