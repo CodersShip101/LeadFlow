@@ -29,7 +29,7 @@ export async function POST() {
           price_data: {
             currency: 'gbp',
             product_data: {
-              name: 'LeadFlow Pro',
+              name: 'Flaiir Pro',
               description: 'Unlimited leads, skill filtering, early access',
             },
             unit_amount: 4900,

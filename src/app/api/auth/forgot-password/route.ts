@@ -34,9 +34,9 @@ export async function POST(request: Request) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'LeadFlow <onboarding@resend.dev>',
+        from: 'Flaiir <onboarding@resend.dev>',
         to: [email],
-        subject: 'Reset your LeadFlow password',
+        subject: 'Reset your Flaiir password',
         html: `<p>Click the link below to reset your password:</p>
 <p><a href="${resetLink}">${resetLink}</a></p>
 <p>This link expires in 1 hour.</p>

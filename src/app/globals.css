@@ -241,6 +241,9 @@ textarea.input { resize: vertical; min-height: 80px; }
 .brand-mark{width:32px;height:32px;border-radius:8px;background:var(--lime);display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .brand-mark span{font-family:var(--font-mono);font-weight:700;font-size:14px;color:var(--sidebar)}
 .brand-name{font-family:var(--font-display);font-weight:700;font-size:17px;color:#fff;letter-spacing:-.02em}
+/* lowercase "flaiir" wordmark — highlight the "ai" in lime */
+.brand-ai{color:var(--lime)}
+#mobile-top .brand-ai{color:var(--lime-deep)}
 .rail-label{font-family:var(--font-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--slate);padding:14px 10px 6px}
 .nav-item{display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:var(--r-sm);color:#A9B5AC;font-size:14px;font-weight:500;width:100%;text-align:left;transition:background .15s,color .15s;position:relative;background:transparent;border:none;cursor:pointer}
 .nav-item .ti{font-size:19px;width:20px;text-align:center;flex-shrink:0}

@@ -33,8 +33,8 @@ export default function LoginPage() {
         <div className="panel-glow" aria-hidden="true"></div>
         <div className="panel-content">
           <div className="auth-logo">
-            <span className="auth-logo-mark"><span>LF</span></span>
-            <span className="auth-logo-name">LeadFlow</span>
+            <span className="auth-logo-mark"><span>fl</span></span>
+            <span className="auth-logo-name">fl<span className="brand-ai">ai</span>ir</span>
           </div>
           <div className="panel-hero">
             <div className="panel-eyebrow">Your lead feed is waiting</div>
@@ -72,7 +72,7 @@ export default function LoginPage() {
             </div>
           </div>
           <div className="auth-testimonial">
-            <p>Landed a £380/day Fintech contract through a Reddit lead I&apos;d never have found manually. LeadFlow sent it before anyone else saw it.</p>
+            <p>Landed a £380/day Fintech contract through a Reddit lead I&apos;d never have found manually. Flaiir sent it before anyone else saw it.</p>
             <div className="auth-testimonial-author">
               <div className="auth-author-av" aria-hidden="true">JK</div>
               <div className="auth-author-info">
@@ -87,7 +87,7 @@ export default function LoginPage() {
       <main className="panel-right">
         <div className="auth-form-wrap">
           <div className="auth-form-eyebrow">Welcome back</div>
-          <h1>Log in to LeadFlow</h1>
+          <h1>Log in to Flaiir</h1>
           <p className="auth-tagline">Your leads are ready.</p>
 
           {error && (

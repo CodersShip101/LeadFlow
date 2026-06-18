@@ -16,7 +16,7 @@ const MAX_PER_RUN = 24
 async function fetchRedditPosts() {
   try {
     const res = await fetch('https://www.reddit.com/r/forhire/new.json?limit=10', {
-      headers: { 'User-Agent': 'LeadFlow/1.0' },
+      headers: { 'User-Agent': 'Flaiir/1.0' },
       signal: AbortSignal.timeout(8000),
     })
     if (!res.ok) return []
@@ -61,7 +61,7 @@ async function fetchWWRPosts() {
 async function fetchReedPosts() {
   try {
     const res = await fetch('https://www.reed.co.uk/jobs/rss/freelance?keywords=developer+designer+writer+marketing', {
-      headers: { 'User-Agent': 'LeadFlow/1.0' },
+      headers: { 'User-Agent': 'Flaiir/1.0' },
       signal: AbortSignal.timeout(8000),
     })
     if (!res.ok) return []
@@ -80,7 +80,7 @@ async function fetchReedPosts() {
 async function fetchCWJobsPosts() {
   try {
     const res = await fetch('https://www.cwjobs.co.uk/jobs/rss?keywords=contract+freelance', {
-      headers: { 'User-Agent': 'LeadFlow/1.0' },
+      headers: { 'User-Agent': 'Flaiir/1.0' },
       signal: AbortSignal.timeout(8000),
     })
     if (!res.ok) return []
@@ -99,7 +99,7 @@ async function fetchCWJobsPosts() {
 async function fetchIndeedPosts() {
   try {
     const res = await fetch('https://uk.indeed.com/rss?q=freelance+contract&l=United+Kingdom', {
-      headers: { 'User-Agent': 'LeadFlow/1.0' },
+      headers: { 'User-Agent': 'Flaiir/1.0' },
       signal: AbortSignal.timeout(8000),
     })
     if (!res.ok) return []
@@ -118,7 +118,7 @@ async function fetchIndeedPosts() {
 async function fetchRemoteOKPosts() {
   try {
     const res = await fetch('https://remoteok.com/api', {
-      headers: { 'User-Agent': 'LeadFlow/1.0' },
+      headers: { 'User-Agent': 'Flaiir/1.0' },
       signal: AbortSignal.timeout(8000),
     })
     if (!res.ok) return []
@@ -134,7 +134,7 @@ async function fetchRemoteOKPosts() {
 async function fetchHimalayasPosts() {
   try {
     const res = await fetch('https://himalayas.app/jobs/api', {
-      headers: { 'User-Agent': 'LeadFlow/1.0' },
+      headers: { 'User-Agent': 'Flaiir/1.0' },
       signal: AbortSignal.timeout(8000),
     })
     if (!res.ok) return []
@@ -149,7 +149,7 @@ async function fetchHimalayasPosts() {
 async function fetchArbeitnowPosts() {
   try {
     const res = await fetch('https://www.arbeitnow.com/api/job-board-api', {
-      headers: { 'User-Agent': 'LeadFlow/1.0' },
+      headers: { 'User-Agent': 'Flaiir/1.0' },
       signal: AbortSignal.timeout(8000),
     })
     if (!res.ok) return []
@@ -366,7 +366,7 @@ export async function POST() {
                   </a>
                 </td></tr>
                 <tr><td style="padding:0 28px 20px;text-align:center;font-size:11px;color:#9CA3AF">
-                  You're receiving this because you set a score alert on LeadFlow.<br>
+                  You're receiving this because you set a score alert on Flaiir.<br>
                   <a href="${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://lead-flow-gpyj.vercel.app'}/dashboard/profile" style="color:#9CA3AF">Manage alerts</a>
                 </td></tr>
               </table>
@@ -377,7 +377,7 @@ export async function POST() {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              from: 'LeadFlow Alerts <alerts@leadflow.dev>',
+              from: 'Flaiir Alerts <alerts@leadflow.dev>',
               to: [profile.email],
               subject: `${matches.length} new lead${matches.length > 1 ? 's' : ''} hit your ${prefs.minScore}+ alert — ${topMatch.lead.title}`,
               html,

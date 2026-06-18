@@ -34,14 +34,14 @@ const initialSignals = [
 ]
 
 const faqData = [
-  { q: 'Where does LeadFlow find leads?', a: 'We continuously monitor Reddit (r/forhire, r/freelance, r/hiring), Reed.co.uk, and We Work Remotely. Everything is scored by our AI model before it reaches your feed — so you only see what\'s worth your time.' },
+  { q: 'Where does Flaiir find leads?', a: 'We continuously monitor Reddit (r/forhire, r/freelance, r/hiring), Reed.co.uk, and We Work Remotely. Everything is scored by our AI model before it reaches your feed — so you only see what\'s worth your time.' },
   { q: 'What does the 1–10 score mean?', a: 'The score weighs budget clarity, scope detail, response-rate signals, and how well a lead matches your profile. A 9+ usually has a clear brief, a stated budget, and a hiring decision within two weeks.' },
   { q: 'Do you take a cut of my contract?', a: 'Never. Every lead links straight to the original post. You apply on the client\'s terms, on the original platform. No middleman, no markup, no commission.' },
-  { q: 'How is this different from a job board?', a: 'Job boards show you everything. LeadFlow shows you only what fits your profile, ranked by score, so you act on the best leads in minutes instead of searching for an hour.' },
+  { q: 'How is this different from a job board?', a: 'Job boards show you everything. Flaiir shows you only what fits your profile, ranked by score, so you act on the best leads in minutes instead of searching for an hour.' },
   { q: 'What happens when my trial ends?', a: 'On day 7 your plan continues automatically — but only if you stay. We email you 48 hours before, so you are never charged by surprise. Cancel any time before then in one click and you pay nothing.' },
   { q: 'Can I cancel whenever I want?', a: 'Yes. Cancel from settings anytime and keep access until your billing period ends. No fees, no friction.' },
   { q: 'Which freelancers is this built for?', a: 'Designers, developers, writers, marketers and consultants. The scoring model is tuned for UK and remote markets.' },
-  { q: 'Is my profile shared with clients?', a: 'No. Your profile only powers filtering and scoring. Clients never see your LeadFlow profile.' },
+  { q: 'Is my profile shared with clients?', a: 'No. Your profile only powers filtering and scoring. Clients never see your Flaiir profile.' },
 ]
 
 function SignalCard({ s, flash }: { s: typeof initialSignals[0], flash?: boolean }) {
@@ -230,10 +230,10 @@ export default function HomePage() {
         __html: JSON.stringify({
           "@context": "https://schema.org",
           "@type": "SoftwareApplication",
-          "name": "LeadFlow",
+          "name": "Flaiir",
           "applicationCategory": "BusinessApplication",
           "operatingSystem": "Web",
-          "description": "LeadFlow finds and scores freelance leads, then delivers the best matches to your inbox as often as every hour.",
+          "description": "Flaiir finds and scores freelance leads, then delivers the best matches to your inbox as often as every hour.",
           "url": "https://lead-flow-gpyj.vercel.app/",
           "offers": [
             { "@type": "Offer", "name": PRICING.free.label, "price": String(PRICING.free.monthly), "priceCurrency": "GBP" },
@@ -260,9 +260,9 @@ export default function HomePage() {
       <header>
         <nav id="navbar" className={scrolled ? 'scrolled' : ''} aria-label="Main navigation">
           <div className="nav-inner">
-            <Link href="/" className="nav-logo" aria-label="LeadFlow home">
-              <span className="nav-logo-mark"><span>LF</span></span>
-              LeadFlow
+            <Link href="/" className="nav-logo" aria-label="Flaiir home">
+              <span className="nav-logo-mark"><span>fl</span></span>
+              fl<span className="brand-ai">ai</span>ir
             </Link>
             <div className="nav-desktop" style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
               <a href="#how" className="nav-link">How it works</a>
@@ -307,7 +307,7 @@ export default function HomePage() {
                   Let the <span className="hl">right leads</span> find you.
                 </h1>
                 <p className="hero-sub">
-                  LeadFlow scans Reddit, Reed and We Work Remotely every hour, scores every lead against your rate and skills, and puts your best matches in front of you — before the competition even sees them.
+                  Flaiir scans Reddit, Reed and We Work Remotely every hour, scores every lead against your rate and skills, and puts your best matches in front of you — before the competition even sees them.
                 </p>
                 <div className="hero-cta-row">
                   <Link href="/auth/signup" className="btn-p btn-lg"><i className="ti ti-bolt" aria-hidden="true"></i> Start free — 7 days Pro trial</Link>
@@ -378,7 +378,7 @@ export default function HomePage() {
             <div className="section-head sr">
               <div className="tag tag-lime tag-bracket">where we source</div>
               <h2 id="platforms-h">You pitch to clients — you don&apos;t wait for them</h2>
-              <p>Every platform LeadFlow monitors lets you reach out directly. No platform rating needed, no algorithm burying your profile. Your pitch and speed win the job.</p>
+              <p>Every platform Flaiir monitors lets you reach out directly. No platform rating needed, no algorithm burying your profile. Your pitch and speed win the job.</p>
             </div>
             <div className="grid-3 sr">
               {[
@@ -435,10 +435,10 @@ export default function HomePage() {
                 {
                   icon: 'ti-clock-bolt',
                   name: 'Apply in the first three',
-                  sub: 'The LeadFlow edge',
+                  sub: 'The Flaiir edge',
                   href: null,
-                  desc: 'Being one of the first three applicants dramatically improves your reply rate. LeadFlow scores and surfaces new posts within the hour — so you act before the crowd.',
-                  tag: 'LeadFlow advantage',
+                  desc: 'Being one of the first three applicants dramatically improves your reply rate. Flaiir scores and surfaces new posts within the hour — so you act before the crowd.',
+                  tag: 'Flaiir advantage',
                   tagColor: 'rgba(196,240,0,.2)',
                   tagText: 'var(--lime-deep)',
                 },
@@ -471,7 +471,7 @@ export default function HomePage() {
               <div>
                 <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', fontWeight: 700, color: '#fff', marginBottom: 6 }}>The zero-review trick: apply within the first 20 minutes</h3>
                 <p style={{ fontSize: '.92rem', color: 'var(--slate-300)', lineHeight: 1.65, margin: 0 }}>
-                  On every platform, the first three applicants get the most attention. Filter for posts under 20 minutes old, lead with a specific insight about their project, and you&apos;ll outcompete accounts with dozens of reviews. LeadFlow alerts you the moment qualifying leads are posted.
+                  On every platform, the first three applicants get the most attention. Filter for posts under 20 minutes old, lead with a specific insight about their project, and you&apos;ll outcompete accounts with dozens of reviews. Flaiir alerts you the moment qualifying leads are posted.
                 </p>
               </div>
             </div>
@@ -541,7 +541,7 @@ export default function HomePage() {
             <div className="section-head sr">
               <div className="tag tag-lime tag-bracket">how it works</div>
               <h2 id="how-h">Up and running in minutes</h2>
-              <p>Set it up once. LeadFlow runs in the background and surfaces only what&apos;s worth your attention.</p>
+              <p>Set it up once. Flaiir runs in the background and surfaces only what&apos;s worth your attention.</p>
             </div>
             <div className="steps sr">
               <div className="step">
@@ -642,7 +642,7 @@ export default function HomePage() {
                 <Link href="/auth/signup" className="btn-p btn-lg"><i className="ti ti-bolt" aria-hidden="true"></i> Try it free</Link>
               </div>
               <div className="sr sr-d2">
-                <div className="dash" role="img" aria-label="LeadFlow dashboard preview, filtered to high-scoring leads">
+                <div className="dash" role="img" aria-label="Flaiir dashboard preview, filtered to high-scoring leads">
                   <div className="dash-bar">
                     <span className="radar-mini" aria-hidden="true"></span>
                     <span className="console-title">Dashboard</span>
@@ -821,9 +821,9 @@ export default function HomePage() {
         <div className="container" style={{ paddingTop: 60, paddingBottom: 40 }}>
           <div className="footer-grid" style={{ marginBottom: 48 }}>
             <div>
-              <a href="#" style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }} aria-label="LeadFlow home">
-                <span className="nav-logo-mark"><span>LF</span></span>
-                <span style={{ fontFamily: "'Space Grotesk',sans-serif", color: '#fff', fontWeight: 700, fontSize: '1.05rem', letterSpacing: '-.02em' }}>LeadFlow</span>
+              <a href="#" style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }} aria-label="Flaiir home">
+                <span className="nav-logo-mark"><span>fl</span></span>
+                <span style={{ fontFamily: "'Space Grotesk',sans-serif", color: '#fff', fontWeight: 700, fontSize: '1.05rem', letterSpacing: '-.02em' }}>fl<span className="brand-ai">ai</span>ir</span>
               </a>
               <p style={{ fontSize: '.875rem', color: 'var(--slate-400)', lineHeight: 1.65, maxWidth: 250 }}>AI-scored freelance leads, matched to your skills and delivered as often as every hour.</p>
             </div>
@@ -853,7 +853,7 @@ export default function HomePage() {
             </nav>
           </div>
           <div style={{ borderTop: '1px solid var(--ink-700)', paddingTop: 24, display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '.78rem', color: 'var(--slate-600)' }}>© 2026 LeadFlow. All rights reserved.</span>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '.78rem', color: 'var(--slate-600)' }}>© 2026 Flaiir. All rights reserved.</span>
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: '.72rem', color: 'var(--lime-deep)', display: 'flex', alignItems: 'center', gap: 7 }}>
               <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--lime)', animation: 'blink 1.6s infinite' }}></span>
               updating as often as every hour

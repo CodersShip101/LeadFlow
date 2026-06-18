@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
     <tr><td align="center" style="padding:32px 16px">
       <table width="480" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:12px;border:1px solid #E5E7EB">
         <tr><td style="padding:32px 32px 24px">
-          <h1 style="font-size:20px;font-weight:700;margin:0;color:#1A1D23">Your Weekly LeadFlow Digest</h1>
+          <h1 style="font-size:20px;font-weight:700;margin:0;color:#1A1D23">Your Weekly Flaiir Digest</h1>
           <p style="font-size:13px;color:#6B7280;margin:6px 0 0">Your top matches and weekly stats</p>
         </td></tr>
         <tr><td style="padding:0 32px 16px">
@@ -130,11 +130,11 @@ export async function POST(req: NextRequest) {
         <tr><td style="padding:24px 32px 32px;text-align:center">
           <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://lead-flow-gpyj.vercel.app'}/dashboard"
              style="display:inline-block;padding:12px 24px;background:#1B6B4A;color:white;text-decoration:none;font-size:14px;font-weight:600;border-radius:8px">
-            View all leads on LeadFlow
+            View all leads on Flaiir
           </a>
         </td></tr>
         <tr><td style="padding:0 32px 24px;text-align:center;font-size:11px;color:#9CA3AF">
-          LeadFlow · Quality freelance leads, delivered weekly.<br>
+          Flaiir · Quality freelance leads, delivered weekly.<br>
           <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://lead-flow-gpyj.vercel.app'}/dashboard/settings" style="color:#9CA3AF">Unsubscribe</a>
         </td></tr>
       </table>
@@ -150,7 +150,7 @@ export async function POST(req: NextRequest) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          from: 'LeadFlow <onboarding@resend.dev>',
+          from: 'Flaiir <onboarding@resend.dev>',
           to: [profile.email],
           subject: `Your Weekly Digest — ${scoredLeads.length} new matches`,
           html: digestHtml,

@@ -101,7 +101,7 @@ export async function POST(req: NextRequest) {
           <a href="${process.env.NEXT_PUBLIC_SITE_URL}/dashboard" style="background:#111827;color:#C4F000;padding:10px 22px;border-radius:8px;font-weight:600;font-size:13px;text-decoration:none">View all leads</a>
         </td></tr>
         <tr><td style="padding:0 24px 20px;text-align:center;font-size:11px;color:#9CA3AF">
-          You're receiving this because you set a score alert on LeadFlow.<br>
+          You're receiving this because you set a score alert on Flaiir.<br>
           <a href="${process.env.NEXT_PUBLIC_SITE_URL}/dashboard/profile" style="color:#9CA3AF">Manage alerts</a>
         </td></tr>
       </table>
@@ -115,7 +115,7 @@ export async function POST(req: NextRequest) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          from: 'LeadFlow Alerts <alerts@leadflow.dev>',
+          from: 'Flaiir Alerts <alerts@leadflow.dev>',
           to: [profile.email],
           subject: `${matches.length} new lead${matches.length > 1 ? 's' : ''} matched your alert (score ${prefs.minScore}+)`,
           html,

@@ -32,8 +32,8 @@ export default function ForgotPasswordPage() {
           <div className="panel-glow" aria-hidden="true"></div>
           <div className="panel-content">
             <div className="auth-logo">
-              <span className="auth-logo-mark"><span>LF</span></span>
-              <span className="auth-logo-name">LeadFlow</span>
+              <span className="auth-logo-mark"><span>fl</span></span>
+              <span className="auth-logo-name">fl<span className="brand-ai">ai</span>ir</span>
             </div>
             <div className="panel-hero">
               <div className="panel-eyebrow">Check your inbox</div>
@@ -82,13 +82,13 @@ export default function ForgotPasswordPage() {
         <div className="panel-glow" aria-hidden="true"></div>
         <div className="panel-content">
           <div className="auth-logo">
-            <span className="auth-logo-mark"><span>LF</span></span>
-            <span className="auth-logo-name">LeadFlow</span>
+            <span className="auth-logo-mark"><span>fl</span></span>
+            <span className="auth-logo-name">fl<span className="brand-ai">ai</span>ir</span>
           </div>
           <div className="panel-hero">
             <div className="panel-eyebrow">Forgot your password?</div>
             <h2 className="panel-heading">No problem.<br />We&apos;ll get you back in.</h2>
-            <p className="panel-sub">Enter the email you use for LeadFlow and we&apos;ll send a reset link. Takes 10 seconds.</p>
+            <p className="panel-sub">Enter the email you use for Flaiir and we&apos;ll send a reset link. Takes 10 seconds.</p>
             <div className="auth-stats-row">
               <div className="auth-stat-item">
                 <span className="auth-stat-num"><span>2,400+</span></span>

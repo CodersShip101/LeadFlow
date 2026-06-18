@@ -80,8 +80,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {/* ─── Sidebar ─── */}
       <aside id="rail" className={menuOpen ? 'open' : ''}>
         <div className="brand">
-          <span className="brand-mark"><span>LF</span></span>
-          <span className="brand-name">LeadFlow</span>
+          <span className="brand-mark"><span>fl</span></span>
+          <span className="brand-name">fl<span className="brand-ai">ai</span>ir</span>
         </div>
 
         <div className="rail-label">Leads</div>
@@ -130,8 +130,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <button onClick={() => setMenuOpen(true)} className="btn-icon tip" data-tip="Menu" aria-label="Open menu">
             <i className="ti ti-menu-2"></i>
           </button>
-          <span className="brand-mark" style={{ width: 28, height: 28 }}><span style={{ fontSize: 12 }}>LF</span></span>
-          <span className="brand-name" style={{ color: 'var(--ink)', fontSize: 16 }}>LeadFlow</span>
+          <span className="brand-mark" style={{ width: 28, height: 28 }}><span style={{ fontSize: 12 }}>fl</span></span>
+          <span className="brand-name" style={{ color: 'var(--ink)', fontSize: 16 }}>fl<span className="brand-ai">ai</span>ir</span>
           <div className="avatar" style={{ marginLeft: 'auto', width: 30, height: 30, fontSize: 11 }}>
             {profileInitials(profile?.full_name)}
           </div>
