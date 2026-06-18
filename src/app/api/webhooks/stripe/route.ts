@@ -67,8 +67,11 @@ export async function POST(req: NextRequest) {
       if (org) {
         await admin.from('organizations').update({ seats: qty }).eq('id', org.id)
       } else {
+        // Prefer the tier we stamped on the subscription at checkout; fall back
+        // to the price nickname only if it's missing.
+        const metaTier = sub.metadata?.tier
         const nick = sub.items.data[0]?.price?.nickname?.toLowerCase() ?? ''
-        const plan = nick.includes('max') ? 'max' : 'pro'
+        const plan = metaTier === 'max' || (!metaTier && nick.includes('max')) ? 'max' : 'pro'
         await setProfilePlan(customerId, active ? (plan as 'max' | 'pro') : 'free')
       }
       break

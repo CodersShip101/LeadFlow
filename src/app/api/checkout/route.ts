@@ -58,7 +58,12 @@ export async function POST(req: NextRequest) {
     // If it doesn't, Stripe falls back to the price's base currency.
     ...(currency ? { currency } : {}),
     line_items: [{ price, quantity }],
-    subscription_data: { trial_period_days: 7 },
+    subscription_data: {
+      trial_period_days: 7,
+      // Carried onto the subscription so webhook events (created/updated/
+      // deleted) can map back to the user and tier.
+      metadata: { supabase_user_id: user.id, tier },
+    },
     allow_promotion_codes: true,
     success_url: `${origin}/dashboard/billing?upgraded=${tier}`,
     cancel_url: `${origin}/dashboard/billing`,
