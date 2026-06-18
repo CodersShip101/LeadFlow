@@ -243,8 +243,9 @@ export async function POST() {
 
     const insertedLeads: any[] = []
 
-    // Higher concurrency packs more AI calls into the time budget.
-    const batchSize = 6
+    // Lower concurrency avoids free-tier throttling, so each call stays fast
+    // and reliably finishes inside its timeout.
+    const batchSize = 3
     // Stop starting new batches at 38s; a final batch can run up to the 18s
     // per-call timeout, keeping us safely under the 60s function cap.
     const deadline = startTime + 38_000
@@ -267,11 +268,17 @@ export async function POST() {
         const expiryDate = new Date()
         expiryDate.setDate(expiryDate.getDate() + 14)
 
+        // Budget columns are integers — the model sometimes returns decimals.
+        const toInt = (v: any) => {
+          const n = Number(v)
+          return Number.isFinite(n) && n > 0 ? Math.round(n) : null
+        }
+
         const leadRow = {
           title: r.parsed.title || 'Untitled',
           description: r.parsed.description || r.post.rawText.substring(0, 500),
-          budget_min: r.parsed.budget_min || null,
-          budget_max: r.parsed.budget_max || null,
+          budget_min: toInt(r.parsed.budget_min),
+          budget_max: toInt(r.parsed.budget_max),
           skills_required: r.parsed.skills_required || [],
           project_type: r.parsed.project_type || null,
           client_location: r.parsed.client_location || 'Remote',
