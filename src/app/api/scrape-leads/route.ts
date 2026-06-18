@@ -102,6 +102,49 @@ async function fetchIndeedPosts() {
   } catch { return [] }
 }
 
+async function fetchRemoteOKPosts() {
+  try {
+    const res = await fetch('https://remoteok.com/api', {
+      headers: { 'User-Agent': 'LeadFlow/1.0' },
+    })
+    if (!res.ok) return []
+    const data = await res.json()
+    // First element is metadata/legal notice — skip it
+    return (Array.isArray(data) ? data.slice(1) : []).slice(0, 20).map((job: any) => ({
+      rawText: `Title: ${job.position || job.title || ''}\nCompany: ${job.company || ''}\nTags: ${(job.tags || []).join(', ')}\n\n${(job.description || '').replace(/<[^>]*>/g, '').substring(0, 3000)}`,
+      source_url: job.url || (job.id ? `https://remoteok.com/remote-jobs/${job.id}` : ''),
+    }))
+  } catch { return [] }
+}
+
+async function fetchHimalayasPosts() {
+  try {
+    const res = await fetch('https://himalayas.app/jobs/api', {
+      headers: { 'User-Agent': 'LeadFlow/1.0' },
+    })
+    if (!res.ok) return []
+    const data = await res.json()
+    return (data.jobs || []).slice(0, 20).map((job: any) => ({
+      rawText: `Title: ${job.title || ''}\nCompany: ${job.companyName || ''}\nCategories: ${(job.categories || []).join(', ')}\n\n${(job.description || '').replace(/<[^>]*>/g, '').substring(0, 3000)}`,
+      source_url: job.applicationLink || job.guid || '',
+    }))
+  } catch { return [] }
+}
+
+async function fetchArbeitnowPosts() {
+  try {
+    const res = await fetch('https://www.arbeitnow.com/api/job-board-api', {
+      headers: { 'User-Agent': 'LeadFlow/1.0' },
+    })
+    if (!res.ok) return []
+    const data = await res.json()
+    return (data.data || []).slice(0, 20).map((job: any) => ({
+      rawText: `Title: ${job.title || ''}\nCompany: ${job.company_name || ''}\nTags: ${(job.tags || []).join(', ')}\nRemote: ${job.remote ? 'Yes' : 'No'}\n\n${(job.description || '').replace(/<[^>]*>/g, '').substring(0, 3000)}`,
+      source_url: job.url || '',
+    }))
+  } catch { return [] }
+}
+
 export async function POST() {
   const startTime = Date.now()
   const result = { found: 0, passed_filter: 0, inserted: 0, skipped_duplicates: 0, errors: [] as string[] }
@@ -109,16 +152,19 @@ export async function POST() {
   try {
     const supabase = await createAdminSupabase()
 
-    const [reddit, remotive, wwr, reed, cwjobs, indeed] = await Promise.all([
+    const [reddit, remotive, wwr, reed, cwjobs, indeed, remoteok, himalayas, arbeitnow] = await Promise.all([
       fetchRedditPosts(),
       fetchRemotivePosts(),
       fetchWWRPosts(),
       fetchReedPosts(),
       fetchCWJobsPosts(),
       fetchIndeedPosts(),
+      fetchRemoteOKPosts(),
+      fetchHimalayasPosts(),
+      fetchArbeitnowPosts(),
     ])
 
-    const allPosts = [...reddit, ...remotive, ...wwr, ...reed, ...cwjobs, ...indeed]
+    const allPosts = [...reddit, ...remotive, ...wwr, ...reed, ...cwjobs, ...indeed, ...remoteok, ...himalayas, ...arbeitnow]
     result.found = allPosts.length
 
     const { data: existing } = await supabase
