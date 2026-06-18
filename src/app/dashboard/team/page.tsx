@@ -100,8 +100,8 @@ export default function TeamPage() {
       })
       const d = await res.json()
       if (res.ok) {
-        toast.success('Invite sent')
         if (d.acceptUrl) navigator.clipboard?.writeText(d.acceptUrl).catch(() => {})
+        toast.success(d.emailed ? 'Invite emailed' : 'Invite link copied — share it with them')
         setEmail('')
         load()
       } else {

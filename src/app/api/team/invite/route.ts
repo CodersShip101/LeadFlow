@@ -39,5 +39,36 @@ export async function POST(req: NextRequest) {
   const origin = req.headers.get('origin') ?? process.env.NEXT_PUBLIC_SITE_URL!
   const acceptUrl = `${origin}/api/team/accept?token=${invite!.token}`
 
-  return NextResponse.json({ ok: true, acceptUrl })
+  // Email the invitee the accept link.
+  const html = `<!DOCTYPE html><html><body style="font-family:-apple-system,sans-serif;background:#F5F5F7;margin:0;padding:24px">
+    <table width="480" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:12px;border:1px solid #E5E7EB;margin:0 auto">
+      <tr><td style="padding:28px 28px 8px">
+        <h1 style="font-size:18px;font-weight:700;margin:0;color:#111827">You've been invited to a team on Flaiir</h1>
+        <p style="font-size:14px;color:#6B7280;margin:10px 0 0;line-height:1.5">Join your team's shared lead pool, pipeline and templates. Click below to accept (you'll sign in or create an account with this email).</p>
+      </td></tr>
+      <tr><td style="padding:22px 28px 28px">
+        <a href="${acceptUrl}" style="background:#111827;color:#C4F000;padding:12px 24px;border-radius:8px;font-weight:600;font-size:14px;text-decoration:none;display:inline-block">Accept invitation</a>
+      </td></tr>
+      <tr><td style="padding:0 28px 24px;font-size:11px;color:#9CA3AF;word-break:break-all">Or paste this link: ${acceptUrl}</td></tr>
+    </table>
+  </body></html>`
+
+  let emailed = false
+  if (process.env.RESEND_API_KEY) {
+    try {
+      const r = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          from: 'Flaiir <onboarding@resend.dev>',
+          to: [email.toLowerCase()],
+          subject: 'You\'ve been invited to a Flaiir team',
+          html,
+        }),
+      })
+      emailed = r.ok
+    } catch { /* fall back to link sharing */ }
+  }
+
+  return NextResponse.json({ ok: true, acceptUrl, emailed })
 }
