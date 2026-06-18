@@ -173,28 +173,13 @@ export default function ResetPasswordPage() {
           </div>
           <div className="panel-hero">
             <div className="panel-eyebrow">Forgot your password?</div>
-            <h2 className="panel-heading">No problem.<br />We&apos;ll get you back in.</h2>
-            <p className="panel-sub">Enter the email you use for LeadFlow and we&apos;ll send a reset link. Takes 10 seconds.</p>
-            <div className="auth-stats-row">
-              <div className="auth-stat-item">
-                <span className="auth-stat-num"><span>2,400+</span></span>
-                <span className="auth-stat-label">Active freelancers</span>
-              </div>
-              <div className="auth-stat-item">
-                <span className="auth-stat-num"><span>98%</span></span>
-                <span className="auth-stat-label">Reset success rate</span>
-              </div>
-            </div>
-          </div>
-          <div className="auth-testimonial">
-            <p>Had a mini panic when I couldn&apos;t log in, but the reset took less than a minute. Solid experience.</p>
-            <div className="auth-testimonial-author">
-              <div className="auth-author-av" aria-hidden="true">TP</div>
-              <div className="auth-author-info">
-                <div className="auth-author-name">Tom P.</div>
-                <div className="auth-author-role">Freelance Developer · Bristol</div>
-              </div>
-            </div>
+            <h2 className="panel-heading">Happens to everyone.<br />We&apos;ll get you back in.</h2>
+            <p className="panel-sub">Enter your email and we&apos;ll send a secure reset link. Your leads will be right where you left them.</p>
+            <ul className="auth-step-list">
+              <li><span className="auth-step-n">1</span> Enter your email address</li>
+              <li><span className="auth-step-n">2</span> Open the reset link we send you</li>
+              <li><span className="auth-step-n">3</span> Set a new password and you&apos;re in</li>
+            </ul>
           </div>
         </div>
       </aside>
