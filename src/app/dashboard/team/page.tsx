@@ -33,14 +33,33 @@ export default function TeamPage() {
   const [myId, setMyId] = useState<string | null>(null)
   const [pool, setPool] = useState<{ leads: PoolLead[]; members: { user_id: string; name: string }[] } | null>(null)
   const [stats, setStats] = useState<TeamStats | null>(null)
+  const [slackConfigured, setSlackConfigured] = useState(false)
+  const [slackUrl, setSlackUrl] = useState('')
+  const [savingSlack, setSavingSlack] = useState(false)
 
   const loadPool = useCallback(async () => {
     try {
-      const [poolRes, statsRes] = await Promise.all([fetch('/api/team/pool'), fetch('/api/team/analytics')])
+      const [poolRes, statsRes, notifRes] = await Promise.all([
+        fetch('/api/team/pool'), fetch('/api/team/analytics'), fetch('/api/team/notifications'),
+      ])
       if (poolRes.ok) setPool(await poolRes.json())
       if (statsRes.ok) setStats(await statsRes.json())
+      if (notifRes.ok) { const d = await notifRes.json(); setSlackConfigured(d.configured) }
     } catch { /* ignore */ }
   }, [])
+
+  const saveSlack = async () => {
+    setSavingSlack(true)
+    try {
+      const res = await fetch('/api/team/notifications', {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slackWebhookUrl: slackUrl }),
+      })
+      const d = await res.json()
+      if (res.ok) { setSlackConfigured(d.configured); setSlackUrl(''); toast.success(d.configured ? 'Slack connected — check your channel' : 'Slack disconnected') }
+      else toast.error(d.error || 'Could not save')
+    } finally { setSavingSlack(false) }
+  }
 
   const assign = async (applicationId: string, assignTo: string) => {
     const res = await fetch('/api/team/pool', {
@@ -232,6 +251,22 @@ export default function TeamPage() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* Slack notifications (admin) */}
+      {isAdmin && (
+        <div className="tm-card">
+          <h3 className="tm-card-title">Slack notifications {slackConfigured && <span className="tpl-shared"><i className="ti ti-check" /> Connected</span>}</h3>
+          <p className="tm-note" style={{ marginTop: 0, marginBottom: 12 }}>
+            Get a message in Slack when a lead is assigned. Create an <a href="https://api.slack.com/messaging/webhooks" target="_blank" rel="noopener noreferrer" className="auth-cta-link">incoming webhook</a> and paste its URL.
+          </p>
+          <div className="tm-invite">
+            <input type="url" className="auth-input" placeholder="https://hooks.slack.com/services/…" value={slackUrl} onChange={e => setSlackUrl(e.target.value)} />
+            <button className="btn btn-primary" onClick={saveSlack} disabled={savingSlack}>
+              {savingSlack ? <LoadingDots label="Saving" /> : slackConfigured && !slackUrl ? <><i className="ti ti-x" /> Disconnect</> : <><i className="ti ti-brand-slack" /> Connect</>}
+            </button>
           </div>
         </div>
       )}

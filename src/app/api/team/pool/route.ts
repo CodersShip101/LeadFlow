@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabase, createAdminSupabase } from '@/lib/supabase-server'
+import { notifySlack, notifyEmail } from '@/lib/notify'
 
 // Shared team lead pool — every application tagged to the caller's org, with
 // the lead details and who it's assigned to. Membership is verified server-side
@@ -61,5 +62,22 @@ export async function PATCH(req: NextRequest) {
     .eq('id', applicationId)
     .eq('org_id', c.orgId)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  // Notify the assignee (Slack channel + email) — non-blocking.
+  if (assignTo) {
+    const [{ data: org }, { data: assignee }, { data: app }] = await Promise.all([
+      c.admin.from('organizations').select('slack_webhook_url').eq('id', c.orgId).single(),
+      c.admin.from('profiles').select('full_name, email').eq('id', assignTo).single(),
+      c.admin.from('applications').select('lead:leads(title)').eq('id', applicationId).single(),
+    ])
+    const title = (app?.lead as { title?: string } | null)?.title ?? 'a lead'
+    const who = assignee?.full_name ?? 'a teammate'
+    notifySlack(org?.slack_webhook_url, `:dart: *${who}* was assigned a lead: *${title}*`)
+    notifyEmail(
+      assignee?.email,
+      `You've been assigned a lead: ${title}`,
+      `<p>Hi ${who},</p><p>You've been assigned <strong>${title}</strong> in your team's Flaiir pipeline.</p><p><a href="${process.env.NEXT_PUBLIC_SITE_URL ?? ''}/dashboard/applied">Open your pipeline</a></p>`,
+    )
+  }
   return NextResponse.json({ ok: true })
 }
