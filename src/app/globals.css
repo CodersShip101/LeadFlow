@@ -240,7 +240,7 @@ textarea.input { resize: vertical; min-height: 80px; }
 .brand{display:flex;align-items:center;gap:10px;padding:6px 8px 18px}
 .brand-mark{width:32px;height:32px;border-radius:8px;background:var(--lime);display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .brand-mark span{font-family:var(--font-mono);font-weight:700;font-size:14px;color:var(--sidebar)}
-.brand-name{font-family:var(--font-display);font-weight:700;font-size:21px;color:#fff;letter-spacing:-.02em}
+.brand-name{font-family:var(--font-display);font-weight:800;font-size:26px;color:#fff;letter-spacing:-.025em}
 /* lowercase "flaiir" wordmark — highlight the "ai" in lime */
 .brand-ai{color:var(--lime)}
 #mobile-top .brand-ai{color:var(--lime-deep)}
