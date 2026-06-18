@@ -925,7 +925,7 @@ textarea.input { resize: vertical; min-height: 80px; }
 .ob-progress-label { display: block; font-size: .65rem; color: var(--slate); margin-top: 4px; font-weight: 500; }
 .ob-progress-label.cur { color: var(--ink); font-weight: 600; }
 .ob-step { min-height: 280px; }
-.ob-title { font-family: var(--font-display); font-size: 1.25rem; font-weight: 700; color: var(--ink); margin-bottom: 6px; }
+.ob-title { font-family: var(--font-display); font-size: 1.25rem; font-weight: 700; letter-spacing: -.02em; color: var(--ink); margin-bottom: 6px; }
 .ob-sub { font-size: .84rem; color: var(--slate); margin-bottom: 22px; line-height: 1.5; }
 .ob-label { display: block; font-size: .78rem; font-weight: 600; color: var(--ink); margin-bottom: 8px; }
 .ob-label-hint { font-weight: 400; color: var(--slate); font-size: .72rem; }

@@ -1,7 +1,6 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { CalendarDays } from 'lucide-react'
 
 export default function CalendarPage() {
   const router = useRouter()
@@ -9,7 +8,7 @@ export default function CalendarPage() {
     <div className="flex-1 flex items-center justify-center px-4 pb-20 md:pb-0" style={{ minHeight: 'calc(100vh - 56px)', background: 'var(--paper)' }}>
       <div className="text-center">
         <div className="w-14 h-14 rounded-xl flex items-center justify-center mx-auto mb-4" style={{ background: 'rgba(196,240,0,.15)' }}>
-          <CalendarDays size={24} style={{ color: 'var(--lime-deep)' }} />
+          <i className="ti ti-calendar" style={{ fontSize: 24, color: 'var(--lime-deep)' }} />
         </div>
         <h2 className="text-base font-bold mb-1" style={{ color: 'var(--ink-900)' }}>Calendar</h2>
         <p className="text-xs mb-5 max-w-[280px]" style={{ color: 'var(--slate-500)' }}>

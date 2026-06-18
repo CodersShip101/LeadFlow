@@ -1,7 +1,6 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { BarChart3 } from 'lucide-react'
 
 export default function AnalyticsPage() {
   const router = useRouter()
@@ -9,7 +8,7 @@ export default function AnalyticsPage() {
     <div className="flex-1 flex items-center justify-center pb-20 md:pb-0" style={{ background: 'var(--paper)' }}>
       <div className="text-center">
         <div className="w-14 h-14 rounded-xl flex items-center justify-center mx-auto mb-4" style={{ background: 'rgba(196,240,0,.15)' }}>
-          <BarChart3 size={24} style={{ color: 'var(--lime-deep)' }} />
+          <i className="ti ti-chart-bar" style={{ fontSize: 24, color: 'var(--lime-deep)' }} />
         </div>
         <h1 className="text-xl font-bold mb-2" style={{ color: 'var(--ink-900)' }}>Analytics</h1>
         <p className="text-sm mb-4" style={{ color: 'var(--slate-500)' }}>Stats over time &mdash; coming soon</p>
