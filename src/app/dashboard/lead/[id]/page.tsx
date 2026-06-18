@@ -7,6 +7,7 @@ import toast from 'react-hot-toast'
 import type { Lead, Profile, Application } from '@/types'
 import { computeMatchExplanation } from '@/types'
 import { getSourceInfo, formatBudgetGBP, formatDate } from '@/lib/utils'
+import { entitlementsFor, type Tier } from '@/lib/tiers'
 
 const SRC: Record<string, { name: string; cls: string; ava: string }> = {
   reddit: { name: 'Reddit', cls: 'sb-reddit', ava: '#FF5A3C' },
@@ -45,6 +46,9 @@ export default function LeadDetailPage() {
   const [loading, setLoading] = useState(true)
   const [showFull, setShowFull] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [followUp, setFollowUp] = useState('')
+  const [reminderNote, setReminderNote] = useState('')
+  const [savingReminder, setSavingReminder] = useState(false)
   const router = useRouter()
   const supabase = createClient()
 
@@ -62,7 +66,12 @@ export default function LeadDetailPage() {
       const res = await fetch('/api/applications')
       if (res.ok) {
         const apps: Application[] = await res.json()
-        setApplication(apps.find(a => a.lead_id === id) || null)
+        const mine = apps.find(a => a.lead_id === id) || null
+        setApplication(mine)
+        const fu = (mine as { follow_up_at?: string } | null)?.follow_up_at
+        if (fu) setFollowUp(new Date(fu).toISOString().slice(0, 16))
+        const fn = (mine as { follow_up_note?: string } | null)?.follow_up_note
+        if (fn) setReminderNote(fn)
       }
       setLoading(false)
     }
@@ -84,6 +93,22 @@ export default function LeadDetailPage() {
     if (res.ok) { setApplication(await res.json()); toast.success('Saved') }
   }, [id])
 
+  const saveReminder = useCallback(async () => {
+    setSavingReminder(true)
+    try {
+      const res = await fetch('/api/reminders', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          lead_id: id,
+          follow_up_at: followUp ? new Date(followUp).toISOString() : null,
+          follow_up_note: reminderNote || null,
+        }),
+      })
+      if (res.ok) toast.success(followUp ? 'Follow-up reminder set' : 'Reminder cleared')
+      else { const d = await res.json().catch(() => ({})); toast.error(d.error || 'Could not save') }
+    } finally { setSavingReminder(false) }
+  }, [id, followUp, reminderNote])
+
   if (loading) return (
     <div className="ld-loading">
       <div className="ld-loading-dot" />
@@ -94,6 +119,7 @@ export default function LeadDetailPage() {
   if (!lead) return null
 
   const isPro = profile?.subscription_status !== 'free'
+  const ent = entitlementsFor((profile?.subscription_status ?? 'free') as Tier)
   const si = SRC[srcKey(lead.source_url)]
   const m = computeMatchExplanation(lead, profile)
   const sc = m.score
@@ -193,6 +219,23 @@ export default function LeadDetailPage() {
           <i className={`ti ti-bookmark${isSaved ? '-filled' : ''}`} />
         </button>
       </div>
+
+      {/* ── FOLLOW-UP REMINDER (Pro) ── */}
+      {ent.calendarSync && (
+        <div className="ld-card ld-reminder">
+          <div className="ld-verdict-label"><i className="ti ti-bell" />Follow-up reminder</div>
+          <div className="ld-reminder-row">
+            <input type="datetime-local" className="auth-input" value={followUp} onChange={e => setFollowUp(e.target.value)} />
+            <input type="text" className="auth-input" placeholder="Note (optional) — e.g. chase if no reply" value={reminderNote} onChange={e => setReminderNote(e.target.value)} />
+          </div>
+          <div className="ld-reminder-actions">
+            <button className="btn btn-primary" onClick={saveReminder} disabled={savingReminder}>
+              <i className="ti ti-calendar-plus" /> {followUp ? 'Set reminder' : 'Clear reminder'}
+            </button>
+            <a className="ld-cal-link" href="/dashboard/profile#calendar">Sync to your calendar</a>
+          </div>
+        </div>
+      )}
 
       {/* ── MATCH VERDICT ── */}
       <div className="ld-card ld-verdict" style={{ borderLeftColor: scoreColor(sc) }}>

@@ -407,6 +407,26 @@ export default function SettingsPage() {
         </div>
       </div>
 
+      {/* ── CALENDAR SYNC ── */}
+      {ent.calendarSync && (profile as { calendar_token?: string } | null)?.calendar_token && (
+        <div className="st-card" id="calendar">
+          <div className="st-card-head">
+            <span className="st-card-icon" style={{ background: 'var(--lime-dim)' }}><i className="ti ti-calendar" style={{ color: 'var(--lime-deep)' }} /></span>
+            <div>
+              <h3 className="st-card-title">Calendar sync</h3>
+              <p className="st-card-desc">Subscribe to this private feed in Google/Apple Calendar to see your follow-up reminders.</p>
+            </div>
+          </div>
+          <div className="st-cal-feed">
+            <span className="st-cal-url" id="cal-url">{typeof window !== 'undefined' ? window.location.origin : ''}/api/calendar?token={(profile as { calendar_token?: string }).calendar_token}</span>
+            <button className="btn btn-primary" onClick={() => {
+              const url = `${window.location.origin}/api/calendar?token=${(profile as { calendar_token?: string }).calendar_token}`
+              navigator.clipboard?.writeText(url).then(() => toast.success('Calendar URL copied')).catch(() => {})
+            }}><i className="ti ti-copy" /> Copy URL</button>
+          </div>
+        </div>
+      )}
+
       {/* ── PLAN ── */}
       <div className="st-card">
         <div className="st-card-head">

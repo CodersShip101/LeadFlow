@@ -1818,3 +1818,11 @@ button:disabled { cursor: default; opacity: .85; }
 .tpl-textarea:focus { outline: none; border-color: var(--lime-deep); box-shadow: 0 0 0 3px var(--lime-dim); }
 .tpl-share-row { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ink-2); margin-top: 14px; cursor: pointer; }
 .tpl-modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 22px; }
+
+/* ───────── Follow-up reminder (lead detail) + calendar feed ───────── */
+.ld-reminder-row { display: flex; gap: 10px; margin: 12px 0; flex-wrap: wrap; }
+.ld-reminder-row .auth-input { flex: 1; min-width: 180px; }
+.ld-reminder-actions { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.ld-cal-link { font-size: 13px; color: var(--lime-deep); font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
+.st-cal-feed { display: flex; gap: 8px; align-items: center; margin-top: 10px; flex-wrap: wrap; }
+.st-cal-url { flex: 1; min-width: 220px; font-family: var(--font-mono); font-size: 12px; padding: 10px 12px; border: 1.5px solid var(--line); border-radius: var(--r-md); background: var(--paper-2); color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
