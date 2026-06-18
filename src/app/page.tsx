@@ -652,7 +652,7 @@ export default function HomePage() {
                     const maxScore = Math.max(...dashboardRows.map(r => parseFloat(r.score)))
                     const bestIdx = dashboardRows.findIndex(r => parseFloat(r.score) === maxScore)
                     return dashboardRows.map((d, i) => (
-                      <div key={d.title} className="dash-row" style={i === 0 ? { animation: 'newFlash .8s ease-out' } : undefined}>
+                      <div key={`${d.title}-${i}`} className="dash-row" style={i === 0 ? { animation: 'newFlash .8s ease-out' } : undefined}>
                         <span style={{ width: 6, height: 6, borderRadius: '50%', background: d.dot, flexShrink: 0 }} aria-hidden="true"></span>
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div style={{ marginBottom: 3, display: 'flex', alignItems: 'center', gap: 6 }}>
