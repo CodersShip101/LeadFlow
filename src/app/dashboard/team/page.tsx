@@ -12,6 +12,8 @@ interface PoolLead {
   id: string; status: string; assigned_to: string | null
   lead: { id: string; title: string; client_location: string | null } | null
 }
+interface LeaderRow { user_id: string; name: string; role: string; applied: number; won: number; winRate: number | null }
+interface TeamStats { summary: { members: number; totalApplied: number; totalWon: number; teamWinRate: number | null }; leaderboard: LeaderRow[] }
 interface TeamData {
   org: { id: string; plan: string; seats: number; myRole: string } | null
   seatsUsed: number
@@ -30,11 +32,13 @@ export default function TeamPage() {
   const [inviting, setInviting] = useState(false)
   const [myId, setMyId] = useState<string | null>(null)
   const [pool, setPool] = useState<{ leads: PoolLead[]; members: { user_id: string; name: string }[] } | null>(null)
+  const [stats, setStats] = useState<TeamStats | null>(null)
 
   const loadPool = useCallback(async () => {
     try {
-      const res = await fetch('/api/team/pool')
-      if (res.ok) setPool(await res.json())
+      const [poolRes, statsRes] = await Promise.all([fetch('/api/team/pool'), fetch('/api/team/analytics')])
+      if (poolRes.ok) setPool(await poolRes.json())
+      if (statsRes.ok) setStats(await statsRes.json())
     } catch { /* ignore */ }
   }, [])
 
@@ -140,6 +144,31 @@ export default function TeamPage() {
           <i className={`ti ${isAdmin ? 'ti-shield-check' : 'ti-user'}`} /> You&apos;re {isAdmin ? 'an admin' : 'a member'}
         </span>
       </div>
+
+      {/* Team performance */}
+      {stats && (
+        <div className="tm-card">
+          <h3 className="tm-card-title">Team performance</h3>
+          <div className="an-kpis" style={{ marginBottom: 18 }}>
+            <div className="an-kpi"><span className="an-kpi-ico"><i className="ti ti-users" /></span><span className="an-kpi-val">{stats.summary.members}</span><span className="an-kpi-lbl">Members</span></div>
+            <div className="an-kpi"><span className="an-kpi-ico"><i className="ti ti-send" /></span><span className="an-kpi-val">{stats.summary.totalApplied}</span><span className="an-kpi-lbl">Applications</span></div>
+            <div className="an-kpi"><span className="an-kpi-ico" style={{ background: 'var(--lime-dim)', color: 'var(--lime-ink)' }}><i className="ti ti-trophy" /></span><span className="an-kpi-val">{stats.summary.totalWon}</span><span className="an-kpi-lbl">Won</span></div>
+            <div className="an-kpi"><span className="an-kpi-ico" style={{ background: 'var(--hi-bg)', color: 'var(--hi)' }}><i className="ti ti-percentage" /></span><span className="an-kpi-val">{stats.summary.teamWinRate !== null ? `${stats.summary.teamWinRate}%` : '—'}</span><span className="an-kpi-lbl">Team win rate</span></div>
+          </div>
+          <div className="tm-board">
+            <div className="tm-board-head"><span>#</span><span>Member</span><span>Applied</span><span>Won</span><span>Win rate</span></div>
+            {stats.leaderboard.map((r, i) => (
+              <div key={r.user_id} className={`tm-board-row ${i === 0 && r.won > 0 ? 'lead' : ''}`}>
+                <span className="tm-rank">{i === 0 && r.won > 0 ? <i className="ti ti-crown" /> : i + 1}</span>
+                <span className="tm-board-name">{r.name}{r.role === 'admin' && <span className="tm-you">admin</span>}</span>
+                <span>{r.applied}</span>
+                <span>{r.won}</span>
+                <span className="tm-board-rate">{r.winRate !== null ? `${r.winRate}%` : '—'}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Invite */}
       {isAdmin && (

@@ -1826,3 +1826,16 @@ button:disabled { cursor: default; opacity: .85; }
 .ld-cal-link { font-size: 13px; color: var(--lime-deep); font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
 .st-cal-feed { display: flex; gap: 8px; align-items: center; margin-top: 10px; flex-wrap: wrap; }
 .st-cal-url { flex: 1; min-width: 220px; font-family: var(--font-mono); font-size: 12px; padding: 10px 12px; border: 1.5px solid var(--line); border-radius: var(--r-md); background: var(--paper-2); color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ───────── Team leaderboard ───────── */
+.tm-board { display: flex; flex-direction: column; }
+.tm-board-head, .tm-board-row { display: grid; grid-template-columns: 36px 1fr 70px 60px 80px; align-items: center; gap: 8px; padding: 10px 8px; }
+.tm-board-head { font-family: var(--font-mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--slate-2); border-bottom: 1px solid var(--line); }
+.tm-board-head span:nth-child(n+3), .tm-board-row span:nth-child(n+3) { text-align: right; }
+.tm-board-row { border-bottom: 1px solid var(--line-2); font-size: 14px; color: var(--ink-2); }
+.tm-board-row:last-child { border-bottom: none; }
+.tm-board-row.lead { background: var(--lime-dim); border-radius: var(--r-sm); }
+.tm-rank { font-family: var(--font-mono); font-weight: 700; color: var(--slate); text-align: center; }
+.tm-board-row.lead .tm-rank { color: var(--lime-deep); }
+.tm-board-name { font-weight: 600; color: var(--ink); display: flex; align-items: center; gap: 8px; }
+.tm-board-rate { font-family: var(--font-mono); font-weight: 700; color: var(--hi); }
