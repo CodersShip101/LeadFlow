@@ -237,10 +237,10 @@ textarea.input { resize: vertical; min-height: 80px; }
 
 /* ---- Sidebar ---- */
 #rail{background:var(--sidebar);display:flex;flex-direction:column;padding:18px 14px;gap:4px;position:sticky;top:0;height:100vh;overflow-y:auto;z-index:30}
-.brand{display:flex;align-items:center;gap:10px;padding:6px 8px 18px}
+.brand{display:flex;align-items:center;justify-content:center;gap:10px;padding:10px 8px 20px}
 .brand-mark{width:32px;height:32px;border-radius:8px;background:var(--lime);display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .brand-mark span{font-family:var(--font-mono);font-weight:700;font-size:14px;color:var(--sidebar)}
-.brand-name{font-family:var(--font-display);font-weight:800;font-size:26px;color:#fff;letter-spacing:-.025em}
+.brand-name{font-family:var(--font-display);font-weight:800;font-size:30px;color:#fff;letter-spacing:-.025em}
 /* lowercase "flaiir" wordmark — highlight the "ai" in lime */
 .brand-ai{color:var(--lime)}
 #mobile-top .brand-ai{color:var(--lime-deep)}
