@@ -6,6 +6,8 @@ import { createClient } from '@/lib/supabase-client'
 import type { Lead, Profile, Application } from '@/types'
 import { computeMatchExplanation } from '@/types'
 import LoadingDots from '@/components/LoadingDots'
+import RefreshBar from '@/components/RefreshBar'
+import { entitlementsFor, type Tier } from '@/lib/tiers'
 import { isDirectApply, isBeginnerFriendly, isFresh } from '@/lib/lead-filters'
 import { formatBudgetGBP, timeAgo } from '@/lib/utils'
 import { useSearch } from '@/components/TopbarSearch'
@@ -147,6 +149,37 @@ export default function DashboardPage() {
   const isFree = profile?.subscription_status === 'free'
   const plan = profile?.subscription_status || 'free'
   const isPro = plan === 'pro' || plan === 'max' || plan === 'team'
+  const ent = entitlementsFor(plan as Tier)
+  const lastScanAt = useMemo(
+    () => leads.reduce((m, l) => Math.max(m, new Date(l.posted_date).getTime()), 0) || null,
+    [leads],
+  )
+  const [exporting, setExporting] = useState(false)
+
+  const handleExport = async () => {
+    if (exporting) return
+    setExporting(true)
+    try {
+      const res = await fetch('/api/export/leads')
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}))
+        toast.error(d.error || 'Export failed')
+        return
+      }
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `flaiir-leads-${new Date().toISOString().slice(0, 10)}.csv`
+      a.click()
+      URL.revokeObjectURL(url)
+      toast.success('Leads exported')
+    } catch {
+      toast.error('Network error')
+    } finally {
+      setExporting(false)
+    }
+  }
 
   useEffect(() => {
     const load = async () => {
@@ -525,6 +558,8 @@ export default function DashboardPage() {
         </div>
       </div>
 
+      <RefreshBar plan={plan as Tier} lastScanAt={lastScanAt} />
+
       <div className="toolbar">
         <div className="toolbar-group">
           {([['score', 'Best match'], ['recent', 'Newest'], ['budget', 'Top budget']] as [string, string][]).map(([k, lbl]) => (
@@ -556,6 +591,16 @@ export default function DashboardPage() {
             </button>
           ))}
         </div>
+        {ent.csvExport && (
+          <>
+            <div className="tool-sep"></div>
+            <div className="toolbar-group">
+              <button className="pill easy-pill" onClick={handleExport} disabled={exporting} title="Export your leads as CSV">
+                {exporting ? <LoadingDots label="Exporting" /> : <><i className="ti ti-download"></i> Export CSV</>}
+              </button>
+            </div>
+          </>
+        )}
       </div>
 
       {filtered.length === 0 && leads.length > 0 && (
