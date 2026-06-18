@@ -13,6 +13,9 @@ export async function POST(req: NextRequest) {
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   if (data?.error) return NextResponse.json({ error: data.error }, { status: 400 })
 
+  // Joining a team unlocks team features for the member.
+  await supabase.from('profiles').update({ subscription_status: 'team' }).eq('id', user.id)
+
   return NextResponse.json({ ok: true, orgId: data.org_id })
 }
 
@@ -33,5 +36,6 @@ export async function GET(req: NextRequest) {
   if (error || data?.error) {
     return NextResponse.redirect(new URL('/dashboard/team?invite=error', base))
   }
+  await supabase.from('profiles').update({ subscription_status: 'team' }).eq('id', user.id)
   return NextResponse.redirect(new URL('/dashboard/team?invite=accepted', base))
 }

@@ -46,6 +46,8 @@ export async function POST(req: NextRequest) {
             .from('org_members')
             .upsert({ org_id: org.id, user_id: userId, role: 'admin' }, { onConflict: 'org_id,user_id' })
         }
+        // Put the owner's profile on the team plan so the UI unlocks Team.
+        await admin.from('profiles').update({ subscription_status: 'team' }).eq('id', userId)
       } else if (tier === 'pro' || tier === 'max') {
         await setProfilePlan(customerId, tier)
       }
