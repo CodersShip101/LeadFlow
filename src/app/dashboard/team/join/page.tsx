@@ -1,9 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 
-export default function JoinTeamPage() {
+function JoinContent() {
   const router = useRouter()
   const sp = useSearchParams()
   const [msg, setMsg] = useState('Joining your team…')
@@ -29,5 +29,18 @@ export default function JoinTeamPage() {
       <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--lime)', animation: 'pulse 1.2s ease-in-out infinite' }} />
       <span style={{ fontSize: 14 }}>{msg}</span>
     </div>
+  )
+}
+
+export default function JoinTeamPage() {
+  return (
+    <Suspense fallback={
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '50vh', gap: 10, color: 'var(--slate)' }}>
+        <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--lime)', animation: 'pulse 1.2s ease-in-out infinite' }} />
+        <span style={{ fontSize: 14 }}>Joining…</span>
+      </div>
+    }>
+      <JoinContent />
+    </Suspense>
   )
 }
