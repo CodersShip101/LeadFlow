@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createAdminSupabase } from '@/lib/supabase-server'
+import { sendEmail } from '@/lib/email'
 
 export async function POST(request: Request) {
   try {
@@ -27,26 +28,17 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Failed to generate reset link' }, { status: 500 })
     }
 
-    const res = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        from: 'Flaiir <onboarding@resend.dev>',
-        to: [email],
-        subject: 'Reset your Flaiir password',
-        html: `<p>Click the link below to reset your password:</p>
+    const res = await sendEmail({
+      to: email,
+      subject: 'Reset your Flaiir password',
+      html: `<p>Click the link below to reset your password:</p>
 <p><a href="${resetLink}">${resetLink}</a></p>
 <p>This link expires in 1 hour.</p>
 <p>If you didn't request this, ignore this email.</p>`,
-      }),
     })
 
     if (!res.ok) {
-      const err = await res.text()
-      return NextResponse.json({ error: `Failed to send email: ${err.substring(0, 200)}` }, { status: 500 })
+      return NextResponse.json({ error: `Failed to send email: ${res.error}` }, { status: 500 })
     }
 
     return NextResponse.json({ success: true })

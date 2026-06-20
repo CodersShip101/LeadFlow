@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createAdminSupabase } from '@/lib/supabase-server'
 import { scoreLead, type ScoringLead, type ScoringWeights } from '@/lib/scoring'
 import { ENTITLEMENTS, type Tier } from '@/lib/tiers'
+import { sendEmail } from '@/lib/email'
 
 export async function POST(req: NextRequest) {
   // Vercel cron sends this header automatically on production
@@ -107,22 +108,12 @@ export async function POST(req: NextRequest) {
       </table>
     </body></html>`
 
-    try {
-      const res = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          from: 'Flaiir Alerts <alerts@leadflow.dev>',
-          to: [profile.email],
-          subject: `${matches.length} new lead${matches.length > 1 ? 's' : ''} matched your alert (score ${prefs.minScore}+)`,
-          html,
-        }),
-      })
-      if (res.ok) dispatched++
-    } catch { /* non-blocking */ }
+    const res = await sendEmail({
+      to: profile.email,
+      subject: `${matches.length} new lead${matches.length > 1 ? 's' : ''} matched your alert (score ${prefs.minScore}+)`,
+      html,
+    })
+    if (res.ok) dispatched++
   }
 
   return NextResponse.json({ dispatched, leadsChecked: newLeads.length, usersChecked: profiles.length })

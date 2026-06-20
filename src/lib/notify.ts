@@ -1,5 +1,6 @@
 // Lightweight notification helpers. Both are non-blocking and never throw —
 // callers fire-and-forget so a failed notification can't break the request.
+import { sendEmail } from './email'
 
 export async function notifySlack(webhookUrl: string | null | undefined, text: string): Promise<void> {
   if (!webhookUrl) return
@@ -14,21 +15,6 @@ export async function notifySlack(webhookUrl: string | null | undefined, text: s
 }
 
 export async function notifyEmail(to: string | null | undefined, subject: string, html: string): Promise<void> {
-  if (!to || !process.env.RESEND_API_KEY) return
-  try {
-    await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        from: 'Flaiir <onboarding@resend.dev>',
-        to: [to],
-        subject,
-        html,
-      }),
-      signal: AbortSignal.timeout(8000),
-    })
-  } catch { /* non-blocking */ }
+  if (!to) return
+  await sendEmail({ to, subject, html }) // non-blocking: sendEmail never throws
 }

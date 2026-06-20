@@ -4,6 +4,7 @@ import { processLeadWithAI } from '@/lib/zen'
 import { scoreLead, type ScoringLead, type ScoringWeights } from '@/lib/scoring'
 import { ENTITLEMENTS, type Tier } from '@/lib/tiers'
 import { isDirectApply } from '@/lib/lead-filters'
+import { sendEmail } from '@/lib/email'
 
 // Vercel Hobby caps function duration at 60s. Stay just under it.
 export const maxDuration = 60
@@ -299,7 +300,7 @@ export async function POST() {
     }
 
     // ── Alert dispatch: notify users whose score threshold is met ──
-    if (insertedLeads.length > 0 && process.env.RESEND_API_KEY) {
+    if (insertedLeads.length > 0 && process.env.SENDGRID_API_KEY) {
       try {
         const eligiblePlans = (Object.keys(ENTITLEMENTS) as Tier[])
           .filter(p => ENTITLEMENTS[p].customAlerts)
@@ -373,16 +374,11 @@ export async function POST() {
             </td></tr></table>
           </body></html>`
 
-          await fetch('https://api.resend.com/emails', {
-            method: 'POST',
-            headers: { 'Authorization': `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              from: 'Flaiir Alerts <alerts@leadflow.dev>',
-              to: [profile.email],
-              subject: `${matches.length} new lead${matches.length > 1 ? 's' : ''} hit your ${prefs.minScore}+ alert — ${topMatch.lead.title}`,
-              html,
-            }),
-          }).catch(() => {})
+          await sendEmail({
+            to: profile.email,
+            subject: `${matches.length} new lead${matches.length > 1 ? 's' : ''} hit your ${prefs.minScore}+ alert — ${topMatch.lead.title}`,
+            html,
+          })
         }
       } catch { /* non-blocking — don't fail scrape if alerts error */ }
     }

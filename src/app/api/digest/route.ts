@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminSupabase } from '@/lib/supabase-server'
 import { ENTITLEMENTS, type Tier } from '@/lib/tiers'
+import { sendEmail } from '@/lib/email'
 
 export async function POST(req: NextRequest) {
   const isVercelCron = req.headers.get('x-vercel-cron') === '1'
@@ -143,23 +144,14 @@ export async function POST(req: NextRequest) {
 </body>
 </html>`
 
-      const res = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          from: 'Flaiir <onboarding@resend.dev>',
-          to: [profile.email],
-          subject: `Your Weekly Digest — ${scoredLeads.length} new matches`,
-          html: digestHtml,
-        }),
+      const res = await sendEmail({
+        to: profile.email,
+        subject: `Your Weekly Digest — ${scoredLeads.length} new matches`,
+        html: digestHtml,
       })
 
       if (!res.ok) {
-        const err = await res.text()
-        results.push({ email: profile.email, success: false, error: err.substring(0, 200) })
+        results.push({ email: profile.email, success: false, error: res.error })
       } else {
         results.push({ email: profile.email, success: true })
       }

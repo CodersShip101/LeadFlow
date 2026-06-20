@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabase } from '@/lib/supabase-server'
+import { sendEmail } from '@/lib/email'
 
 export async function POST(req: NextRequest) {
   const supabase = await createServerSupabase()
@@ -53,22 +54,11 @@ export async function POST(req: NextRequest) {
     </table>
   </body></html>`
 
-  let emailed = false
-  if (process.env.RESEND_API_KEY) {
-    try {
-      const r = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          from: 'Flaiir <onboarding@resend.dev>',
-          to: [email.toLowerCase()],
-          subject: 'You\'ve been invited to a Flaiir team',
-          html,
-        }),
-      })
-      emailed = r.ok
-    } catch { /* fall back to link sharing */ }
-  }
+  const sent = await sendEmail({
+    to: email.toLowerCase(),
+    subject: "You've been invited to a Flaiir team",
+    html,
+  })
 
-  return NextResponse.json({ ok: true, acceptUrl, emailed })
+  return NextResponse.json({ ok: true, acceptUrl, emailed: sent.ok })
 }
