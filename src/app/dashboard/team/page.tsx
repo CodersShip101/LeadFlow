@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { Suspense, useEffect, useState, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase-client'
 import LoadingDots from '@/components/LoadingDots'
@@ -21,7 +21,7 @@ interface TeamData {
   pendingInvites: Invite[]
 }
 
-export default function TeamPage() {
+function TeamContent() {
   const router = useRouter()
   const sp = useSearchParams()
   const supabase = createClient()
@@ -295,5 +295,18 @@ export default function TeamPage() {
         )}
       </div>
     </>
+  )
+}
+
+export default function TeamPage() {
+  return (
+    <Suspense fallback={
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '50vh', gap: 10, color: 'var(--slate)' }}>
+        <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--lime)', animation: 'pulse 1.2s ease-in-out infinite' }} />
+        <span style={{ fontSize: 14 }}>Loading&hellip;</span>
+      </div>
+    }>
+      <TeamContent />
+    </Suspense>
   )
 }
