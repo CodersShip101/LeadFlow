@@ -5,7 +5,7 @@ export const maxDuration = 300
 
 export async function POST() {
   try {
-    const { scrapeAll } = await import('../../../../scripts/ai-scrape.mjs')
+    const { scrapeAll } = await import('@/lib/ai-scrape')
     const result = await scrapeAll()
 
     // Try to store scrape log (table may not exist yet — non-blocking)
