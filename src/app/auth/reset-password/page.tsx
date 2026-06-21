@@ -16,6 +16,8 @@ export default function ResetPasswordPage() {
   const router = useRouter()
   const supabase = createClient()
 
+  const strength = getPasswordStrength(password)
+
   useEffect(() => {
     if (typeof window === 'undefined') return
     const params = new URLSearchParams(window.location.search)
@@ -39,6 +41,11 @@ export default function ResetPasswordPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  const startCountdown = (seconds: number) => {
+    setCountdown(seconds)
+    const timer = setInterval(() => setCountdown(prev => { if (prev <= 1) { clearInterval(timer); return 0 }; return prev - 1 }), 1000)
+  }
+
   const handleSendEmail = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
@@ -48,11 +55,18 @@ export default function ResetPasswordPage() {
       body: JSON.stringify({ email }),
     })
     const data = await res.json()
-    if (!res.ok) { toast.error(data.error || 'Something went wrong'); setLoading(false); return }
-    setStep('sent')
     setLoading(false)
+    if (res.status === 429) {
+      // Server cooldown still active — keep them on the sent screen and sync the timer.
+      setStep('sent')
+      startCountdown(data.retryAfter || 60)
+      toast.error(data.error || 'Please wait before requesting another email.')
+      return
+    }
+    if (!res.ok) { toast.error(data.error || 'Something went wrong'); return }
+    setStep('sent')
     toast.success('Check your email for the reset link.')
-    const timer = setInterval(() => setCountdown(prev => { if (prev <= 1) { clearInterval(timer); return 0 }; return prev - 1 }), 1000)
+    startCountdown(60)
   }
 
   const handleReset = async (e: React.FormEvent) => {
@@ -77,7 +91,7 @@ export default function ResetPasswordPage() {
           <div className="panel-hero">
             <div className="panel-eyebrow">Check your inbox</div>
             <h2 className="panel-heading">We&apos;ve sent the link.<br />One click and you&apos;re back.</h2>
-            <p className="panel-sub">The reset link expires in 1 hour. If you don&apos;t see it, check your spam folder or try again.</p>
+            <p className="panel-sub">The reset link expires in 10 minutes. If you don&apos;t see it, check your spam folder or try again.</p>
           </div>
           <div className="auth-testimonial">
             <p>Best decision I made for my freelance business. The quality of leads is unmatched.</p>
@@ -151,8 +165,18 @@ export default function ResetPasswordPage() {
             <div className="auth-field">
               <label htmlFor="password">New password</label>
               <div className="auth-pw-field">
-                <input type="password" id="password" className="auth-input" placeholder="At least 6 characters" autoComplete="new-password" required minLength={6} value={password} onChange={e => setPassword(e.target.value)} />
+                <input type="password" id="password" className="auth-input" placeholder="At least 8 characters" autoComplete="new-password" required minLength={6} value={password} onChange={e => setPassword(e.target.value)} />
               </div>
+              {password && (
+                <div style={{ marginTop: 8 }}>
+                  <div style={{ display: 'flex', gap: 4 }}>
+                    {[0, 1, 2, 3].map(i => (
+                      <div key={i} style={{ height: 4, flex: 1, borderRadius: 2, background: i < strength.score ? strength.color : 'var(--slate-200, #E5E7EB)', transition: 'background .2s' }} />
+                    ))}
+                  </div>
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '.72rem', margin: '6px 0 0', color: strength.color }}>{strength.label}</p>
+                </div>
+              )}
             </div>
             <div className="auth-field">
               <label htmlFor="confirm">Confirm password</label>
@@ -217,4 +241,25 @@ export default function ResetPasswordPage() {
       </main>
     </div>
   )
+}
+
+function getPasswordStrength(pw: string): { score: number; label: string; color: string } {
+  if (!pw) return { score: 0, label: '', color: '#E5E7EB' }
+  let score = 0
+  if (pw.length >= 8) score++
+  if (pw.length >= 12) score++
+  if (/[a-z]/.test(pw) && /[A-Z]/.test(pw)) score++
+  if (/\d/.test(pw)) score++
+  if (/[^A-Za-z0-9]/.test(pw)) score++
+  // Cap to a 0–4 scale for the four bars.
+  score = Math.min(4, score)
+  if (pw.length < 8) score = Math.min(score, 1)
+  const meta = [
+    { label: 'Too weak', color: '#DC2626' },
+    { label: 'Weak', color: '#DC2626' },
+    { label: 'Fair', color: '#D97706' },
+    { label: 'Good', color: '#5E8F00' },
+    { label: 'Strong', color: '#1B6B4A' },
+  ][score]
+  return { score, label: meta.label, color: meta.color }
 }

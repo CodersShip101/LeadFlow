@@ -9,6 +9,12 @@ export default function MagicLinkPage() {
   const [loading, setLoading] = useState(false)
   const [sent, setSent] = useState(false)
   const [resending, setResending] = useState(false)
+  const [countdown, setCountdown] = useState(0)
+
+  const startCountdown = (seconds: number) => {
+    setCountdown(seconds)
+    const timer = setInterval(() => setCountdown(prev => { if (prev <= 1) { clearInterval(timer); return 0 }; return prev - 1 }), 1000)
+  }
 
   const sendLink = async () => {
     const res = await fetch('/api/auth/magic-link', {
@@ -16,10 +22,15 @@ export default function MagicLinkPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email }),
     })
+    const data = await res.json().catch(() => ({}))
+    if (res.status === 429) {
+      startCountdown(data.retryAfter || 60)
+      throw new Error(data.error || 'Please wait before requesting another link.')
+    }
     if (!res.ok) {
-      const data = await res.json().catch(() => ({}))
       throw new Error(data.error || 'Something went wrong')
     }
+    startCountdown(60)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -73,11 +84,11 @@ export default function MagicLinkPage() {
               <h1>Check your inbox</h1>
               <p>We&apos;ve sent a magic sign-in link to</p>
               <p className="auth-sent-email">{email}</p>
-              <p style={{ marginTop: 10 }}>Click the link in the email to log in. It expires in 1 hour.</p>
+              <p style={{ marginTop: 10 }}>Click the link in the email to log in. It expires in 10 minutes.</p>
               <div className="auth-sent-actions">
-                <button className="btn-p" onClick={handleResend} disabled={resending}>
+                <button className="btn-p" onClick={handleResend} disabled={resending || countdown > 0}>
                   <i className="ti ti-refresh" aria-hidden="true"></i>
-                  {resending ? 'Resending…' : 'Resend link'}
+                  {resending ? 'Resending…' : countdown > 0 ? `Resend in ${countdown}s` : 'Resend link'}
                 </button>
                 <button className="auth-magic-link" onClick={() => setSent(false)}>Use a different email</button>
               </div>

@@ -2,12 +2,28 @@ import { NextResponse } from 'next/server'
 import { createAdminSupabase } from '@/lib/supabase-server'
 import { sendEmail } from '@/lib/email'
 
+// Server-side cooldown so spamming "Resend link" can't waste emails.
+const COOLDOWN_MS = 60_000
+const lastSent = new Map<string, number>()
+
 export async function POST(request: Request) {
   try {
     const { email } = await request.json()
     if (!email) {
       return NextResponse.json({ error: 'Email is required' }, { status: 400 })
     }
+
+    const key = String(email).toLowerCase().trim()
+    const now = Date.now()
+    const prev = lastSent.get(key)
+    if (prev && now - prev < COOLDOWN_MS) {
+      const wait = Math.ceil((COOLDOWN_MS - (now - prev)) / 1000)
+      return NextResponse.json(
+        { error: `Please wait ${wait}s before requesting another link.`, retryAfter: wait },
+        { status: 429 },
+      )
+    }
+    lastSent.set(key, now)
 
     const supabase = createAdminSupabase()
 
@@ -37,6 +53,8 @@ export async function POST(request: Request) {
   }
 }
 
+
+
 function magicLinkHtml(link: string): string {
   return `<!DOCTYPE html>
 <html>
@@ -58,7 +76,7 @@ function magicLinkHtml(link: string): string {
       </td></tr>
       <tr><td style="padding:8px 32px 24px">
         <p style="font-size:12px;color:#9CA3AF;margin:0;line-height:1.5">
-          This link expires in 1 hour and can only be used once. If the button doesn't work, paste this into your browser:<br>
+          This link expires in 10 minutes and can only be used once. If the button doesn't work, paste this into your browser:<br>
           <a href="${link}" style="color:#5E8F00;word-break:break-all">${link}</a>
         </p>
       </td></tr>
