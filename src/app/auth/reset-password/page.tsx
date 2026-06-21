@@ -17,10 +17,26 @@ export default function ResetPasswordPage() {
   const supabase = createClient()
 
   useEffect(() => {
-    const hash = typeof window !== 'undefined' ? window.location.hash : ''
-    if (hash.includes('access_token') || hash.includes('type=recovery')) {
+    if (typeof window === 'undefined') return
+    const params = new URLSearchParams(window.location.search)
+    const tokenHash = params.get('token_hash')
+    const type = params.get('type')
+    const hash = window.location.hash
+
+    if (tokenHash && type === 'recovery') {
+      // Exchange the emailed token for a recovery session, then show the form.
+      supabase.auth.verifyOtp({ type: 'recovery', token_hash: tokenHash }).then(({ error }) => {
+        if (error) {
+          toast.error('That reset link is invalid or expired. Request a new one.')
+          return
+        }
+        setStep('reset')
+        window.history.replaceState({}, '', '/auth/reset-password')
+      })
+    } else if (hash.includes('access_token') || hash.includes('type=recovery')) {
       setStep('reset')
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const handleSendEmail = async (e: React.FormEvent) => {
