@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase-client'
 import toast from 'react-hot-toast'
 
 export default function MagicLinkPage() {
@@ -10,18 +9,17 @@ export default function MagicLinkPage() {
   const [loading, setLoading] = useState(false)
   const [sent, setSent] = useState(false)
   const [resending, setResending] = useState(false)
-  const supabase = createClient()
-
-  const emailRedirectTo = typeof window !== 'undefined'
-    ? `${window.location.origin}/auth/callback?next=/dashboard`
-    : undefined
 
   const sendLink = async () => {
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: { emailRedirectTo },
+    const res = await fetch('/api/auth/magic-link', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
     })
-    if (error) throw error
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}))
+      throw new Error(data.error || 'Something went wrong')
+    }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
