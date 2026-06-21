@@ -361,14 +361,14 @@ export async function POST() {
                 </td></tr>
                 ${rows}
                 <tr><td style="padding:20px 28px 28px;text-align:center">
-                  <a href="${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://lead-flow-gpyj.vercel.app'}/dashboard"
+                  <a href="${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://flaiir.co'}/dashboard"
                      style="background:#111827;color:#C4F000;padding:11px 24px;border-radius:8px;font-weight:600;font-size:13px;text-decoration:none;display:inline-block">
                     View all leads
                   </a>
                 </td></tr>
                 <tr><td style="padding:0 28px 20px;text-align:center;font-size:11px;color:#9CA3AF">
                   You're receiving this because you set a score alert on Flaiir.<br>
-                  <a href="${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://lead-flow-gpyj.vercel.app'}/dashboard/profile" style="color:#9CA3AF">Manage alerts</a>
+                  <a href="${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://flaiir.co'}/dashboard/profile" style="color:#9CA3AF">Manage alerts</a>
                 </td></tr>
               </table>
             </td></tr></table>

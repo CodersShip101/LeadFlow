@@ -129,14 +129,14 @@ export async function POST(req: NextRequest) {
         </td></tr>
         ` : ''}
         <tr><td style="padding:24px 32px 32px;text-align:center">
-          <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://lead-flow-gpyj.vercel.app'}/dashboard"
+          <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://flaiir.co'}/dashboard"
              style="display:inline-block;padding:12px 24px;background:#1B6B4A;color:white;text-decoration:none;font-size:14px;font-weight:600;border-radius:8px">
             View all leads on Flaiir
           </a>
         </td></tr>
         <tr><td style="padding:0 32px 24px;text-align:center;font-size:11px;color:#9CA3AF">
           Flaiir · Quality freelance leads, delivered weekly.<br>
-          <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://lead-flow-gpyj.vercel.app'}/dashboard/settings" style="color:#9CA3AF">Unsubscribe</a>
+          <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://flaiir.co'}/dashboard/settings" style="color:#9CA3AF">Unsubscribe</a>
         </td></tr>
       </table>
     </td></tr>

@@ -293,7 +293,7 @@ export default function BillingContent() {
           <h4>Need more than Team?</h4>
           <p>SSO, API access, a dedicated account manager, custom data retention, and 20&ndash;150+ seats. Quoted to fit your organisation.</p>
         </div>
-        <a className="bill-ent-btn" href="mailto:sales@leadflow.dev?subject=Enterprise%20plan%20inquiry"><i className="ti ti-mail" /> Talk to us</a>
+        <a className="bill-ent-btn" href="mailto:sales@leadflow.dev?subject=Enterprise%20plan%20inquiry">Talk to us</a>
       </div>
 
       {/* ── USAGE ── */}

@@ -491,10 +491,8 @@ export default function DashboardPage() {
       </span>
     )
 
-    if (isLocked) return null
-
     return (
-      <article key={lead.id} onClick={() => selectLead(lead)}
+      <article key={lead.id} onClick={isLocked ? undefined : () => selectLead(lead)} tabIndex={isLocked ? -1 : undefined}
         className={`lead-card ${selected?.id === lead.id ? 'sel' : ''} ${isTop ? 'top-match' : ''} ${state === 'new' ? 'is-new' : ''}`}>
         <div className="lc-top">
           <span className="src-ava" style={{ background: si.ava }}>{si.ini}</span>
@@ -620,8 +618,8 @@ export default function DashboardPage() {
             <button onClick={async () => {
               const res = await fetch('/api/leads/seed?force=1', { method: 'POST' })
               if (res.ok) { router.refresh() } else { const d = await res.json(); toast.error(d.error || 'Failed to seed leads') }
-            }} className="btn btn-primary" style={{ display: 'inline-flex' }}><i className="ti ti-flask"></i> Generate demo leads</button>
-            <button onClick={() => router.refresh()} className="btn btn-ghost" style={{ display: 'inline-flex' }}><i className="ti ti-refresh"></i> Check now</button>
+            }} className="btn btn-primary" style={{ display: 'inline-flex' }}>Generate demo leads</button>
+            <button onClick={() => router.refresh()} className="btn btn-ghost" style={{ display: 'inline-flex' }}>Check now</button>
           </div>
         </div>
       )}
@@ -631,15 +629,54 @@ export default function DashboardPage() {
           {isFree && filtered.length > FREE_LIMIT
             ? <>
                 {leadCards.slice(0, FREE_LIMIT)}
-                <div className="free-gate-row">
-                  <span className="free-gate-row-icon"><i className="ti ti-lock" /></span>
-                  <span className="free-gate-row-text">
-                    <strong>{filtered.length - FREE_LIMIT} more leads</strong> are scored for you — unlock to see them
-                  </span>
-                  <span className="free-gate-row-hint">From £15/mo · cancel any time</span>
-                  <button className="btn btn-primary free-gate-row-btn" onClick={() => router.push('/dashboard/billing')}>
-                    <i className="ti ti-bolt" /> Unlock
-                  </button>
+                <div className="free-gate">
+                  <div className="free-gate-blur" aria-hidden="true">
+                    {[
+                      { ava: '#FF6B3D', ini: 'R', cls: 'sb-reddit', src: 'REDDIT', sc: 9.4, title: 'Senior Product Designer — Fintech', why: 'Strong match — high budget, clear scope', desc: 'Looking for a product designer to own end-to-end flows for our payments app. Figma, prototyping and a sharp eye for detail.', budget: '£450–550/day', loc: 'Remote · UK', skills: ['Figma', 'UI/UX', 'Prototyping'] },
+                      { ava: '#6EA8D4', ini: 'W', cls: 'sb-wwr', src: 'WWR', sc: 9.1, title: 'Full-Stack Engineer — AI Startup', why: 'Great fit — your stack, strong budget', desc: 'Series-A AI startup hiring a contract full-stack engineer. React/Node, ships fast, async-first remote team.', budget: '£600/day', loc: 'Remote', skills: ['React', 'Node', 'TypeScript'] },
+                      { ava: '#B08ADB', ini: 'R', cls: 'sb-reed', src: 'REED', sc: 8.8, title: 'Brand Strategist — DTC Skincare', why: 'Solid match — budget meets your rate', desc: 'Fast-growing skincare brand needs a strategist to shape positioning and voice ahead of a major launch.', budget: '£3,200/mo', loc: 'Hybrid · London', skills: ['Branding', 'Strategy', 'Copy'] },
+                      { ava: '#5EC49E', ini: 'R', cls: 'sb-rok', src: 'REMOTE OK', sc: 9.2, title: 'Motion Designer — Ad Agency', why: 'Excellent match — premium day rate', desc: 'Award-winning agency needs a motion designer for a 6-week campaign sprint. After Effects, bold creative direction.', budget: '£400/day', loc: 'Remote', skills: ['After Effects', 'Motion', 'Cinema 4D'] },
+                      { ava: '#FF6B3D', ini: 'R', cls: 'sb-reddit', src: 'REDDIT', sc: 8.6, title: 'Webflow Developer — SaaS Marketing', why: 'Strong fit — clear brief, fast start', desc: 'Build and maintain a marketing site for a B2B SaaS. Webflow, light JS, CMS collections. Ongoing retainer available.', budget: '£55–70k', loc: 'Remote · EU', skills: ['Webflow', 'JavaScript', 'CMS'] },
+                      { ava: '#6EA8D4', ini: 'W', cls: 'sb-wwr', src: 'WWR', sc: 9.0, title: 'Content Designer — Health Tech', why: 'Great match — values your niche', desc: 'Health-tech scale-up needs a content designer to craft in-product copy and design systems documentation.', budget: '£380/day', loc: 'Remote · UK', skills: ['UX Writing', 'Figma', 'Docs'] },
+                    ].map((f, i) => (
+                      <div key={`fg-${i}`} className="lead-card fg-preview-card">
+                        <div className="lc-top">
+                          <span className="src-ava" style={{ background: f.ava }}>{f.ini}</span>
+                          <span className={`src-badge ${f.cls}`}>{f.src}</span>
+                          <span className="state-badge st-new">NEW</span>
+                          <span className="lc-time">2h ago</span>
+                        </div>
+                        <div className="lc-title">{gaugeSVG(f.sc)}<span className="tt">{f.title}</span></div>
+                        <div className="why-inline"><i className="ti ti-sparkles" /><span>{f.why}</span></div>
+                        <p className="lc-desc">{f.desc}</p>
+                        <div className="lc-meta">
+                          <span className="budget"><i className="ti ti-currency-pound" />{f.budget}</span>
+                          <span className="meta-chip"><i className="ti ti-map-pin" />{f.loc}</span>
+                        </div>
+                        <div className="skills-row">
+                          {f.skills.map(s => <span key={s} className="skill">{s}</span>)}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="free-gate-cta">
+                    <div className="free-gate-panel">
+                      <span className="fg-pro"><i className="ti ti-sparkles" /> PRO</span>
+                      <span className="fg-lock"><i className="ti ti-crown" /></span>
+                      <div className="fg-stat">
+                        <span className="fg-stat-num">{filtered.length - FREE_LIMIT}</span>
+                        <span className="fg-stat-lbl">more leads scored for you</span>
+                      </div>
+                      {(() => {
+                        const hi = filtered.slice(FREE_LIMIT).filter(l => computeMatchExplanation(l, profile).score >= 8).length
+                        return hi > 0
+                          ? <p className="fg-sub">including <strong>{hi} scoring 8+</strong> — your strongest matches, ready to apply.</p>
+                          : <p className="fg-sub">Unlock your full feed to see every match — with direct apply links and no daily limits.</p>
+                      })()}
+                      <button className="fg-btn" onClick={() => router.push('/dashboard/billing')}>Unlock all leads</button>
+                      <span className="fg-hint">From £15/mo · cancel any time</span>
+                    </div>
+                  </div>
                 </div>
               </>
             : leadCards}

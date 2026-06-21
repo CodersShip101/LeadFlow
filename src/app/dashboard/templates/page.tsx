@@ -99,14 +99,14 @@ export default function TemplatesPage() {
           <h2 className="tm-title">Pitch templates</h2>
           <p className="tm-sub">Save your best pitches and reuse them when you apply.</p>
         </div>
-        <button className="btn btn-primary" onClick={openNew}><i className="ti ti-plus" /> New template</button>
+        <button className="btn btn-primary" onClick={openNew}>New template</button>
       </div>
 
       {list.length === 0 ? (
         <div className="tpl-empty">
           <i className="ti ti-template" />
           <p>No templates yet. Create your first reusable pitch.</p>
-          <button className="btn btn-primary" onClick={openNew}><i className="ti ti-plus" /> New template</button>
+          <button className="btn btn-primary" onClick={openNew}>New template</button>
         </div>
       ) : (
         <div className="tpl-grid">

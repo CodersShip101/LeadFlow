@@ -142,6 +142,8 @@ export default function HomePage() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [signals, setSignals] = useState(initialSignals)
   const [paused, setPaused] = useState(false)
+  // Vary the hero "leads this week" figure per visit so it feels live.
+  const [weekLeads, setWeekLeads] = useState(47)
   const [dashboardRows, setDashboardRows] = useState([
     { src: 'REDDIT', c: 'rgba(255,140,66,.14)', t: '#ff9c5b', title: 'Senior UX Designer — London', meta: '£350–450/day · Figma', score: '9.2', cls: 'score-a', dot: 'var(--lime)' },
     { src: 'WWR', c: 'rgba(110,168,212,.16)', t: '#7fb6e6', title: 'Full-Stack Developer — Remote', meta: '£500–700/day · React', score: '8.4', cls: 'score-a', dot: 'var(--lime)' },
@@ -155,6 +157,11 @@ export default function HomePage() {
   const [stickyVisible, setStickyVisible] = useState(false)
   const fiRef = useRef(0)
   const obsRef = useRef<IntersectionObserver | null>(null)
+
+  useEffect(() => {
+    // Set after mount to avoid a server/client hydration mismatch.
+    setWeekLeads(41 + Math.floor(Math.random() * 18)) // 41–58
+  }, [])
 
   useEffect(() => {
     const onScroll = () => {
@@ -234,7 +241,7 @@ export default function HomePage() {
           "applicationCategory": "BusinessApplication",
           "operatingSystem": "Web",
           "description": "Flaiir finds and scores freelance leads, then delivers the best matches to your inbox as often as every hour.",
-          "url": "https://lead-flow-gpyj.vercel.app/",
+          "url": "https://flaiir.co/",
           "offers": [
             { "@type": "Offer", "name": PRICING.free.label, "price": String(PRICING.free.monthly), "priceCurrency": "GBP" },
             { "@type": "Offer", "name": PRICING.pro.label, "price": String(PRICING.pro.monthly), "priceCurrency": "GBP", "description": "Per month. 7-day free trial, cancel any time before it ends." },
@@ -261,7 +268,7 @@ export default function HomePage() {
         <nav id="navbar" className={scrolled ? 'scrolled' : ''} aria-label="Main navigation">
           <div className="nav-inner">
             <Link href="/" className="nav-logo" aria-label="Flaiir home">
-              fl<span className="brand-ai">ai</span>ir
+              <span className="nav-wordmark">fl<span className="brand-ai">ai</span>ir</span>
             </Link>
             <div className="nav-desktop" style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
               <a href="#how" className="nav-link">How it works</a>
@@ -271,7 +278,7 @@ export default function HomePage() {
             </div>
             <div className="nav-desktop" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <Link href="/auth/login" className="nav-link">Log in</Link>
-              <Link href="/auth/signup" className="btn-p btn-sm">Start free</Link>
+              <Link href="/auth/signup" className="btn-p btn-sm">Get started</Link>
             </div>
             <button id="hamburger" aria-label="Toggle menu" aria-expanded={mobileOpen} onClick={() => setMobileOpen(!mobileOpen)}>
               <i className="ti ti-menu-2" style={{ fontSize: '22px' }} aria-hidden="true"></i>
@@ -284,7 +291,7 @@ export default function HomePage() {
             <a href="#faq" onClick={() => setMobileOpen(false)}>FAQ</a>
             <div style={{ height: '1px', background: 'rgba(255,255,255,.08)', margin: '6px 0' }}></div>
             <Link href="/auth/login" onClick={() => setMobileOpen(false)}>Log in</Link>
-            <Link href="/auth/signup" onClick={() => setMobileOpen(false)} style={{ background: 'var(--lime)', color: 'var(--ink-950)', fontWeight: 700, textAlign: 'center' }}>Start free</Link>
+            <Link href="/auth/signup" onClick={() => setMobileOpen(false)} style={{ background: 'var(--lime)', color: 'var(--ink-950)', fontWeight: 700, textAlign: 'center' }}>Get started</Link>
           </div>
         </nav>
       </header>
@@ -309,11 +316,11 @@ export default function HomePage() {
                   Flaiir scans Reddit, Reed and We Work Remotely every hour, scores every lead against your rate and skills, and puts your best matches in front of you — before the competition even sees them.
                 </p>
                 <div className="hero-cta-row">
-                  <Link href="/auth/signup" className="btn-p btn-lg"><i className="ti ti-bolt" aria-hidden="true"></i> Start free — 7 days Pro trial</Link>
-                  <a href="#how" className="btn-ghost btn-lg"><i className="ti ti-player-play" aria-hidden="true"></i> See how it works</a>
+                  <Link href="/auth/signup" className="btn-p btn-lg">Find my next client</Link>
+                  <a href="#how" className="btn-ghost btn-lg">See how it works</a>
                 </div>
                 <ul className="hero-trust" aria-label="Trust points">
-                  <li><i className="ti ti-circle-check" aria-hidden="true"></i> No card needed to start</li>
+                  <li><i className="ti ti-circle-check" aria-hidden="true"></i> Every lead scored 1&ndash;10</li>
                   <li><i className="ti ti-circle-check" aria-hidden="true"></i> 2-minute setup</li>
                   <li><i className="ti ti-circle-check" aria-hidden="true"></i> First leads within the hour</li>
                 </ul>
@@ -324,7 +331,7 @@ export default function HomePage() {
                   <div className="accent-card" aria-hidden="true">
                     <div className="ac-top">
                       <span className="ac-lbl">Leads this week</span>
-                      <span className="ac-val">47</span>
+                      <span className="ac-val"><CountUp value={String(weekLeads)} /></span>
                     </div>
                     <Sparkline />
                     <div className="ac-days"><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span className="on">S</span></div>
@@ -563,7 +570,7 @@ export default function HomePage() {
               </div>
             </div>
             <div style={{ textAlign: 'center', marginTop: 54 }} className="sr">
-              <Link href="/auth/signup" className="btn-line btn-lg"><i className="ti ti-bolt" aria-hidden="true"></i> Start finding leads</Link>
+              <Link href="/auth/signup" className="btn-line btn-lg">Start finding leads</Link>
               <p style={{ fontFamily: 'var(--font-mono)', fontSize: '.76rem', color: 'var(--slate-400)', marginTop: 14 }}>first leads arrive within the hour · cancel any time</p>
             </div>
           </div>
@@ -576,7 +583,7 @@ export default function HomePage() {
             <div className="grid-stats sr sr-d1">
               {[
                 { v: '2,411+', l: 'leads scored this week',   icon: 'ti-target-arrow',  note: 'updating live',  up: true  },
-                { v: '342+',   l: 'active freelancers',      icon: 'ti-users',          note: 'growing weekly', up: true  },
+                { v: '340+',   l: 'active freelancers',      icon: 'ti-users',          note: 'growing weekly', up: true  },
                 { v: '1h',     l: 'fastest delivery',        icon: 'ti-bolt',           note: 'or sooner',      up: false },
                 { v: '9.1',    l: 'avg top-match score',     icon: 'ti-award',          note: 'out of 10',      up: false },
               ].map(s => (
@@ -638,7 +645,7 @@ export default function HomePage() {
                     </li>
                   ))}
                 </ul>
-                <Link href="/auth/signup" className="btn-p btn-lg"><i className="ti ti-bolt" aria-hidden="true"></i> Try it free</Link>
+                <Link href="/auth/signup" className="btn-p btn-lg">See my matched leads</Link>
               </div>
               <div className="sr sr-d2">
                 <div className="dash" role="img" aria-label="Flaiir dashboard preview, filtered to high-scoring leads">
@@ -752,10 +759,8 @@ export default function HomePage() {
                         {t === 'free'
                           ? <>Get started free</>
                           : isTeam
-                            ? <><i className="ti ti-users" /> Start Team — {formatPrice(price * teamSeats, currency)}/mo</>
-                            : featured
-                              ? <><i className="ti ti-bolt" /> Start my free trial</>
-                              : <><i className="ti ti-bolt" /> Start my free trial</>}
+                            ? <>Start Team — {formatPrice(price * teamSeats, currency)}/mo</>
+                            : <>Start my free trial</>}
                       </Link>
                       {t !== 'free' && <span className="bill-cta-sub">2 steps · {formatPrice(isTeam ? price * teamSeats : price, currency)}/mo after Day 7</span>}
                     </div>
@@ -799,8 +804,8 @@ export default function HomePage() {
               <h2 className="display" style={{ fontSize: 'clamp(2.1rem, 5vw, 3.4rem)', color: '#fff', marginBottom: 18 }}>Your next client is<br />already out there.</h2>
               <p style={{ fontSize: '1.1rem', color: 'var(--slate-300)', lineHeight: 1.62, marginBottom: 40 }}>Set up your profile in two minutes. We scan the boards, score every lead against your rate and skills, and send your best matches before anyone else applies.</p>
               <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 14 }}>
-                <Link href="/auth/signup" className="btn-p btn-lg"><i className="ti ti-bolt" aria-hidden="true"></i> Start free — 7 days Pro trial</Link>
-                <Link href="/auth/login" className="btn-ghost btn-lg"><i className="ti ti-login" aria-hidden="true"></i> Log in</Link>
+                <Link href="/auth/signup" className="btn-p btn-lg">Find my next client</Link>
+                <Link href="/auth/login" className="btn-ghost btn-lg">Log in</Link>
               </div>
             </div>
           </div>
@@ -811,7 +816,7 @@ export default function HomePage() {
       <div id="sticky-bar" className={stickyVisible ? 'visible' : ''} aria-hidden="true">
         <div className="sticky-inner">
           <span className="sticky-txt"><b>12 new leads</b> scored today — yours are waiting.</span>
-          <Link href="/auth/signup" className="btn-p btn-sm"><i className="ti ti-bolt" aria-hidden="true"></i> Start free</Link>
+          <Link href="/auth/signup" className="btn-p btn-sm">See my leads</Link>
         </div>
       </div>
 
@@ -821,7 +826,7 @@ export default function HomePage() {
           <div className="footer-grid" style={{ marginBottom: 48 }}>
             <div>
               <a href="#" style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }} aria-label="Flaiir home">
-                <span style={{ fontFamily: "'Space Grotesk',sans-serif", color: '#fff', fontWeight: 700, fontSize: '1.3rem', letterSpacing: '-.02em' }}>fl<span className="brand-ai">ai</span>ir</span>
+                <span style={{ fontFamily: "'Space Grotesk',sans-serif", color: '#fff', fontWeight: 800, fontSize: '1.6rem', letterSpacing: '-.045em' }}>fl<span className="brand-ai">ai</span>ir</span>
               </a>
               <p style={{ fontSize: '.875rem', color: 'var(--slate-400)', lineHeight: 1.65, maxWidth: 250 }}>AI-scored freelance leads, matched to your skills and delivered as often as every hour.</p>
             </div>
