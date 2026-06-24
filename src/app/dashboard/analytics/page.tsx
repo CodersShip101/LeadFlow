@@ -75,7 +75,6 @@ export default function AnalyticsPage() {
     <>
       <div className="an-header">
         <div>
-          <h2 className="an-title">Analytics</h2>
           <p className="an-sub">Your application activity and outcomes over time.</p>
         </div>
       </div>

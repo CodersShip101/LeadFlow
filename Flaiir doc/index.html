@@ -1,0 +1,1192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LeadFlow — Quality freelance leads, delivered</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ─── Reset & base ─────────────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    color: #1a1a1a;
+    background: #ffffff;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ─── Tokens ────────────────────────────────────────────────── */
+  :root {
+    --green-950: #0c1f14;
+    --green-900: #132a1a;
+    --green-800: #1b4024;
+    --green-700: #1d5c2d;
+    --green-600: #1b6b4a;
+    --green-500: #2d8a5e;
+    --green-400: #4aaa7a;
+    --green-200: #b6e8ce;
+    --green-100: #d7f3e5;
+    --green-50:  #eef9f3;
+    --gray-50:   #f9f9f8;
+    --gray-100:  #f2f1ef;
+    --gray-200:  #e5e4e0;
+    --gray-300:  #cecdca;
+    --gray-400:  #9e9c98;
+    --gray-500:  #6e6d6a;
+    --gray-700:  #3d3c3a;
+    --gray-900:  #1a1a18;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+    --shadow-lg: 0 8px 24px rgba(0,0,0,0.10), 0 4px 8px rgba(0,0,0,0.04);
+    --radius:    8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+  }
+
+  /* ─── Typography ────────────────────────────────────────────── */
+  h1, h2, h3, h4 { font-family: 'Geist', 'Inter', sans-serif; font-weight: 600; line-height: 1.2; letter-spacing: -0.02em; }
+  h1 { font-size: clamp(2.2rem, 5vw, 3.4rem); }
+  h2 { font-size: clamp(1.6rem, 3vw, 2.2rem); }
+  h3 { font-size: 1.1rem; }
+  p  { color: var(--gray-500); }
+
+  /* ─── Layout helpers ────────────────────────────────────────── */
+  .container { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+  section { padding: 96px 0; }
+
+  /* ─── Buttons ───────────────────────────────────────────────── */
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 10px 20px; border-radius: var(--radius);
+    font-size: 14px; font-weight: 500;
+    text-decoration: none; cursor: pointer; border: none;
+    transition: all 0.15s ease;
+  }
+  .btn-primary {
+    background: var(--green-600); color: #ffffff;
+  }
+  .btn-primary:hover { background: var(--green-700); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+  .btn-secondary {
+    background: transparent; color: var(--gray-700);
+    border: 1px solid var(--gray-200);
+  }
+  .btn-secondary:hover { background: var(--gray-50); border-color: var(--gray-300); }
+  .btn-ghost { background: transparent; color: var(--green-200); border: 1px solid rgba(255,255,255,0.15); }
+  .btn-ghost:hover { background: rgba(255,255,255,0.08); }
+  .btn-lg { padding: 13px 26px; font-size: 15px; }
+
+  /* ─── Navbar ────────────────────────────────────────────────── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--gray-100);
+    transition: box-shadow 0.2s;
+  }
+  nav.scrolled { box-shadow: var(--shadow-sm); }
+  .nav-inner {
+    display: flex; align-items: center; justify-content: space-between;
+    height: 60px; max-width: 1120px; margin: 0 auto; padding: 0 24px;
+  }
+  .nav-logo {
+    display: flex; align-items: center; gap: 8px;
+    text-decoration: none; color: var(--gray-900);
+    font-family: 'Geist', sans-serif; font-weight: 700; font-size: 17px;
+  }
+  .nav-logo-mark {
+    width: 30px; height: 30px; background: var(--green-600); border-radius: 7px;
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 13px; font-weight: 700;
+  }
+  .nav-links { display: flex; align-items: center; gap: 28px; list-style: none; }
+  .nav-links a { text-decoration: none; color: var(--gray-500); font-size: 14px; font-weight: 500; }
+  .nav-links a:hover { color: var(--gray-900); }
+  .nav-actions { display: flex; align-items: center; gap: 8px; }
+  .nav-login { font-size: 14px; font-weight: 500; text-decoration: none; color: var(--gray-600); padding: 8px 12px; border-radius: var(--radius); }
+  .nav-login:hover { background: var(--gray-50); color: var(--gray-900); }
+  @media (max-width: 768px) {
+    .nav-links { display: none; }
+    .nav-login { display: none; }
+  }
+
+  /* ─── Hero ──────────────────────────────────────────────────── */
+  .hero {
+    padding: 140px 0 80px;
+    background: var(--gray-50);
+    border-bottom: 1px solid var(--gray-100);
+  }
+  .hero-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center;
+  }
+  @media (max-width: 900px) { .hero-grid { grid-template-columns: 1fr; } }
+  .hero-eyebrow {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--green-50); border: 1px solid var(--green-100);
+    color: var(--green-600); font-size: 12px; font-weight: 600;
+    padding: 5px 10px; border-radius: 20px; margin-bottom: 20px;
+    letter-spacing: 0.03em; text-transform: uppercase;
+  }
+  .eyebrow-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green-400); }
+  .hero h1 { color: var(--gray-900); margin-bottom: 18px; }
+  .hero h1 em { font-style: normal; color: var(--green-600); }
+  .hero-sub { font-size: 17px; color: var(--gray-500); margin-bottom: 32px; line-height: 1.65; max-width: 460px; }
+  .hero-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+  .hero-trust {
+    display: flex; gap: 20px; margin-top: 28px; flex-wrap: wrap;
+  }
+  .trust-item { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--gray-400); }
+  .trust-icon { color: var(--green-400); }
+
+  /* ─── Dashboard mockup ──────────────────────────────────────── */
+  .mockup-shell {
+    background: white;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    box-shadow: var(--shadow-lg), 0 0 0 1px rgba(0,0,0,0.03);
+  }
+  .mockup-bar {
+    background: var(--gray-50);
+    border-bottom: 1px solid var(--gray-100);
+    padding: 10px 14px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .mockup-dots { display: flex; gap: 5px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot-r { background: #ff5f57; }
+  .dot-y { background: #febc2e; }
+  .dot-g { background: #28c840; }
+  .mockup-url {
+    flex: 1; background: white; border: 1px solid var(--gray-200);
+    border-radius: 6px; padding: 3px 10px; font-size: 11px; color: var(--gray-400);
+    font-family: 'Inter', monospace;
+  }
+  .mockup-body { padding: 16px; }
+  .mockup-header {
+    display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;
+  }
+  .mockup-title { font-size: 12px; font-weight: 600; color: var(--gray-700); }
+  .mockup-badge {
+    font-size: 10px; font-weight: 600; padding: 3px 7px; border-radius: 4px;
+    background: var(--green-50); color: var(--green-600); border: 1px solid var(--green-100);
+  }
+  .lead-card {
+    border: 1px solid var(--gray-100); border-radius: var(--radius);
+    padding: 10px 12px; margin-bottom: 8px; position: relative;
+  }
+  .lead-card:last-child { margin-bottom: 0; }
+  .lead-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+  .lead-title-row { display: flex; align-items: center; gap: 6px; }
+  .lead-source {
+    font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em;
+    padding: 2px 6px; border-radius: 3px;
+  }
+  .src-reddit { background: #fff1eb; color: #c44a21; }
+  .src-wwr    { background: #e9f0ff; color: #2e5dd6; }
+  .src-reed   { background: #f3ebff; color: #6e33c2; }
+  .lead-name { font-size: 12px; font-weight: 600; color: var(--gray-800); }
+  .score-bar { display: flex; align-items: center; gap: 5px; }
+  .score-num { font-size: 12px; font-weight: 700; color: var(--green-600); }
+  .score-track { width: 36px; height: 4px; background: var(--gray-100); border-radius: 2px; overflow: hidden; }
+  .score-fill { height: 100%; border-radius: 2px; background: var(--green-400); }
+  .lead-meta { display: flex; gap: 10px; flex-wrap: wrap; }
+  .meta-chip {
+    display: flex; align-items: center; gap: 4px;
+    font-size: 10px; color: var(--gray-400);
+  }
+  .meta-chip svg { width: 10px; height: 10px; flex-shrink: 0; }
+  .highlighted { border-color: var(--green-200); background: var(--green-50); }
+
+  /* ─── Stats bar ─────────────────────────────────────────────── */
+  .stats-bar {
+    background: var(--green-900); padding: 40px 0;
+  }
+  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; }
+  @media (max-width: 600px) { .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 24px; } }
+  .stat-item {
+    text-align: center; padding: 8px 24px;
+    border-right: 1px solid rgba(255,255,255,0.08);
+  }
+  .stat-item:last-child { border-right: none; }
+  .stat-num { font-family: 'Geist', sans-serif; font-size: 2rem; font-weight: 700; color: white; line-height: 1; margin-bottom: 6px; }
+  .stat-label { font-size: 13px; color: rgba(255,255,255,0.5); }
+
+  /* ─── Problem section ───────────────────────────────────────── */
+  .problem { background: white; }
+  .section-label {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--green-500); margin-bottom: 12px;
+  }
+  .section-heading { color: var(--gray-900); margin-bottom: 14px; }
+  .section-sub { font-size: 17px; color: var(--gray-400); max-width: 540px; margin-bottom: 48px; }
+  .pain-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  @media (max-width: 768px) { .pain-grid { grid-template-columns: 1fr; } }
+  .pain-card {
+    padding: 24px; border-radius: var(--radius-lg);
+    border: 1px solid var(--gray-100);
+    background: var(--gray-50);
+  }
+  .pain-icon {
+    width: 36px; height: 36px; border-radius: var(--radius);
+    background: var(--green-50); border: 1px solid var(--green-100);
+    display: flex; align-items: center; justify-content: center; margin-bottom: 14px;
+    color: var(--green-600);
+  }
+  .pain-title { font-size: 15px; font-weight: 600; color: var(--gray-800); margin-bottom: 8px; }
+  .pain-desc { font-size: 14px; color: var(--gray-400); line-height: 1.6; }
+
+  /* ─── How it works ──────────────────────────────────────────── */
+  .how { background: var(--gray-50); }
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; position: relative; }
+  @media (max-width: 768px) { .steps { grid-template-columns: 1fr; gap: 28px; } }
+  .steps::before {
+    content: ''; position: absolute; top: 22px; left: 16%; right: 16%;
+    height: 1px; background: var(--gray-200);
+  }
+  @media (max-width: 768px) { .steps::before { display: none; } }
+  .step-num {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: white; border: 1px solid var(--gray-200);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Geist', sans-serif; font-size: 14px; font-weight: 700;
+    color: var(--green-600); margin-bottom: 18px; position: relative; z-index: 1;
+  }
+  .step h3 { font-size: 15px; color: var(--gray-800); margin-bottom: 8px; }
+  .step p { font-size: 14px; color: var(--gray-400); }
+
+  /* ─── Features ──────────────────────────────────────────────── */
+  .features { background: white; }
+  .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; background: var(--gray-100); border: 1px solid var(--gray-100); border-radius: var(--radius-lg); overflow: hidden; }
+  @media (max-width: 768px) { .features-grid { grid-template-columns: 1fr; } }
+  .feature-cell {
+    background: white; padding: 28px 24px;
+    transition: background 0.15s;
+  }
+  .feature-cell:hover { background: var(--gray-50); }
+  .feature-icon {
+    width: 38px; height: 38px; border-radius: var(--radius);
+    background: var(--green-50); border: 1px solid var(--green-100);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 14px; color: var(--green-600); font-size: 18px;
+  }
+  .feature-cell h3 { font-size: 14px; font-weight: 600; color: var(--gray-800); margin-bottom: 6px; }
+  .feature-cell p { font-size: 13px; color: var(--gray-400); line-height: 1.55; }
+
+  /* ─── Product preview (dark section) ───────────────────────── */
+  .preview { background: var(--green-900); padding: 96px 0; }
+  .preview-grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: 60px; align-items: center; }
+  @media (max-width: 900px) { .preview-grid { grid-template-columns: 1fr; } }
+  .preview h2 { color: white; margin-bottom: 16px; }
+  .preview .section-label { color: var(--green-400); }
+  .preview-sub { font-size: 16px; color: rgba(255,255,255,0.55); margin-bottom: 32px; line-height: 1.65; }
+  .checklist { list-style: none; display: flex; flex-direction: column; gap: 12px; margin-bottom: 32px; }
+  .checklist li { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; color: rgba(255,255,255,0.7); }
+  .check-icon { color: var(--green-400); margin-top: 2px; flex-shrink: 0; }
+
+  /* Full mockup inside dark section */
+  .full-mockup {
+    background: #1e2a22; border: 1px solid rgba(255,255,255,0.08);
+    border-radius: var(--radius-xl); overflow: hidden;
+  }
+  .fm-bar {
+    background: #16211a; border-bottom: 1px solid rgba(255,255,255,0.06);
+    padding: 12px 16px; display: flex; align-items: center; gap: 10px;
+  }
+  .fm-body { padding: 16px; }
+  .fm-row {
+    display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;
+  }
+  .fm-label { font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.35); letter-spacing: 0.06em; text-transform: uppercase; }
+  .fm-filters { display: flex; gap: 6px; }
+  .fm-chip {
+    font-size: 10px; padding: 3px 8px; border-radius: 4px; font-weight: 500;
+    background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.45);
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  .fm-chip.active { background: rgba(45,138,94,0.2); color: var(--green-400); border-color: rgba(45,138,94,0.3); }
+  .dark-lead {
+    background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+    border-radius: var(--radius); padding: 10px 12px; margin-bottom: 8px;
+  }
+  .dark-lead:last-child { margin-bottom: 0; }
+  .dark-lead-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+  .dark-lead-name { font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.85); }
+  .dark-score { font-size: 12px; font-weight: 700; color: var(--green-400); }
+  .dark-meta { display: flex; gap: 10px; }
+  .dark-chip { font-size: 10px; color: rgba(255,255,255,0.35); display: flex; align-items: center; gap: 3px; }
+  .dark-lead.hot { border-color: rgba(45,138,94,0.25); background: rgba(45,138,94,0.05); }
+
+  /* ─── Testimonials ──────────────────────────────────────────── */
+  .testimonials { background: var(--gray-50); }
+  .testi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  @media (max-width: 768px) { .testi-grid { grid-template-columns: 1fr; } }
+  .testi-card {
+    background: white; border: 1px solid var(--gray-100); border-radius: var(--radius-lg); padding: 24px;
+  }
+  .testi-quote { font-size: 15px; color: var(--gray-600); line-height: 1.65; margin-bottom: 20px; font-style: italic; }
+  .testi-author { display: flex; align-items: center; gap: 12px; }
+  .testi-avatar {
+    width: 38px; height: 38px; border-radius: 50%;
+    background: var(--green-600); color: white;
+    font-size: 13px; font-weight: 600;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .testi-name { font-size: 13px; font-weight: 600; color: var(--gray-800); }
+  .testi-role { font-size: 12px; color: var(--gray-400); }
+  .stars { display: flex; gap: 2px; margin-bottom: 14px; }
+  .star { color: #f59e0b; font-size: 13px; }
+
+  /* ─── Pricing ───────────────────────────────────────────────── */
+  .pricing { background: white; }
+  .price-toggle {
+    display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 48px;
+  }
+  .toggle-label { font-size: 14px; color: var(--gray-500); font-weight: 500; cursor: pointer; }
+  .toggle-label.active { color: var(--gray-900); }
+  .toggle-track {
+    position: relative; width: 44px; height: 24px;
+    background: var(--gray-200); border-radius: 12px;
+    cursor: pointer; transition: background 0.2s;
+  }
+  .toggle-track.on { background: var(--green-600); }
+  .toggle-knob {
+    position: absolute; top: 3px; left: 3px; width: 18px; height: 18px;
+    background: white; border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .toggle-track.on .toggle-knob { transform: translateX(20px); }
+  .save-badge {
+    font-size: 11px; font-weight: 600; background: var(--green-50);
+    color: var(--green-600); border: 1px solid var(--green-100);
+    padding: 2px 8px; border-radius: 20px;
+  }
+  .price-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  @media (max-width: 768px) { .price-grid { grid-template-columns: 1fr; } }
+  .price-card {
+    border: 1px solid var(--gray-200); border-radius: var(--radius-xl); padding: 28px 24px;
+    position: relative;
+  }
+  .price-card.highlighted {
+    border: 2px solid var(--green-600); background: var(--green-50);
+  }
+  .popular-badge {
+    position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+    background: var(--green-600); color: white; font-size: 11px; font-weight: 600;
+    padding: 3px 12px; border-radius: 20px; white-space: nowrap;
+  }
+  .plan-name { font-size: 13px; font-weight: 600; color: var(--gray-500); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.06em; }
+  .plan-price {
+    font-family: 'Geist', sans-serif; font-size: 2.4rem; font-weight: 700;
+    color: var(--gray-900); line-height: 1; margin-bottom: 4px;
+  }
+  .plan-price sup { font-size: 1.1rem; vertical-align: super; }
+  .plan-period { font-size: 13px; color: var(--gray-400); margin-bottom: 16px; }
+  .plan-desc { font-size: 14px; color: var(--gray-400); margin-bottom: 20px; line-height: 1.5; }
+  .plan-divider { height: 1px; background: var(--gray-100); margin-bottom: 20px; }
+  .plan-features { list-style: none; display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
+  .plan-features li { display: flex; align-items: flex-start; gap: 8px; font-size: 14px; color: var(--gray-600); }
+  .plan-check { color: var(--green-500); margin-top: 2px; flex-shrink: 0; }
+
+  /* ─── FAQ ───────────────────────────────────────────────────── */
+  .faq { background: var(--gray-50); }
+  .faq-list { max-width: 680px; margin: 0 auto; display: flex; flex-direction: column; gap: 0; }
+  .faq-item { border-bottom: 1px solid var(--gray-200); }
+  .faq-question {
+    width: 100%; background: none; border: none; cursor: pointer;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 20px 0; text-align: left; gap: 16px;
+    font-size: 15px; font-weight: 500; color: var(--gray-800);
+  }
+  .faq-question:hover { color: var(--gray-900); }
+  .faq-chevron {
+    width: 20px; height: 20px; flex-shrink: 0; color: var(--gray-400);
+    transition: transform 0.2s;
+  }
+  .faq-item.open .faq-chevron { transform: rotate(180deg); }
+  .faq-answer {
+    font-size: 14px; color: var(--gray-500); line-height: 1.7;
+    max-height: 0; overflow: hidden; transition: max-height 0.25s ease, padding 0.2s;
+  }
+  .faq-item.open .faq-answer { max-height: 200px; padding-bottom: 20px; }
+
+  /* ─── CTA section ───────────────────────────────────────────── */
+  .cta-section {
+    background: var(--green-900); padding: 96px 0; text-align: center;
+  }
+  .cta-section h2 { color: white; margin-bottom: 14px; }
+  .cta-section p { color: rgba(255,255,255,0.5); font-size: 15px; margin-bottom: 32px; }
+  .cta-actions { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+
+  /* ─── Footer ────────────────────────────────────────────────── */
+  footer {
+    background: var(--green-950); border-top: 1px solid rgba(255,255,255,0.06);
+    padding: 56px 0 32px;
+  }
+  .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px; margin-bottom: 40px; }
+  @media (max-width: 768px) { .footer-grid { grid-template-columns: 1fr 1fr; } }
+  .footer-brand p { font-size: 13px; color: rgba(255,255,255,0.35); margin-top: 10px; max-width: 220px; }
+  .footer-logo {
+    display: flex; align-items: center; gap: 8px;
+    color: white; text-decoration: none;
+    font-family: 'Geist', sans-serif; font-weight: 700; font-size: 16px;
+  }
+  .footer-logo-mark {
+    width: 28px; height: 28px; background: var(--green-600); border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 12px; font-weight: 700;
+  }
+  .footer-col h4 { font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.5); letter-spacing: 0.07em; text-transform: uppercase; margin-bottom: 14px; }
+  .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .footer-col a { font-size: 13px; color: rgba(255,255,255,0.4); text-decoration: none; }
+  .footer-col a:hover { color: rgba(255,255,255,0.75); }
+  .footer-bottom {
+    border-top: 1px solid rgba(255,255,255,0.06); padding-top: 24px;
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 12px;
+  }
+  .footer-copy { font-size: 12px; color: rgba(255,255,255,0.25); }
+
+  /* ─── Scroll reveal ─────────────────────────────────────────── */
+  .reveal { opacity: 0; transform: translateY(16px); transition: opacity 0.5s ease, transform 0.5s ease; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  /* ─── SVG icons (inline) ────────────────────────────────────── */
+  .icon { display: inline-flex; flex-shrink: 0; }
+</style>
+</head>
+<body>
+
+<!-- ─── Navbar ──────────────────────────────────────────────── -->
+<nav id="navbar">
+  <div class="nav-inner">
+    <a href="/" class="nav-logo">
+      <div class="nav-logo-mark">LF</div>
+      LeadFlow
+    </a>
+    <ul class="nav-links">
+      <li><a href="#features">Features</a></li>
+      <li><a href="#how-it-works">How it works</a></li>
+      <li><a href="#pricing">Pricing</a></li>
+    </ul>
+    <div class="nav-actions">
+      <a href="/auth/login" class="nav-login">Log in</a>
+      <a href="/auth/signup" class="btn btn-primary" style="font-size:13px; padding:8px 16px;">Start free</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ─── Hero ────────────────────────────────────────────────── -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-grid">
+      <div>
+        <div class="hero-eyebrow">
+          <div class="eyebrow-dot"></div>
+          <span id="signup-count">340</span> freelancers in beta
+        </div>
+        <h1>Stop hunting for clients.<br><em>Start choosing them.</em></h1>
+        <p class="hero-sub">LeadFlow finds, vets and scores freelance leads for you — delivered fresh every 6 hours. Only the leads worth your time make it through.</p>
+        <div class="hero-actions">
+          <a href="/auth/signup" class="btn btn-primary btn-lg">
+            Get started free
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+          </a>
+          <a href="#how-it-works" class="btn btn-secondary btn-lg">See how it works</a>
+        </div>
+        <div class="hero-trust">
+          <div class="trust-item">
+            <svg class="trust-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            No credit card needed
+          </div>
+          <div class="trust-item">
+            <svg class="trust-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            3 free leads included
+          </div>
+          <div class="trust-item">
+            <svg class="trust-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Cancel anytime
+          </div>
+        </div>
+      </div>
+
+      <!-- Live dashboard mockup -->
+      <div>
+        <div class="mockup-shell">
+          <div class="mockup-bar">
+            <div class="mockup-dots">
+              <div class="dot dot-r"></div>
+              <div class="dot dot-y"></div>
+              <div class="dot dot-g"></div>
+            </div>
+            <div class="mockup-url">app.leadflow.io/dashboard</div>
+          </div>
+          <div class="mockup-body">
+            <div class="mockup-header">
+              <span class="mockup-title">Today's leads</span>
+              <span class="mockup-badge">14 new · 2h ago</span>
+            </div>
+
+            <!-- Lead card 1 (highlighted) -->
+            <div class="lead-card highlighted">
+              <div class="lead-top">
+                <div class="lead-title-row">
+                  <span class="lead-source src-reddit">Reddit</span>
+                  <span class="lead-name">Senior UX Designer — London</span>
+                </div>
+                <div class="score-bar">
+                  <span class="score-num">9.2</span>
+                  <div class="score-track"><div class="score-fill" style="width:92%"></div></div>
+                </div>
+              </div>
+              <div class="lead-meta">
+                <span class="meta-chip">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+                  £350–450/day
+                </span>
+                <span class="meta-chip">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  Posted 1h ago
+                </span>
+                <span class="meta-chip">Figma · Design Systems</span>
+              </div>
+            </div>
+
+            <!-- Lead card 2 -->
+            <div class="lead-card">
+              <div class="lead-top">
+                <div class="lead-title-row">
+                  <span class="lead-source src-wwr">WWR</span>
+                  <span class="lead-name">Full-Stack Developer — Remote UK</span>
+                </div>
+                <div class="score-bar">
+                  <span class="score-num">7.8</span>
+                  <div class="score-track"><div class="score-fill" style="width:78%"></div></div>
+                </div>
+              </div>
+              <div class="lead-meta">
+                <span class="meta-chip">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+                  £500–700/day
+                </span>
+                <span class="meta-chip">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  Posted 3h ago
+                </span>
+                <span class="meta-chip">React · Node · AWS</span>
+              </div>
+            </div>
+
+            <!-- Lead card 3 -->
+            <div class="lead-card">
+              <div class="lead-top">
+                <div class="lead-title-row">
+                  <span class="lead-source src-reed">Reed</span>
+                  <span class="lead-name">Brand Identity — 3-month contract</span>
+                </div>
+                <div class="score-bar">
+                  <span class="score-num">6.5</span>
+                  <div class="score-track"><div class="score-fill" style="width:65%"></div></div>
+                </div>
+              </div>
+              <div class="lead-meta">
+                <span class="meta-chip">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+                  £2,800/mo
+                </span>
+                <span class="meta-chip">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  Posted 5h ago
+                </span>
+                <span class="meta-chip">Branding · Illustrator</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── Stats bar ────────────────────────────────────────────── -->
+<div class="stats-bar">
+  <div class="container">
+    <div class="stats-grid">
+      <div class="stat-item">
+        <div class="stat-num">2,400+</div>
+        <div class="stat-label">Leads posted</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num" id="stat-count">340+</div>
+        <div class="stat-label">Freelancers in beta</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">6h</div>
+        <div class="stat-label">Refresh interval</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">9.1</div>
+        <div class="stat-label">Avg quality score</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── Problem ──────────────────────────────────────────────── -->
+<section class="problem reveal" id="problem">
+  <div class="container">
+    <div class="section-label">The problem</div>
+    <h2 class="section-heading">The old way wastes your time</h2>
+    <p class="section-sub">Job boards are noisy, budgets are hidden, and applying blind burns hours you should be billing.</p>
+    <div class="pain-grid">
+      <div class="pain-card">
+        <div class="pain-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><path d="M11 8v6M8 11h6"/></svg>
+        </div>
+        <div class="pain-title">Hours lost to job boards</div>
+        <p class="pain-desc">Scrolling through irrelevant listings, filtering noise, applying blind. Time that should be billed, spent on search.</p>
+      </div>
+      <div class="pain-card">
+        <div class="pain-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        </div>
+        <div class="pain-title">Leads with no substance</div>
+        <p class="pain-desc">No budget, no scope, no response. You've sent the proposal, done the call — and heard nothing back.</p>
+      </div>
+      <div class="pain-card">
+        <div class="pain-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <div class="pain-title">Feast-or-famine pipeline</div>
+        <p class="pain-desc">Land a project, go dark on new leads. The cycle ends when quality leads arrive on a consistent schedule.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── How it works ─────────────────────────────────────────── -->
+<section class="how reveal" id="how-it-works">
+  <div class="container">
+    <div class="section-label">How it works</div>
+    <h2 class="section-heading" style="margin-bottom:48px">Up and running in minutes</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">01</div>
+        <h3>Create your profile</h3>
+        <p>Tell us your skills, day rate, and the kind of work you want. Takes under two minutes.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <h3>We find and score leads</h3>
+        <p>AI scans Reddit, Reed, and We Work Remotely every 6 hours. Only quality leads make it through.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <h3>Land the work</h3>
+        <p>Browse your personal lead feed, express interest, and apply directly on the original platform.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── Features ─────────────────────────────────────────────── -->
+<section class="features reveal" id="features">
+  <div class="container">
+    <div class="section-label">Features</div>
+    <h2 class="section-heading" style="margin-bottom:40px">Everything you need, nothing you don't</h2>
+    <div class="features-grid">
+      <div class="feature-cell">
+        <div class="feature-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        </div>
+        <h3>AI quality scoring</h3>
+        <p>Every lead rated 1–10 so you prioritise the best opportunities first.</p>
+      </div>
+      <div class="feature-cell">
+        <div class="feature-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+        </div>
+        <h3>6-hour refresh</h3>
+        <p>Always fresh. New leads appear within minutes of being posted on any platform.</p>
+      </div>
+      <div class="feature-cell">
+        <div class="feature-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <h3>Skill matching</h3>
+        <p>Only see leads that match your skills and rate. No irrelevant noise in your feed.</p>
+      </div>
+      <div class="feature-cell">
+        <div class="feature-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        </div>
+        <h3>Budget visible</h3>
+        <p>Real numbers upfront. No more applying to leads with vague or missing budgets.</p>
+      </div>
+      <div class="feature-cell">
+        <div class="feature-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        </div>
+        <h3>Direct source links</h3>
+        <p>Apply on the original platform. Full transparency — we never gate-keep the lead.</p>
+      </div>
+      <div class="feature-cell">
+        <div class="feature-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        </div>
+        <h3>Pipeline tracking</h3>
+        <p>Follow applications from interested to won. Never lose track of where a lead stands.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── Product preview (dark) ───────────────────────────────── -->
+<section class="preview">
+  <div class="container">
+    <div class="preview-grid">
+      <div>
+        <div class="section-label">The product</div>
+        <h2>See your leads at a glance</h2>
+        <p class="preview-sub">A clean, opinionated feed designed to get you from "new leads" to "application sent" in under a minute.</p>
+        <ul class="checklist">
+          <li>
+            <svg class="check-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Filter by source, score, budget, or skill
+          </li>
+          <li>
+            <svg class="check-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            One click to express interest and save a lead
+          </li>
+          <li>
+            <svg class="check-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Email digest with your top 5 leads every morning
+          </li>
+          <li>
+            <svg class="check-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Track pipeline from interest to won
+          </li>
+        </ul>
+        <a href="/auth/signup" class="btn btn-ghost btn-lg">
+          Try it free — no card needed
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+        </a>
+      </div>
+
+      <!-- Richer dark mockup -->
+      <div>
+        <div class="full-mockup">
+          <div class="fm-bar">
+            <div class="mockup-dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>
+            <span style="font-size:11px;color:rgba(255,255,255,0.3);margin-left:4px;font-family:monospace">LeadFlow Dashboard</span>
+          </div>
+          <div class="fm-body">
+            <div class="fm-row">
+              <span class="fm-label">Your feed · Today</span>
+              <div class="fm-filters">
+                <span class="fm-chip active">All sources</span>
+                <span class="fm-chip">Score 8+</span>
+                <span class="fm-chip">£300+/day</span>
+              </div>
+            </div>
+
+            <div class="dark-lead hot">
+              <div class="dark-lead-top">
+                <div>
+                  <span class="lead-source src-reddit" style="margin-right:6px">Reddit</span>
+                  <span class="dark-lead-name">Senior UX Designer — London</span>
+                </div>
+                <span class="dark-score">9.2 ★</span>
+              </div>
+              <div class="dark-meta">
+                <span class="dark-chip">£350–450/day</span>
+                <span class="dark-chip">·</span>
+                <span class="dark-chip">Figma · Systems</span>
+                <span class="dark-chip">·</span>
+                <span class="dark-chip">Posted 1h ago</span>
+              </div>
+            </div>
+
+            <div class="dark-lead">
+              <div class="dark-lead-top">
+                <div>
+                  <span class="lead-source src-wwr" style="margin-right:6px">WWR</span>
+                  <span class="dark-lead-name">Full-Stack Developer — Remote UK</span>
+                </div>
+                <span class="dark-score">7.8 ★</span>
+              </div>
+              <div class="dark-meta">
+                <span class="dark-chip">£500–700/day</span>
+                <span class="dark-chip">·</span>
+                <span class="dark-chip">React · Node</span>
+                <span class="dark-chip">·</span>
+                <span class="dark-chip">3h ago</span>
+              </div>
+            </div>
+
+            <div class="dark-lead">
+              <div class="dark-lead-top">
+                <div>
+                  <span class="lead-source src-reed" style="margin-right:6px">Reed</span>
+                  <span class="dark-lead-name">Brand Identity — 3-month contract</span>
+                </div>
+                <span class="dark-score">6.5 ★</span>
+              </div>
+              <div class="dark-meta">
+                <span class="dark-chip">£2,800/mo</span>
+                <span class="dark-chip">·</span>
+                <span class="dark-chip">Branding</span>
+                <span class="dark-chip">·</span>
+                <span class="dark-chip">5h ago</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── Testimonials ─────────────────────────────────────────── -->
+<section class="testimonials reveal">
+  <div class="container">
+    <div class="section-label" style="text-align:center">What freelancers say</div>
+    <h2 class="section-heading" style="text-align:center;margin-bottom:40px">From the beta community</h2>
+    <div class="testi-grid">
+      <div class="testi-card">
+        <div class="stars"><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span></div>
+        <p class="testi-quote">"Landed a £2,400 contract within my first week. The quality score saved me hours — I ignored anything under 7 and applied to three leads. Got two replies."</p>
+        <div class="testi-author">
+          <div class="testi-avatar">SJ</div>
+          <div>
+            <div class="testi-name">Sarah J.</div>
+            <div class="testi-role">UX Designer, London</div>
+          </div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="stars"><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span></div>
+        <p class="testi-quote">"I used to spend Sunday afternoons trawling job boards. Now I spend 10 minutes on Monday morning. The ROI on the Pro plan is a joke — I made it back in one contract."</p>
+        <div class="testi-author">
+          <div class="testi-avatar">MT</div>
+          <div>
+            <div class="testi-name">Marcus T.</div>
+            <div class="testi-role">Full-Stack Developer, Manchester</div>
+          </div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="stars"><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span></div>
+        <p class="testi-quote">"The budget filter alone is worth it. I stopped wasting time on leads that can't pay my rate. My pipeline is healthier than it's been in three years of freelancing."</p>
+        <div class="testi-author">
+          <div class="testi-avatar">PK</div>
+          <div>
+            <div class="testi-name">Priya K.</div>
+            <div class="testi-role">Brand Designer, Edinburgh</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── Pricing ──────────────────────────────────────────────── -->
+<section class="pricing reveal" id="pricing">
+  <div class="container">
+    <div class="section-label" style="text-align:center">Pricing</div>
+    <h2 class="section-heading" style="text-align:center;margin-bottom:12px">Simple, honest pricing</h2>
+    <p style="text-align:center;margin-bottom:32px">Pay monthly or save with annual billing.</p>
+
+    <div class="price-toggle">
+      <span class="toggle-label active" id="label-monthly">Monthly</span>
+      <div class="toggle-track" id="billing-toggle" role="switch" aria-checked="false" tabindex="0">
+        <div class="toggle-knob"></div>
+      </div>
+      <span class="toggle-label" id="label-annual">Annual</span>
+      <span class="save-badge">Save 2 months</span>
+    </div>
+
+    <div class="price-grid">
+      <!-- Free -->
+      <div class="price-card">
+        <div class="plan-name">Free</div>
+        <div class="plan-price"><sup>£</sup><span class="price-val" data-monthly="0" data-annual="0">0</span></div>
+        <div class="plan-period">forever free</div>
+        <p class="plan-desc">For freelancers exploring the platform.</p>
+        <div class="plan-divider"></div>
+        <ul class="plan-features">
+          <li>
+            <svg class="plan-check" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            3 leads per week
+          </li>
+          <li>
+            <svg class="plan-check" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            AI quality scores
+          </li>
+          <li>
+            <svg class="plan-check" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Direct source links
+          </li>
+        </ul>
+        <a href="/auth/signup" class="btn btn-secondary" style="width:100%;justify-content:center">Get started free</a>
+      </div>
+
+      <!-- Pro (highlighted) -->
+      <div class="price-card highlighted">
+        <div class="popular-badge">Most popular</div>
+        <div class="plan-name">Pro</div>
+        <div class="plan-price"><sup>£</sup><span class="price-val" data-monthly="29" data-annual="24">29</span></div>
+        <div class="plan-period">per month</div>
+        <p class="plan-desc">For active freelancers building a steady pipeline.</p>
+        <div class="plan-divider" style="background:var(--green-100)"></div>
+        <ul class="plan-features">
+          <li>
+            <svg class="plan-check" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Unlimited leads
+          </li>
+          <li>
+            <svg class="plan-check" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Skill + rate filtering
+          </li>
+          <li>
+            <svg class="plan-check" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Daily email digest
+          </li>
+          <li>
+            <svg class="plan-check" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Pipeline tracking
+          </li>
+          <li>
+            <svg class="plan-check" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Priority support
+          </li>
+        </ul>
+        <a href="/auth/signup" class="btn btn-primary" style="width:100%;justify-content:center">Start 7-day free trial</a>
+      </div>
+
+      <!-- Growth -->
+      <div class="price-card">
+        <div class="plan-name">Growth</div>
+        <div class="plan-price"><sup>£</sup><span class="price-val" data-monthly="49" data-annual="40">49</span></div>
+        <div class="plan-period">per month</div>
+        <p class="plan-desc">For established freelancers optimising every lead.</p>
+        <div class="plan-divider"></div>
+        <ul class="plan-features">
+          <li>
+            <svg class="plan-check" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Everything in Pro
+          </li>
+          <li>
+            <svg class="plan-check" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Custom lead alerts
+          </li>
+          <li>
+            <svg class="plan-check" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Analytics dashboard
+          </li>
+          <li>
+            <svg class="plan-check" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            CSV export
+          </li>
+          <li>
+            <svg class="plan-check" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Dedicated onboarding
+          </li>
+        </ul>
+        <a href="/auth/signup" class="btn btn-secondary" style="width:100%;justify-content:center">Start 7-day free trial</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── FAQ ──────────────────────────────────────────────────── -->
+<section class="faq reveal">
+  <div class="container">
+    <div class="section-label" style="text-align:center">FAQ</div>
+    <h2 class="section-heading" style="text-align:center;margin-bottom:40px">Common questions</h2>
+    <div class="faq-list">
+
+      <div class="faq-item">
+        <button class="faq-question">
+          Where do the leads come from?
+          <svg class="faq-chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="faq-answer">We scan Reddit (r/forhire, r/freelance, r/hiring), Reed.co.uk, and We Work Remotely every 6 hours. Leads are then processed by our AI scoring model before appearing in your feed.</div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question">
+          How does the quality score work?
+          <svg class="faq-chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="faq-answer">Scores are based on budget clarity, scope specificity, response rate signals, and match against your profile. A 9+ lead typically has a clear brief, stated budget, and a hiring decision in the next two weeks.</div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question">
+          Can I apply directly, or does LeadFlow intermediate?
+          <svg class="faq-chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="faq-answer">We never intermediate. Every lead includes a direct link to the original post. You apply on the client's terms, on the original platform. We're your lead finder, not a middleman.</div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question">
+          How is this different from job boards?
+          <svg class="faq-chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="faq-answer">Job boards surface everything. LeadFlow surfaces only what matches your profile, with quality scores so you can prioritise. You spend 10 minutes on the best leads instead of an hour trawling everything.</div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question">
+          What happens after my trial ends?
+          <svg class="faq-chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="faq-answer">You'll be moved to the Free plan (3 leads/week) unless you upgrade. We'll send a reminder 48 hours before the trial ends. No card is required to start.</div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question">
+          Can I cancel at any time?
+          <svg class="faq-chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="faq-answer">Yes, always. Cancel from your account settings at any time and you keep access until the end of your billing period. No fees, no friction.</div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question">
+          What kinds of freelancers does LeadFlow work for?
+          <svg class="faq-chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="faq-answer">We cover design, development, copywriting, marketing, and consulting. Our scoring model is tuned for UK and remote freelance markets — if your work is project-based, LeadFlow will find it.</div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question">
+          Is my profile data shared with clients?
+          <svg class="faq-chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="faq-answer">No. Your profile is used only to filter and score leads relevant to you. Clients on other platforms never see your LeadFlow profile.</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ─── Final CTA ─────────────────────────────────────────────── -->
+<section class="cta-section">
+  <div class="container">
+    <h2>Join 340+ freelancers already using LeadFlow</h2>
+    <p>Get your first leads in minutes. No credit card needed.</p>
+    <div class="cta-actions">
+      <a href="/auth/signup" class="btn btn-primary btn-lg">
+        Get started free
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+      </a>
+      <a href="/auth/login" class="btn btn-ghost btn-lg">Log in</a>
+    </div>
+  </div>
+</section>
+
+<!-- ─── Footer ───────────────────────────────────────────────── -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="/" class="footer-logo">
+          <div class="footer-logo-mark">LF</div>
+          LeadFlow
+        </a>
+        <p>Quality freelance leads, delivered every 6 hours.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Product</h4>
+        <ul>
+          <li><a href="#features">Features</a></li>
+          <li><a href="#pricing">Pricing</a></li>
+          <li><a href="/changelog">Changelog</a></li>
+          <li><a href="/blog">Blog</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
+        <ul>
+          <li><a href="/about">About</a></li>
+          <li><a href="/contact">Contact</a></li>
+          <li><a href="/careers">Careers</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="/privacy">Privacy policy</a></li>
+          <li><a href="/terms">Terms of service</a></li>
+          <li><a href="/cookies">Cookie policy</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span class="footer-copy">© 2026 LeadFlow. All rights reserved.</span>
+      <div style="display:flex;gap:16px">
+        <a href="/privacy" style="font-size:12px;color:rgba(255,255,255,0.25);text-decoration:none">Privacy</a>
+        <a href="/terms" style="font-size:12px;color:rgba(255,255,255,0.25);text-decoration:none">Terms</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- ─── Scripts ───────────────────────────────────────────────── -->
+<script>
+  // Navbar scroll shadow
+  const navbar = document.getElementById('navbar');
+  window.addEventListener('scroll', () => {
+    navbar.classList.toggle('scrolled', window.scrollY > 20);
+  }, { passive: true });
+
+  // Scroll reveal
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+  }, { threshold: 0.08 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  // FAQ accordion
+  document.querySelectorAll('.faq-item').forEach(item => {
+    item.querySelector('.faq-question').addEventListener('click', () => {
+      const wasOpen = item.classList.contains('open');
+      document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+      if (!wasOpen) item.classList.add('open');
+    });
+  });
+
+  // Pricing toggle — actually wired up
+  const toggle = document.getElementById('billing-toggle');
+  const priceVals = document.querySelectorAll('.price-val');
+  const labelMonthly = document.getElementById('label-monthly');
+  const labelAnnual = document.getElementById('label-annual');
+  let annual = false;
+
+  function updatePricing() {
+    priceVals.forEach(el => {
+      el.textContent = annual ? el.dataset.annual : el.dataset.monthly;
+    });
+    labelMonthly.classList.toggle('active', !annual);
+    labelAnnual.classList.toggle('active', annual);
+    toggle.classList.toggle('on', annual);
+    toggle.setAttribute('aria-checked', annual);
+  }
+
+  toggle.addEventListener('click', () => { annual = !annual; updatePricing(); });
+  toggle.addEventListener('keydown', e => {
+    if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); annual = !annual; updatePricing(); }
+  });
+</script>
+
+</body>
+</html>

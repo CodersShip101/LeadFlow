@@ -1,0 +1,524 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d0d0f;
+  --s1:#131316;
+  --s2:#18181d;
+  --s3:#1f1f26;
+  --s4:#26262f;
+  --b1:rgba(255,255,255,0.055);
+  --b2:rgba(255,255,255,0.1);
+  --b3:rgba(255,255,255,0.16);
+  --t1:#eceaf5;
+  --t2:#7e7c8f;
+  --t3:#45434f;
+  --acc:#b8f050;
+  --acc2:rgba(184,240,80,0.08);
+  --acc3:rgba(184,240,80,0.18);
+  --amber:#f5a623;
+  --amberD:rgba(245,166,35,0.1);
+  --blue:#7aabff;
+  --blueD:rgba(122,171,255,0.1);
+  --red:#ff6060;
+  --redD:rgba(255,96,96,0.08);
+  --serif:'Instrument Serif',serif;
+  --sans:'DM Sans',sans-serif;
+  --r:10px;--rL:14px;--rXL:18px;
+}
+body{background:var(--bg);color:var(--t1);font-family:var(--sans);font-size:13px;line-height:1.5;-webkit-font-smoothing:antialiased}
+
+/* ── SHELL ── */
+.shell{display:grid;grid-template-columns:52px 196px 1fr 256px;min-height:820px;max-height:820px;overflow:hidden}
+
+/* ── ICON RAIL ── */
+.rail{background:var(--s1);border-right:1px solid var(--b1);display:flex;flex-direction:column;align-items:center;padding:16px 0;gap:4px}
+.rail-logo{width:32px;height:32px;background:var(--acc);border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;flex-shrink:0}
+.rail-logo i{font-size:18px;color:#0a1800}
+.rail-icon{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;color:var(--t3);font-size:18px;cursor:pointer;transition:all .15s;position:relative}
+.rail-icon:hover{background:var(--s3);color:var(--t2)}
+.rail-icon.active{background:var(--acc2);color:var(--acc)}
+.rail-icon .tip{position:absolute;left:44px;background:var(--s4);color:var(--t1);font-size:11px;padding:4px 8px;border-radius:6px;white-space:nowrap;border:1px solid var(--b2);pointer-events:none;opacity:0;transition:opacity .15s;z-index:10}
+.rail-icon:hover .tip{opacity:1}
+.rail-dot{width:6px;height:6px;border-radius:50%;background:var(--red);position:absolute;top:6px;right:6px;border:1.5px solid var(--s1)}
+.rail-spacer{flex:1}
+.rail-avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#1e2e10,#3a5a1e);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;color:var(--acc);border:1.5px solid rgba(184,240,80,0.2);cursor:pointer;margin-top:8px}
+
+/* ── SIDEBAR ── */
+.sidebar{background:var(--s1);border-right:1px solid var(--b1);padding:20px 0;display:flex;flex-direction:column}
+.sb-section{padding:0 12px 4px;font-size:10px;font-weight:500;letter-spacing:.09em;color:var(--t3);text-transform:uppercase;margin-top:16px}
+.sb-section:first-child{margin-top:0}
+.sb-item{display:flex;align-items:center;gap:9px;padding:7px 14px;color:var(--t2);font-size:12.5px;cursor:pointer;transition:all .15s;border-radius:0;position:relative;margin:0 4px;border-radius:8px}
+.sb-item:hover{background:var(--s3);color:var(--t1)}
+.sb-item.active{background:var(--acc2);color:var(--acc)}
+.sb-item i{font-size:16px;flex-shrink:0}
+.sb-chip{margin-left:auto;font-size:10px;font-weight:500;padding:1px 6px;border-radius:10px;line-height:1.5}
+.chip-acc{background:var(--acc);color:#0a1800}
+.chip-dim{background:var(--s4);color:var(--t3)}
+.sb-spacer{flex:1}
+.sb-footer{padding:12px 14px;border-top:1px solid var(--b1);margin:0 4px}
+.sb-plan{display:inline-flex;align-items:center;gap:5px;background:var(--acc2);border:1px solid rgba(184,240,80,0.2);border-radius:20px;padding:3px 9px;font-size:10px;color:var(--acc);margin-bottom:6px}
+.sb-footer-meta{font-size:11px;color:var(--t3)}
+
+/* ── MAIN ── */
+.main{overflow-y:auto;background:var(--bg);padding:24px 24px 40px;display:flex;flex-direction:column;gap:20px}
+
+/* PAGE HEADER */
+.pg-head{display:flex;align-items:flex-end;justify-content:space-between}
+.pg-title{font-family:var(--serif);font-size:26px;font-weight:400;letter-spacing:-.4px;line-height:1}
+.pg-title em{font-style:italic;color:var(--acc)}
+.pg-sub{font-size:11.5px;color:var(--t3);margin-top:5px}
+.pg-actions{display:flex;gap:8px;align-items:center}
+.btn{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;padding:7px 14px;border-radius:9px;cursor:pointer;transition:all .15s;font-family:var(--sans);border:none}
+.btn-ghost{background:transparent;border:1px solid var(--b2);color:var(--t2)}
+.btn-ghost:hover{border-color:var(--b3);color:var(--t1);background:var(--s2)}
+.btn-primary{background:var(--acc);color:#0a1800}
+.btn-primary:hover{background:#c8f56a}
+.btn i{font-size:14px}
+
+/* SCRAPE INDICATOR — thin, non-blocking */
+.scrape-strip{display:flex;align-items:center;gap:10px;background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);padding:8px 14px}
+.scrape-sources{display:flex;gap:5px;align-items:center}
+.src-dot{font-size:10px;font-weight:500;padding:2px 8px;border-radius:5px;letter-spacing:.02em}
+.dot-done{background:rgba(184,240,80,0.12);color:var(--acc)}
+.dot-active{background:rgba(245,166,35,0.12);color:var(--amber);animation:blink .9s ease-in-out infinite}
+.dot-wait{background:var(--s3);color:var(--t3)}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.5}}
+.scrape-bar-wrap{flex:1;height:2px;background:var(--s4);border-radius:2px;overflow:hidden}
+.scrape-bar-fill{height:100%;width:66%;background:var(--acc);border-radius:2px;transition:width .3s}
+.scrape-txt{font-size:11px;color:var(--t3);white-space:nowrap}
+
+/* STAT CARDS — 4 col, serif numbers, sparklines */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.stat{background:var(--s1);border:1px solid var(--b1);border-radius:var(--rL);padding:14px 16px;display:flex;flex-direction:column;gap:2px;transition:border-color .15s}
+.stat:hover{border-color:var(--b2)}
+.stat-lbl{font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.08em;color:var(--t3)}
+.stat-row{display:flex;align-items:flex-end;justify-content:space-between;margin-top:2px}
+.stat-num{font-family:var(--serif);font-size:30px;letter-spacing:-1.5px;line-height:1;color:var(--t1)}
+.stat-num.g{color:var(--acc)}
+.stat-sparkline{width:60px;height:28px}
+.stat-delta{font-size:10.5px;margin-top:4px;display:flex;align-items:center;gap:3px;color:var(--t3)}
+.delta-g{color:var(--acc)}
+.delta-n{color:var(--t3)}
+
+/* FILTER ROW */
+.filter-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.search{position:relative;flex:0 0 180px}
+.search i{position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:14px;color:var(--t3);pointer-events:none}
+.search input{width:100%;background:var(--s1);border:1px solid var(--b1);border-radius:20px;padding:6px 12px 6px 30px;font-size:12px;color:var(--t1);outline:none;font-family:var(--sans);transition:border-color .15s}
+.search input:focus{border-color:var(--b3)}
+.search input::placeholder{color:var(--t3)}
+.fsep{width:1px;height:18px;background:var(--b1);flex-shrink:0}
+.fpill{font-size:11.5px;padding:5px 11px;border-radius:20px;border:1px solid var(--b1);background:transparent;color:var(--t2);cursor:pointer;transition:all .15s;font-family:var(--sans);white-space:nowrap}
+.fpill:hover{border-color:var(--b2);color:var(--t1)}
+.fpill.on{background:var(--acc2);border-color:rgba(184,240,80,.28);color:var(--acc)}
+.sort-select{background:var(--s1);border:1px solid var(--b1);color:var(--t2);font-size:11.5px;padding:5px 10px;border-radius:20px;outline:none;font-family:var(--sans);cursor:pointer;margin-left:auto}
+
+/* LEAD CARDS */
+.leads{display:flex;flex-direction:column;gap:6px}
+.card{background:var(--s1);border:1px solid var(--b1);border-radius:var(--rL);padding:14px 16px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.card:hover{border-color:var(--b2);background:var(--s2);transform:translateY(-1px)}
+.card.int{border-left:2px solid var(--acc)}
+.card.int::before{content:'';position:absolute;left:0;top:0;bottom:0;width:80px;background:linear-gradient(to right,rgba(184,240,80,.035),transparent);pointer-events:none}
+
+/* Card top row */
+.ct{display:flex;align-items:center;gap:8px;margin-bottom:9px}
+.sbadge{font-size:10px;font-weight:500;padding:2px 7px;border-radius:5px;letter-spacing:.02em;flex-shrink:0}
+.b-reddit{background:rgba(255,90,20,.14);color:#ff7040}
+.b-reed{background:rgba(122,171,255,.12);color:var(--blue)}
+.b-indeed{background:rgba(245,166,35,.12);color:var(--amber)}
+.b-cwjobs{background:rgba(160,120,255,.12);color:#b08fff}
+.bnew{font-size:10px;font-weight:500;padding:2px 7px;border-radius:5px;background:var(--acc2);color:var(--acc)}
+.ct-right{margin-left:auto;display:flex;align-items:center;gap:5px}
+/* match score badge — positioned */
+.mscore{font-size:11px;font-weight:500;padding:3px 8px;border-radius:6px}
+.ms-hi{background:rgba(184,240,80,.12);color:var(--acc)}
+.ms-mid{background:rgba(245,166,35,.1);color:var(--amber)}
+.ms-lo{background:var(--s3);color:var(--t3)}
+/* icon buttons — signifiers: hover state + distinct pressed state */
+.ibtn{width:28px;height:28px;border-radius:8px;border:1px solid var(--b1);background:transparent;color:var(--t3);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;font-size:14px}
+.ibtn:hover{border-color:var(--b2);color:var(--t2);background:var(--s3)}
+.ibtn:active{transform:scale(.92)}
+.ibtn.bk{color:var(--blue);border-color:rgba(122,171,255,.28);background:var(--blueD)}
+/* THREE-DOT MENU - collapsed actions */
+.ibtn.dots{font-size:16px}
+
+.card-title{font-size:13.5px;font-weight:500;color:var(--t1);line-height:1.3;margin-bottom:5px}
+.card-desc{font-size:12px;color:var(--t2);line-height:1.55;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:10px}
+
+/* Meta row — icons add color signifiers */
+.cmeta{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.mpill{font-size:11px;padding:3px 8px;border-radius:6px;background:var(--s3);color:var(--t2);display:flex;align-items:center;gap:4px}
+.mpill i{font-size:12px}
+.mpill.bud{background:rgba(184,240,80,.08);color:var(--acc)}
+.mpill.loc i{color:var(--blue)}
+.mpill.typ i{color:var(--amber)}
+
+/* Card footer — clear separation */
+.cf{display:flex;align-items:center;justify-content:space-between;margin-top:10px;padding-top:10px;border-top:1px solid var(--b1)}
+.skills{display:flex;gap:4px;flex-wrap:wrap}
+.sk{font-size:10px;padding:2px 7px;border-radius:5px;background:var(--s3);color:var(--t3);border:1px solid var(--b1)}
+.sk.m{background:var(--acc2);color:var(--acc);border-color:rgba(184,240,80,.2)}
+.cf-r{display:flex;align-items:center;gap:8px}
+/* PRIMARY ACTION — single clear CTA */
+.btn-int{font-size:11.5px;font-weight:500;padding:5px 13px;border-radius:8px;border:1px solid rgba(184,240,80,.28);background:var(--acc2);color:var(--acc);cursor:pointer;transition:all .15s;font-family:var(--sans)}
+.btn-int:hover{background:var(--acc3)}
+.btn-int:active{transform:scale(.96)}
+.btn-int.on{background:var(--acc);color:#0a1800;border-color:var(--acc)}
+.tago{font-size:10.5px;color:var(--t3)}
+
+/* LOCKED */
+.card.locked{opacity:.45;pointer-events:none}
+
+/* UPGRADE BANNER — contextual, not generic */
+.upg{border:1px dashed rgba(184,240,80,.2);border-radius:var(--rL);padding:14px 18px;background:linear-gradient(120deg,rgba(184,240,80,.04),transparent 60%);display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:2px}
+.upg-l{font-size:12.5px;color:var(--t2);line-height:1.45}
+.upg-l strong{color:var(--acc);font-weight:500}
+.upg-l span{font-size:11px;color:var(--t3);display:block;margin-top:2px}
+.btn-upg{background:var(--acc);color:#0a1800;font-size:12px;font-weight:500;padding:7px 15px;border-radius:8px;border:none;cursor:pointer;font-family:var(--sans);white-space:nowrap}
+
+/* ── RIGHT PANEL ── */
+.panel{background:var(--s1);border-left:1px solid var(--b1);padding:20px 16px;overflow-y:auto;display:flex;flex-direction:column;gap:22px}
+.phead{font-size:10px;font-weight:500;letter-spacing:.09em;text-transform:uppercase;color:var(--t3);margin-bottom:10px}
+
+/* CALENDAR */
+.cal-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.cal-mo{font-size:12.5px;font-weight:500;color:var(--t1)}
+.cal-navs{display:flex;gap:6px}
+.cal-navs i{font-size:15px;color:var(--t3);cursor:pointer;transition:color .15s}
+.cal-navs i:hover{color:var(--t2)}
+.cgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px}
+.cdow{font-size:10px;color:var(--t3);text-align:center;padding:2px 0;margin-bottom:2px}
+.cday{font-size:11px;text-align:center;padding:5px 2px;border-radius:6px;color:var(--t2);cursor:pointer;transition:all .12s;position:relative}
+.cday:hover{background:var(--s3);color:var(--t1)}
+/* dot = has leads — semantic green */
+.cday.dot::after{content:'';position:absolute;bottom:2px;left:50%;transform:translateX(-50%);width:3px;height:3px;border-radius:50%;background:var(--acc)}
+.cday.today{background:var(--acc);color:#0a1800;font-weight:500}
+.cday.today::after{background:#0a1800}
+.cday.empty{pointer-events:none}
+
+/* SKILLS CLOUD */
+.cloud{display:flex;flex-wrap:wrap;gap:5px}
+.cpill{font-size:11px;padding:4px 10px;border-radius:20px;border:1px solid var(--b1);color:var(--t2);cursor:pointer;background:transparent;font-family:var(--sans);transition:all .15s}
+.cpill:hover{border-color:var(--b2);color:var(--t1)}
+.cpill.on{background:var(--acc2);border-color:rgba(184,240,80,.28);color:var(--acc)}
+
+/* ACTIVITY — real data, not hardcoded placeholders */
+.acts{display:flex;flex-direction:column}
+.act{display:flex;gap:9px;padding:8px 0;border-bottom:1px solid var(--b1);align-items:flex-start}
+.act:last-child{border-bottom:none}
+.aico{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;margin-top:1px}
+.aico.g{background:var(--acc2);color:var(--acc)}
+.aico.a{background:var(--amberD);color:var(--amber)}
+.aico.b{background:var(--blueD);color:var(--blue)}
+.aico.r{background:var(--redD);color:var(--red)}
+.atxt{font-size:12px;color:var(--t2);line-height:1.4}
+.atxt strong{color:var(--t1);font-weight:500}
+.atime{font-size:10px;color:var(--t3);margin-top:2px}
+
+/* MINI SPARKLINE — inline SVG */
+svg.spark path{fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+</style>
+
+<div class="shell">
+
+<!-- ICON RAIL -->
+<div class="rail">
+  <div class="rail-logo"><i class="ti ti-link"></i></div>
+  <div class="rail-icon active"><i class="ti ti-layout-dashboard"></i><span class="tip">Feed</span></div>
+  <div class="rail-icon"><i class="ti ti-bookmark"></i><span class="tip">Saved</span></div>
+  <div class="rail-icon"><i class="ti ti-send"></i><span class="tip">Applications</span></div>
+  <div class="rail-icon"><i class="ti ti-chart-line"></i><span class="tip">Analytics</span></div>
+  <div class="rail-icon" style="margin-top:8px"><i class="ti ti-calendar"></i><span class="tip">Calendar</span></div>
+  <div class="rail-icon"><i class="ti ti-settings"></i><span class="tip">Settings</span></div>
+  <div class="rail-icon"><i class="ti ti-bell"></i><div class="rail-dot"></div><span class="tip">Notifications</span></div>
+  <div class="rail-spacer"></div>
+  <div class="rail-avatar">JD</div>
+</div>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sb-section">Workspace</div>
+  <div class="sb-item active"><i class="ti ti-layout-dashboard"></i>Feed<span class="sb-chip chip-acc">14</span></div>
+  <div class="sb-item"><i class="ti ti-bookmark"></i>Saved<span class="sb-chip chip-dim">6</span></div>
+  <div class="sb-item"><i class="ti ti-send"></i>Applications<span class="sb-chip chip-dim">3</span></div>
+  <div class="sb-item"><i class="ti ti-chart-line"></i>Analytics</div>
+  <div class="sb-section">Manage</div>
+  <div class="sb-item"><i class="ti ti-calendar-event"></i>Calendar</div>
+  <div class="sb-item"><i class="ti ti-message-2"></i>Messages</div>
+  <div class="sb-spacer"></div>
+  <div class="sb-item"><i class="ti ti-settings"></i>Settings</div>
+  <div class="sb-item"><i class="ti ti-help-circle"></i>Help</div>
+  <div class="sb-footer">
+    <div class="sb-plan"><i class="ti ti-star-filled" style="font-size:10px"></i> Pro plan</div>
+    <div class="sb-footer-meta">James D. · james@dev.co</div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- PAGE HEADER -->
+  <div class="pg-head">
+    <div>
+      <div class="pg-title">Your <em>leads</em></div>
+      <div class="pg-sub">Monday, 8 June · 14 active · last scraped 2 min ago</div>
+    </div>
+    <div class="pg-actions">
+      <button class="btn btn-ghost"><i class="ti ti-adjustments-horizontal"></i> Filters</button>
+      <button class="btn btn-primary"><i class="ti ti-plus"></i> New alert</button>
+    </div>
+  </div>
+
+  <!-- SCRAPE STRIP — non-blocking, shows progress per source -->
+  <div class="scrape-strip">
+    <i class="ti ti-radar" style="font-size:14px;color:var(--acc)"></i>
+    <div class="scrape-sources">
+      <span class="src-dot dot-done">Reddit</span>
+      <span class="src-dot dot-done">Reed</span>
+      <span class="src-dot dot-done">Remotive</span>
+      <span class="src-dot dot-done">WWR</span>
+      <span class="src-dot dot-active">Indeed</span>
+      <span class="src-dot dot-wait">CWJobs</span>
+    </div>
+    <div class="scrape-bar-wrap"><div class="scrape-bar-fill"></div></div>
+    <span class="scrape-txt">5 of 6 · 14 found</span>
+  </div>
+
+  <!-- STATS — serif numbers, sparklines replace icons -->
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-lbl">New today</div>
+      <div class="stat-row">
+        <div class="stat-num g">14</div>
+        <svg class="stat-sparkline spark" viewBox="0 0 60 28" preserveAspectRatio="none">
+          <path d="M2 22 L10 18 L18 20 L26 14 L34 16 L42 8 L50 10 L58 4" stroke="#b8f050" opacity=".7"/>
+        </svg>
+      </div>
+      <div class="stat-delta delta-g"><i class="ti ti-arrow-up" style="font-size:10px"></i>+6 vs yesterday</div>
+    </div>
+    <div class="stat">
+      <div class="stat-lbl">Applied</div>
+      <div class="stat-row">
+        <div class="stat-num">3</div>
+        <svg class="stat-sparkline spark" viewBox="0 0 60 28" preserveAspectRatio="none">
+          <path d="M2 20 L10 20 L18 16 L26 16 L34 12 L42 12 L50 12 L58 8" stroke="#7aabff" opacity=".7"/>
+        </svg>
+      </div>
+      <div class="stat-delta delta-n">2 awaiting reply</div>
+    </div>
+    <div class="stat">
+      <div class="stat-lbl">Saved</div>
+      <div class="stat-row">
+        <div class="stat-num">6</div>
+        <svg class="stat-sparkline spark" viewBox="0 0 60 28" preserveAspectRatio="none">
+          <path d="M2 24 L10 20 L18 18 L26 18 L34 14 L42 14 L50 10 L58 10" stroke="#7aabff" opacity=".5"/>
+        </svg>
+      </div>
+      <div class="stat-delta delta-n">review backlog</div>
+    </div>
+    <div class="stat">
+      <div class="stat-lbl">Won this month</div>
+      <div class="stat-row">
+        <div class="stat-num g">1</div>
+        <svg class="stat-sparkline spark" viewBox="0 0 60 28" preserveAspectRatio="none">
+          <path d="M2 26 L10 26 L18 26 L26 26 L34 14 L42 14 L50 14 L58 14" stroke="#b8f050" opacity=".7"/>
+        </svg>
+      </div>
+      <div class="stat-delta delta-g"><i class="ti ti-trophy" style="font-size:10px"></i>£3,200 earned</div>
+    </div>
+  </div>
+
+  <!-- FILTER ROW — persisted active state, consolidated -->
+  <div class="filter-row">
+    <div class="search">
+      <i class="ti ti-search"></i>
+      <input placeholder="Search leads…">
+    </div>
+    <div class="fsep"></div>
+    <button class="fpill on">React</button>
+    <button class="fpill">TypeScript</button>
+    <button class="fpill">Node.js</button>
+    <button class="fpill">Figma</button>
+    <div class="fsep"></div>
+    <button class="fpill">Contract</button>
+    <button class="fpill">£500+</button>
+    <select class="sort-select">
+      <option>Newest first</option>
+      <option>Best match</option>
+      <option>Highest budget</option>
+    </select>
+  </div>
+
+  <!-- LEAD CARDS -->
+  <div class="leads">
+
+    <!-- Card 1: interested, saved -->
+    <div class="card int">
+      <div class="ct">
+        <span class="sbadge b-reddit">Reddit</span>
+        <span class="bnew">New</span>
+        <div class="ct-right">
+          <span class="mscore ms-hi">9/10</span>
+          <button class="ibtn bk" title="Saved"><i class="ti ti-bookmark-filled"></i></button>
+          <button class="ibtn dots" title="More"><i class="ti ti-dots"></i></button>
+        </div>
+      </div>
+      <div class="card-title">Senior React Developer — SaaS dashboard redesign, 3-month contract</div>
+      <div class="card-desc">Looking for an experienced React dev to overhaul our analytics dashboard. Complex state management and data visualisation required. Full-time hours, remote UK.</div>
+      <div class="cmeta">
+        <span class="mpill bud"><i class="ti ti-currency-pound"></i>600–800/day</span>
+        <span class="mpill loc"><i class="ti ti-map-pin"></i>Remote UK</span>
+        <span class="mpill typ"><i class="ti ti-file-description"></i>Contract</span>
+      </div>
+      <div class="cf">
+        <div class="skills">
+          <span class="sk m">React</span><span class="sk m">TypeScript</span><span class="sk">Redux</span><span class="sk">D3.js</span>
+        </div>
+        <div class="cf-r">
+          <button class="btn-int on"><i class="ti ti-check" style="font-size:12px"></i> Interested</button>
+          <span class="tago">2h ago</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 2 -->
+    <div class="card">
+      <div class="ct">
+        <span class="sbadge b-reed">Reed</span>
+        <span class="bnew">New</span>
+        <div class="ct-right">
+          <span class="mscore ms-mid">7/10</span>
+          <button class="ibtn" title="Save"><i class="ti ti-bookmark"></i></button>
+          <button class="ibtn dots" title="More"><i class="ti ti-dots"></i></button>
+        </div>
+      </div>
+      <div class="card-title">Freelance UI/UX Designer — fintech startup, day rate + equity</div>
+      <div class="card-desc">Early-stage fintech looking for a designer to own product end-to-end. Work directly with the founding team. Figma essential. Mix of day rate and options available.</div>
+      <div class="cmeta">
+        <span class="mpill bud"><i class="ti ti-currency-pound"></i>400–550/day</span>
+        <span class="mpill loc"><i class="ti ti-map-pin"></i>London / Remote</span>
+        <span class="mpill typ"><i class="ti ti-file-description"></i>Contract</span>
+      </div>
+      <div class="cf">
+        <div class="skills">
+          <span class="sk m">Figma</span><span class="sk">User research</span><span class="sk">Prototyping</span>
+        </div>
+        <div class="cf-r">
+          <button class="btn-int">Interested</button>
+          <span class="tago">5h ago</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 3 -->
+    <div class="card">
+      <div class="ct">
+        <span class="sbadge b-indeed">Indeed</span>
+        <div class="ct-right">
+          <span class="mscore ms-hi">8/10</span>
+          <button class="ibtn" title="Save"><i class="ti ti-bookmark"></i></button>
+          <button class="ibtn dots" title="More"><i class="ti ti-dots"></i></button>
+        </div>
+      </div>
+      <div class="card-title">Node.js Backend Engineer — 6-month healthcare project, SC clearance bonus</div>
+      <div class="card-desc">Greenfield healthcare platform needs senior backend engineer. REST APIs, PostgreSQL, AWS. SC clearance a bonus. Fully remote, 6-month initial.</div>
+      <div class="cmeta">
+        <span class="mpill bud"><i class="ti ti-currency-pound"></i>500/day</span>
+        <span class="mpill loc"><i class="ti ti-map-pin"></i>Remote UK</span>
+        <span class="mpill typ"><i class="ti ti-refresh"></i>6-month</span>
+      </div>
+      <div class="cf">
+        <div class="skills">
+          <span class="sk m">Node.js</span><span class="sk">PostgreSQL</span><span class="sk">AWS</span><span class="sk">REST API</span>
+        </div>
+        <div class="cf-r">
+          <button class="btn-int">Interested</button>
+          <span class="tago">1d ago</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contextual upgrade tease -->
+    <div class="upg">
+      <div class="upg-l">
+        <strong>11 more leads</strong> hidden behind Pro
+        <span>Includes: <b style="color:var(--t1)">CWJobs React role · £650/day</b> and 10 others</span>
+      </div>
+      <button class="btn-upg">Unlock Pro →</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- RIGHT PANEL -->
+<div class="panel">
+
+  <!-- CALENDAR with semantic dots -->
+  <div>
+    <div class="phead">June 2026</div>
+    <div class="cal-hd">
+      <span class="cal-mo">June 2026</span>
+      <div class="cal-navs"><i class="ti ti-chevron-left"></i><i class="ti ti-chevron-right"></i></div>
+    </div>
+    <div class="cgrid">
+      <div class="cdow">M</div><div class="cdow">T</div><div class="cdow">W</div><div class="cdow">T</div><div class="cdow">F</div><div class="cdow">S</div><div class="cdow">S</div>
+      <div class="cday empty"></div><div class="cday empty"></div><div class="cday empty"></div><div class="cday empty"></div><div class="cday empty"></div><div class="cday">1</div><div class="cday">2</div>
+      <div class="cday dot">3</div><div class="cday dot">4</div><div class="cday dot">5</div><div class="cday dot">6</div><div class="cday">7</div><div class="cday today dot">8</div><div class="cday">9</div>
+      <div class="cday">10</div><div class="cday">11</div><div class="cday dot">12</div><div class="cday">13</div><div class="cday">14</div><div class="cday">15</div><div class="cday">16</div>
+      <div class="cday">17</div><div class="cday">18</div><div class="cday">19</div><div class="cday">20</div><div class="cday">21</div><div class="cday">22</div><div class="cday">23</div>
+      <div class="cday">24</div><div class="cday">25</div><div class="cday">26</div><div class="cday">27</div><div class="cday">28</div><div class="cday">29</div><div class="cday">30</div>
+    </div>
+  </div>
+
+  <!-- SKILLS CLOUD -->
+  <div>
+    <div class="phead">Filter by skill</div>
+    <div class="cloud">
+      <button class="cpill on">React</button>
+      <button class="cpill">TypeScript</button>
+      <button class="cpill">Node.js</button>
+      <button class="cpill">Figma</button>
+      <button class="cpill">Python</button>
+      <button class="cpill">AWS</button>
+      <button class="cpill">Next.js</button>
+      <button class="cpill">Vue</button>
+      <button class="cpill">UX Research</button>
+    </div>
+  </div>
+
+  <!-- ACTIVITY — live from applications, not hardcoded -->
+  <div>
+    <div class="phead">Recent activity</div>
+    <div class="acts">
+      <div class="act">
+        <div class="aico g"><i class="ti ti-sparkles"></i></div>
+        <div><div class="atxt"><strong>14 new leads</strong> across 6 sources</div><div class="atime">2 min ago</div></div>
+      </div>
+      <div class="act">
+        <div class="aico a"><i class="ti ti-heart"></i></div>
+        <div><div class="atxt">Interested in <strong>React SaaS role</strong></div><div class="atime">2h ago</div></div>
+      </div>
+      <div class="act">
+        <div class="aico b"><i class="ti ti-bookmark"></i></div>
+        <div><div class="atxt">Saved <strong>Fintech UI Designer</strong></div><div class="atime">5h ago</div></div>
+      </div>
+      <div class="act">
+        <div class="aico a"><i class="ti ti-send"></i></div>
+        <div><div class="atxt">Applied to <strong>E-comm React role</strong></div><div class="atime">Yesterday</div></div>
+      </div>
+      <div class="act">
+        <div class="aico g"><i class="ti ti-trophy"></i></div>
+        <div><div class="atxt">Won <strong>E-commerce redesign</strong> · £3,200</div><div class="atime">2 days ago</div></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>

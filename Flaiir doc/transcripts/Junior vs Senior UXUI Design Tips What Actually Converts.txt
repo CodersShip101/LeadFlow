@@ -1,0 +1,1102 @@
+00:01 Today we're breaking down three AB tests
+00:04 
+
+00:04 for maps. Pay walls,
+00:07 
+
+00:07 ride hailing, bookings
+00:10 
+
+00:10 that will completely change how you
+00:12 
+
+00:12 think about interface design. You're
+00:14 
+
+00:14 going to love it. For each one, we're
+00:16 
+
+00:16 going to show you two screens, A and B.
+00:19 
+
+00:19 They look really similar. Both look
+00:21 
+
+00:21 fine, but one of them performs
+00:23 
+
+00:23 dramatically better. Pause the video on
+00:25 
+
+00:25 each one and see if you can spot which
+00:27 
+
+00:27 one won before we explain it. If you
+00:30 
+
+00:30 want, keep track of how many you guess
+00:32 
+
+00:32 right and let us know in the comments at
+00:34 
+
+00:34 the end.
+00:36 
+
+00:36 Look at these two screens. Same app,
+00:39 
+
+00:39 same price, same $19 a month, same free
+00:43 
+
+00:43 trial. One of them converts much better
+00:46 
+
+00:46 than the other. Pause the video and tell
+00:48 
+
+00:48 me which one you think is better.
+00:51 
+
+00:51 Okay, let's go. It's B. And here's the
+00:53 
+
+00:53 crazy part. B doesn't even try to sell
+00:55 
+
+00:55 you. That's exactly why it wins. Let me
+00:58 
+
+00:58 show you what's happening. Screen A is a
+01:00 
+
+01:00 classic payw wall. Big hero image with
+01:03 
+
+01:03 some space art. A bold headline. Get
+01:05 
+
+01:05 access to 1,000 plus futuristic and fun
+01:08 
+
+01:08 games. Then the price $19 per month.
+01:11 
+
+01:11 Then three feature bullets with icons.
+01:14 
+
+01:14 Instant unlimited access, new games
+01:17 
+
+01:17 added weekly, membersonly rewards, and
+01:20 
+
+01:20 at the bottom, a big purple button that
+01:23 
+
+01:23 says subscribe and start 7 days for
+01:25 
+
+01:25 free. It's a perfectly reasonable
+01:27 
+
+01:27 screen. You've seen this layout a
+01:29 
+
+01:29 hundred times. And that's the problem.
+01:32 
+
+01:32 Because the moment a user sees this
+01:34 
+
+01:34 screen, the brain asks one question. Is
+01:37 
+
+01:37 this worth $19 a month? And that is a
+01:40 
+
+01:40 brutal question to land on someone who
+01:42 
+
+01:42 opened your app 30 seconds ago. They
+01:45 
+
+01:45 haven't played a single game. They
+01:46 
+
+01:46 haven't felt any value. And now you're
+01:48 
+
+01:48 asking them to evaluate three bullet
+01:50 
+
+01:50 points and decide if that's worth $19
+01:53 
+
+01:53 every month for the foreseeable future.
+01:56 
+
+01:56 That's not a decision. That's homework.
+01:58 
+
+01:58 And the easiest answer to homework is,
+01:60 
+
+01:60 "I'll think about it later." Which means
+02:02 
+
+02:02 never. Now look at screen B. Same price,
+02:05 
+
+02:05 same trial, but a completely different
+02:07 
+
+02:07 question. The headline says how your
+02:10 
+
+02:10 free trial works. Not here's what you
+02:12 
+
+02:12 get, not here's why you should pay, just
+02:15 
+
+02:15 here's how the free thing works. And the
+02:17 
+
+02:17 user's brain immediately shifts from is
+02:19 
+
+02:19 this worth $19 to can I try this for
+02:22 
+
+02:22 free? And the answer to that question is
+02:24 
+
+02:24 obviously yes. You've gone from a hard
+02:26 
+
+02:26 question to an easy one. That's the
+02:28 
+
+02:28 entire game. But the way B delivers this
+02:31 
+
+02:31 is where it gets really smart. There's a
+02:34 
+
+02:34 timeline. Three steps. Today, day five,
+02:37 
+
+02:37 day seven, and each one tells you
+02:39 
+
+02:39 exactly what happens. Today, you unlock
+02:42 
+
+02:42 the full library. Day five, we send you
+02:44 
+
+02:44 a reminder that your trial is ending
+02:46 
+
+02:46 soon. Day seven, your first charge
+02:48 
+
+02:48 begins. Cancel any time before. Now,
+02:51 
+
+02:51 that day five line, that single line is
+02:54 
+
+02:54 doing more psychological work than all
+02:56 
+
+02:56 three feature bullets on screen 8
+02:58 
+
+02:58 combined because it says, "We will warn
+03:00 
+
+03:00 you before we charge you." Think about
+03:02 
+
+03:02 what that communicates. It says, "We're
+03:04 
+
+03:04 not trying to trap you. We're actually
+03:07 
+
+03:07 going to remind you so you can make an
+03:08 
+
+03:08 informed decision." This triggers
+03:10 
+
+03:10 something called transparency bias. When
+03:13 
+
+03:13 a company proactively reveals a
+03:15 
+
+03:15 potential downside, users trust them
+03:17 
+
+03:17 more, not less. It feels like the
+03:19 
+
+03:19 company is on your side. And a user who
+03:21 
+
+03:21 trusts you is a user who converts. Now
+03:23 
+
+03:23 look at the buttons. This seems like a
+03:25 
+
+03:25 tiny difference, but it's massive. The
+03:28 
+
+03:28 word subscribe carries commitments
+03:30 
+
+03:30 weight. Your brain hears subscribe and
+03:32 
+
+03:32 thinks recurring payment. Hard to
+03:34 
+
+03:34 cancel. I'm locked in. And then the
+03:36 
+
+03:36 button tries to soften it with and start
+03:39 
+
+03:39 7 days for free, but it's too late.
+03:41 
+
+03:41 Screen B uses start. Start is light.
+03:44 
+
+03:44 Start implies a beginning, not a
+03:46 
+
+03:46 commitment. And notice it says my free
+03:49 
+
+03:49 trial, not your free trial. My. That one
+03:52 
+
+03:52 word creates a sense of ownership before
+03:54 
+
+03:54 you've even tapped the button. And then
+03:56 
+
+03:56 underneath, start in two taps. This is
+03:60 
+
+03:60 brilliant because your brain hates
+04:01 
+
+04:01 uncertainty. Will there be a form? Do I
+04:04 
+
+04:04 need my credit card? How many steps?
+04:06 
+
+04:06 Start in two taps kills every single one
+04:09 
+
+04:09 of those questions with a number. Not
+04:10 
+
+04:10 quick setup, not easy setup. The number
+04:13 
+
+04:13 does the convincing. It's the same
+04:15 
+
+04:15 reason delivery in 23 minutes converts
+04:17 
+
+04:17 better than fast delivery. Specificity
+04:20 
+
+04:20 is trust. Look at the hero images.
+04:23 
+
+04:23 Screen A has this beautiful space
+04:25 
+
+04:25 illustration with planets and meteors.
+04:27 
+
+04:27 It's gorgeous, but it's decorative. It
+04:30 
+
+04:30 does not answer the question, "What am I
+04:32 
+
+04:32 actually getting?" Screen B shows actual
+04:35 
+
+04:35 game characters, different games,
+04:37 
+
+04:37 different styles, all visible. The user
+04:40 
+
+04:40 can immediately see what they're
+04:41 
+
+04:41 subscribing to, and you can't commit to
+04:43 
+
+04:43 something you can't visualize. So,
+04:45 
+
+04:45 here's the full picture. Screen A asks a
+04:48 
+
+04:48 hard question. Screen B asks an easy
+04:50 
+
+04:50 one. Screen A lists features. Screen B
+04:54 
+
+04:54 shows a timeline. Screen A says
+04:56 
+
+04:56 subscribe. Screen B says start. Screen A
+04:60 
+
+04:60 hopes you'll trust them. Screen B proves
+05:02 
+
+05:02 they're trustworthy by promising to
+05:04 
+
+05:04 remind you before they charge you. Same
+05:07 
+
+05:07 app, same price, same offer, but one
+05:10 
+
+05:10 feels like a sales pitch and the other
+05:12 
+
+05:12 feels like a safety net. And users don't
+05:14 
+
+05:14 buy from sales pitches, they buy from
+05:16 
+
+05:16 safety nets. The best payw wall is the
+05:19 
+
+05:19 one that makes the user feel safe, not
+05:21 
+
+05:21 sold. Today, we have something exciting
+05:23 
+
+05:23 to share. We are launching UX Peak Plus,
+05:26 
+
+05:26 a new design learning platform that
+05:28 
+
+05:28 teaches the advanced UX and UI skills
+05:31 
+
+05:31 designers actually need today. Most
+05:33 
+
+05:33 design education still teaches the same
+05:35 
+
+05:35 basics. how to pick a type face, how to
+05:37 
+
+05:37 space your buttons, and how to use
+05:39 
+
+05:39 Figma. And those things matter, but
+05:41 
+
+05:41 they're not what's actually holding
+05:42 
+
+05:42 designers back. You don't need another
+05:44 
+
+05:44 lesson on typography. You need to
+05:46 
+
+05:46 understand how top e-commerce sites
+05:48 
+
+05:48 design product pages that actually
+05:50 
+
+05:50 convert.
+05:52 
+
+05:52 How the best apps onboard new users so
+05:54 
+
+05:54 they stick around past day one. The
+05:57 
+
+05:57 pricing psychology top SAS companies use
+05:60 
+
+05:60 to drive conversion.
+06:02 
+
+06:02 and how to use AI the way top designers
+06:04 
+
+06:04 use it to move faster, design better,
+06:07 
+
+06:07 and stay ahead. The real advanced stuff
+06:10 
+
+06:10 designers need to know in 2026 that
+06:12 
+
+06:12 nobody else is teaching. That's what UX
+06:15 
+
+06:15 Peak Plus is. We break down how top
+06:17 
+
+06:17 companies like Spotify, Notion, Airbnb,
+06:20 
+
+06:20 and Dolingo actually design their
+06:22 
+
+06:22 products. It's the kind of learning that
+06:24 
+
+06:24 makes you genuinely better. The kind
+06:25 
+
+06:25 that gets you promoted, makes your
+06:27 
+
+06:27 designs convert, and gets people to
+06:29 
+
+06:29 actually use what you build. We're also
+06:31 
+
+06:31 releasing a new course every week. So,
+06:33 
+
+06:33 for every month you're a member, you get
+06:34 
+
+06:34 four new courses added to your library.
+06:37 
+
+06:37 But you don't have to decide blindly.
+06:38 
+
+06:38 You can start for free at uxpeak.com
+06:41 
+
+06:41 with free course and no credit card
+06:43 
+
+06:43 required. And if you decide to join, use
+06:45 
+
+06:45 code ux peak 20 to get 20% off with our
+06:48 
+
+06:48 launch offer. You'll also have a 7-day
+06:50 
+
+06:50 money back guarantee. So, if it's not
+06:51 
+
+06:51 for you, there's no risk. Now, let's get
+06:53 
+
+06:53 back into the second example. Okay, so
+06:56 
+
+06:56 in the last tip, we talked about how the
+06:58 
+
+06:58 words on your payw wall change whether
+06:60 
+
+06:60 someone subscribes or bounces. But what
+07:03 
+
+07:03 happens when the problem isn't the
+07:04 
+
+07:04 words, it's the number, not how much you
+07:07 
+
+07:07 charge, how you show it. Look at these
+07:09 
+
+07:09 two ride hailing screens. Same ride,
+07:12 
+
+07:12 same route. Same Tuesday afternoon. One
+07:16 
+
+07:16 of them gets significantly more
+07:17 
+
+07:17 bookings. The other one was actually
+07:20 
+
+07:20 losing the company money. And this time
+07:22 
+
+07:22 it's tricky because the one that looks
+07:24 
+
+07:24 more honest is the one that fails. Pause
+07:26 
+
+07:26 the video and tell me which one you
+07:28 
+
+07:28 think won.
+07:31 
+
+07:31 It's B. And no, it's not because it's
+07:33 
+
+07:33 cheaper. The average fair is almost
+07:36 
+
+07:36 identical. The difference is entirely in
+07:38 
+
+07:38 how the price is presented. Version A
+07:41 
+
+07:41 shows price ranges. Go X 13 to $17.
+07:45 
+
+07:45 Comfort 17 to 222. Go XL 16 to 21. Feels
+07:50 
+
+07:50 honest, right? Except your brain doesn't
+07:52 
+
+07:52 process ranges the way you think it
+07:54 
+
+07:54 does. When you see 13 to 17, you don't
+07:58 
+
+07:58 think probably 15. You grab the high
+08:00 
+
+08:00 number 17. That's called anchoring. Now,
+08:03 
+
+08:03 Go X feels like a $17 ride you might get
+08:06 
+
+08:06 lucky and pay 13 for. And you're doing
+08:09 
+
+08:09 that mental negotiation on three options
+08:11 
+
+08:11 simultaneously. Go X could be 17.
+08:14 
+
+08:14 Comfort could be 22. Go XL could be 21.
+08:17 
+
+08:17 Too many unknowns. Too many whatifs and
+08:20 
+
+08:20 the easiest decision becomes no
+08:22 
+
+08:22 decision. Close the app, just walk.
+08:24 
+
+08:24 Version A asks, "How much are you
+08:26 
+
+08:26 willing to risk?" Version B asks, "Which
+08:28 
+
+08:28 one do you want?" Easy questions get
+08:31 
+
+08:31 fast answers. One number per ride. No
+08:33 
+
+08:33 range, no negotiation. Your brain
+08:35 
+
+08:35 compares three clear prices in about 2
+08:37 
+
+08:37 seconds. Researchers call this
+08:39 
+
+08:39 evaluative ease. The less work a
+08:41 
+
+08:41 decision requires, the more likely
+08:43 
+
+08:43 someone is to make it. But B does more.
+08:46 
+
+08:46 Under go x, it says 12:53 p.m., 2
+08:49 
+
+08:49 minutes away. This reframes a cost
+08:52 
+
+08:52 decision into a convenience decision.
+08:54 
+
+08:54 You're not evaluating a price anymore. A
+08:56 
+
+08:56 car is 2 minutes away and it costs less
+08:58 
+
+08:58 than lunch. Then there's a tiny green
+09:01 
+
+09:01 badge that says cheaper. One word
+09:03 
+
+09:03 doesn't say cheaper than what. Your
+09:05 
+
+09:05 brain reads it and immediately
+09:06 
+
+09:06 categorizes this as the smart choice. A
+09:09 
+
+09:09 single green word did the thinking for
+09:10 
+
+09:10 you. And one more. There's a destination
+09:13 
+
+09:13 card on the map before you even see the
+09:15 
+
+09:15 right options. The Weston St. Francis
+09:18 
+
+09:18 San Francisco. That's commitment
+09:20 
+
+09:20 consistency. You already decided where
+09:23 
+
+09:23 you're going. The only question left is
+09:25 
+
+09:25 which car. And that's a much smaller
+09:27 
+
+09:27 decision than should I take a ride at
+09:29 
+
+09:29 all. If you're showing users a range
+09:32 
+
+09:32 when you could show them a number,
+09:33 
+
+09:33 you're not being transparent. You're
+09:35 
+
+09:35 creating doubt. And doubt is the most
+09:37 
+
+09:37 expensive thing in your interface. You
+09:40 
+
+09:40 probably know this feeling. You need to
+09:41 
+
+09:41 design something, maybe a payw wall,
+09:43 
+
+09:43 checkout flow, onboarding screen,
+09:45 
+
+09:45 booking flow. So, you go looking for
+09:47 
+
+09:47 inspiration. Maybe you open Dribble and
+09:49 
+
+09:49 everything looks beautiful. But the
+09:50 
+
+09:50 problem is you don't know if it was
+09:52 
+
+09:52 actually shipped, tested, or used in the
+09:54 
+
+09:54 real world. Pretty UI can inspire how
+09:57 
+
+09:57 something looks. But real product
+09:58 
+
+09:58 screens can teach you if something
+10:00 
+
+10:00 really works. That's why we used Mobin
+10:02 
+
+10:02 for creating this video. We've looked at
+10:04 
+
+10:04 hundreds of different payw wall screens
+10:06 
+
+10:06 and booking screens to give you the best
+10:08 
+
+10:08 tips. Mobin gives you a huge library of
+10:11 
+
+10:11 real mobile and web app screens. You can
+10:13 
+
+10:13 search for pay walls, onboarding,
+10:15 
+
+10:15 checkout flows, cancellation flows, and
+10:17 
+
+10:17 compare how different apps structure the
+10:19 
+
+10:19 same moment. So, if you're a designer,
+10:21 
+
+10:21 founder, or product person, Mobin is
+10:23 
+
+10:23 genuinely one of the best tools for
+10:25 
+
+10:25 that. We use it ourselves, and that's
+10:27 
+
+10:27 why we partnered with Mobin to give you
+10:28 
+
+10:28 an exclusive 20% discount on your first
+10:31 
+
+10:31 year. You can get 20% off simply by
+10:33 
+
+10:33 clicking the link in the description.
+10:38 
+
+10:38 So far, we've talked about how the words
+10:40 
+
+10:40 on your screen change behavior and how
+10:42 
+
+10:42 the way you show a number changes
+10:44 
+
+10:44 whether someone buys or bounces. But
+10:46 
+
+10:46 what happens when the words are fine and
+10:49 
+
+10:49 the numbers are fine and it still
+10:51 
+
+10:51 doesn't convert? That's when the problem
+10:53 
+
+10:53 isn't what you're showing. It's how it
+10:55 
+
+10:55 makes them feel. Look at these two
+10:57 
+
+10:57 booking screens. Same villa, same price,
+10:60 
+
+10:60 €89 a night. Same dates, same beds, same
+11:04 
+
+11:04 bathroom. One of these gets dramatically
+11:07 
+
+11:07 more bookings than the other. Pause the
+11:09 
+
+11:09 video and tell us which one.
+11:12 
+
+11:12 Got it? It's B. And this one is
+11:15 
+
+11:15 important because screen A does
+11:16 
+
+11:16 absolutely nothing wrong. The title is
+11:19 
+
+11:19 clear. The rating is visible. The price
+11:21 
+
+11:21 is big. The dates are there. The reserve
+11:23 
+
+11:23 button works. If you showed this to a
+11:25 
+
+11:25 designer, they'd say, "Yeah, that's
+11:27 
+
+11:27 fine." And that's exactly the problem.
+11:29 
+
+11:29 Fine. Doesn't book villas. Look at what
+11:31 
+
+11:31 screen A actually gives you. A nice
+11:33 
+
+11:33 photo of the villa, but tucked into a
+11:35 
+
+11:35 small thumbnail at the top. Almost like
+11:37 
+
+11:37 it's afraid to take up space. Beach
+11:39 
+
+11:39 house with garden. 4.82 stars. 89 per
+11:44 
+
+11:44 night. Check in March 28. Check out
+11:46 
+
+11:46 April 2. Two guests reserve. That's a
+11:49 
+
+11:49 form. You're filling out a form. And
+11:50 
+
+11:50 nobody has ever felt excited about
+11:52 
+
+11:52 filling out a form. Now look at screen
+11:55 
+
+11:55 B. Same exact photo, but the photo isn't
+11:57 
+
+11:57 squeezed into a small thumbnail anymore,
+11:60 
+
+11:60 taking over the top half of the screen.
+12:02 
+
+12:02 You're not looking at a listing card.
+12:03 
+
+12:03 You're looking at a place you might
+12:05 
+
+12:05 actually go. There are navigation
+12:07 
+
+12:07 badges, superhost, guest favorite, one
+12:11 
+
+12:11 of 24 photos. You haven't read a single
+12:14 
+
+12:14 word and you already feel something.
+12:16 
+
+12:16 That's the difference. Screen A informs
+12:18 
+
+12:18 you. Screen B transports you. Then the
+12:22 
+
+12:22 title. Screen A says beach house with
+12:24 
+
+12:24 garden. Screen B says beachside escape
+12:27 
+
+12:27 steps from the sand. Same place, but
+12:30 
+
+12:30 beachside escape activates emotional
+12:32 
+
+12:32 imagination. Steps from the sand gives
+12:35 
+
+12:35 you a specific spatial detail. You don't
+12:37 
+
+12:37 have to walk for 10 minutes to reach the
+12:39 
+
+12:39 beach. This is sensory language. It
+12:41 
+
+12:41 makes you feel like you're already on
+12:43 
+
+12:43 holiday before you've even checked the
+12:45 
+
+12:45 price. Now, the price. Screen A just
+12:48 
+
+12:48 shows €89. There's no reference point.
+12:51 
+
+12:51 Screen B shows €129
+12:53 
+
+12:53 cost out, then 89 with a green minus 31%
+12:57 
+
+12:57 badge. same price, but now it feels like
+12:59 
+
+12:59 a deal. That's anchoring working for you
+13:02 
+
+13:02 instead of against you, which is exactly
+13:04 
+
+13:04 what we talked about in the last tip.
+13:06 
+
+13:06 The dates. Screen A shows two input
+13:09 
+
+13:09 fields, March 28 and April 2. Screen B
+13:13 
+
+13:13 shows Friday, March 28 to Wednesday,
+13:15 
+
+13:15 April 2, with the purple badge that says
+13:18 
+
+13:18 five nights. Day names make the trip
+13:20 
+
+13:20 feel real. You're already planning your
+13:22 
+
+13:22 Friday arrival, and the night count
+13:24 
+
+13:24 saves you the mental math. Every piece
+13:26 
+
+13:26 of friction you remove is a reason to
+13:28 
+
+13:28 keep going. The button screen A says
+13:31 
+
+13:31 reserve. Reserve what? For how much
+13:33 
+
+13:33 total? Screen B says reserve $445
+13:37 
+
+13:37 total. The total is right there. No
+13:39 
+
+13:39 anxiety about hidden fees on the next
+13:41 
+
+13:41 screen. And underneath a green shield
+13:43 
+
+13:43 that says free cancellation before March
+13:46 
+
+13:46 26. The number one booking objection is
+13:49 
+
+13:49 what if my plans change? That single
+13:51 
+
+13:51 line answers it before the user even
+13:53 
+
+13:53 asks. Three tips in and the pattern is
+13:56 
+
+13:56 the same every time. That is all for
+13:58 
+
+13:58 today. If you take one thing from this
+14:00 
+
+14:00 video, take this. Every element on your
+14:03 
+
+14:03 screen is asking the user a question.
+14:05 
+
+14:05 And the question you're asking
+14:06 
+
+14:06 determines whether they act or hesitate.
+14:09 
+
+14:09 That's the whole thing. Once you start
+14:10 
+
+14:10 seeing it, you can't unsee it, and your
+14:13 
+
+14:13 designs get better immediately. If one
+14:15 
+
+14:15 of these tips surprised you, we'd love
+14:17 
+
+14:17 to hear which one. Also, let us know in
+14:19 
+
+14:19 the comments if you'd like to see more
+14:20 
+
+14:20 of these. Thanks for watching.

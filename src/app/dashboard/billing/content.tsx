@@ -21,7 +21,6 @@ const CMP_GROUPS: { label: string; rows: [string, CmpVal, CmpVal, CmpVal, CmpVal
     ['Applications / month', String(FREE_APP_LIMIT), '∞', '∞', '∞'],
     ['Direct source links', false, true, true, true],
     ['Scan frequency', '5h', '2h', '1h', '1h'],
-    ['Manual refresh', false, false, true, true],
   ]},
   { label: 'Insight', rows: [
     ['Daily email digest', false, true, true, true],
@@ -230,7 +229,6 @@ export default function BillingContent() {
       {/* ── HEADER with context nudge ── */}
       <div className="bill-header">
         <div>
-          <h1>Plan &amp; billing</h1>
           <p>You&apos;re on <span className="hl">{curName}</span>.</p>
         </div>
         {/* Context nudge — shows what's happening right now */}

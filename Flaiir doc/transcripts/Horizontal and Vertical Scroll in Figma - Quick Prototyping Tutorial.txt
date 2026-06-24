@@ -1,0 +1,301 @@
+00:00 [Music]
+00:00 
+
+00:00 everybody
+00:02 
+
+00:02 [Music]
+00:11 
+
+00:11 hey there Welcome to our Hands-On
+00:13 
+
+00:13 tutorial today we're going to guide you
+00:15 
+
+00:15 through setting up both horizontal and
+00:17 
+
+00:17 vertical scrolling in a mobile design
+00:19 
+
+00:19 first let's jump into our figma file
+00:22 
+
+00:22 where the mobile design lives
+00:31 
+
+00:31 we'll tackle the horizontal scroll
+00:33 
+
+00:33 feature for our quick recipe filters
+00:35 
+
+00:35 first we've used auto layout for each
+00:37 
+
+00:37 filter item to keep everything organized
+00:40 
+
+00:40 and well aligned here's how you do it
+00:42 
+
+00:42 select all filter items and create an
+00:44 
+
+00:44 auto layout you might be tempted to use
+00:47 
+
+00:47 a regular frame but Auto layout is a
+00:49 
+
+00:49 more efficient option we then establish
+00:51 
+
+00:51 a horizontal space of 20 pixels between
+00:54 
+
+00:54 items next we're going to dive into the
+00:56 
+
+00:56 crucial part of creating this horizontal
+00:58 
+
+00:59 scroll hold down the command key and
+01:01 
+
+01:01 then left click on the container and
+01:03 
+
+01:03 drag it until it fits within the
+01:04 
+
+01:04 dimensions of our phone frame in simpler
+01:07 
+
+01:07 terms we're adjusting the container to
+01:09 
+
+01:09 only show the content that fits within
+01:11 
+
+01:11 the phone screen don't worry all your
+01:13 
+
+01:13 content is still there we've just
+01:15 
+
+01:15 resized the container the following step
+01:17 
+
+01:17 is to activate the clip content feature
+01:19 
+
+01:19 this ensures that content doesn't spill
+01:22 
+
+01:22 out of our phone frame
+01:27 
+
+01:27 after that it's essential to navigate to
+01:29 
+
+01:29 the Prototype section here we're keeping
+01:32 
+
+01:32 the position the same but changing the
+01:34 
+
+01:34 Overflow to horizontal scroll now we can
+01:36 
+
+01:36 test our work by previewing our
+01:38 
+
+01:38 prototype
+01:43 
+
+01:43 as you can see our horizontal scroll
+01:45 
+
+01:45 function is working like a charm if
+01:48 
+
+01:48 you're interested in enhancing this
+01:49 
+
+01:49 further there are additional tweaks you
+01:51 
+
+01:51 can make for a smoother experience but
+01:53 
+
+01:53 we'll save that for another session
+01:55 
+
+01:55 moving on we're now going to set up
+01:57 
+
+01:57 scrollable recipes while keeping
+01:59 
+
+01:59 everything else in place we'll do this
+02:01 
+
+02:01 by resizing our frame to match the
+02:03 
+
+02:03 dimensions of our prototype for this
+02:05 
+
+02:05 tutorial we're using the iPhone Mini
+02:07 
+
+02:07 which is 375 by 812 pixels let's
+02:12 
+
+02:12 temporarily remove the bottom navigation
+02:14 
+
+02:14 now adjust the height to 812 pixels
+02:24 
+
+02:24 great we can now bring back the
+02:26 
+
+02:26 navigation and align it to the bottom of
+02:28 
+
+02:28 the frame
+02:33 
+
+02:33 but as We Shrunk our frame our content
+02:35 
+
+02:35 now overflows beyond the Mainframe
+02:38 
+
+02:38 select all recipe boxes
+02:44 
+
+02:44 create an auto layout and then choose
+02:47 
+
+02:47 clip content we'll also apply clip
+02:49 
+
+02:49 content to the phone frame to prevent
+02:51 
+
+02:51 content from spilling out of our
+02:52 
+
+02:52 Mainframe
+02:58 
+
+02:58 with everything now clipped let's
+02:60 
+
+02:60 preview our prototype you might notice
+03:02 
+
+03:02 that the content isn't yet scrollable
+03:04 
+
+03:04 that's because we need to take a few
+03:06 
+
+03:06 more steps to get it to scroll as
+03:08 
+
+03:08 desired in a similar fashion to our
+03:10 
+
+03:10 setup for the horizontal scroll we'll
+03:12 
+
+03:12 crop our content area and align it with
+03:14 
+
+03:14 the bottom of our phone frame hold down
+03:16 
+
+03:16 the command key left click and drag with
+03:19 
+
+03:19 your mouse until the container is
+03:21 
+
+03:21 perfectly aligned now we'll head back to
+03:23 
+
+03:23 the Prototype section
+03:26 
+
+03:26 we'll leave the position as is and
+03:28 
+
+03:28 change the Overflow to vertical
+03:32 
+
+03:32 let's preview our prototype once more to
+03:35 
+
+03:35 see the outcome awesome our vertical
+03:37 
+
+03:37 scroll is now working flawlessly and
+03:40 
+
+03:40 there you have it that's how you easily
+03:43 
+
+03:43 create simple horizontal and vertical
+03:45 
+
+03:45 Scrolls in figma if you found this
+03:47 
+
+03:47 tutorial helpful and are eager to learn
+03:49 
+
+03:49 more remember to hit the Subscribe
+03:51 
+
+03:51 button to stay updated on our future
+03:53 
+
+03:53 content but why stop here if you're
+03:56 
+
+03:56 serious about leveling up your skills
+03:58 
+
+03:58 and taking your designs to new heights
+03:59 
+
+03:59 we highly recommend checking out our uxu
+04:02 
+
+04:02 I design Mastery course this
+04:04 
+
+04:04 comprehensive course is designed to
+04:06 
+
+04:06 equip you with the tools techniques and
+04:08 
+
+04:08 Industry insights you need to create
+04:10 
+
+04:10 stunning and user-friendly designs that
+04:12 
+
+04:12 stand out in today's competitive digital
+04:14 
+
+04:14 landscape
+04:17 
+
+04:17 [Music]

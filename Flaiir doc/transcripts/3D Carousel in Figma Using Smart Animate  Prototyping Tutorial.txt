@@ -1,0 +1,457 @@
+00:01 [Music]
+00:06 
+
+00:06 hi everyone
+00:08 
+
+00:08 welcome back to our Channel
+00:10 
+
+00:10 today we have a unique figma tutorial
+00:12 
+
+00:12 ready for you
+00:14 
+
+00:14 we're going to create a circular slider
+00:16 
+
+00:16 for a website's hero section so get your
+00:18 
+
+00:18 figma file ready and let's dive in here
+00:21 
+
+00:21 we have our basic layout for the hero
+00:23 
+
+00:23 section already set up just beneath that
+00:27 
+
+00:27 you'll see we have a few images of
+00:29 
+
+00:29 smoothie bowls and fruits ready to go
+00:31 
+
+00:31 the first step is to create a circle
+00:33 
+
+00:33 that is going to serve as the base for
+00:36 
+
+00:36 our rotating Carousel of smoothie bowls
+00:38 
+
+00:38 now let's go ahead and copy all the
+00:41 
+
+00:41 Smoothie Bowl images into our circle
+00:43 
+
+00:43 make sure to distribute them evenly
+00:45 
+
+00:45 around the circle so we can create a
+00:47 
+
+00:47 good flow for our slider
+00:51 
+
+00:51 all right
+00:59 
+
+00:59 once we have all our bowls nicely placed
+01:02 
+
+01:02 around the circle we're going to select
+01:04 
+
+01:04 all these images along with the circle
+01:06 
+
+01:06 itself and create a group now move this
+01:10 
+
+01:10 group into the hero section frame
+01:12 
+
+01:12 carefully position it so that we're only
+01:14 
+
+01:14 able to see the pink bowl at the
+01:16 
+
+01:16 Forefront
+01:19 
+
+01:19 next we're going to give our Circle a
+01:21 
+
+01:21 bit of color let's go with a vibrant
+01:23 
+
+01:23 pink now let's go back to our collection
+01:25 
+
+01:25 of smoothie Bowl images
+01:27 
+
+01:27 copy all of them and scale them down a
+01:29 
+
+01:29 bit
+01:30 
+
+01:30 once that's done we'll place these
+01:32 
+
+01:32 images right below the paragraph
+01:34 
+
+01:34 these will serve as our handy selectors
+01:36 
+
+01:36 to switch between the bowls
+01:42 
+
+01:42 to help our viewers know which smoothie
+01:45 
+
+01:45 bowl is currently in the spotlight We'll
+01:47 
+
+01:47 add a white rectangle just below the
+01:49 
+
+01:49 pink Bowl
+01:54 
+
+01:54 finally We'll add some drop Shadows to
+01:57 
+
+01:57 all the bowl images this will give our
+01:59 
+
+01:59 design a more 3D and interactive feel
+02:19 
+
+02:19 [Music]
+02:22 
+
+02:22 now we're going to duplicate the frame
+02:25 
+
+02:25 select the circle with all the bowls and
+02:27 
+
+02:27 rotate it just enough so that you can
+02:29 
+
+02:29 see the next bulb that's to the right of
+02:31 
+
+02:31 the currently displayed Bowl you might
+02:33 
+
+02:33 need to play around with the positioning
+02:34 
+
+02:34 a bit to get it just right and here's a
+02:37 
+
+02:37 little trick let's also rotate the
+02:39 
+
+02:39 individual Bowl
+02:41 
+
+02:41 this will give the effect of the bowl
+02:42 
+
+02:42 also turning as it moves into view
+02:45 
+
+02:45 now we're going to tweak the colors and
+02:48 
+
+02:48 visuals a bit to bring everything
+02:49 
+
+02:49 together
+02:51 
+
+02:51 first let's adjust the colors of our
+02:53 
+
+02:53 page to match the new smoothie Bowl
+02:55 
+
+02:56 this can really tie the design together
+02:57 
+
+02:57 and create a cohesive look and feel
+03:01 
+
+03:01 next we'll play around with the Shadows
+03:03 
+
+03:03 a bit
+03:15 
+
+03:15 we're also going to change the color of
+03:17 
+
+03:17 the paragraph
+03:19 
+
+03:19 with our light background we want to
+03:20 
+
+03:20 make sure the text has enough contrast
+03:22 
+
+03:22 to be easily readable
+03:24 
+
+03:24 for the Final Touch let's switch out the
+03:26 
+
+03:26 fruit in the background
+03:28 
+
+03:28 we'll replace it with these mango pieces
+03:30 
+
+03:30 to match our smoothie
+03:35 
+
+03:35 change the pass-through property to 20
+03:37 
+
+03:37 so that the fruit doesn't overshadow the
+03:40 
+
+03:40 text
+03:42 
+
+03:42 foreign
+03:48 
+
+03:48 moving forward
+03:49 
+
+03:49 duplicate the frame we've just created
+03:52 
+
+03:52 select the circle that includes all the
+03:55 
+
+03:55 bowls and once again rotate it just
+03:57 
+
+03:57 enough to bring the next bowl from the
+03:59 
+
+03:59 right into view
+04:02 
+
+04:02 let's match the page colors to this new
+04:04 
+
+04:04 bowl and move the rectangle indicating
+04:06 
+
+04:06 the selected Bowl under the next Bowl
+04:11 
+
+04:11 [Music]
+04:13 
+
+04:13 tweak the Shadows a bit to ensure they
+04:15 
+
+04:15 match with the new color changes
+04:19 
+
+04:19 foreign
+04:23 
+
+04:23 ly replace the background fruit to match
+04:26 
+
+04:26 the Smoothie Bowl currently displayed
+04:51 
+
+04:51 now repeat the entire process for the
+04:54 
+
+04:54 last frame with a blue smoothie Bowl
+04:57 
+
+04:57 foreign
+05:01 
+
+05:01 don't forget to adjust the color shadows
+05:04 
+
+05:04 and background fruit accordingly
+05:12 
+
+05:12 [Music]
+05:39 
+
+05:39 fantastic
+05:41 
+
+05:41 to make our design even more vibrant
+05:43 
+
+05:43 let's apply a drop shadow to all the
+05:45 
+
+05:45 bowls currently in view
+05:48 
+
+05:48 this will give us a nice 3d effect
+06:04 
+
+06:04 [Music]
+06:07 
+
+06:07 and now on to our final and most
+06:10 
+
+06:10 exciting part where we'll be creating
+06:11 
+
+06:11 interactions between frames
+06:14 
+
+06:14 this is where we truly bring our design
+06:17 
+
+06:17 to life switch over to the Prototype tab
+06:19 
+
+06:20 in the first frame select the second
+06:22 
+
+06:22 bowl click on the plus sign and drag it
+06:24 
+
+06:24 to connect it with the second frame
+06:26 
+
+06:26 choose on click as the trigger smart
+06:29 
+
+06:29 animate for the animation ease out for
+06:31 
+
+06:31 the easing and set the duration to 600
+06:33 
+
+06:33 milliseconds let's ensure that our users
+06:36 
+
+06:36 can also go back to the previous Bowl
+06:38 
+
+06:38 not just forward use the same details as
+06:41 
+
+06:41 before enabling our design to move both
+06:43 
+
+06:43 ways
+06:49 
+
+06:49 let's continue by creating an
+06:51 
+
+06:51 interaction between the second and third
+06:53 
+
+06:53 frames
+06:54 
+
+06:54 keep the interaction details consistent
+06:56 
+
+06:56 with what we used before
+06:58 
+
+06:58 and for our final interaction let's
+07:01 
+
+07:01 connect the third and the last frames in
+07:03 
+
+07:03 the same way
+07:05 
+
+07:05 now let's preview our prototype and see
+07:07 
+
+07:07 how it performs
+07:13 
+
+07:13 the Smoothie bowls are rotating
+07:15 
+
+07:15 beautifully when we're moving forward
+07:17 
+
+07:17 but not when we're going back
+07:20 
+
+07:20 but we can fix this easily
+07:22 
+
+07:22 the trick here is to adjust the
+07:24 
+
+07:24 positions of bowls in subsequent frames
+07:26 
+
+07:26 for instance
+07:28 
+
+07:28 if we want the pink Bowl to rotate when
+07:31 
+
+07:31 going back we need to rotate it slightly
+07:33 
+
+07:33 in this Frame
+07:35 
+
+07:35 now when we preview the Prototype again
+07:38 
+
+07:38 it works as expected
+07:40 
+
+07:40 repeat this process for all the bowls to
+07:43 
+
+07:43 ensure a smooth rotation in both
+07:45 
+
+07:45 directions with that final tweak we've
+07:47 
+
+07:47 created a beautiful engaging animation
+07:49 
+
+07:50 that will truly bring your designs to
+07:52 
+
+07:52 life don't forget to subscribe to our
+07:54 
+
+07:54 channel for more creative content and
+07:56 
+
+07:56 inspiring design ideas

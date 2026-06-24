@@ -173,7 +173,6 @@ export default function SettingsPage() {
       {/* ── HEADER ── */}
       <div className="st-header">
         <div>
-          <h2 className="st-title">Settings</h2>
           <p className="st-sub">Your profile directly affects how leads are scored for you.</p>
         </div>
         {dirty && (

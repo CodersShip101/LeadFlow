@@ -29,12 +29,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   const pageTitles: Record<string, string> = {
     '/dashboard': 'Feed',
-    '/dashboard/saved': 'Saved',
+    '/dashboard/saved': 'Shortlist',
     '/dashboard/applied': 'Pipeline',
     '/dashboard/profile': 'Settings',
-    '/dashboard/billing': 'Plan',
+    '/dashboard/billing': 'Plan & billing',
+    '/dashboard/templates': 'Pitch templates',
+    '/dashboard/team': 'Team',
+    '/dashboard/analytics': 'Analytics',
+    '/dashboard/lead': 'Lead',
   }
-  const pageTitle = Object.entries(pageTitles).find(([k]) => pathname.startsWith(k))?.[1] || 'Feed'
+  // Match the most specific (longest) path so sub-pages don't fall back to "Feed".
+  const pageTitle = Object.entries(pageTitles)
+    .sort((a, b) => b[0].length - a[0].length)
+    .find(([k]) => pathname === k || pathname.startsWith(k + '/'))?.[1] || 'Feed'
 
   useEffect(() => {
     const load = async () => {

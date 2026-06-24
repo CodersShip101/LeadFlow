@@ -107,7 +107,6 @@ export default function SavedPage() {
       {/* Header */}
       <div className="sv-header">
         <div className="sv-header-left">
-          <h2 className="sv-title">Shortlist</h2>
           <p className="sv-sub">
             <span className="sv-count">{leads.length}</span> saved
             {hotLeads.length > 0 && <span className="sv-hot-badge"><i className="ti ti-flame" />{hotLeads.length} posted recently</span>}

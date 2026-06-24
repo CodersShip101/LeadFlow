@@ -126,7 +126,6 @@ export default function PipelinePage() {
       {/* ── HEADER ── */}
       <div className="pipe-header">
         <div className="pipe-header-left">
-          <h2 className="pipe-title">Pipeline</h2>
           <p className="pipe-sub">Drag cards to advance stages, or use the quick-action buttons.</p>
         </div>
         <div className="pipe-stats">

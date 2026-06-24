@@ -156,7 +156,6 @@ function TeamContent() {
     <>
       <div className="tm-header">
         <div>
-          <h2 className="tm-title">Team</h2>
           <p className="tm-sub">{seatsUsed} of {org.seats} seats used{pendingInvites.length > 0 ? ` · ${pendingInvites.length} pending` : ''}</p>
         </div>
         <span className={`tm-role-chip ${isAdmin ? 'admin' : ''}`}>

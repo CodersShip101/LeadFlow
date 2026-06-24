@@ -230,7 +230,6 @@ export function planFeatures(tier: Tier): PlanFeature[] {
         { txt: `Everything in ${PRICING.pro.label}` },
         { txt: 'Adjustable scoring weights' },
         { txt: `Priority scanning every ${ENTITLEMENTS.max.scanIntervalHours}h` },
-        { txt: 'Refresh your feed on demand' },
         { txt: 'Full analytics + CSV export' },
         { txt: 'Saved pitch & application templates' },
         { txt: 'Follow-up reminders & calendar sync' },

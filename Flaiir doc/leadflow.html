@@ -1,0 +1,1419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LeadFlow — Quality Freelance Leads, Delivered Daily</title>
+  <meta name="description" content="Stop hunting for clients. LeadFlow finds, vets and scores freelance leads for you — delivered fresh every 6 hours." />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+
+  <!-- Tabler Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css" />
+
+  <!-- Tailwind CSS Play CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            green: {
+              50:  '#eef9f3',
+              100: '#d7f3e5',
+              200: '#b0e7cc',
+              300: '#7dd4ae',
+              400: '#4aaa7a',
+              500: '#2d8a5e',
+              600: '#166B42',
+              700: '#1d5c2d',
+              800: '#1b4024',
+              900: '#132a1a',
+              950: '#0c1f14',
+            },
+            amber: {
+              500: '#E8A020',
+            },
+            base: {
+              50:  '#f7f8f9',
+              100: '#eaeef2',
+              200: '#dde2e7',
+              300: '#c4cad0',
+              400: '#9ca3aa',
+              500: '#6b7280',
+              600: '#4b5563',
+              700: '#374151',
+              800: '#1f2937',
+              900: '#111827',
+            }
+          },
+          fontFamily: {
+            sans:    ['"DM Sans"', 'sans-serif'],
+            serif:   ['"Instrument Serif"', 'serif'],
+          },
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* ─── Base ─────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      color: #1f2937;
+      background: #f7f8f9;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ─── CSS Variables ─────────────────────────────────── */
+    :root {
+      --green-50:  #eef9f3;
+      --green-100: #d7f3e5;
+      --green-400: #4aaa7a;
+      --green-500: #2d8a5e;
+      --green-600: #166B42;
+      --green-700: #1d5c2d;
+      --green-800: #1b4024;
+      --green-900: #132a1a;
+      --green-950: #0c1f14;
+      --amber-500: #E8A020;
+    }
+
+    /* ─── Typography ────────────────────────────────────── */
+    .font-serif-italic {
+      font-family: 'Instrument Serif', serif;
+      font-style: italic;
+    }
+
+    /* ─── Navbar ─────────────────────────────────────────── */
+    #navbar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 50;
+      transition: background 0.3s, backdrop-filter 0.3s, box-shadow 0.3s;
+    }
+    #navbar.scrolled {
+      background: rgba(247,248,249,0.88);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      box-shadow: 0 1px 0 rgba(0,0,0,0.07);
+    }
+
+    /* ─── Buttons ────────────────────────────────────────── */
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--green-600);
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.9375rem;
+      padding: 11px 22px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .btn-primary:hover {
+      background: var(--green-700);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(22,107,66,0.28);
+    }
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: transparent;
+      color: var(--green-700);
+      font-weight: 600;
+      font-size: 0.9375rem;
+      padding: 11px 22px;
+      border-radius: 10px;
+      border: 1.5px solid var(--green-500);
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s, transform 0.2s;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .btn-secondary:hover {
+      background: var(--green-50);
+      border-color: var(--green-600);
+      transform: translateY(-2px);
+    }
+    .btn-outline-white {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: transparent;
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.9375rem;
+      padding: 11px 22px;
+      border-radius: 10px;
+      border: 1.5px solid rgba(255,255,255,0.4);
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s, transform 0.2s;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .btn-outline-white:hover {
+      background: rgba(255,255,255,0.1);
+      border-color: rgba(255,255,255,0.7);
+      transform: translateY(-2px);
+    }
+    .btn-nav-login {
+      display: inline-flex;
+      align-items: center;
+      color: var(--green-700);
+      font-weight: 500;
+      font-size: 0.9rem;
+      padding: 7px 14px;
+      border-radius: 8px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      text-decoration: none;
+    }
+    .btn-nav-login:hover { background: var(--green-50); }
+    .btn-nav-start {
+      display: inline-flex;
+      align-items: center;
+      background: var(--green-600);
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.875rem;
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.15s;
+      text-decoration: none;
+    }
+    .btn-nav-start:hover { background: var(--green-700); transform: translateY(-1px); }
+
+    /* ─── Eyebrow badge ──────────────────────────────────── */
+    .eyebrow-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--green-50);
+      border: 1px solid var(--green-100);
+      color: var(--green-700);
+      font-size: 0.8125rem;
+      font-weight: 600;
+      padding: 5px 12px 5px 8px;
+      border-radius: 999px;
+    }
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--green-500);
+      position: relative;
+      flex-shrink: 0;
+    }
+    .pulse-dot::after {
+      content: '';
+      position: absolute;
+      inset: -3px;
+      border-radius: 50%;
+      border: 2px solid var(--green-400);
+      animation: pulse-ring 1.8s ease-out infinite;
+    }
+    @keyframes pulse-ring {
+      0%   { opacity: 1;   transform: scale(1); }
+      100% { opacity: 0;   transform: scale(2.2); }
+    }
+
+    /* ─── Dashboard mockup ───────────────────────────────── */
+    .mockup-shell {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(22,107,66,0.12), 0 4px 16px rgba(0,0,0,0.06);
+    }
+    .mockup-header {
+      background: #f8fafc;
+      border-bottom: 1px solid #e9edf1;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .traffic-light {
+      width: 10px; height: 10px; border-radius: 50%;
+    }
+    .lead-card {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 14px 16px;
+      border-bottom: 1px solid #f0f3f6;
+      transition: background 0.15s;
+    }
+    .lead-card:last-child { border-bottom: none; }
+    .lead-card:hover { background: #f8fafc; }
+    .source-badge {
+      font-size: 0.6875rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      padding: 2px 7px;
+      border-radius: 6px;
+      white-space: nowrap;
+    }
+    .score-circle {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700;
+      font-size: 0.8125rem;
+      flex-shrink: 0;
+    }
+
+    /* ─── Dark mockup (dashboard preview section) ────────── */
+    .dark-mockup {
+      background: #0e2016;
+      border: 1px solid rgba(74,170,122,0.15);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.5);
+    }
+    .dark-lead-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 13px 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      transition: background 0.15s;
+    }
+    .dark-lead-row:hover { background: rgba(255,255,255,0.03); }
+    .dark-lead-row:last-child { border-bottom: none; }
+
+    /* ─── Cards ──────────────────────────────────────────── */
+    .card {
+      background: #fff;
+      border: 1px solid var(--base-200, #dde2e7);
+      border-radius: 14px;
+      transition: transform 0.22s ease, box-shadow 0.22s ease;
+    }
+    .card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.09);
+    }
+    .feature-icon-box {
+      width: 44px; height: 44px;
+      border-radius: 12px;
+      background: var(--green-50);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.2s;
+    }
+    .card:hover .feature-icon-box { background: var(--green-100); }
+
+    /* ─── Testimonial cards ──────────────────────────────── */
+    .testimonial-card {
+      background: #fff;
+      border: 1px solid #e8eeeb;
+      border-radius: 16px;
+      padding: 28px;
+      transition: transform 0.22s, box-shadow 0.22s;
+    }
+    .testimonial-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 40px rgba(22,107,66,0.1);
+    }
+    .avatar-circle {
+      width: 42px; height: 42px;
+      border-radius: 50%;
+      background: var(--green-600);
+      color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700;
+      font-size: 0.875rem;
+      flex-shrink: 0;
+    }
+
+    /* ─── Pricing ────────────────────────────────────────── */
+    .pricing-card {
+      background: #fff;
+      border: 1.5px solid #dde2e7;
+      border-radius: 18px;
+      padding: 32px 28px;
+      transition: transform 0.22s, box-shadow 0.22s;
+      position: relative;
+    }
+    .pricing-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 48px rgba(0,0,0,0.1);
+    }
+    .pricing-card.popular {
+      border-color: var(--green-600);
+      box-shadow: 0 0 0 1px var(--green-600), 0 8px 32px rgba(22,107,66,0.15);
+    }
+    .popular-badge {
+      position: absolute;
+      top: -13px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--green-600);
+      color: #fff;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      padding: 4px 14px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+    .price-feature {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      font-size: 0.9rem;
+      color: #374151;
+      padding: 5px 0;
+    }
+    .price-feature i { color: var(--green-600); font-size: 17px; flex-shrink: 0; }
+
+    /* ─── Toggle switch ──────────────────────────────────── */
+    .toggle-track {
+      width: 46px; height: 26px;
+      background: #dde2e7;
+      border-radius: 999px;
+      position: relative;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .toggle-track.on { background: var(--green-600); }
+    .toggle-thumb {
+      position: absolute;
+      top: 3px; left: 3px;
+      width: 20px; height: 20px;
+      background: #fff;
+      border-radius: 50%;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.18);
+      transition: transform 0.28s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .toggle-track.on .toggle-thumb { transform: translateX(20px); }
+
+    /* ─── FAQ accordion ──────────────────────────────────── */
+    .faq-item {
+      border-bottom: 1px solid #e4e9ed;
+    }
+    .faq-question {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 20px 0;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 1rem;
+      color: #1f2937;
+      user-select: none;
+      list-style: none;
+    }
+    .faq-question:hover { color: var(--green-700); }
+    .faq-chevron {
+      flex-shrink: 0;
+      width: 22px; height: 22px;
+      color: var(--green-600);
+      transition: transform 0.25s ease;
+    }
+    .faq-item.open .faq-chevron { transform: rotate(180deg); }
+    .faq-answer {
+      overflow: hidden;
+      max-height: 0;
+      transition: max-height 0.32s ease, padding 0.32s ease;
+    }
+    .faq-answer-inner {
+      padding-bottom: 18px;
+      font-size: 0.9375rem;
+      color: #4b5563;
+      line-height: 1.65;
+    }
+
+    /* ─── Scroll reveal ──────────────────────────────────── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.55s ease, transform 0.55s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: none;
+    }
+    .reveal-delay-1 { transition-delay: 0.08s; }
+    .reveal-delay-2 { transition-delay: 0.16s; }
+    .reveal-delay-3 { transition-delay: 0.24s; }
+    .reveal-delay-4 { transition-delay: 0.32s; }
+    .reveal-delay-5 { transition-delay: 0.40s; }
+    .reveal-delay-6 { transition-delay: 0.48s; }
+
+    /* ─── Step connector ─────────────────────────────────── */
+    .step-connector {
+      flex: 1;
+      height: 1.5px;
+      background: linear-gradient(90deg, var(--green-300), var(--green-100));
+    }
+
+    /* ─── Gradient hero bg ───────────────────────────────── */
+    .hero-bg {
+      background: linear-gradient(160deg, #f0faf5 0%, #f7f8f9 55%, #eef6f1 100%);
+    }
+
+    /* ─── Section spacing ────────────────────────────────── */
+    .section-py { padding-top: 96px; padding-bottom: 96px; }
+    @media (max-width: 768px) {
+      .section-py { padding-top: 64px; padding-bottom: 64px; }
+    }
+
+    /* ─── Nav mobile ──────────────────────────────────────── */
+    #mobile-menu {
+      display: none;
+      flex-direction: column;
+      gap: 4px;
+      background: rgba(247,248,249,0.97);
+      backdrop-filter: blur(14px);
+      border-top: 1px solid #e4e9ed;
+      padding: 16px;
+    }
+    #mobile-menu.open { display: flex; }
+    #mobile-menu a {
+      padding: 11px 14px;
+      border-radius: 10px;
+      color: #374151;
+      font-weight: 500;
+      text-decoration: none;
+      transition: background 0.15s;
+    }
+    #mobile-menu a:hover { background: var(--green-50); color: var(--green-700); }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════
+     NAVBAR
+══════════════════════════════════════════════════ -->
+<nav id="navbar">
+  <div class="max-w-7xl mx-auto px-5 sm:px-8 flex items-center justify-between h-16">
+    <!-- Logo -->
+    <a href="#" class="flex items-center gap-2 text-decoration-none" style="text-decoration:none">
+      <div style="
+        width:32px;height:32px;
+        background:var(--green-600);
+        border-radius:9px;
+        display:flex;align-items:center;justify-content:center;
+        flex-shrink:0;
+      ">
+        <span style="color:#fff;font-weight:800;font-size:0.875rem;letter-spacing:-0.02em;">LF</span>
+      </div>
+      <span style="font-weight:700;font-size:1.0625rem;color:#111827;letter-spacing:-0.02em;">LeadFlow</span>
+    </a>
+
+    <!-- Desktop nav -->
+    <div class="hidden md:flex items-center gap-1">
+      <a href="#features" class="btn-nav-login">Features</a>
+      <a href="#how-it-works" class="btn-nav-login">How it works</a>
+      <a href="#pricing" class="btn-nav-login">Pricing</a>
+    </div>
+
+    <!-- Desktop CTA -->
+    <div class="hidden md:flex items-center gap-2">
+      <a href="#" class="btn-nav-login">Log in</a>
+      <a href="#" class="btn-nav-start">Start free</a>
+    </div>
+
+    <!-- Mobile hamburger -->
+    <button id="hamburger" class="md:hidden p-2 rounded-lg hover:bg-green-50 transition-colors" aria-label="Toggle menu">
+      <i class="ti ti-menu-2 text-xl text-gray-700"></i>
+    </button>
+  </div>
+  <!-- Mobile menu -->
+  <div id="mobile-menu" role="menu">
+    <a href="#features">Features</a>
+    <a href="#how-it-works">How it works</a>
+    <a href="#pricing">Pricing</a>
+    <div style="height:1px;background:#e4e9ed;margin:4px 0;"></div>
+    <a href="#">Log in</a>
+    <a href="#" style="background:var(--green-600);color:#fff;font-weight:600;" class="text-center">Start free →</a>
+  </div>
+</nav>
+
+
+<!-- ═══════════════════════════════════════════════
+     HERO
+══════════════════════════════════════════════════ -->
+<section class="hero-bg" style="padding-top:120px;padding-bottom:80px;">
+  <div class="max-w-7xl mx-auto px-5 sm:px-8">
+    <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+
+      <!-- Left: copy -->
+      <div class="reveal">
+        <!-- Eyebrow -->
+        <div class="eyebrow-badge mb-6 inline-flex">
+          <span class="pulse-dot"></span>
+          <span>340 freelancers in beta — spots still open</span>
+        </div>
+
+        <!-- Heading -->
+        <h1 class="font-serif-italic mb-5" style="font-size:clamp(2.5rem,5.5vw,3.75rem);line-height:1.08;letter-spacing:-0.02em;color:#111827;">
+          Stop chasing leads.<br>
+          Start <span style="color:var(--green-600);">choosing</span> them.
+        </h1>
+
+        <!-- Sub -->
+        <p style="font-size:1.125rem;line-height:1.7;color:#4b5563;max-width:480px;" class="mb-8">
+          LeadFlow finds, vets, and scores freelance opportunities that match your skills — delivered fresh every 6 hours, so you spend time billing, not searching.
+        </p>
+
+        <!-- CTAs -->
+        <div class="flex flex-wrap gap-3 mb-6">
+          <a href="#" class="btn-primary">Get started free →</a>
+          <a href="#how-it-works" class="btn-secondary">
+            <i class="ti ti-player-play" style="font-size:15px;"></i>
+            See how it works
+          </a>
+        </div>
+
+        <!-- Trust line -->
+        <div class="flex flex-wrap items-center gap-x-5 gap-y-1" style="font-size:0.8125rem;color:#6b7280;">
+          <span class="flex items-center gap-1.5"><i class="ti ti-circle-check" style="color:var(--green-500);"></i>No card needed</span>
+          <span class="flex items-center gap-1.5"><i class="ti ti-circle-check" style="color:var(--green-500);"></i>3 free leads to start</span>
+          <span class="flex items-center gap-1.5"><i class="ti ti-circle-check" style="color:var(--green-500);"></i>Cancel anytime</span>
+        </div>
+      </div>
+
+      <!-- Right: Dashboard mockup -->
+      <div class="reveal reveal-delay-2">
+        <div class="mockup-shell" style="max-width:480px;margin:0 auto;">
+          <!-- Header bar -->
+          <div class="mockup-header">
+            <span class="traffic-light" style="background:#ff5f57;"></span>
+            <span class="traffic-light" style="background:#ffbd2e;"></span>
+            <span class="traffic-light" style="background:#28c840;"></span>
+            <div style="flex:1;display:flex;align-items:center;justify-content:space-between;margin-left:8px;">
+              <span style="font-size:0.8125rem;font-weight:600;color:#374151;">LeadFlow — Today's leads</span>
+              <span style="font-size:0.75rem;background:var(--green-50);color:var(--green-700);border-radius:999px;padding:2px 9px;font-weight:600;border:1px solid var(--green-100);">12 new today</span>
+            </div>
+          </div>
+          <!-- Sub-header -->
+          <div style="padding:10px 16px;background:#fafbfc;border-bottom:1px solid #f0f3f6;display:flex;align-items:center;justify-content:space-between;">
+            <span style="font-size:0.8125rem;font-weight:600;color:#374151;">Fresh leads</span>
+            <span style="font-size:0.75rem;color:#9ca3aa;">Updated 14 min ago</span>
+          </div>
+
+          <!-- Lead cards -->
+          <!-- Reddit -->
+          <div class="lead-card">
+            <div style="flex:1;min-width:0;">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="source-badge" style="background:#fff0e0;color:#c45200;">Reddit</span>
+                <span style="font-size:0.75rem;color:#9ca3aa;">r/forhire</span>
+              </div>
+              <div style="font-size:0.875rem;font-weight:600;color:#1f2937;margin-bottom:3px;">Senior UX Designer — London (Fintech)</div>
+              <div style="font-size:0.75rem;color:#6b7280;">£350–450/day · Figma, Design Systems · Inside IR35</div>
+            </div>
+            <div class="score-circle" style="background:#dcfce7;color:#166B42;">9.1</div>
+          </div>
+
+          <!-- WWR -->
+          <div class="lead-card">
+            <div style="flex:1;min-width:0;">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="source-badge" style="background:#e0f0ff;color:#0057a8;">WWR</span>
+                <span style="font-size:0.75rem;color:#9ca3aa;">we work remotely</span>
+              </div>
+              <div style="font-size:0.875rem;font-weight:600;color:#1f2937;margin-bottom:3px;">Full-Stack Developer — Remote UK</div>
+              <div style="font-size:0.75rem;color:#6b7280;">£60–75k · React, Node.js · Starts ASAP</div>
+            </div>
+            <div class="score-circle" style="background:#dcfce7;color:#166B42;">8.7</div>
+          </div>
+
+          <!-- Reed -->
+          <div class="lead-card">
+            <div style="flex:1;min-width:0;">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="source-badge" style="background:#f3e8ff;color:#7c3aed;">Reed</span>
+                <span style="font-size:0.75rem;color:#9ca3aa;">reed.co.uk</span>
+              </div>
+              <div style="font-size:0.875rem;font-weight:600;color:#1f2937;margin-bottom:3px;">Brand Identity — 3-month contract</div>
+              <div style="font-size:0.75rem;color:#6b7280;">£40k pro rata · Branding, Illustrator</div>
+            </div>
+            <div class="score-circle" style="background:#fef9c3;color:#854d0e;">7.4</div>
+          </div>
+
+          <!-- Remote OK -->
+          <div class="lead-card">
+            <div style="flex:1;min-width:0;">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="source-badge" style="background:#e0fef0;color:#166B42;">Remote OK</span>
+              </div>
+              <div style="font-size:0.875rem;font-weight:600;color:#1f2937;margin-bottom:3px;">DevOps Engineer — Full-time Remote</div>
+              <div style="font-size:0.75rem;color:#6b7280;">£70–90k · AWS, Terraform, K8s</div>
+            </div>
+            <div class="score-circle" style="background:#dcfce7;color:#166B42;">8.9</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════
+     STATS BAR
+══════════════════════════════════════════════════ -->
+<div style="background:var(--green-900);">
+  <div class="max-w-7xl mx-auto px-5 sm:px-8 py-10">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-0 reveal">
+      <div class="text-center md:border-r md:border-green-800 px-4">
+        <div class="font-serif-italic" style="font-size:2.25rem;color:#fff;line-height:1.1;">2,400+</div>
+        <div style="font-size:0.875rem;color:var(--green-300);margin-top:4px;">Leads posted</div>
+      </div>
+      <div class="text-center md:border-r md:border-green-800 px-4">
+        <div class="font-serif-italic" style="font-size:2.25rem;color:#fff;line-height:1.1;">340+</div>
+        <div style="font-size:0.875rem;color:var(--green-300);margin-top:4px;">Freelancers in beta</div>
+      </div>
+      <div class="text-center md:border-r md:border-green-800 px-4">
+        <div class="font-serif-italic" style="font-size:2.25rem;color:#fff;line-height:1.1;">6h</div>
+        <div style="font-size:0.875rem;color:var(--green-300);margin-top:4px;">Refresh interval</div>
+      </div>
+      <div class="text-center px-4">
+        <div class="font-serif-italic" style="font-size:2.25rem;color:#fff;line-height:1.1;">9.1</div>
+        <div style="font-size:0.875rem;color:var(--green-300);margin-top:4px;">Avg quality score</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════
+     PROBLEM
+══════════════════════════════════════════════════ -->
+<section class="section-py" style="background:#fff;" id="problem">
+  <div class="max-w-7xl mx-auto px-5 sm:px-8">
+    <!-- Section label -->
+    <div class="text-center mb-14 reveal">
+      <div style="display:inline-flex;align-items:center;gap:6px;font-size:0.8125rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--green-600);margin-bottom:12px;">
+        <i class="ti ti-alert-circle"></i> The problem
+      </div>
+      <h2 class="font-serif-italic" style="font-size:clamp(1.875rem,4vw,2.75rem);letter-spacing:-0.02em;color:#111827;">The old way wastes your time</h2>
+      <p style="font-size:1rem;color:#6b7280;max-width:500px;margin:12px auto 0;line-height:1.65;">Job boards are noisy, budgets are hidden, and applying blind burns hours you should be billing.</p>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-6">
+      <!-- Card 1 -->
+      <div class="card p-7 reveal reveal-delay-1">
+        <div class="feature-icon-box mb-4" style="background:#fff1f1;">
+          <i class="ti ti-clock-x" style="font-size:22px;color:#dc2626;"></i>
+        </div>
+        <h3 style="font-weight:700;font-size:1.0625rem;color:#111827;margin-bottom:10px;">Hours lost to job boards</h3>
+        <p style="font-size:0.9375rem;color:#6b7280;line-height:1.65;">Scrolling through irrelevant listings, filtering noise, applying blind. Time that should be billed, spent on search.</p>
+      </div>
+
+      <!-- Card 2 -->
+      <div class="card p-7 reveal reveal-delay-2">
+        <div class="feature-icon-box mb-4" style="background:#fff8e8;">
+          <i class="ti ti-file-unknown" style="font-size:22px;color:#d97706;"></i>
+        </div>
+        <h3 style="font-weight:700;font-size:1.0625rem;color:#111827;margin-bottom:10px;">Leads with no substance</h3>
+        <p style="font-size:0.9375rem;color:#6b7280;line-height:1.65;">No budget, no scope, no response. You've sent the proposal, done the call — and heard nothing back.</p>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="card p-7 reveal reveal-delay-3">
+        <div class="feature-icon-box mb-4" style="background:#f0f4ff;">
+          <i class="ti ti-chart-bar-off" style="font-size:22px;color:#4f46e5;"></i>
+        </div>
+        <h3 style="font-weight:700;font-size:1.0625rem;color:#111827;margin-bottom:10px;">Feast-or-famine pipeline</h3>
+        <p style="font-size:0.9375rem;color:#6b7280;line-height:1.65;">Land a project, go dark on new leads. The cycle ends when quality leads arrive on a consistent schedule.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════
+     HOW IT WORKS
+══════════════════════════════════════════════════ -->
+<section class="section-py" style="background:var(--green-50);" id="how-it-works">
+  <div class="max-w-7xl mx-auto px-5 sm:px-8">
+    <div class="text-center mb-16 reveal">
+      <div style="display:inline-flex;align-items:center;gap:6px;font-size:0.8125rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--green-600);margin-bottom:12px;">
+        <i class="ti ti-list-check"></i> How it works
+      </div>
+      <h2 class="font-serif-italic" style="font-size:clamp(1.875rem,4vw,2.75rem);letter-spacing:-0.02em;color:#111827;">Up and running in minutes</h2>
+    </div>
+
+    <!-- Steps -->
+    <div class="flex flex-col md:flex-row items-start gap-8 md:gap-4">
+      <!-- Step 1 -->
+      <div class="flex-1 text-center reveal reveal-delay-1">
+        <div style="
+          width:56px;height:56px;border-radius:50%;
+          background:var(--green-600);color:#fff;
+          display:flex;align-items:center;justify-content:center;
+          font-size:1.25rem;font-weight:800;
+          margin:0 auto 20px;
+          box-shadow:0 4px 16px rgba(22,107,66,0.3);
+        ">1</div>
+        <h3 style="font-weight:700;font-size:1.0625rem;color:#111827;margin-bottom:10px;">Create your profile</h3>
+        <p style="font-size:0.9375rem;color:#4b5563;line-height:1.65;max-width:260px;margin:0 auto;">Tell us your skills, day rate, and the kind of work you want. Takes under two minutes.</p>
+      </div>
+
+      <!-- Connector -->
+      <div class="hidden md:flex items-center" style="padding-top:28px;flex-shrink:0;width:60px;">
+        <div class="step-connector"></div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="flex-1 text-center reveal reveal-delay-2">
+        <div style="
+          width:56px;height:56px;border-radius:50%;
+          background:var(--green-600);color:#fff;
+          display:flex;align-items:center;justify-content:center;
+          font-size:1.25rem;font-weight:800;
+          margin:0 auto 20px;
+          box-shadow:0 4px 16px rgba(22,107,66,0.3);
+        ">2</div>
+        <h3 style="font-weight:700;font-size:1.0625rem;color:#111827;margin-bottom:10px;">We find and score leads</h3>
+        <p style="font-size:0.9375rem;color:#4b5563;line-height:1.65;max-width:260px;margin:0 auto;">AI scans Reddit, Reed, and We Work Remotely every 6 hours. Only quality leads make it through.</p>
+      </div>
+
+      <!-- Connector -->
+      <div class="hidden md:flex items-center" style="padding-top:28px;flex-shrink:0;width:60px;">
+        <div class="step-connector"></div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="flex-1 text-center reveal reveal-delay-3">
+        <div style="
+          width:56px;height:56px;border-radius:50%;
+          background:var(--green-600);color:#fff;
+          display:flex;align-items:center;justify-content:center;
+          font-size:1.25rem;font-weight:800;
+          margin:0 auto 20px;
+          box-shadow:0 4px 16px rgba(22,107,66,0.3);
+        ">3</div>
+        <h3 style="font-weight:700;font-size:1.0625rem;color:#111827;margin-bottom:10px;">Land the work</h3>
+        <p style="font-size:0.9375rem;color:#4b5563;line-height:1.65;max-width:260px;margin:0 auto;">Browse your personal lead feed, express interest, and apply directly on the original platform.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════
+     FEATURES
+══════════════════════════════════════════════════ -->
+<section class="section-py" style="background:#fff;" id="features">
+  <div class="max-w-7xl mx-auto px-5 sm:px-8">
+    <div class="text-center mb-14 reveal">
+      <div style="display:inline-flex;align-items:center;gap:6px;font-size:0.8125rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--green-600);margin-bottom:12px;">
+        <i class="ti ti-sparkles"></i> Features
+      </div>
+      <h2 class="font-serif-italic" style="font-size:clamp(1.875rem,4vw,2.75rem);letter-spacing:-0.02em;color:#111827;">Everything you need, nothing you don't</h2>
+    </div>
+
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      <!-- Feature 1 -->
+      <div class="card p-7 reveal reveal-delay-1">
+        <div class="feature-icon-box mb-4">
+          <i class="ti ti-brain" style="font-size:22px;color:var(--green-600);"></i>
+        </div>
+        <h3 style="font-weight:700;font-size:1.0625rem;color:#111827;margin-bottom:8px;">AI quality scoring</h3>
+        <p style="font-size:0.9375rem;color:#6b7280;line-height:1.65;">Every lead rated 1–10 so you prioritise the best opportunities first. No more guessing which are worth your time.</p>
+      </div>
+
+      <!-- Feature 2 -->
+      <div class="card p-7 reveal reveal-delay-2">
+        <div class="feature-icon-box mb-4">
+          <i class="ti ti-refresh" style="font-size:22px;color:var(--green-600);"></i>
+        </div>
+        <h3 style="font-weight:700;font-size:1.0625rem;color:#111827;margin-bottom:8px;">6-hour refresh</h3>
+        <p style="font-size:0.9375rem;color:#6b7280;line-height:1.65;">Always fresh. New leads appear within minutes of being posted on any platform — you're never looking at stale listings.</p>
+      </div>
+
+      <!-- Feature 3 -->
+      <div class="card p-7 reveal reveal-delay-3">
+        <div class="feature-icon-box mb-4">
+          <i class="ti ti-adjustments-horizontal" style="font-size:22px;color:var(--green-600);"></i>
+        </div>
+        <h3 style="font-weight:700;font-size:1.0625rem;color:#111827;margin-bottom:8px;">Skill matching</h3>
+        <p style="font-size:0.9375rem;color:#6b7280;line-height:1.65;">Only see leads that match your skills and rate. No irrelevant noise in your feed, ever.</p>
+      </div>
+
+      <!-- Feature 4 -->
+      <div class="card p-7 reveal reveal-delay-1">
+        <div class="feature-icon-box mb-4">
+          <i class="ti ti-currency-pound" style="font-size:22px;color:var(--green-600);"></i>
+        </div>
+        <h3 style="font-weight:700;font-size:1.0625rem;color:#111827;margin-bottom:8px;">Budget visible</h3>
+        <p style="font-size:0.9375rem;color:#6b7280;line-height:1.65;">Real numbers upfront. No more applying to leads with vague budgets or discovering the rate doesn't work after a call.</p>
+      </div>
+
+      <!-- Feature 5 -->
+      <div class="card p-7 reveal reveal-delay-2">
+        <div class="feature-icon-box mb-4">
+          <i class="ti ti-external-link" style="font-size:22px;color:var(--green-600);"></i>
+        </div>
+        <h3 style="font-weight:700;font-size:1.0625rem;color:#111827;margin-bottom:8px;">Direct source links</h3>
+        <p style="font-size:0.9375rem;color:#6b7280;line-height:1.65;">Apply on the original platform. Full transparency — we never gate-keep the lead or add an intermediary layer.</p>
+      </div>
+
+      <!-- Feature 6 -->
+      <div class="card p-7 reveal reveal-delay-3">
+        <div class="feature-icon-box mb-4">
+          <i class="ti ti-chart-kanban" style="font-size:22px;color:var(--green-600);"></i>
+        </div>
+        <h3 style="font-weight:700;font-size:1.0625rem;color:#111827;margin-bottom:8px;">Pipeline tracking</h3>
+        <p style="font-size:0.9375rem;color:#6b7280;line-height:1.65;">Follow applications from interested to won. Never lose track of where a lead stands in your pipeline.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════
+     DASHBOARD PREVIEW (dark section)
+══════════════════════════════════════════════════ -->
+<section class="section-py" style="background:var(--green-900);" id="product">
+  <div class="max-w-7xl mx-auto px-5 sm:px-8">
+    <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+
+      <!-- Left: copy -->
+      <div class="reveal">
+        <div style="display:inline-flex;align-items:center;gap:6px;font-size:0.8125rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--green-400);margin-bottom:12px;">
+          <i class="ti ti-layout-dashboard"></i> The product
+        </div>
+        <h2 class="font-serif-italic" style="font-size:clamp(1.875rem,4vw,2.625rem);letter-spacing:-0.02em;color:#fff;margin-bottom:16px;">See your leads at a glance</h2>
+        <p style="font-size:1rem;color:var(--green-300);line-height:1.7;margin-bottom:28px;">A clean, opinionated feed designed to get you from "new leads" to "application sent" in under a minute.</p>
+
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:20px;height:20px;border-radius:50%;background:var(--green-600);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <i class="ti ti-check" style="font-size:12px;color:#fff;"></i>
+            </div>
+            <span style="font-size:0.9375rem;color:var(--green-100);">Filter by source, score, budget, or skill</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:20px;height:20px;border-radius:50%;background:var(--green-600);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <i class="ti ti-check" style="font-size:12px;color:#fff;"></i>
+            </div>
+            <span style="font-size:0.9375rem;color:var(--green-100);">One click to express interest and save a lead</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:20px;height:20px;border-radius:50%;background:var(--green-600);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <i class="ti ti-check" style="font-size:12px;color:#fff;"></i>
+            </div>
+            <span style="font-size:0.9375rem;color:var(--green-100);">Email digest with your top 5 leads every morning</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:20px;height:20px;border-radius:50%;background:var(--green-600);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <i class="ti ti-check" style="font-size:12px;color:#fff;"></i>
+            </div>
+            <span style="font-size:0.9375rem;color:var(--green-100);">Track pipeline from interest to won</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: dark mockup -->
+      <div class="reveal reveal-delay-2">
+        <div class="dark-mockup" style="max-width:480px;margin:0 auto;">
+          <!-- Header -->
+          <div style="background:#091810;padding:12px 16px;border-bottom:1px solid rgba(74,170,122,0.1);display:flex;align-items:center;justify-content:space-between;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <div style="width:8px;height:8px;border-radius:50%;background:var(--green-500);"></div>
+              <span style="font-size:0.8125rem;font-weight:600;color:rgba(255,255,255,0.6);">LeadFlow Dashboard</span>
+            </div>
+            <span style="font-size:0.75rem;color:rgba(255,255,255,0.3);">Your feed · Today</span>
+          </div>
+          <!-- Toolbar -->
+          <div style="padding:10px 16px;background:#091810;border-bottom:1px solid rgba(255,255,255,0.05);display:flex;align-items:center;gap:8px;">
+            <span style="font-size:0.75rem;color:rgba(255,255,255,0.35);background:rgba(255,255,255,0.06);padding:4px 10px;border-radius:6px;">All sources</span>
+            <span style="font-size:0.75rem;color:var(--green-400);background:rgba(74,170,122,0.12);padding:4px 10px;border-radius:6px;border:1px solid rgba(74,170,122,0.2);">Score 8+</span>
+          </div>
+
+          <!-- Lead rows -->
+          <div class="dark-lead-row">
+            <div style="width:6px;height:6px;border-radius:50%;background:var(--green-400);flex-shrink:0;"></div>
+            <div style="flex:1;min-width:0;">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
+                <span style="font-size:0.6875rem;font-weight:700;color:#ff8c42;background:rgba(255,140,66,0.12);padding:1px 6px;border-radius:4px;">Reddit</span>
+              </div>
+              <div style="font-size:0.875rem;font-weight:600;color:#f1f5f9;margin-bottom:2px;">Senior UX Designer — London (Fintech)</div>
+              <div style="font-size:0.75rem;color:rgba(255,255,255,0.35);">£350–450/day · Figma, Design Systems</div>
+            </div>
+            <div style="width:34px;height:34px;border-radius:50%;background:rgba(74,170,122,0.15);border:1.5px solid var(--green-500);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.8125rem;color:var(--green-400);flex-shrink:0;">9.2</div>
+          </div>
+
+          <div class="dark-lead-row">
+            <div style="width:6px;height:6px;border-radius:50%;background:var(--green-400);flex-shrink:0;"></div>
+            <div style="flex:1;min-width:0;">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
+                <span style="font-size:0.6875rem;font-weight:700;color:#6ea8d4;background:rgba(110,168,212,0.12);padding:1px 6px;border-radius:4px;">WWR</span>
+              </div>
+              <div style="font-size:0.875rem;font-weight:600;color:#f1f5f9;margin-bottom:2px;">Full-Stack Developer — Remote UK</div>
+              <div style="font-size:0.75rem;color:rgba(255,255,255,0.35);">£500–700/day · React, Node.js</div>
+            </div>
+            <div style="width:34px;height:34px;border-radius:50%;background:rgba(74,170,122,0.15);border:1.5px solid var(--green-500);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.8125rem;color:var(--green-400);flex-shrink:0;">7.8</div>
+          </div>
+
+          <div class="dark-lead-row">
+            <div style="width:6px;height:6px;border-radius:50%;background:rgba(156,163,170,0.4);flex-shrink:0;"></div>
+            <div style="flex:1;min-width:0;">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
+                <span style="font-size:0.6875rem;font-weight:700;color:#b08adb;background:rgba(176,138,219,0.12);padding:1px 6px;border-radius:4px;">Reed</span>
+              </div>
+              <div style="font-size:0.875rem;font-weight:600;color:#f1f5f9;margin-bottom:2px;">Brand Identity — 3-month contract</div>
+              <div style="font-size:0.75rem;color:rgba(255,255,255,0.35);">£2,800/mo · Branding, Illustrator</div>
+            </div>
+            <div style="width:34px;height:34px;border-radius:50%;background:rgba(212,184,0,0.1);border:1.5px solid rgba(212,184,0,0.4);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.8125rem;color:#d4bc00;flex-shrink:0;">6.5</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════
+     TESTIMONIALS
+══════════════════════════════════════════════════ -->
+<section class="section-py" style="background:var(--green-50);">
+  <div class="max-w-7xl mx-auto px-5 sm:px-8">
+    <div class="text-center mb-14 reveal">
+      <div style="display:inline-flex;align-items:center;gap:6px;font-size:0.8125rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--green-600);margin-bottom:12px;">
+        <i class="ti ti-quote"></i> What freelancers say
+      </div>
+      <h2 class="font-serif-italic" style="font-size:clamp(1.875rem,4vw,2.75rem);letter-spacing:-0.02em;color:#111827;">From the beta community</h2>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-6">
+      <!-- Testimonial 1 -->
+      <div class="testimonial-card reveal reveal-delay-1">
+        <div style="color:var(--amber-500);font-size:1rem;letter-spacing:1px;margin-bottom:16px;">★★★★★</div>
+        <p style="font-size:0.9375rem;color:#374151;line-height:1.7;margin-bottom:20px;">"Landed a £2,400 contract within my first week. The quality score saved me hours — I ignored anything under 7 and applied to three leads. Got two replies."</p>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div class="avatar-circle">SJ</div>
+          <div>
+            <div style="font-weight:700;font-size:0.9rem;color:#111827;">Sarah J.</div>
+            <div style="font-size:0.8125rem;color:#6b7280;">UX Designer, London</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Testimonial 2 -->
+      <div class="testimonial-card reveal reveal-delay-2">
+        <div style="color:var(--amber-500);font-size:1rem;letter-spacing:1px;margin-bottom:16px;">★★★★★</div>
+        <p style="font-size:0.9375rem;color:#374151;line-height:1.7;margin-bottom:20px;">"I used to spend Sunday afternoons trawling job boards. Now I spend 10 minutes on Monday morning. The ROI on the Pro plan is a joke — I made it back in one contract."</p>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div class="avatar-circle">MT</div>
+          <div>
+            <div style="font-weight:700;font-size:0.9rem;color:#111827;">Marcus T.</div>
+            <div style="font-size:0.8125rem;color:#6b7280;">Full-Stack Developer, Manchester</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Testimonial 3 -->
+      <div class="testimonial-card reveal reveal-delay-3">
+        <div style="color:var(--amber-500);font-size:1rem;letter-spacing:1px;margin-bottom:16px;">★★★★★</div>
+        <p style="font-size:0.9375rem;color:#374151;line-height:1.7;margin-bottom:20px;">"The budget filter alone is worth it. I stopped wasting time on leads that can't pay my rate. My pipeline is healthier than it's been in three years of freelancing."</p>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div class="avatar-circle">PK</div>
+          <div>
+            <div style="font-weight:700;font-size:0.9rem;color:#111827;">Priya K.</div>
+            <div style="font-size:0.8125rem;color:#6b7280;">Brand Designer, Edinburgh</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════
+     PRICING
+══════════════════════════════════════════════════ -->
+<section class="section-py" style="background:#fff;" id="pricing">
+  <div class="max-w-7xl mx-auto px-5 sm:px-8">
+    <div class="text-center mb-10 reveal">
+      <div style="display:inline-flex;align-items:center;gap:6px;font-size:0.8125rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--green-600);margin-bottom:12px;">
+        <i class="ti ti-receipt"></i> Pricing
+      </div>
+      <h2 class="font-serif-italic" style="font-size:clamp(1.875rem,4vw,2.75rem);letter-spacing:-0.02em;color:#111827;margin-bottom:8px;">Simple, honest pricing</h2>
+      <p style="font-size:1rem;color:#6b7280;">Pay monthly or save with annual billing.</p>
+    </div>
+
+    <!-- Toggle -->
+    <div class="flex items-center justify-center gap-4 mb-12 reveal">
+      <span id="lbl-monthly" style="font-size:0.9375rem;font-weight:600;color:#111827;">Monthly</span>
+      <div
+        id="pricing-toggle"
+        class="toggle-track"
+        role="switch"
+        aria-checked="false"
+        tabindex="0"
+        aria-label="Switch to annual billing"
+      >
+        <div class="toggle-thumb"></div>
+      </div>
+      <span id="lbl-annual" style="font-size:0.9375rem;font-weight:500;color:#6b7280;">
+        Annual
+        <span id="save-badge" style="
+          display:inline-block;
+          background:var(--amber-500);
+          color:#fff;
+          font-size:0.6875rem;
+          font-weight:700;
+          padding:2px 8px;
+          border-radius:999px;
+          margin-left:6px;
+          vertical-align:middle;
+        ">Save 2 months</span>
+      </span>
+    </div>
+
+    <!-- Cards -->
+    <div class="grid md:grid-cols-3 gap-6 items-start reveal">
+
+      <!-- Free -->
+      <div class="pricing-card">
+        <div style="font-size:0.875rem;font-weight:700;color:var(--green-600);letter-spacing:0.04em;text-transform:uppercase;margin-bottom:8px;">Free</div>
+        <div style="margin-bottom:6px;">
+          <span style="font-size:2.5rem;font-weight:800;color:#111827;letter-spacing:-0.03em;">£0</span>
+          <span style="font-size:0.9rem;color:#6b7280;">/month</span>
+        </div>
+        <p style="font-size:0.875rem;color:#6b7280;margin-bottom:24px;">For freelancers exploring the platform.</p>
+        <div style="height:1px;background:#f0f3f6;margin-bottom:20px;"></div>
+        <div style="display:flex;flex-direction:column;gap:2px;margin-bottom:28px;">
+          <div class="price-feature"><i class="ti ti-check"></i> 3 leads per week</div>
+          <div class="price-feature"><i class="ti ti-check"></i> AI quality scores</div>
+          <div class="price-feature"><i class="ti ti-check"></i> Direct source links</div>
+        </div>
+        <a href="#" class="btn-secondary" style="width:100%;justify-content:center;">Get started free</a>
+      </div>
+
+      <!-- Pro (popular) -->
+      <div class="pricing-card popular" style="transform:translateY(-8px);">
+        <div class="popular-badge">Most popular</div>
+        <div style="font-size:0.875rem;font-weight:700;color:var(--green-600);letter-spacing:0.04em;text-transform:uppercase;margin-bottom:8px;">Pro</div>
+        <div style="margin-bottom:6px;">
+          <span class="price-amount" data-monthly="29" data-annual="24" style="font-size:2.5rem;font-weight:800;color:#111827;letter-spacing:-0.03em;">£29</span>
+          <span class="price-period" style="font-size:0.9rem;color:#6b7280;">/month</span>
+        </div>
+        <p style="font-size:0.875rem;color:#6b7280;margin-bottom:24px;">For active freelancers building a steady pipeline.</p>
+        <div style="height:1px;background:#f0f3f6;margin-bottom:20px;"></div>
+        <div style="display:flex;flex-direction:column;gap:2px;margin-bottom:28px;">
+          <div class="price-feature"><i class="ti ti-check"></i> Unlimited leads</div>
+          <div class="price-feature"><i class="ti ti-check"></i> Skill + rate filtering</div>
+          <div class="price-feature"><i class="ti ti-check"></i> Daily email digest</div>
+          <div class="price-feature"><i class="ti ti-check"></i> Pipeline tracking</div>
+          <div class="price-feature"><i class="ti ti-check"></i> Priority support</div>
+        </div>
+        <a href="#" class="btn-primary" style="width:100%;justify-content:center;">Start 7-day free trial</a>
+      </div>
+
+      <!-- Growth -->
+      <div class="pricing-card">
+        <div style="font-size:0.875rem;font-weight:700;color:var(--green-600);letter-spacing:0.04em;text-transform:uppercase;margin-bottom:8px;">Growth</div>
+        <div style="margin-bottom:6px;">
+          <span class="price-amount" data-monthly="49" data-annual="40" style="font-size:2.5rem;font-weight:800;color:#111827;letter-spacing:-0.03em;">£49</span>
+          <span class="price-period" style="font-size:0.9rem;color:#6b7280;">/month</span>
+        </div>
+        <p style="font-size:0.875rem;color:#6b7280;margin-bottom:24px;">For established freelancers optimising every lead.</p>
+        <div style="height:1px;background:#f0f3f6;margin-bottom:20px;"></div>
+        <div style="display:flex;flex-direction:column;gap:2px;margin-bottom:28px;">
+          <div class="price-feature"><i class="ti ti-check"></i> Everything in Pro</div>
+          <div class="price-feature"><i class="ti ti-check"></i> Custom lead alerts</div>
+          <div class="price-feature"><i class="ti ti-check"></i> Analytics dashboard</div>
+          <div class="price-feature"><i class="ti ti-check"></i> CSV export</div>
+          <div class="price-feature"><i class="ti ti-check"></i> Dedicated onboarding</div>
+        </div>
+        <a href="#" class="btn-primary" style="width:100%;justify-content:center;background:var(--green-700);">Start 7-day free trial</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════
+     FAQ
+══════════════════════════════════════════════════ -->
+<section class="section-py" style="background:var(--green-50);" id="faq">
+  <div class="max-w-3xl mx-auto px-5 sm:px-8">
+    <div class="text-center mb-12 reveal">
+      <div style="display:inline-flex;align-items:center;gap:6px;font-size:0.8125rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--green-600);margin-bottom:12px;">
+        <i class="ti ti-help-circle"></i> FAQ
+      </div>
+      <h2 class="font-serif-italic" style="font-size:clamp(1.875rem,4vw,2.75rem);letter-spacing:-0.02em;color:#111827;">Common questions</h2>
+    </div>
+
+    <div style="background:#fff;border-radius:16px;border:1px solid #e4e9ed;overflow:hidden;padding:0 28px;" class="reveal">
+
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          How does LeadFlow find leads?
+          <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+        <div class="faq-answer">
+          <div class="faq-answer-inner">We scan Reddit (r/forhire, r/freelance, r/hiring), Reed.co.uk, and We Work Remotely every 6 hours. Leads are processed by our AI scoring model before appearing in your feed — so you only see what's worth your time.</div>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          How does the quality score work?
+          <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+        <div class="faq-answer">
+          <div class="faq-answer-inner">Scores are based on budget clarity, scope specificity, response rate signals, and match against your profile. A 9+ lead typically has a clear brief, stated budget, and a hiring decision expected within two weeks.</div>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          Can I apply directly, or does LeadFlow intermediate?
+          <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+        <div class="faq-answer">
+          <div class="faq-answer-inner">We never intermediate. Every lead includes a direct link to the original post. You apply on the client's terms, on the original platform — no middleman, no markup.</div>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          How is this different from job boards?
+          <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+        <div class="faq-answer">
+          <div class="faq-answer-inner">Job boards surface everything. LeadFlow surfaces only what matches your profile, with quality scores so you can prioritise. You spend 10 minutes on the best leads instead of an hour trawling everything.</div>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          What happens after my trial ends?
+          <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+        <div class="faq-answer">
+          <div class="faq-answer-inner">You'll be moved to the Free plan (3 leads/week) unless you upgrade. We'll send a reminder 48 hours before the trial ends. No card is required to start — ever.</div>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          Can I cancel at any time?
+          <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+        <div class="faq-answer">
+          <div class="faq-answer-inner">Yes, always. Cancel from your account settings at any time and you keep access until the end of your billing period. No fees, no friction.</div>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          What kinds of freelancers does LeadFlow work for?
+          <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+        <div class="faq-answer">
+          <div class="faq-answer-inner">We cover design, development, copywriting, marketing, and consulting. Our scoring model is tuned for UK and remote freelance markets, with more regions coming soon.</div>
+        </div>
+      </div>
+
+      <div class="faq-item" style="border-bottom:none;">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          Is my profile data shared with clients?
+          <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+        <div class="faq-answer">
+          <div class="faq-answer-inner">No. Your profile is used only to filter and score leads relevant to you. Clients on other platforms never see your LeadFlow profile.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════
+     FINAL CTA
+══════════════════════════════════════════════════ -->
+<section style="background:var(--green-900);padding:96px 0;">
+  <div class="max-w-3xl mx-auto px-5 sm:px-8 text-center reveal">
+    <h2 class="font-serif-italic" style="font-size:clamp(2rem,5vw,3.25rem);letter-spacing:-0.02em;color:#fff;margin-bottom:16px;">
+      Join 340+ freelancers getting quality leads daily
+    </h2>
+    <p style="font-size:1.0625rem;color:var(--green-300);line-height:1.65;margin-bottom:36px;">Get your first leads in minutes. No credit card needed.</p>
+    <div class="flex flex-wrap justify-center gap-4">
+      <a href="#" class="btn-primary" style="font-size:1rem;padding:13px 28px;">Get started free →</a>
+      <a href="#" class="btn-outline-white" style="font-size:1rem;padding:13px 28px;">Log in</a>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════
+     FOOTER
+══════════════════════════════════════════════════ -->
+<footer style="background:var(--green-950);">
+  <div class="max-w-7xl mx-auto px-5 sm:px-8 py-14">
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
+      <!-- Brand -->
+      <div class="lg:col-span-1">
+        <a href="#" style="display:flex;align-items:center;gap:8px;text-decoration:none;margin-bottom:12px;">
+          <div style="width:30px;height:30px;background:var(--green-600);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+            <span style="color:#fff;font-weight:800;font-size:0.8125rem;">LF</span>
+          </div>
+          <span style="color:#fff;font-weight:700;font-size:1rem;letter-spacing:-0.02em;">LeadFlow</span>
+        </a>
+        <p style="font-size:0.875rem;color:var(--green-400);line-height:1.6;">Quality freelance leads, delivered every 6 hours.</p>
+      </div>
+
+      <!-- Product -->
+      <div>
+        <h4 style="font-size:0.8125rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--green-400);margin-bottom:14px;">Product</h4>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <a href="#features" style="font-size:0.9rem;color:var(--green-300);text-decoration:none;transition:color 0.15s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='var(--green-300)'">Features</a>
+          <a href="#pricing" style="font-size:0.9rem;color:var(--green-300);text-decoration:none;transition:color 0.15s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='var(--green-300)'">Pricing</a>
+          <a href="#" style="font-size:0.9rem;color:var(--green-300);text-decoration:none;transition:color 0.15s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='var(--green-300)'">Blog</a>
+        </div>
+      </div>
+
+      <!-- Company -->
+      <div>
+        <h4 style="font-size:0.8125rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--green-400);margin-bottom:14px;">Company</h4>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <a href="#" style="font-size:0.9rem;color:var(--green-300);text-decoration:none;transition:color 0.15s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='var(--green-300)'">About</a>
+          <a href="#" style="font-size:0.9rem;color:var(--green-300);text-decoration:none;transition:color 0.15s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='var(--green-300)'">Careers</a>
+          <a href="#" style="font-size:0.9rem;color:var(--green-300);text-decoration:none;transition:color 0.15s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='var(--green-300)'">Contact</a>
+        </div>
+      </div>
+
+      <!-- Legal -->
+      <div>
+        <h4 style="font-size:0.8125rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--green-400);margin-bottom:14px;">Legal</h4>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <a href="#" style="font-size:0.9rem;color:var(--green-300);text-decoration:none;transition:color 0.15s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='var(--green-300)'">Privacy policy</a>
+          <a href="#" style="font-size:0.9rem;color:var(--green-300);text-decoration:none;transition:color 0.15s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='var(--green-300)'">Terms of service</a>
+          <a href="#" style="font-size:0.9rem;color:var(--green-300);text-decoration:none;transition:color 0.15s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='var(--green-300)'">Cookie policy</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom bar -->
+    <div style="border-top:1px solid rgba(255,255,255,0.07);padding-top:24px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;">
+      <span style="font-size:0.8125rem;color:var(--green-500);">© 2026 LeadFlow. All rights reserved.</span>
+      <div style="display:flex;gap:16px;">
+        <a href="#" style="font-size:0.8125rem;color:var(--green-500);text-decoration:none;" onmouseover="this.style.color='var(--green-300)'" onmouseout="this.style.color='var(--green-500)'">Privacy</a>
+        <a href="#" style="font-size:0.8125rem;color:var(--green-500);text-decoration:none;" onmouseover="this.style.color='var(--green-300)'" onmouseout="this.style.color='var(--green-500)'">Terms</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+
+<!-- ═══════════════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════════════════ -->
+<script>
+  // ─── Navbar scroll effect ──────────────────────────────
+  const navbar = document.getElementById('navbar');
+  window.addEventListener('scroll', () => {
+    navbar.classList.toggle('scrolled', window.scrollY > 20);
+  }, { passive: true });
+
+  // ─── Mobile hamburger ──────────────────────────────────
+  const hamburger = document.getElementById('hamburger');
+  const mobileMenu = document.getElementById('mobile-menu');
+  hamburger.addEventListener('click', () => {
+    mobileMenu.classList.toggle('open');
+  });
+  // Close on link click
+  mobileMenu.querySelectorAll('a').forEach(a => {
+    a.addEventListener('click', () => mobileMenu.classList.remove('open'));
+  });
+
+  // ─── Scroll reveal ─────────────────────────────────────
+  const revealEls = document.querySelectorAll('.reveal');
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+  revealEls.forEach(el => revealObserver.observe(el));
+
+  // ─── Pricing toggle ────────────────────────────────────
+  const toggle = document.getElementById('pricing-toggle');
+  const lblMonthly = document.getElementById('lbl-monthly');
+  const lblAnnual = document.getElementById('lbl-annual');
+  let isAnnual = false;
+
+  function updatePricing() {
+    const amounts = document.querySelectorAll('.price-amount');
+    const periods = document.querySelectorAll('.price-period');
+    amounts.forEach(el => {
+      el.textContent = '£' + (isAnnual ? el.dataset.annual : el.dataset.monthly);
+    });
+    periods.forEach(el => {
+      el.textContent = isAnnual ? '/month, billed annually' : '/month';
+    });
+    lblMonthly.style.fontWeight = isAnnual ? '500' : '600';
+    lblMonthly.style.color = isAnnual ? '#6b7280' : '#111827';
+    lblAnnual.childNodes[0].nodeValue = 'Annual';
+    if (isAnnual) {
+      lblAnnual.style.fontWeight = '600';
+      lblAnnual.style.color = '#111827';
+    } else {
+      lblAnnual.style.fontWeight = '500';
+      lblAnnual.style.color = '#6b7280';
+    }
+  }
+
+  function activateToggle() {
+    isAnnual = !isAnnual;
+    toggle.classList.toggle('on', isAnnual);
+    toggle.setAttribute('aria-checked', String(isAnnual));
+    updatePricing();
+  }
+
+  toggle.addEventListener('click', activateToggle);
+  toggle.addEventListener('keydown', e => {
+    if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); activateToggle(); }
+  });
+
+  // ─── FAQ accordion ─────────────────────────────────────
+  function toggleFaq(btn) {
+    const item = btn.closest('.faq-item');
+    const answer = item.querySelector('.faq-answer');
+    const isOpen = item.classList.contains('open');
+
+    // Close all
+    document.querySelectorAll('.faq-item.open').forEach(openItem => {
+      openItem.classList.remove('open');
+      openItem.querySelector('.faq-answer').style.maxHeight = '0';
+    });
+
+    // Open clicked if it was closed
+    if (!isOpen) {
+      item.classList.add('open');
+      answer.style.maxHeight = answer.scrollHeight + 'px';
+    }
+  }
+</script>
+
+</body>
+</html>

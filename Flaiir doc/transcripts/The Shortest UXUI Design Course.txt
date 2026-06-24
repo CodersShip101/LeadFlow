@@ -1,0 +1,547 @@
+00:00 in the next few minutes we'll teach you
+00:02 
+
+00:02 all the important stuff you need to know
+00:03 
+
+00:03 about ux UI design we've condensed hours
+00:06 
+
+00:06 of training into this short but
+00:08 
+
+00:08 impactful video by the end you'll have
+00:10 
+
+00:10 practical skills you can use right away
+00:13 
+
+00:13 let's dive in first things first what is
+00:16 
+
+00:16 ux UI design user experience or ux
+00:19 
+
+00:19 design is about the overall feel of the
+00:21 
+
+00:21 experience and how a user interacts with
+00:23 
+
+00:23 a product ux design is concerned with
+00:26 
+
+00:26 the entire Journey a user takes this
+00:28 
+
+00:28 includes understanding user needs
+00:30 
+
+00:30 defining user flows and creating
+00:33 
+
+00:33 wireframes among other steps the primary
+00:35 
+
+00:35 objective of ux design is to create a
+00:38 
+
+00:38 product that is intuitive efficient and
+00:40 
+
+00:40 enjoyable to use user interface or UI
+00:43 
+
+00:43 design focuses primarily on the visual
+00:46 
+
+00:46 elements that users interact with on a
+00:48 
+
+00:48 digital platform this includes
+00:50 
+
+00:50 typography spacing colors icons and
+00:53 
+
+00:53 other graphical elements the goal of UI
+00:56 
+
+00:56 design is to create an intuitive and
+00:57 
+
+00:57 Visually appealing interface that
+00:59 
+
+00:59 provides a SE less experience for the
+01:01 
+
+01:01 user in a nutshell ux makes an app
+01:04 
+
+01:04 enjoyable while UI makes it beautiful
+01:06 
+
+01:06 and trust me you need both to create
+01:08 
+
+01:08 something people will love using now
+01:10 
+
+01:10 let's get into tools figma is currently
+01:12 
+
+01:12 the most popular tool among designers
+01:14 
+
+01:14 it's web-based allows for realtime
+01:16 
+
+01:16 collaboration and is easy to learn one
+01:19 
+
+01:19 of the first things you'll want to do in
+01:20 
+
+01:20 any project is set up a frame a frame is
+01:23 
+
+01:23 basically your canvas it's where all
+01:25 
+
+01:25 your Design Elements live with your
+01:27 
+
+01:27 frame ready this is where you can start
+01:28 
+
+01:28 building out your user interface you can
+01:30 
+
+01:30 easily add text shapes and images
+01:34 
+
+01:34 throughout this video I'll be designing
+01:35 
+
+01:35 a Marketplace for digital products this
+01:38 
+
+01:38 will give you a firsthand look at how to
+01:40 
+
+01:40 navigate the entire design process from
+01:42 
+
+01:42 start to finish design thinking is a
+01:44 
+
+01:44 widely used user- centered process with
+01:47 
+
+01:47 five key stages empathize Define id8
+01:50 
+
+01:50 prototype and test the process isn't
+01:52 
+
+01:52 linear you can go back to previous
+01:54 
+
+01:54 stages as you gain more insights there
+01:56 
+
+01:56 are also many more design processes and
+01:58 
+
+01:58 Frameworks that you might come across
+02:01 
+
+02:01 before we jump into the stages of design
+02:03 
+
+02:03 thinking it's worth noting that while
+02:05 
+
+02:05 we're covering all the essentials in
+02:07 
+
+02:07 this video there's so much more to learn
+02:09 
+
+02:09 to master uxui design for that we've
+02:12 
+
+02:12 created a uxui design Mastery course
+02:14 
+
+02:14 that covers everything you need to
+02:15 
+
+02:15 become a professional we've condensed
+02:17 
+
+02:17 the best of everything we've learned
+02:19 
+
+02:19 into this powerful course drawing from
+02:21 
+
+02:21 years of experience designing successful
+02:23 
+
+02:23 products so you can shortcut that
+02:25 
+
+02:25 process and save yourself years of
+02:27 
+
+02:27 frustration our course goes beyond just
+02:29 
+
+02:29 Theory we equip you with all the figma
+02:31 
+
+02:31 skills you need to create stunning well
+02:33 
+
+02:33 organized Pixel Perfect designs you can
+02:36 
+
+02:36 find the link in the description below
+02:38 
+
+02:38 the video now let's get into the first
+02:40 
+
+02:40 stage of design thinking empathize
+02:43 
+
+02:43 before you design anything you need to
+02:44 
+
+02:44 know who you're designing for you might
+02:47 
+
+02:47 start with user interviews where you ask
+02:49 
+
+02:49 open-ended questions this allows you to
+02:51 
+
+02:51 delve into user experiences and needs on
+02:53 
+
+02:53 a more personal level the goal is to
+02:56 
+
+02:56 really get into users heads and
+02:58 
+
+02:58 understand their needs pain points and
+02:60 
+
+02:60 what they value from the data gathered
+03:02 
+
+03:02 you can create user personas user
+03:04 
+
+03:04 Journey Maps Affinity diagrams and much
+03:07 
+
+03:07 more the defined stage is where you
+03:09 
+
+03:09 figure out the main problem you're going
+03:11 
+
+03:11 to solve and for that you need a problem
+03:13 
+
+03:13 statement a good problem statement must
+03:14 
+
+03:14 be specific a bad example might be
+03:17 
+
+03:17 people need a way to sell digital
+03:19 
+
+03:19 products it's not specific enough to
+03:22 
+
+03:22 guide your design process effectively a
+03:25 
+
+03:25 better more targeted problem statement
+03:26 
+
+03:26 could be independent creators need a way
+03:29 
+
+03:29 to reach a wider a audience and handle
+03:31 
+
+03:31 transactions securely when selling
+03:33 
+
+03:33 digital products that's specific it
+03:36 
+
+03:36 pinpoints a problem and identifies a
+03:38 
+
+03:38 user group giving you a clear road map
+03:40 
+
+03:40 for design so the question you and your
+03:42 
+
+03:42 team should ask now is how might we
+03:44 
+
+03:44 create a digital product Marketplace
+03:46 
+
+03:46 that empowers online creators to reach a
+03:48 
+
+03:48 wider audience while ensuring secure
+03:51 
+
+03:51 transactions here we're entering the id8
+03:53 
+
+03:53 stage the goal is simple come up with as
+03:55 
+
+03:55 many ideas as you can use whiteboards
+03:58 
+
+03:58 sticky notes or digital tool tools like
+04:00 
+
+04:00 Meo to quickly write down all your ideas
+04:04 
+
+04:04 some designers also start creating
+04:05 
+
+04:05 wireframes during the ideation stage the
+04:08 
+
+04:08 main purpose of wireframes is to define
+04:10 
+
+04:10 the dimensions and placement of page
+04:12 
+
+04:12 elements information architecture
+04:14 
+
+04:14 intended behaviors and navigation you
+04:16 
+
+04:16 can begin with either low Fidelity or
+04:18 
+
+04:18 mid-fidelity wireframes low Fidelity
+04:20 
+
+04:20 wireframes are quite basic focusing
+04:23 
+
+04:23 primarily on layout and functionality
+04:25 
+
+04:25 they serve as the skeleton of your
+04:27 
+
+04:27 design and are perfect for rough drafts
+04:28 
+
+04:28 and quick internal discussions mid
+04:31 
+
+04:31 Fidelity wireframes are more advanced
+04:33 
+
+04:33 including UI elements like buttons input
+04:36 
+
+04:36 fields and placeholder text while still
+04:38 
+
+04:38 avoiding
+04:40 
+
+04:40 details as your ideas start taking shape
+04:42 
+
+04:42 and you narrow down your choices you'll
+04:44 
+
+04:44 want to transition to High Fidelity
+04:46 
+
+04:46 wireframes that closely mirror what the
+04:48 
+
+04:48 final design will look like making them
+04:50 
+
+04:50 ideal for detailed user testing you can
+04:53 
+
+04:53 kick off user testing during the
+04:55 
+
+04:55 ideation or prototyping stage but it's
+04:57 
+
+04:57 generally more valuable when you test
+04:59 
+
+04:59 with high fidelity wireframes if the
+05:01 
+
+05:01 feedback is positive in alignance with
+05:03 
+
+05:03 your objectives you're ready to
+05:04 
+
+05:04 transform these High Fidelity wireframes
+05:06 
+
+05:06 into actual designs this is where things
+05:09 
+
+05:09 get exciting the core difference between
+05:11 
+
+05:11 a high fidelity wireframe and a
+05:13 
+
+05:13 prototype is interactivity this includes
+05:15 
+
+05:15 clickable buttons Transitions and even
+05:18 
+
+05:18 complex animations Now's the Time to
+05:20 
+
+05:20 finalize the user interface add the
+05:22 
+
+05:22 colors fonts and other design elements
+05:25 
+
+05:25 that will make your design visually
+05:26 
+
+05:26 appealing after your prototype is ready
+05:29 
+
+05:29 go for another round of user testing
+05:31 
+
+05:31 often how a user interacts with a
+05:33 
+
+05:33 complete prototype can reveal issues
+05:35 
+
+05:35 that weren't apparent in the wireframe
+05:36 
+
+05:36 stage usability testing is your goto
+05:39 
+
+05:39 method for this during these tests you
+05:41 
+
+05:41 can observe real users as they navigate
+05:43 
+
+05:43 through your product the goal is to
+05:45 
+
+05:45 identify any parts of your design that
+05:47 
+
+05:47 could be confusing or hard to use once
+05:49 
+
+05:49 you've conducted usability testing and
+05:51 
+
+05:51 made any necessary adjustments to your
+05:53 
+
+05:53 design the next step is the developer
+05:55 
+
+05:55 handoff this is where you transition
+05:57 
+
+05:57 your designs into something that can be
+05:59 
+
+05:59 implemented Ed by your development team
+06:01 
+
+06:01 to ensure a smooth handoff you'll need
+06:03 
+
+06:03 to prepare user interface specifications
+06:06 
+
+06:06 they should include detailed information
+06:07 
+
+06:07 about the dimensions spacing
+06:09 
+
+06:09 responsiveness and interactive elements
+06:11 
+
+06:11 in your design essentially it's a
+06:13 
+
+06:13 comprehensive guide that enables
+06:14 
+
+06:14 developers to bring your vision to life
+06:16 
+
+06:16 with code finally the designs are ready
+06:19 
+
+06:19 for implementation developers will now
+06:21 
+
+06:21 use the UI specs to start building the
+06:24 
+
+06:24 actual product turning what was once a
+06:26 
+
+06:26 series of wireframes and High Fidelity
+06:28 
+
+06:28 designs into a fully functional digital
+06:30 
+
+06:30 product and that's it for this video if
+06:33 
+
+06:33 you found it helpful make sure to give
+06:34 
+
+06:34 it a thumbs up and subscribe for more
+06:36 
+
+06:36 insightful content on uxui design

@@ -96,7 +96,6 @@ export default function TemplatesPage() {
     <>
       <div className="tm-header">
         <div>
-          <h2 className="tm-title">Pitch templates</h2>
           <p className="tm-sub">Save your best pitches and reuse them when you apply.</p>
         </div>
         <button className="btn btn-primary" onClick={openNew}>New template</button>

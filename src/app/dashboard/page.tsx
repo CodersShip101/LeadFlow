@@ -126,6 +126,7 @@ function SkeletonFeed() {
 
 export default function DashboardPage() {
   const [leads, setLeads] = useState<Lead[]>([])
+  const [lastRefreshedAt, setLastRefreshedAt] = useState<number>(Date.now())
   const [profile, setProfile] = useState<Profile | null>(null)
   const { query: search, setQuery: setSearch } = useSearch()
   const [sourceFilter, setSourceFilter] = useState('all')
@@ -197,6 +198,7 @@ export default function DashboardPage() {
 
       const { data: leadsData } = await supabase.from('leads').select('*').eq('status', 'active').order('posted_date', { ascending: false })
       setLeads(leadsData || [])
+      setLastRefreshedAt(Date.now())
 
       const lastSeen = parseInt(localStorage.getItem('lastSeen') || '0')
       if (lastSeen > 0) {
@@ -207,6 +209,17 @@ export default function DashboardPage() {
     }
     load()
   }, [supabase, router])
+
+  // Soft auto-refresh: silently re-fetch leads every 2 min (all plans, no reload).
+  useEffect(() => {
+    const refetch = async () => {
+      if (document.hidden) return
+      const { data } = await supabase.from('leads').select('*').eq('status', 'active').order('posted_date', { ascending: false })
+      if (data) { setLeads(data); setLastRefreshedAt(Date.now()) }
+    }
+    const id = setInterval(refetch, 120000)
+    return () => clearInterval(id)
+  }, [supabase])
 
   const appMap = useMemo(() => new Map(applications.map(a => [a.lead_id, a])), [applications])
 
@@ -556,7 +569,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <RefreshBar plan={plan as Tier} lastScanAt={lastScanAt} />
+      <RefreshBar plan={plan as Tier} lastScanAt={lastScanAt} lastRefreshedAt={lastRefreshedAt} />
 
       <div className="toolbar">
         <div className="toolbar-group">
