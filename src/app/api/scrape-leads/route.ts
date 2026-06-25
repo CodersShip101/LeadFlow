@@ -383,6 +383,18 @@ export async function POST() {
       } catch { /* non-blocking — don't fail scrape if alerts error */ }
     }
 
+    // Store scrape log so the dashboard can show actual last-scrape time
+    try {
+      await supabase.from('leads_scrape_log').insert({
+        duration_ms: Date.now() - startTime,
+        inserted: result.inserted,
+        found: result.found,
+        passed_filter: result.passed_filter,
+        skipped_duplicates: result.skipped_duplicates,
+        skipped_bidding: result.skipped_bidding,
+      })
+    } catch {}
+
     return NextResponse.json({
       ...result,
       timestamp: new Date().toISOString(),
@@ -403,8 +415,16 @@ export async function GET() {
       .order('posted_date', { ascending: false })
       .limit(5)
 
+    const { data: lastScrape } = await supabase
+      .from('leads_scrape_log')
+      .select('created_at, inserted')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+
     return NextResponse.json({
       recentLeads: recentLeads || [],
+      lastScrapedAt: lastScrape?.created_at || null,
       zenConfigured: !!process.env.ZEN_API_KEY,
       jsearchConfigured: !!process.env.RAPIDAPI_KEY,
     })

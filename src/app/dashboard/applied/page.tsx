@@ -42,11 +42,16 @@ export default function PipelinePage() {
     const load = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/auth/login'); return }
-      const res = await fetch('/api/applications')
-      if (!res.ok) return
-      const apps: Application[] = await res.json()
-      setApplications(apps)
-      const activeIds = apps.filter(a => a.status !== 'saved').map(a => a.lead_id)
+      let { data: apps, error } = await supabase
+        .from('applications')
+        .select('id, lead_id, status, outcome, outcome_at, created_at')
+        .eq('freelancer_id', user.id)
+      if (error || !apps) {
+        const res = await fetch('/api/applications')
+        if (res.ok) apps = await res.json()
+      }
+      setApplications((apps || []) as Application[])
+      const activeIds = (apps || []).filter(a => a.status !== 'saved').map(a => a.lead_id)
       if (activeIds.length > 0) {
         const { data } = await supabase.from('leads').select('*').in('id', activeIds).eq('status', 'active')
         setLeads(data || [])
@@ -93,7 +98,8 @@ export default function PipelinePage() {
   const handleDragStart = (e: React.DragEvent, leadId: string, col: string) => {
     setDragId(leadId); setDragCol(col)
     e.dataTransfer.effectAllowed = 'move'
-    requestAnimationFrame(() => (e.currentTarget as HTMLElement).classList.add('dragging'))
+    const el = e.currentTarget as HTMLElement | null
+    requestAnimationFrame(() => el?.classList.add('dragging'))
   }
   const handleDragEnd = (e: React.DragEvent) => {
     ;(e.currentTarget as HTMLElement).classList.remove('dragging')
@@ -115,7 +121,7 @@ export default function PipelinePage() {
         <h3>Your pipeline is empty</h3>
         <p>Click Apply on any lead in the feed to start tracking it here.</p>
         <button className="btn btn-primary" style={{ display: 'inline-flex' }} onClick={() => router.push('/dashboard')}>
-          <i className="ti ti-arrow-left"></i> Browse leads
+          Browse leads
         </button>
       </div>
     )

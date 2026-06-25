@@ -96,7 +96,7 @@ export default function SavedPage() {
         <h3>Your shortlist is empty</h3>
         <p>Bookmark leads you want to revisit. They'll wait here until you're ready to apply.</p>
         <button className="btn btn-primary" style={{ display: 'inline-flex' }} onClick={() => router.push('/dashboard')}>
-          <i className="ti ti-arrow-left"></i> Browse leads
+          Browse leads
         </button>
       </div>
     )

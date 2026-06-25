@@ -216,7 +216,7 @@ export default function LeadDetailPage() {
         )}
 
         <button className={`btn-icon ${isSaved ? 'on' : ''}`} title={isSaved ? 'Saved' : 'Save for later'} onClick={() => updateApp(isSaved ? 'remove' : 'saved')}>
-          <i className={`ti ti-bookmark${isSaved ? '-filled' : ''}`} />
+          <i className="ti ti-bookmark" />
         </button>
       </div>
 

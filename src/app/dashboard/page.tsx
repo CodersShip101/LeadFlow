@@ -127,6 +127,7 @@ function SkeletonFeed() {
 export default function DashboardPage() {
   const [leads, setLeads] = useState<Lead[]>([])
   const [lastRefreshedAt, setLastRefreshedAt] = useState<number>(Date.now())
+  const [lastScrapeAt, setLastScrapeAt] = useState<number | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
   const { query: search, setQuery: setSearch } = useSearch()
   const [sourceFilter, setSourceFilter] = useState('all')
@@ -143,6 +144,7 @@ export default function DashboardPage() {
   const [panelCopied, setPanelCopied] = useState(false)
   const touchStartY = useRef(0)
   const [viewedIds, setViewedIds] = useState<Set<string>>(new Set())
+  const [remindOpen, setRemindOpen] = useState<string | null>(null)
   const router = useRouter()
   const supabase = createClient()
 
@@ -151,11 +153,9 @@ export default function DashboardPage() {
   const plan = profile?.subscription_status || 'free'
   const isPro = plan === 'pro' || plan === 'max' || plan === 'team'
   const ent = entitlementsFor(plan as Tier)
-  const lastScanAt = useMemo(
-    () => leads.reduce((m, l) => Math.max(m, new Date(l.posted_date).getTime()), 0) || null,
-    [leads],
-  )
   const [exporting, setExporting] = useState(false)
+
+  const displayScrapeAt = lastScrapeAt
 
   const handleExport = async () => {
     if (exporting) return
@@ -204,6 +204,11 @@ export default function DashboardPage() {
       if (lastSeen > 0) {
         setNewCount((leadsData || []).filter(l => new Date(l.posted_date).getTime() > lastSeen).length)
       }
+
+      try {
+        const sr = await fetch('/api/scrape-leads')
+        if (sr.ok) { const sd = await sr.json(); setLastScrapeAt(sd.lastScrapedAt ? new Date(sd.lastScrapedAt).getTime() : null) }
+      } catch {}
       setLoading(false)
       localStorage.setItem('lastSeen', Date.now().toString())
     }
@@ -211,15 +216,20 @@ export default function DashboardPage() {
   }, [supabase, router])
 
   // Soft auto-refresh: silently re-fetch leads every 2 min (all plans, no reload).
+  // Only updates lastRefreshedAt when there are actually new leads so the timestamp is honest.
   useEffect(() => {
     const refetch = async () => {
       if (document.hidden) return
       const { data } = await supabase.from('leads').select('*').eq('status', 'active').order('posted_date', { ascending: false })
-      if (data) { setLeads(data); setLastRefreshedAt(Date.now()) }
+      if (data && data.length !== leads.length) { setLeads(data); setLastRefreshedAt(Date.now()) }
+      try {
+        const sr = await fetch('/api/scrape-leads')
+        if (sr.ok) { const sd = await sr.json(); setLastScrapeAt(sd.lastScrapedAt ? new Date(sd.lastScrapedAt).getTime() : null) }
+      } catch {}
     }
     const id = setInterval(refetch, 120000)
     return () => clearInterval(id)
-  }, [supabase])
+  }, [supabase, leads.length])
 
   const appMap = useMemo(() => new Map(applications.map(a => [a.lead_id, a])), [applications])
 
@@ -410,14 +420,13 @@ export default function DashboardPage() {
   }
 
   const handleApply = async (lead: Lead) => {
-    if (isFree && appCount >= 5) {
+    if (isFree && appCount >= FREE_LIMIT) {
       showLimit()
       return
     }
     if (applyingId) return
     setApplyingId(lead.id)
     try {
-      // add to pipeline via API
       const r = await fetch('/api/applications', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -426,10 +435,41 @@ export default function DashboardPage() {
       if (r.ok) {
         const app = await r.json()
         setApplications(prev => [...prev.filter(a => a.lead_id !== lead.id), app])
-        toast('Applied — added to your pipeline')
+        toast.success('Applied — added to your pipeline')
+      } else {
+        const err = await r.json().catch(() => ({ error: 'Request failed' }))
+        toast.error(err.error || 'Apply failed')
       }
     } finally {
       setApplyingId(null)
+    }
+  }
+
+  const handleShare = async (lead: Lead) => {
+    const text = `${lead.title}\n\n${(lead.description || '').substring(0, 300)}${lead.source_url ? `\n\n${lead.source_url}` : ''}`
+    if (navigator.share) {
+      try { await navigator.share({ title: lead.title, text }) } catch { /* user cancelled */ }
+    } else {
+      try { await navigator.clipboard.writeText(text); toast.success('Lead copied to clipboard') } catch { toast.error('Could not copy') }
+    }
+  }
+
+  const handleRemind = async (lead: Lead, hours: number) => {
+    setRemindOpen(null)
+    const followUp = new Date(Date.now() + hours * 3600000).toISOString()
+    const res = await fetch('/api/reminders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ lead_id: lead.id, follow_up_at: followUp }),
+    })
+    if (res.ok) {
+      const lbl = hours >= 24 ? `${hours / 24}d` : `${hours}h`
+      toast.success(`Reminder set for ${lbl}`)
+    } else if (res.status === 403) {
+      toast.error('Upgrade to Pro for reminders')
+    } else {
+      const d = await res.json().catch(() => ({ error: 'Failed to set reminder' }))
+      toast.error(d.error || 'Failed to set reminder')
     }
   }
 
@@ -443,7 +483,7 @@ export default function DashboardPage() {
     div.innerHTML = `
       <div style="background:var(--card);border-radius:var(--r-xl);padding:32px;max-width:400px;text-align:center;box-shadow:var(--sh-lg)">
         <div class="empty-icon" style="margin-bottom:16px"><i class="ti ti-bolt"></i></div>
-        <h3 class="display" style="font-size:20px;margin-bottom:8px">You've used all 5 free applications</h3>
+        <h3 class="display" style="font-size:20px;margin-bottom:8px">You've used all ${FREE_LIMIT} free applications</h3>
         <p style="color:var(--slate);font-size:14px;line-height:1.55;margin-bottom:22px">Upgrade to <b style="color:var(--ink)">Starter (£15/mo)</b> for unlimited applications and direct source links — or go <b style="color:var(--ink)">Pro</b> for analytics and adjustable scoring.</p>
         <button class="btn btn-warm" style="width:100%;margin-bottom:9px" onclick="this.closest('#limitModal').remove();window.location.href='/dashboard/billing'">See plans</button>
         <button class="btn btn-ghost" style="width:100%" onclick="this.closest('#limitModal').remove()">Maybe later</button>
@@ -478,7 +518,7 @@ export default function DashboardPage() {
     power: `<b>${newCount} new leads</b> today. You've applied to <b>${appCount}</b> this month — keep the streak going.`,
   }
 
-  const FREE_LIMIT = 5
+  const FREE_LIMIT = 6
   const leadCards = filtered.map((lead, idx) => {
     const isLocked = isFree && idx >= FREE_LIMIT
     const sc = computeMatchExplanation(lead, profile).score
@@ -528,18 +568,36 @@ export default function DashboardPage() {
         </div>
         <div className="skills-row">{skills}</div>
         <div className="lc-actions" onClick={e => e.stopPropagation()}>
-          <button className={`lc-save-btn ${saved ? 'on' : ''}`} aria-label={saved ? 'Remove from saved' : 'Save for later'} onClick={() => toggleSave(lead)}>
-            <i className="ti ti-bookmark"></i>
-            {saved && <span className="lc-save-lbl">Saved</span>}
-          </button>
-          {applied
-            ? <button className="applied-tag applied-tag-btn" onClick={() => router.push('/dashboard/applied')}><i className="ti ti-circle-check-filled"></i> In your pipeline <i className="ti ti-arrow-right applied-tag-arrow"></i></button>
-            : <>
-                <button className="btn btn-primary" title="Direct link · no commission" disabled={applyingId === lead.id} onClick={() => handleApply(lead)}>
+          <div className="lca-left">
+            {applied
+              ? <button className="applied-tag applied-tag-btn" onClick={() => router.push('/dashboard/applied')}><i className="ti ti-circle-check-filled" /> View in pipeline{profile?.portfolio_url ? <i className="ti ti-paperclip" style={{ fontSize: 13, opacity: .6 }} /> : ''}</button>
+              : <button className="btn btn-primary" title="Direct link · no commission" disabled={applyingId === lead.id} onClick={() => handleApply(lead)}>
                   {applyingId === lead.id ? <LoadingDots label="Applying" /> : <><i className="ti ti-send"></i> Apply</>}
-                </button>
-                <button className="btn btn-ghost" onClick={() => selectLead(lead)}>Full breakdown</button>
-              </>}
+                </button>}
+            <button className="lca-details" onClick={() => selectLead(lead)} title="View full breakdown">Details <i className="ti ti-chevron-right" /></button>
+          </div>
+          <div className="lca-right">
+            <span className="lca-sep" />
+            <button className={`lca-icon ${saved ? 'on' : ''}`} aria-label={saved ? 'Unsave' : 'Save'} onClick={() => toggleSave(lead)}>
+              <i className="ti ti-bookmark" />
+            </button>
+            <button className="lca-icon" aria-label="Share" onClick={() => handleShare(lead)}>
+              <i className="ti ti-share" />
+            </button>
+            <div className="lca-remind-wrap">
+              <button className="lca-icon" aria-label="Remind" onClick={() => setRemindOpen(remindOpen === lead.id ? null : lead.id)}>
+                <i className="ti ti-bell" />
+              </button>
+              {remindOpen === lead.id && (
+                <div className="lca-remind-drop">
+                  <button onClick={() => handleRemind(lead, 3)}>Later today</button>
+                  <button onClick={() => handleRemind(lead, 24)}>Tomorrow</button>
+                  <button onClick={() => handleRemind(lead, 72)}>In 3 days</button>
+                  <button onClick={() => handleRemind(lead, 168)}>Next week</button>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </article>
     )
@@ -569,7 +627,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <RefreshBar plan={plan as Tier} lastScanAt={lastScanAt} lastRefreshedAt={lastRefreshedAt} />
+      <RefreshBar plan={plan as Tier} lastScrapeAt={displayScrapeAt} lastRefreshedAt={lastRefreshedAt} newCount={newCount} />
 
       <div className="toolbar">
         <div className="toolbar-group">
@@ -613,14 +671,6 @@ export default function DashboardPage() {
           </>
         )}
       </div>
-
-      {filtered.length === 0 && leads.length > 0 && (
-        <div className="empty-filter">
-          <i className="ti ti-filter-off"></i>
-          <p>No leads match this filter.</p>
-          <button className="pill" onClick={() => { setScoreFilter('all'); setSourceFilter('all'); setEasyFilters(new Set()) }}>Clear filters</button>
-        </div>
-      )}
 
       {leads.length === 0 && (
         <div className="empty">
@@ -796,7 +846,7 @@ export default function DashboardPage() {
               <div className="dp-foot">
                 {applied
                   ? <button className="applied-tag applied-tag-btn" style={{ width: '100%', justifyContent: 'center' }} onClick={() => router.push('/dashboard/applied')}>
-                      <i className="ti ti-circle-check-filled" /> Tracking in your pipeline <i className="ti ti-arrow-right applied-tag-arrow" />
+                      <i className="ti ti-circle-check-filled" /> View in pipeline
                     </button>
                   : <button className="btn btn-primary" style={{ width: '100%' }} disabled={applyingId === l.id} onClick={() => handleApply(l)}>
                       {applyingId === l.id ? <LoadingDots label="Applying" /> : <><i className="ti ti-send" /> Apply &amp; track</>}

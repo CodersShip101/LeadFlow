@@ -5,8 +5,9 @@ import { entitlementsFor, type Tier } from '@/lib/tiers'
 
 type Props = {
   plan: Tier
-  lastScanAt: number | null
+  lastScrapeAt: number | null
   lastRefreshedAt: number
+  newCount?: number
 }
 
 function formatCountdown(ms: number): string {
@@ -27,7 +28,7 @@ function formatAgo(ms: number): string {
   return `${m}m ago`
 }
 
-export default function RefreshBar({ plan, lastScanAt, lastRefreshedAt }: Props) {
+export default function RefreshBar({ plan, lastScrapeAt, lastRefreshedAt, newCount = 0 }: Props) {
   const [now, setNow] = useState(Date.now())
   const mounted = useRef(true)
 
@@ -42,29 +43,26 @@ export default function RefreshBar({ plan, lastScanAt, lastRefreshedAt }: Props)
     return () => { mounted.current = false; clearInterval(tick) }
   }, [])
 
-  const timeSinceScan = lastScanAt ? now - lastScanAt : 0
-  const nextRefreshIn = lastScanAt ? Math.max(0, intervalMs - timeSinceScan) : 0
-  const isDue = lastScanAt && timeSinceScan >= intervalMs
-  const progress = lastScanAt
-    ? Math.min(100, (timeSinceScan / intervalMs) * 100)
+  const timeSinceScrape = lastScrapeAt ? now - lastScrapeAt : 0
+  const nextScrapeIn = lastScrapeAt ? Math.max(0, intervalMs - timeSinceScrape) : null
+  const progress = lastScrapeAt
+    ? Math.min(100, (timeSinceScrape / intervalMs) * 100)
     : 0
 
   return (
     <div className="refresh-bar">
       <div className="rb-left">
-        <i className={`ti ${isDue ? 'ti-refresh-alert' : 'ti-refresh'}`} />
+        <i className="ti ti-refresh" />
         <span className="rb-label">
           Auto-refresh: every <strong>{e.scanIntervalHours}h</strong>
         </span>
-        {lastScanAt && (
-          <span className="rb-countdown">
-            {isDue
-              ? <span className="rb-due">Due now</span>
-              : <>Next scan in {formatCountdown(nextRefreshIn)}</>
-            }
-            <span className="rb-last">· Last refreshed {formatAgo(now - lastRefreshedAt)}</span>
-          </span>
-        )}
+        <span className="rb-countdown">
+          {lastScrapeAt
+            ? <>Next scan in {formatCountdown(nextScrapeIn!)}</>
+            : <span className="rb-due">Awaiting first scan</span>
+          }
+          <span className="rb-last">· Last checked {formatAgo(now - lastRefreshedAt)}</span>
+        </span>
       </div>
 
       <div className="rb-center">
@@ -72,6 +70,15 @@ export default function RefreshBar({ plan, lastScanAt, lastRefreshedAt }: Props)
           <div className="rb-fill" style={{ width: `${progress}%` }} />
         </div>
       </div>
+
+      {newCount > 0 && (
+        <div className="rb-right">
+          <span className="rb-badge">
+            <i className="ti ti-sparkles" />
+            {newCount} new
+          </span>
+        </div>
+      )}
     </div>
   )
 }

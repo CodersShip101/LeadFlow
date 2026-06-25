@@ -146,7 +146,7 @@ export default function LeadCard({ lead, profile, application, isFreeUser, index
             className={`ibtn ${isSaved ? 'saved' : ''}`}
             title={isSaved ? 'Saved' : 'Save'}
           >
-            <i className={`ti ${isSaved ? 'ti-bookmark-filled' : 'ti-bookmark'}`} />
+            <i className="ti ti-bookmark" />
           </button>
           <div className="relative" ref={menuRef}>
             <button onClick={toggleMenu} className="ibtn dots" title="More"><i className="ti ti-dots" /></button>
