@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-client'
-import TopbarSearch, { SearchProvider } from '@/components/TopbarSearch'
+import { SearchProvider } from '@/components/TopbarSearch'
 import type { Profile } from '@/types'
 
 const profileInitials = (name?: string | null) => {
@@ -165,7 +165,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <h1>{pageTitle}</h1>
           </div>
           <div className="tb-right">
-            <TopbarSearch />
             <div className="avatar">{profileInitials(profile?.full_name)}</div>
           </div>
         </header>

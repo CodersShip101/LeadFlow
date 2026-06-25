@@ -91,6 +91,36 @@ function clamp10(n: number) {
   return Math.max(1, Math.min(10, Math.round(n)))
 }
 
+// ── TF-IDF Cosine Similarity for semantic matching ────────────────
+function tokenize(text: string): string[] {
+  return text.toLowerCase()
+    .replace(/[^a-z0-9\s#+]/g, ' ')
+    .split(/\s+/)
+    .filter(t => t.length > 2 && !['the','and','for','are','not','but','had','has','was','all','can','you','our','its','per','via','use','get','new','job','role'].includes(t))
+}
+
+function cosineSimilarity(a: number[], b: number[]): number {
+  let dot = 0, nA = 0, nB = 0
+  for (let i = 0; i < a.length; i++) { dot += a[i] * b[i]; nA += a[i] * a[i]; nB += b[i] * b[i] }
+  const denom = Math.sqrt(nA) * Math.sqrt(nB)
+  return denom === 0 ? 0 : dot / denom
+}
+
+/** Compute TF-IDF cosine similarity between profile text and lead text. Returns 0–1. */
+export function semanticSimilarity(profileText: string, leadText: string): number {
+  const profileTokens = tokenize(profileText)
+  const leadTokens = tokenize(leadText)
+  if (profileTokens.length === 0 || leadTokens.length === 0) return 0
+  const vocab = [...new Set([...profileTokens, ...leadTokens])]
+  const profileTf = vocab.map(w => profileTokens.filter(t => t === w).length / profileTokens.length)
+  const leadTf = vocab.map(w => leadTokens.filter(t => t === w).length / leadTokens.length)
+  const df = vocab.map(w => (profileTokens.includes(w) ? 1 : 0) + (leadTokens.includes(w) ? 1 : 0))
+  const idf = df.map(d => Math.log(2 / d))
+  const profileTfidf = profileTf.map((tf, i) => tf * idf[i])
+  const leadTfidf = leadTf.map((tf, i) => tf * idf[i])
+  return cosineSimilarity(profileTfidf, leadTfidf)
+}
+
 // ── Skill alias map — fuzzy matching for common abbreviations ───────────────
 const SKILL_ALIASES: Record<string, string[]> = {
   javascript: ['js', 'es6', 'ecmascript', 'vanilla js'],
@@ -165,6 +195,25 @@ export function computeMatchExplanation(lead: Lead, profile?: Profile | null): M
       : `${matchedSkills.length} of ${reqCount} required skills match your profile`
   }
 
+  // ── Semantic match via TF-IDF (weight 0.20) ────────────────────
+  let semanticValue: number
+  let semanticDetail: string
+  const profileText = [profile?.skills?.join(' '), profile?.disciplines?.join(' '), profile?.experience_level].filter(Boolean).join(' ')
+  const leadText = [lead.title, lead.description, lead.skills_required?.join(' ')].filter(Boolean).join(' ')
+  if (!profileText.trim()) {
+    semanticValue = 5
+    semanticDetail = 'Add skills to your profile for semantic matching'
+  } else {
+    const sim = semanticSimilarity(profileText, leadText)
+    // Map 0–1 similarity to 2–10 score (rarely exceeds 0.6 for real matches)
+    semanticValue = clamp10(Math.round(2 + sim * 13))
+    semanticDetail = sim > 0.5
+      ? `Strong semantic match (${(sim * 100).toFixed(0)}% similarity to your profile)`
+      : sim > 0.3
+        ? `Moderate semantic match (${(sim * 100).toFixed(0)}% similarity to your profile)`
+        : `Weak semantic match (${(sim * 100).toFixed(0)}% similarity)`
+  }
+
   // ── Rate match (weight 0.30) ──────────────────────────────────
   let rateValue: number
   let rateDetail: string
@@ -217,10 +266,11 @@ export function computeMatchExplanation(lead: Lead, profile?: Profile | null): M
   const qualityDetail = `${qualityHits} of 5 listing quality signals present`
 
   const subScores: SubScore[] = [
-    { label: 'Skill match', value: skillValue,   weight: 0.45, detail: skillDetail,   icon: 'puzzle' },
-    { label: 'Rate match',  value: rateValue,    weight: 0.30, detail: rateDetail,    icon: 'currency-pound' },
-    { label: 'Recency',     value: recencyValue, weight: 0.15, detail: recencyDetail, icon: 'clock' },
-    { label: 'Detail',      value: qualityValue, weight: 0.10, detail: qualityDetail, icon: 'list-check' },
+    { label: 'Skill match',  value: skillValue,    weight: 0.30, detail: skillDetail,    icon: 'puzzle' },
+    { label: 'Semantic',     value: semanticValue, weight: 0.20, detail: semanticDetail,  icon: 'brain' },
+    { label: 'Rate match',   value: rateValue,     weight: 0.25, detail: rateDetail,     icon: 'currency-pound' },
+    { label: 'Recency',      value: recencyValue,  weight: 0.15, detail: recencyDetail,  icon: 'clock' },
+    { label: 'Detail',       value: qualityValue,  weight: 0.10, detail: qualityDetail,  icon: 'list-check' },
   ]
 
   const score = clamp10(Math.round(subScores.reduce((acc, s) => acc + s.value * s.weight, 0) * 10) / 10)

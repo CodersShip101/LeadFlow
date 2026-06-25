@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState, useMemo } from 'react'
+import { useEffect, useRef, useState, useMemo, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-client'
 import type { Lead, Profile, Application } from '@/types'
@@ -21,10 +21,11 @@ const SRC: Record<string, { name: string; cls: string; ava: string; ini: string 
 }
 
 const SUB: Record<string, { label: string; w: number; icon: string }> = {
-  skill: { label: 'Skill match', w: 40, icon: 'ti-target-arrow' },
-  rate: { label: 'Rate match', w: 30, icon: 'ti-currency-pound' },
-  recency: { label: 'Recency', w: 20, icon: 'ti-clock' },
-  detail: { label: 'Detail', w: 10, icon: 'ti-file-text' },
+  skill: { label: 'Skill match', w: 35, icon: 'ti-target-arrow' },
+  semantic: { label: 'Semantic', w: 20, icon: 'ti-brain' },
+  rate: { label: 'Rate match', w: 25, icon: 'ti-currency-pound' },
+  recency: { label: 'Recency', w: 12, icon: 'ti-clock' },
+  detail: { label: 'Detail', w: 8, icon: 'ti-file-text' },
 }
 
 function srcKey(surl: string | null): string {
@@ -130,6 +131,10 @@ export default function DashboardPage() {
   const [lastScrapeAt, setLastScrapeAt] = useState<number | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
   const { query: search, setQuery: setSearch } = useSearch()
+  const [locationSearch, setLocationSearch] = useState('')
+  const [locOpen, setLocOpen] = useState(false)
+  const [whatOpen, setWhatOpen] = useState(false)
+  const [recentSearches, setRecentSearches] = useState<string[]>([])
   const [sourceFilter, setSourceFilter] = useState('all')
   const [scoreFilter, setScoreFilter] = useState<string>('all')
   const [easyFilters, setEasyFilters] = useState<Set<string>>(new Set())
@@ -244,6 +249,7 @@ export default function DashboardPage() {
   const filtered = useMemo(() => {
     let ls = leads.slice()
     if (search) { const q = search.toLowerCase(); ls = ls.filter(l => l.title.toLowerCase().includes(q) || (l.description || '').toLowerCase().includes(q)) }
+    if (locationSearch) { const loc = locationSearch.toLowerCase(); ls = ls.filter(l => (l.client_location || '').toLowerCase().includes(loc)) }
         if (sourceFilter !== 'all') ls = ls.filter(l => srcKey(l.source_url || '') === sourceFilter)
     if (scoreFilter === '8') ls = ls.filter(l => computeMatchExplanation(l, profile).score >= 8)
     else if (scoreFilter === '7') ls = ls.filter(l => computeMatchExplanation(l, profile).score >= 7)
@@ -294,6 +300,53 @@ export default function DashboardPage() {
     fresh: leads.filter(l => isFresh(l.posted_date, 6)).length,
   }), [leads])
 
+  const FREE_LIMIT = 6
+
+  const whatSuggestions = useMemo(() => {
+    if (!search || search.length < 1) return []
+    const q = search.toLowerCase()
+    const pool = isFree ? leads.slice(0, FREE_LIMIT) : leads
+    const groups = new Map<string, number>()
+    const seen = new Set<string>()
+    pool.forEach(l => {
+      const title = l.title.trim()
+      if (!title) return
+      const key = title.toLowerCase()
+      if (seen.has(key)) return
+      if (key.includes(q)) {
+        groups.set(title, pool.filter(x => x.title.toLowerCase() === key).length)
+        seen.add(key)
+      }
+    })
+    const matching = Array.from(groups.entries(), ([title, n]) => ({ title, n }))
+    matching.sort((a, b) => b.n - a.n)
+    return matching.slice(0, 6)
+  }, [leads, search, isFree])
+
+  const appliedSkills = useMemo(() => {
+    const appliedLeads = applications
+      .filter(a => a.status === 'applied' || a.status === 'hired')
+      .map(a => leads.find(l => l.id === a.lead_id))
+      .filter((l): l is Lead => !!l && !!l.skills_required && l.skills_required.length > 0)
+      .reverse()
+    const freq = new Map<string, number>()
+    appliedLeads.forEach(l => l.skills_required!.forEach(s => freq.set(s, (freq.get(s) || 0) + 1)))
+    return Array.from(freq.entries()).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([skill]) => skill)
+  }, [applications, leads])
+
+  const allLocations = useMemo(() => {
+    const pool = isFree ? leads.slice(0, FREE_LIMIT) : leads
+    const locs = new Set<string>()
+    pool.forEach(l => { if (l.client_location) locs.add(l.client_location) })
+    return [...locs].sort()
+  }, [leads, isFree])
+
+  const locSuggestions = useMemo(() => {
+    if (!locationSearch) return allLocations.slice(0, 8)
+    const q = locationSearch.toLowerCase()
+    return allLocations.filter(l => l.toLowerCase().includes(q)).slice(0, 8)
+  }, [allLocations, locationSearch])
+
   function toggleEasy(key: string) {
     setEasyFilters(prev => {
       const next = new Set(prev)
@@ -317,9 +370,16 @@ export default function DashboardPage() {
     const top = sorted[0]
     const lo = sorted[sorted.length - 1]
     const label = top.label.toLowerCase()
+    const { matched, missing } = m.skillMatch
+    const parts: string[] = []
+    if (matched.length > 0) parts.push(`${matched.length} skill${matched.length > 1 ? 's' : ''} match`)
+    if (missing.length > 0 && matched.length > 0) parts.push(`${missing.length} miss${missing.length > 1 ? 'es' : ''}`)
+    const skillNote = parts.length ? ` · ${parts.join(', ')}` : ''
     if (lo.value <= 3)
-      return `<strong>Strong ${label}</strong> — ${top.value}/10 on fit · weaker on ${lo.label.toLowerCase()}`
-    return `<strong>Strong ${label}</strong> — scores ${top.value}/10 on fit`
+      return `<strong>Strong ${label}</strong> — ${top.value}/10 · weaker on ${lo.label.toLowerCase()}${skillNote}`
+    if (matched.length > 0)
+      return `<strong>${matched.length} skill${matched.length > 1 ? 's' : ''} match</strong> — ${top.value}/10 on ${label}${skillNote}`
+    return `<strong>Strong ${label}</strong> — ${top.value}/10 on fit${skillNote}`
   }
 
   function subBars(lead: Lead, full: boolean) {
@@ -337,9 +397,10 @@ export default function DashboardPage() {
           </div>
         )
       }
-      const subKey = label.toLowerCase().includes('skill') ? 'skill' : label.toLowerCase().includes('rate') ? 'rate' : label.toLowerCase().includes('recency') ? 'recency' : 'detail'
+      const subKey = label.toLowerCase().includes('skill') ? 'skill' : label.toLowerCase().includes('semantic') ? 'semantic' : label.toLowerCase().includes('rate') ? 'rate' : label.toLowerCase().includes('recency') ? 'recency' : 'detail'
       const detailMap: Record<string, string> = {
         skill: `${m.skillMatch.matched.length} of ${m.skillMatch.matched.length + m.skillMatch.missing.length} required skills match your profile`,
+        semantic: m.subScores.find(s => s.label === 'Semantic')?.detail ?? 'TF-IDF similarity to your profile',
         rate: `Budget ${v >= 7 ? 'fits' : v >= 5 ? 'is near' : 'is below'} your £${profileRate}/hr target`,
         recency: `Posted ${timeAgo(lead.posted_date)}`,
         detail: `Listing is ${v >= 8 ? 'thorough' : v >= 5 ? 'adequate' : 'thin'} on scope`,
@@ -504,6 +565,24 @@ export default function DashboardPage() {
     })
   }, [leads])
 
+  const loadWhatSuggestions = useCallback(() => {
+    try {
+      const raw = localStorage.getItem('recentSearches')
+      setRecentSearches(raw ? JSON.parse(raw).slice(0, 3) : [])
+    } catch {}
+  }, [])
+
+  const submitWhat = useCallback((q: string) => {
+    setSearch(q)
+    setWhatOpen(false)
+    if (q) {
+      const prev = (() => { try { return JSON.parse(localStorage.getItem('recentSearches') || '[]') } catch { return [] } })()
+      const next = [q, ...prev.filter((x: string) => x.toLowerCase() !== q.toLowerCase())].slice(0, 8)
+      try { localStorage.setItem('recentSearches', JSON.stringify(next)) } catch {}
+      fetch('/api/search/suggest', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ query: q }) }).catch(() => {})
+    }
+  }, [setSearch])
+
   if (loading) return <SkeletonFeed />
 
   const greetMap: Record<string, string> = {
@@ -518,16 +597,11 @@ export default function DashboardPage() {
     power: `<b>${newCount} new leads</b> today. You've applied to <b>${appCount}</b> this month — keep the streak going.`,
   }
 
-  const FREE_LIMIT = 6
   const leadCards = filtered.map((lead, idx) => {
     const isLocked = isFree && idx >= FREE_LIMIT
     const sc = computeMatchExplanation(lead, profile).score
-    const si = srcInfo(lead.source_url)
     const state = leadState(lead)
-    const stateBadge: Record<string, [string, string]> = { new: ['NEW', 'st-new'], viewed: ['VIEWED', 'st-viewed'], saved: ['SAVED', 'st-saved'], applied: ['APPLIED', 'st-applied'] }
-    const saved = savedIds.has(lead.id)
     const applied = state === 'applied'
-    const isTop = lead.id === topId && scoreFilter === 'all' && sourceFilter === 'all' && !search && sortMode === 'score'
     const skills = (lead.skills_required || []).slice(0, 3).map(sk => {
       const m = profile?.skills?.some(ps => ps.toLowerCase() === sk.toLowerCase())
       return <span key={sk} className={`skill ${m ? 'match' : ''}`}>{m ? <i className="ti ti-check"></i> : ''}{sk}</span>
@@ -536,69 +610,17 @@ export default function DashboardPage() {
       skills.push(<span key="more" className="skill">+{(lead.skills_required?.length || 0) - 3}</span>)
     }
     const budget = formatBudgetGBP(lead.budget_min, lead.budget_max)
-    const applicants = (lead as any).applicants || 3
-    const proof = (
-      <span className={`proof ${applicants > 5 ? 'hot' : 'cool'}`}>
-        <i className={`ti ${applicants > 5 ? 'ti-flame' : 'ti-users'}`}></i>
-        {applicants} applied{applicants > 5 ? ' · apply early' : ' so far'}
-      </span>
-    )
 
     return (
       <article key={lead.id} onClick={isLocked ? undefined : () => selectLead(lead)} tabIndex={isLocked ? -1 : undefined}
-        className={`lead-card ${selected?.id === lead.id ? 'sel' : ''} ${isTop ? 'top-match' : ''} ${state === 'new' ? 'is-new' : ''}`}>
-        <div className="lc-top">
-          <span className="src-ava" style={{ background: si.ava }}>{si.ini}</span>
-          <span className={`src-badge ${si.cls}`}>{si.name.toUpperCase()}</span>
-          {isTop
-            ? <span className="crown"><i className="ti ti-crown"></i>TOP MATCH</span>
-            : <span className={`state-badge ${stateBadge[state][1]}`}>{stateBadge[state][0]}</span>}
-          <span className="lc-time">{timeAgo(lead.posted_date)}</span>
+        className={`lead-card ${selected?.id === lead.id ? 'sel' : ''} ${state === 'new' ? 'is-new' : ''} ${applied ? 'applied' : ''}`}>
+        <div className="lc-row-1">
+          <span className="lc-score" style={{ color: scoreChipColor(sc) }}>{sc}</span>
+          <span className="lc-title">{lead.title}</span>
+          {budget && <span className="lc-budget"><i className="ti ti-currency-pound"></i>{budget}</span>}
         </div>
-        <div className="lc-title">
-          {gaugeSVG(sc)}
-          <span className="tt">{lead.title}</span>
-        </div>
-        <div className="why-inline"><i className="ti ti-sparkles"></i><span dangerouslySetInnerHTML={{ __html: topReason(lead) }} /></div>
-        <p className="lc-desc">{lead.description}</p>
-        <div className="lc-meta">
-          {budget && <span className="budget"><i className="ti ti-currency-pound"></i>{budget}</span>}
-          {lead.client_location && <span className="meta-chip"><i className="ti ti-map-pin"></i>{lead.client_location}</span>}
-          {proof}
-        </div>
-        <div className="skills-row">{skills}</div>
-        <div className="lc-actions" onClick={e => e.stopPropagation()}>
-          <div className="lca-left">
-            {applied
-              ? <button className="applied-tag applied-tag-btn" onClick={() => router.push('/dashboard/applied')}><i className="ti ti-circle-check-filled" /> View in pipeline{profile?.portfolio_url ? <i className="ti ti-paperclip" style={{ fontSize: 13, opacity: .6 }} /> : ''}</button>
-              : <button className="btn btn-primary" title="Direct link · no commission" disabled={applyingId === lead.id} onClick={() => handleApply(lead)}>
-                  {applyingId === lead.id ? <LoadingDots label="Applying" /> : <><i className="ti ti-send"></i> Apply</>}
-                </button>}
-            <button className="lca-details" onClick={() => selectLead(lead)} title="View full breakdown">Details <i className="ti ti-chevron-right" /></button>
-          </div>
-          <div className="lca-right">
-            <span className="lca-sep" />
-            <button className={`lca-icon ${saved ? 'on' : ''}`} aria-label={saved ? 'Unsave' : 'Save'} onClick={() => toggleSave(lead)}>
-              <i className="ti ti-bookmark" />
-            </button>
-            <button className="lca-icon" aria-label="Share" onClick={() => handleShare(lead)}>
-              <i className="ti ti-share" />
-            </button>
-            <div className="lca-remind-wrap">
-              <button className="lca-icon" aria-label="Remind" onClick={() => setRemindOpen(remindOpen === lead.id ? null : lead.id)}>
-                <i className="ti ti-bell" />
-              </button>
-              {remindOpen === lead.id && (
-                <div className="lca-remind-drop">
-                  <button onClick={() => handleRemind(lead, 3)}>Later today</button>
-                  <button onClick={() => handleRemind(lead, 24)}>Tomorrow</button>
-                  <button onClick={() => handleRemind(lead, 72)}>In 3 days</button>
-                  <button onClick={() => handleRemind(lead, 168)}>Next week</button>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
+        <div className="lc-reason"><i className="ti ti-sparkles"></i><span dangerouslySetInnerHTML={{ __html: topReason(lead) }} /></div>
+        <div className="lc-skills">{skills}</div>
       </article>
     )
   })
@@ -628,6 +650,85 @@ export default function DashboardPage() {
       </div>
 
       <RefreshBar plan={plan as Tier} lastScrapeAt={displayScrapeAt} lastRefreshedAt={lastRefreshedAt} newCount={newCount} />
+
+      <div className="search-duo">
+        <div className="tb-search" style={{ width: '100%', flex: 1, position: 'relative' }}>
+          <i className="ti ti-search"></i>
+          <input
+            placeholder="Job title, skill or keyword&hellip;"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            onFocus={() => { setWhatOpen(true); loadWhatSuggestions() }}
+            onBlur={() => setTimeout(() => setWhatOpen(false), 150)}
+            onKeyDown={e => { if (e.key === 'Enter') submitWhat(search) }}
+          />
+          {whatOpen && (
+            <div className="suggest" style={{ display: 'block', position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0, zIndex: 50 }}>
+              {whatSuggestions.length > 0 && (
+                <>
+                  <div className="suggest-label">Matching leads</div>
+                  {whatSuggestions.map(s => (
+                    <div key={s.title} className="suggest-item" onMouseDown={() => submitWhat(s.title)}>
+                      <i className="ti ti-search"></i>{s.title}<span className="tag">{s.n} lead{s.n !== 1 ? 's' : ''}</span>
+                    </div>
+                  ))}
+                  <div className="suggest-divider"></div>
+                </>
+              )}
+              {recentSearches.length > 0 && (
+                <>
+                  <div className="suggest-label">Recent</div>
+                  {recentSearches.map(q => (
+                    <div key={q} className="suggest-item" onMouseDown={() => submitWhat(q)}>
+                      <i className="ti ti-history"></i>{q}
+                    </div>
+                  ))}
+                  <div className="suggest-divider"></div>
+                </>
+              )}
+              <div className="suggest-label">Quick links</div>
+              <div key="__profile__" className="suggest-item" onMouseDown={() => { setWhatOpen(false); router.push('/dashboard/profile') }}>
+                <i className="ti ti-user"></i>My profile
+              </div>
+              <div key="__saved__" className="suggest-item" onMouseDown={() => { setWhatOpen(false); router.push('/dashboard/saved') }}>
+                <i className="ti ti-bookmark"></i>Saved leads
+              </div>
+              <div key="__applied__" className="suggest-item" onMouseDown={() => { setWhatOpen(false); router.push('/dashboard/applied') }}>
+                <i className="ti ti-briefcase"></i>Pipeline
+              </div>
+              {appliedSkills.length > 0 && (<>
+                <div className="suggest-divider"></div>
+                <div className="suggest-label">Your recent skills</div>
+                {appliedSkills.map(skill => (
+                  <div key={skill} className="suggest-item" onMouseDown={() => submitWhat(skill)}>
+                    <i className="ti ti-code"></i>{skill}
+                  </div>
+                ))}
+              </>)}
+
+            </div>
+          )}
+        </div>
+        <div className="tb-search" style={{ width: '100%', flex: 1, position: 'relative' }}>
+          <i className="ti ti-map-pin"></i>
+          <input
+            placeholder="City, postcode or 'Remote'&hellip;"
+            value={locationSearch}
+            onChange={e => { setLocationSearch(e.target.value); setLocOpen(true) }}
+            onFocus={() => setLocOpen(true)}
+            onBlur={() => setTimeout(() => setLocOpen(false), 150)}
+          />
+          {locOpen && locSuggestions.length > 0 && (
+            <div className="suggest" style={{ display: 'block', position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0, zIndex: 50 }}>
+              {locSuggestions.map(loc => (
+                <div key={loc} className="suggest-item" onMouseDown={() => { setLocationSearch(loc); setLocOpen(false) }}>
+                  <i className="ti ti-map-pin"></i>{loc}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
 
       <div className="toolbar">
         <div className="toolbar-group">
@@ -703,20 +804,13 @@ export default function DashboardPage() {
                       { ava: '#6EA8D4', ini: 'W', cls: 'sb-wwr', src: 'WWR', sc: 9.0, title: 'Content Designer — Health Tech', why: 'Great match — values your niche', desc: 'Health-tech scale-up needs a content designer to craft in-product copy and design systems documentation.', budget: '£380/day', loc: 'Remote · UK', skills: ['UX Writing', 'Figma', 'Docs'] },
                     ].map((f, i) => (
                       <div key={`fg-${i}`} className="lead-card fg-preview-card">
-                        <div className="lc-top">
-                          <span className="src-ava" style={{ background: f.ava }}>{f.ini}</span>
-                          <span className={`src-badge ${f.cls}`}>{f.src}</span>
-                          <span className="state-badge st-new">NEW</span>
-                          <span className="lc-time">2h ago</span>
+                        <div className="lc-row-1">
+                          <span className="lc-score" style={{ color: 'var(--lime-deep)' }}>{f.sc}</span>
+                          <span className="lc-title">{f.title}</span>
+                          <span className="lc-budget"><i className="ti ti-currency-pound" />{f.budget}</span>
                         </div>
-                        <div className="lc-title">{gaugeSVG(f.sc)}<span className="tt">{f.title}</span></div>
-                        <div className="why-inline"><i className="ti ti-sparkles" /><span>{f.why}</span></div>
-                        <p className="lc-desc">{f.desc}</p>
-                        <div className="lc-meta">
-                          <span className="budget"><i className="ti ti-currency-pound" />{f.budget}</span>
-                          <span className="meta-chip"><i className="ti ti-map-pin" />{f.loc}</span>
-                        </div>
-                        <div className="skills-row">
+                        <div className="lc-reason"><i className="ti ti-sparkles" /><span>{f.why}</span></div>
+                        <div className="lc-skills">
                           {f.skills.map(s => <span key={s} className="skill">{s}</span>)}
                         </div>
                       </div>
@@ -769,7 +863,7 @@ export default function DashboardPage() {
 
               <div className="dp-handle" aria-hidden="true"><div className="dp-handle-bar" /></div>
 
-              {/* ── COMPACT HEADER ── */}
+              {/* ── HEADER ── */}
               <div className="dp-header">
                 <span className={`src-badge ${si.cls}`}>{si.name.toUpperCase()}</span>
                 <span className="dp-score-chip" style={{ color: scoreChipColor(sc), borderColor: `${scoreChipColor(sc)}33` }}>
@@ -794,28 +888,27 @@ export default function DashboardPage() {
                 {/* 1. Title */}
                 <h2 className="dp-title">{l.title}</h2>
 
-                {/* 2. Verdict — one sentence */}
-                <div className="dp-verdict-line" style={{ borderLeftColor: verdictBorderColor(sc) }}>
-                  {verdictSentence(m, sc)}
+                {/* 2. Unified Metadata Grid (2 columns) */}
+                <div className="dp-meta-grid">
+                  {budget && <div className="dp-mg-item"><span className="dp-mg-label">Budget</span><span className="dp-mg-value">{budget}</span></div>}
+                  {l.client_location && <div className="dp-mg-item"><span className="dp-mg-label">Location</span><span className="dp-mg-value">{l.client_location}</span></div>}
+                  {l.project_type && <div className="dp-mg-item"><span className="dp-mg-label">Type</span><span className="dp-mg-value">{l.project_type}</span></div>}
+                  <div className="dp-mg-item"><span className="dp-mg-label">Posted</span><span className="dp-mg-value" style={{ color: ageCol }}>{ageLabel}</span></div>
+                  <div className="dp-mg-item"><span className="dp-mg-label">Applicants</span><span className="dp-mg-value" style={{ color: applicants > 5 ? 'var(--coral)' : 'var(--slate)' }}>{applicants}</span></div>
                 </div>
 
-                {/* 3. Meta strip — icons only, no emojis */}
-                <div className="dp-meta-strip">
-                  {budget && <span className="dp-meta-budget"><i className="ti ti-currency-pound" />{budget}</span>}
-                  {l.client_location && <span className="dp-meta-item"><i className="ti ti-map-pin" />{l.client_location}</span>}
-                  {l.project_type && <span className="dp-meta-item"><i className="ti ti-briefcase" />{l.project_type}</span>}
-                  <span className="dp-meta-item" style={{ color: ageCol }}><i className="ti ti-clock" />{ageLabel}</span>
-                  <span className="dp-meta-item" style={{ color: applicants > 5 ? 'var(--coral)' : 'var(--slate)' }}>
-                    <i className={`ti ${applicants > 5 ? 'ti-flame' : 'ti-users'}`} />{applicants} applied
-                  </span>
+                {/* 3. Verdict — styled container above description */}
+                <div className="dp-verdict-box" style={{ borderLeftColor: verdictBorderColor(sc) }}>
+                  <i className="ti ti-sparkles" />
+                  {verdictSentence(m, sc)}
                 </div>
 
                 <div className="dp-rule" />
 
-                {/* 4. Description — no label, just the brief */}
+                {/* 4. Full description */}
                 <p className="dp-desc">{l.description}</p>
 
-                {/* 5. Skills */}
+                {/* 5. Unified Skills Matrix */}
                 {totalSkills > 0 && <>
                   <div className="dp-rule" />
                   <div className="dp-skills-head">
@@ -824,9 +917,13 @@ export default function DashboardPage() {
                       {matchCount} of {totalSkills} matched
                     </span>
                   </div>
-                  <div className="skill-detail" style={{ marginTop: 10 }}>
-                    {m.skillMatch.matched.map(s => <span key={s} className="skill-yes"><i className="ti ti-check" />{s}</span>)}
-                    {m.skillMatch.missing.map(s => <span key={s} className="skill-no">{s}</span>)}
+                  <div className="skills-matrix">
+                    {(l.skills_required || []).map(s => {
+                      const isMatch = m.skillMatch.matched.includes(s)
+                      return <span key={s} className={`sm-tag ${isMatch ? 'match' : 'miss'}`}>
+                        {isMatch && <i className="ti ti-check" />}{s}
+                      </span>
+                    })}
                   </div>
                 </>}
 
@@ -844,16 +941,18 @@ export default function DashboardPage() {
 
               {/* ── STICKY FOOTER ── */}
               <div className="dp-foot">
-                {applied
-                  ? <button className="applied-tag applied-tag-btn" style={{ width: '100%', justifyContent: 'center' }} onClick={() => router.push('/dashboard/applied')}>
-                      <i className="ti ti-circle-check-filled" /> View in pipeline
-                    </button>
-                  : <button className="btn btn-primary" style={{ width: '100%' }} disabled={applyingId === l.id} onClick={() => handleApply(l)}>
-                      {applyingId === l.id ? <LoadingDots label="Applying" /> : <><i className="ti ti-send" /> Apply &amp; track</>}
-                    </button>}
-                <button className="btn btn-ghost" style={{ width: '100%' }} onClick={() => toggleSave(l)}>
-                  {saved ? <><i className="ti ti-bookmark" /> Saved</> : <><i className="ti ti-bookmark" /> Save for later</>}
-                </button>
+                <div className="dp-foot-btns">
+                  {applied
+                    ? <button className="applied-tag applied-tag-btn" style={{ flex: 1, justifyContent: 'center' }} onClick={() => router.push('/dashboard/applied')}>
+                        <i className="ti ti-circle-check-filled" /> View in pipeline
+                      </button>
+                    : <button className="btn btn-primary" style={{ flex: 1 }} disabled={applyingId === l.id} onClick={() => handleApply(l)}>
+                        {applyingId === l.id ? <LoadingDots label="Applying" /> : <><i className="ti ti-send" /> Apply &amp; track</>}
+                      </button>}
+                  <button className="btn btn-ghost" style={{ width: 44, height: 44, padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }} onClick={() => toggleSave(l)} title={saved ? 'Unsave' : 'Save'}>
+                    <i className={`ti ti-bookmark${saved ? '-filled' : ''}`} style={{ fontSize: 18 }} />
+                  </button>
+                </div>
                 {!applied && <p className="dp-foot-note">Direct link · no commission · no fee</p>}
               </div>
             </aside>
@@ -865,7 +964,7 @@ export default function DashboardPage() {
             <div className="empty-icon"><i className="ti ti-filter-off"></i></div>
             <h3>No leads match these filters</h3>
             <p>Try widening your score threshold or switching sources.</p>
-            <button className="btn btn-ghost" style={{ display: 'inline-flex' }} onClick={() => { setScoreFilter('all'); setSourceFilter('all'); setSearch(''); setEasyFilters(new Set()) }}>Clear filters</button>
+            <button className="btn btn-ghost" style={{ display: 'inline-flex' }} onClick={() => { setScoreFilter('all'); setSourceFilter('all'); setSearch(''); setEasyFilters(new Set()); setLocationSearch('') }}>Clear filters</button>
           </div>
         )}
       </div>
