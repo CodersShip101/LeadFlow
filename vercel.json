@@ -1,8 +1,16 @@
 {
   "crons": [
     {
+      "path": "/api/scrape-fast",
+      "schedule": "*/15 * * * *"
+    },
+    {
       "path": "/api/scrape-leads",
       "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/scrape-slow",
+      "schedule": "0 */4 * * *"
     },
     {
       "path": "/api/digest",

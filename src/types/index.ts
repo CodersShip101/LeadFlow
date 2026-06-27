@@ -23,11 +23,16 @@ export interface Lead {
   budget_max: number | null;
   project_type: string | null;
   skills_required: string[] | null;
+  responsibilities?: string[] | null;
+  benefits?: string[] | null;
   client_location: string | null;
+  client_name?: string | null;
   source_url: string | null;
   posted_date: string;
   expiry_date: string | null;
   status: 'active' | 'filled' | 'expired';
+  ir35?: string | null;
+  fingerprint?: string | null;
   created_at?: string;
 }
 
@@ -50,6 +55,71 @@ export interface PricingTier {
   features: string[];
   cta: string;
   highlighted?: boolean;
+}
+
+// ── Client telemetry / trust types (from migration_005) ──────────────
+export interface ClientProfile {
+  client_id: string;
+  company_name: string | null;
+  company_website: string | null;
+  is_payment_verified: boolean;
+  stripe_customer_id: string | null;
+  avg_response_mins: number;
+  total_posted: number;
+  total_hired: number;
+  total_spent: number;
+}
+
+export interface ClientTelemetry {
+  client_id: string;
+  company_name: string | null;
+  is_payment_verified: boolean;
+  has_payment_method: boolean;
+  total_hired: number;
+  total_posted: number;
+  hire_rate_pct: number;
+  total_spent: number;
+  avg_response_mins: number;
+}
+
+export interface Project {
+  id: string;
+  client_id: string;
+  title: string;
+  description: string;
+  contract_type: 'FIXED_PRICE' | 'HOURLY' | 'MILESTONE';
+  budget_allocated: number | null;
+  status: 'OPEN' | 'HIRED' | 'EXPIRED' | 'CANCELLED';
+  scope_score: number;
+  is_escrow_funded: boolean;
+  source: string;
+  source_url: string | null;
+  created_at: string;
+  closed_at: string | null;
+}
+
+/** Compute a lead-level scope completeness score (1-4) from scraped lead data. */
+export function computeScopeScore(lead: Lead): { score: number; items: { label: string; met: boolean }[] } {
+  const items = [
+    { label: 'Deliverables', met: (lead.description?.length || 0) > 80 },
+    { label: 'Timeline', met: !!lead.expiry_date || (lead.project_type?.toLowerCase().includes('urgent') ?? false) },
+    { label: 'Technical stack', met: (lead.skills_required?.length || 0) > 0 },
+    { label: 'Budget', met: !!(lead.budget_min || lead.budget_max) },
+  ]
+  return { score: items.filter(i => i.met).length, items }
+}
+
+/** Compute lead-level trust signals from scraped data. */
+export function computeLeadTrust(lead: Lead): {
+  escrow: boolean;
+  contractType: string;
+  scopeScore: number;
+  scopeItems: { label: string; met: boolean }[];
+} {
+  const { score, items } = computeScopeScore(lead)
+  const escrow = lead.source_url?.includes('reed.co.uk') ?? false
+  const contractType = lead.project_type || 'Fixed Price'
+  return { escrow, contractType, scopeScore: score, scopeItems: items }
 }
 
 export function computeQualityScore(lead: Lead): number {
@@ -84,11 +154,13 @@ export interface MatchExplanation {
   summary: string
   /** Single-line tooltip explanation */
   why: string
+  /** Strongest sub-score with label — so UI can show "Skill match 6/10" not a bare number */
+  topSubScore: { label: string; value: number }
   skillMatch: { matched: string[]; missing: string[] }
 }
 
-function clamp10(n: number) {
-  return Math.max(1, Math.min(10, Math.round(n)))
+export function clamp10(n: number) {
+  return Math.max(0, Math.min(10, Math.round(n)))
 }
 
 // ── TF-IDF Cosine Similarity for semantic matching ────────────────
@@ -177,7 +249,7 @@ export function computeMatchExplanation(lead: Lead, profile?: Profile | null): M
   const locationKnown = !!lead.client_location
   const descLen = lead.description?.length || 0
 
-  // ── Skill match (weight 0.45) ─────────────────────────────────
+  // ── Skill match (weight 0.30) ─────────────────────────────────
   let skillValue: number
   let skillDetail: string
   if (!profile?.skills || profile.skills.length === 0) {
@@ -188,11 +260,13 @@ export function computeMatchExplanation(lead: Lead, profile?: Profile | null): M
     skillDetail = 'No skills listed — matched on rate and recency'
   } else {
     const ratio = matchedSkills.length / reqCount
-    // Smooth curve: 0%→3, 50%→6.5, 80%→8.6, 100%→10
-    skillValue = clamp10(Math.round(3 + ratio * 7))
+    // FIX #1: no floor. 0 matched skills now scores 0, not 3.
+    skillValue = clamp10(Math.round(ratio * 10))
     skillDetail = matchedSkills.length === reqCount
       ? `All ${reqCount} required skills match your profile`
-      : `${matchedSkills.length} of ${reqCount} required skills match your profile`
+      : matchedSkills.length === 0
+        ? `None of the ${reqCount} required skills match your profile`
+        : `${matchedSkills.length} of ${reqCount} required skills match your profile`
   }
 
   // ── Semantic match via TF-IDF (weight 0.20) ────────────────────
@@ -205,16 +279,18 @@ export function computeMatchExplanation(lead: Lead, profile?: Profile | null): M
     semanticDetail = 'Add skills to your profile for semantic matching'
   } else {
     const sim = semanticSimilarity(profileText, leadText)
-    // Map 0–1 similarity to 2–10 score (rarely exceeds 0.6 for real matches)
-    semanticValue = clamp10(Math.round(2 + sim * 13))
+    // FIX #1b: no floor. sim=0 now scores 0, not 2.
+    semanticValue = clamp10(Math.round(sim * 10))
     semanticDetail = sim > 0.5
       ? `Strong semantic match (${(sim * 100).toFixed(0)}% similarity to your profile)`
       : sim > 0.3
         ? `Moderate semantic match (${(sim * 100).toFixed(0)}% similarity to your profile)`
-        : `Weak semantic match (${(sim * 100).toFixed(0)}% similarity)`
+        : sim > 0
+          ? `Weak semantic match (${(sim * 100).toFixed(0)}% similarity)`
+          : 'No meaningful overlap with your profile'
   }
 
-  // ── Rate match (weight 0.30) ──────────────────────────────────
+  // ── Rate match (weight 0.25) ──────────────────────────────────
   let rateValue: number
   let rateDetail: string
   const leadBudget = lead.budget_max || lead.budget_min || 0
@@ -238,14 +314,16 @@ export function computeMatchExplanation(lead: Lead, profile?: Profile | null): M
   }
 
   // ── Recency (weight 0.15) — gentler decay ─────────────────────
+  // FIX #2: boundary off-by-one. '<=' so a lead at exactly 168h (7 days)
+  // lands in the 7-day bucket (5), not the 14-day bucket (3).
   const ageHours = (Date.now() - new Date(lead.posted_date).getTime()) / 3600000
   const recencyValue = clamp10(
-    ageHours < 6   ? 10 :
-    ageHours < 24  ? 9  :
-    ageHours < 48  ? 8  :
-    ageHours < 96  ? 7  :
-    ageHours < 168 ? 5  :
-    ageHours < 336 ? 3  : 2
+    ageHours <= 6   ? 10 :
+    ageHours <= 24  ? 9  :
+    ageHours <= 48  ? 8  :
+    ageHours <= 96  ? 7  :
+    ageHours <= 168 ? 5  :
+    ageHours <= 336 ? 3  : 2
   )
   const recencyDetail =
     ageHours < 1   ? 'Posted within the hour' :
@@ -290,7 +368,7 @@ export function computeMatchExplanation(lead: Lead, profile?: Profile | null): M
     summary = `You match ${matchedSkills.length}/${reqCount} skill${reqCount > 1 ? 's' : ''}.`
     if (missingSkills.length > 0) summary += ` Missing: ${missingSkills.slice(0, 3).join(', ')}${missingSkills.length > 3 ? '…' : ''}.`
   } else if (profile?.skills && profile.skills.length > 0) {
-    summary = 'No direct skill overlap — but the budget and listing quality look solid.'
+    summary = 'No direct skill overlap with this listing.'
   } else {
     summary = 'Add your skills to your profile for a personalised match score.'
   }
@@ -302,5 +380,8 @@ export function computeMatchExplanation(lead: Lead, profile?: Profile | null): M
     ? `Strong ${strongest.label.toLowerCase()} (${strongest.value}/10), weaker on ${weakest.label.toLowerCase()} (${weakest.value}/10).`
     : `Balanced fit — ${score}/10 composite across skill, rate and recency.`
 
-  return { score, breakdown, subScores, summary, why, skillMatch: { matched: matchedSkills, missing: missingSkills } }
+  // FIX #3: expose strongest sub-score with its label so UI never shows a bare number
+  const topSubScore = { label: strongest.label, value: strongest.value }
+
+  return { score, breakdown, subScores, summary, why, topSubScore, skillMatch: { matched: matchedSkills, missing: missingSkills } }
 }

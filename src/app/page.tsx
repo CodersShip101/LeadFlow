@@ -142,8 +142,8 @@ export default function HomePage() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [signals, setSignals] = useState(initialSignals)
   const [paused, setPaused] = useState(false)
-  // Vary the hero "leads this week" figure per visit so it feels live.
-  const [weekLeads, setWeekLeads] = useState(47)
+  // Illustrative figure inside the product-preview card (not a live site metric).
+  const weekLeads = 47
   const [dashboardRows, setDashboardRows] = useState([
     { src: 'REDDIT', c: 'rgba(255,140,66,.14)', t: '#ff9c5b', title: 'Senior UX Designer — London', meta: '£350–450/day · Figma', score: '9.2', cls: 'score-a', dot: 'var(--lime)' },
     { src: 'WWR', c: 'rgba(110,168,212,.16)', t: '#7fb6e6', title: 'Full-Stack Developer — Remote', meta: '£500–700/day · React', score: '8.4', cls: 'score-a', dot: 'var(--lime)' },
@@ -157,11 +157,6 @@ export default function HomePage() {
   const [stickyVisible, setStickyVisible] = useState(false)
   const fiRef = useRef(0)
   const obsRef = useRef<IntersectionObserver | null>(null)
-
-  useEffect(() => {
-    // Set after mount to avoid a server/client hydration mismatch.
-    setWeekLeads(41 + Math.floor(Math.random() * 18)) // 41–58
-  }, [])
 
   useEffect(() => {
     const onScroll = () => {
@@ -247,8 +242,7 @@ export default function HomePage() {
             { "@type": "Offer", "name": PRICING.pro.label, "price": String(PRICING.pro.monthly), "priceCurrency": "GBP", "description": "Per month. 7-day free trial, cancel any time before it ends." },
             { "@type": "Offer", "name": PRICING.max.label, "price": String(PRICING.max.monthly), "priceCurrency": "GBP", "description": "Per month. 7-day free trial, cancel any time before it ends." },
             { "@type": "Offer", "name": PRICING.team.label, "price": String(PRICING.team.monthly), "priceCurrency": "GBP", "description": "Per seat / month. 7-day free trial, cancel any time before it ends." }
-          ],
-          "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.9", "ratingCount": "87" }
+          ]
         })
       }} />
       <Script id="ld-json-faq" type="application/ld+json" dangerouslySetInnerHTML={{
@@ -306,7 +300,7 @@ export default function HomePage() {
               <div className="sr">
                 <div className="tag tag-onink tag-bracket" style={{ marginBottom: 24 }}>
                   <span style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--lime)', animation: 'pingDot 2s infinite', display: 'inline-block' }}></span>
-                  Trusted by 340+ UK freelancers
+                  Scoring UK &amp; remote freelance leads, every hour
                 </div>
                 <h1 className="display">
                   Stop searching for work.<br />
@@ -484,30 +478,25 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ═══ SOCIAL PROOF STRIP ═══ */}
+        {/* ═══ WHO IT'S FOR ═══ */}
         <section className="section-py paper-2" aria-labelledby="test-h-top">
           <div className="container">
             <div className="section-head sr" style={{ marginBottom: 32 }}>
-              <div className="tag tag-lime tag-bracket">freelancers who switched</div>
-              <h2 id="test-h-top">Real results, real people</h2>
+              <div className="tag tag-lime tag-bracket">who it&apos;s for</div>
+              <h2 id="test-h-top">Built for how freelancers actually work</h2>
+              <p>Whatever you do, the job is the same: spend less time hunting and more time billing. Here&apos;s how Flaiir fits each discipline.</p>
             </div>
             <div className="grid-3">
               {[
-                { initials: 'SJ', name: 'Sarah J.', role: 'UX Designer · London', text: '"Landed a £2,400 contract in my first week. I ignored anything under 8 and applied to three. Two replied. The score sorts the list for you."' },
-                { initials: 'MT', name: 'Marcus T.', role: 'Full-Stack Dev · Manchester', text: '"Sunday afternoons used to vanish into job boards. Now it\'s 10 minutes on Monday. Made back the Pro plan in a single contract."' },
-                { initials: 'PK', name: 'Priya K.', role: 'Brand Designer · Edinburgh', text: '"The budget filter alone earns its keep. I stopped chasing leads that can\'t pay my rate. Healthiest pipeline I\'ve had in three years."' },
+                { icon: 'ti-palette', role: 'Designers', text: 'Filter to design contracts that match your tools and day rate, so you stop scrolling past roles that were never a fit.' },
+                { icon: 'ti-code', role: 'Developers', text: 'See remote and contract dev work scored against your stack — and apply on the original platform while the post is still fresh.' },
+                { icon: 'ti-pencil', role: 'Writers & marketers', text: 'Budgets shown upfront mean you never burn a call discovering the rate doesn\'t work. Chase only the leads worth your time.' },
               ].map((t, i) => (
-                <figure key={t.name} className={`quote-card sr ${i === 0 ? 'sr-d1' : i === 1 ? 'sr-d2' : 'sr-d3'}`}>
-                  <div className="quote-stars" aria-label="5 out of 5">★★★★★</div>
-                  <blockquote style={{ fontSize: '.96rem', color: 'var(--slate-700)', lineHeight: 1.7, marginBottom: 22, border: 'none' }}>{t.text}</blockquote>
-                  <figcaption style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <span className="avatar" aria-hidden="true">{t.initials}</span>
-                    <span>
-                      <span style={{ display: 'block', fontWeight: 600, fontSize: '.88rem' }}>{t.name}</span>
-                      <span style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: '.76rem', color: 'var(--slate-500)' }}>{t.role}</span>
-                    </span>
-                  </figcaption>
-                </figure>
+                <article key={t.role} className={`card sr ${i === 0 ? 'sr-d1' : i === 1 ? 'sr-d2' : 'sr-d3'}`} style={{ padding: 30 }}>
+                  <div className="icon-box" style={{ background: 'rgba(196,240,0,.16)' }}><i className={`ti ${t.icon}`} style={{ fontSize: 23, color: 'var(--lime-deep)' }} aria-hidden="true"></i></div>
+                  <h3 className="display" style={{ fontSize: '1.12rem', marginBottom: 8 }}>{t.role}</h3>
+                  <p style={{ fontSize: '.92rem', color: 'var(--slate-500)', lineHeight: 1.65 }}>{t.text}</p>
+                </article>
               ))}
             </div>
           </div>
@@ -579,13 +568,13 @@ export default function HomePage() {
         {/* ═══ STATS BAND ═══ */}
         <section className="stats-band" aria-label="Platform statistics">
           <div className="container" style={{ paddingTop: 52, paddingBottom: 52, position: 'relative', zIndex: 2 }}>
-            <p className="stats-eyebrow sr">Trusted by freelancers across the UK</p>
+            <p className="stats-eyebrow sr">How Flaiir works for you</p>
             <div className="grid-stats sr sr-d1">
               {[
-                { v: '2,411+', l: 'leads scored this week',   icon: 'ti-target-arrow',  note: 'updating live',  up: true  },
-                { v: '340+',   l: 'active freelancers',      icon: 'ti-users',          note: 'growing weekly', up: true  },
-                { v: '1h',     l: 'fastest delivery',        icon: 'ti-bolt',           note: 'or sooner',      up: false },
-                { v: '9.1',    l: 'avg top-match score',     icon: 'ti-award',          note: 'out of 10',      up: false },
+                { v: '5+',   l: 'sources monitored',     icon: 'ti-target-arrow',  note: 'more added weekly', up: true  },
+                { v: '1–10', l: 'transparent score',     icon: 'ti-award',          note: 'on every lead',     up: false },
+                { v: '1h',   l: 'refresh cadence',       icon: 'ti-bolt',           note: 'or sooner',         up: false },
+                { v: '£0',   l: 'commission taken',      icon: 'ti-link',           note: 'apply direct',      up: false },
               ].map(s => (
                 <div className="stat" key={s.l}>
                   <span className="stat-ico" aria-hidden="true"><i className={`ti ${s.icon}`} /></span>
@@ -667,7 +656,7 @@ export default function HomePage() {
                           <div style={{ marginBottom: 3, display: 'flex', alignItems: 'center', gap: 6 }}>
                             <span className="sig-src" style={{ background: d.c, color: d.t }}>{d.src}</span>
                             {i === 0 && <span className="dash-badge dash-badge-new">new</span>}
-                            {i === bestIdx && i !== 0 && <span className="dash-badge dash-badge-rec"><i className="ti ti-star-filled" style={{ fontSize: 9 }} aria-hidden="true"></i> recommended</span>}
+                            {i === bestIdx && i !== 0 && <span className="dash-badge dash-badge-rec"><i className="ti ti-star" style={{ fontSize: 9 }} aria-hidden="true"></i> recommended</span>}
                           </div>
                           <div className="sig-title">{d.title}</div>
                           <div className="sig-meta">{d.meta}</div>
@@ -815,7 +804,7 @@ export default function HomePage() {
       {/* ═══ STICKY CTA BAR ═══ */}
       <div id="sticky-bar" className={stickyVisible ? 'visible' : ''} aria-hidden="true">
         <div className="sticky-inner">
-          <span className="sticky-txt"><b>12 new leads</b> scored today — yours are waiting.</span>
+          <span className="sticky-txt"><b>Your scored feed</b> is ready — see today&apos;s best matches.</span>
           <Link href="/auth/signup" className="btn-p btn-sm">See my leads</Link>
         </div>
       </div>

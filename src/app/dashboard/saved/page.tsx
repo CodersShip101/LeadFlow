@@ -166,7 +166,7 @@ export default function SavedPage() {
                 <div className="sv-card-actions" onClick={e => e.stopPropagation()}>
                   {inPipeline
                     ? <button className="sv-pipeline-btn on" onClick={() => router.push('/dashboard/applied')}>
-                        <i className="ti ti-circle-check-filled" /> In pipeline
+                        <i className="ti ti-circle-check" /> In pipeline
                         <i className="ti ti-arrow-right sv-arr" />
                       </button>
                     : <button className="sv-pipeline-btn" onClick={() => moveToPipeline(lead.id)}>
