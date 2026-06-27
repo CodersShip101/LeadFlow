@@ -43,9 +43,12 @@ export async function POST() {
     }
 
     const admin = createAdminSupabase()
+    const nowISO = new Date().toISOString()
+    // Manual refresh delivers immediately: advance the scan high-water mark so
+    // the gated feed releases everything ingested up to now.
     const { error: updateError } = await admin
       .from('profiles')
-      .update({ last_manual_refresh_at: new Date().toISOString() })
+      .update({ last_manual_refresh_at: nowISO, last_scan_at: nowISO })
       .eq('id', user.id)
 
     if (updateError) {

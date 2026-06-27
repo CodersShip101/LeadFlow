@@ -38,6 +38,7 @@ export default function OnboardingPage() {
   const [exp, setExp] = useState('')
   const [avail, setAvail] = useState('')
   const [tz, setTz] = useState('')
+  const [ir35, setIr35] = useState('')
   const [saving, setSaving] = useState(false)
   const [instantLeads, setInstantLeads] = useState<Lead[]>([])
   const router = useRouter()
@@ -99,6 +100,7 @@ export default function OnboardingPage() {
         experience_level: exp || null,
         availability: avail || null,
         timezone: tz || null,
+        ir35_preference: ir35 || null,
       }),
     })
     if (!res.ok) { const j = await res.json(); toast.error(j.error || 'Failed to save'); setSaving(false); return }
@@ -321,6 +323,13 @@ export default function OnboardingPage() {
             <div className="ob-pills">
               {TIMEZONES.map(t => (
                 <button key={t} type="button" className={`ob-pill ${tz === t ? 'on' : ''}`} onClick={() => setTz(tz === t ? '' : t)}>{t}</button>
+              ))}
+            </div>
+
+            <label className="ob-label" style={{ marginTop: 18 }}>IR35 preference <span className="ob-label-hint">UK contracts · optional</span></label>
+            <div className="ob-pills">
+              {[{ id: 'outside', label: 'Outside IR35' }, { id: 'inside', label: 'Inside IR35' }, { id: '', label: 'No preference' }].map(o => (
+                <button key={o.id || 'none'} type="button" className={`ob-pill ${ir35 === o.id ? 'on' : ''}`} onClick={() => setIr35(o.id)}>{o.label}</button>
               ))}
             </div>
           </div>

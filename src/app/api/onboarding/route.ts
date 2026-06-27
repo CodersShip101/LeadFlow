@@ -9,7 +9,8 @@ export async function POST(request: NextRequest) {
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const body = await request.json()
-    const { full_name, disciplines, skills, hourly_rate, experience_level, availability, timezone } = body
+    const { full_name, disciplines, skills, hourly_rate, experience_level, availability, timezone, ir35_preference } = body
+    const ir35 = ir35_preference === 'inside' || ir35_preference === 'outside' ? ir35_preference : null
 
     const admin = createAdminSupabase()
     const { error } = await admin.from('profiles').upsert({
@@ -22,6 +23,7 @@ export async function POST(request: NextRequest) {
       experience_level: experience_level || null,
       availability: availability || null,
       timezone: timezone || null,
+      ir35_preference: ir35,
       onboarding_completed: true,
       subscription_status: 'free',
     })

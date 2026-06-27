@@ -1,8 +1,11 @@
 // lib/scoring.ts
 // ---------------------------------------------------------------------------
-// The weighted 40/30/20/10 scoring model that ranks every lead against a
-// freelancer's profile. Pure functions, no I/O — easy to unit test and reuse
-// on the server (API routes) or in a scraper post-processing step.
+// The weighted 45/30/15/10 scoring model (skill / rate / recency / detail)
+// that ranks every lead against a freelancer's profile, plus two gentle
+// modifiers — competition (how many have already applied) and IR35 fit — that
+// nudge the composite without adding user-facing weight sliders. Pure
+// functions, no I/O — easy to unit test and reuse on the server (API routes)
+// or in a scraper post-processing step.
 // ---------------------------------------------------------------------------
 
 export interface ScoringLead {
@@ -12,12 +15,17 @@ export interface ScoringLead {
   budget_max: number | null;
   posted_date: string;
   detail_score: number;
+  applicants?: number | null;
+  ir35?: 'inside' | 'outside' | null;
 }
 
 export interface ScoringProfile {
   skills: string[];
   hourly_rate: number | null;
   weights?: ScoringWeights | null;
+  // Preferred IR35 stance ('outside' for most contractors). When set, an
+  // opposing lead is penalised and a matching one rewarded.
+  ir35_preference?: 'inside' | 'outside' | null;
 }
 
 export interface SubScores {
@@ -104,7 +112,31 @@ function recency(lead: ScoringLead): number {
 }
 
 function detailScore(lead: ScoringLead): number {
-  return Math.max(0, Math.min(10, lead.detail_score));
+  // Freshly-scraped leads (alert dispatch) may not carry a detail_score yet —
+  // fall back to a neutral 5 so the composite never becomes NaN.
+  const d = lead.detail_score;
+  return Number.isFinite(d) ? Math.max(0, Math.min(10, d)) : 5;
+}
+
+// Early-applicant advantage: the product's core promise is "apply before the
+// crowd", so fewer existing applicants nudges the score up and a crowded post
+// nudges it down. No data (null) is neutral.
+function competitionModifier(lead: ScoringLead): number {
+  const a = lead.applicants;
+  if (a == null) return 0;
+  if (a === 0) return 0.3;
+  if (a <= 3) return 0.1;
+  if (a <= 9) return 0;
+  if (a <= 19) return -0.2;
+  return -0.4;
+}
+
+// IR35 fit: an outside-IR35 contract at the same headline rate is worth more
+// after tax, so reward leads matching the freelancer's stated preference.
+function ir35Modifier(lead: ScoringLead, profile: ScoringProfile): number {
+  const pref = profile.ir35_preference;
+  if (!pref || !lead.ir35) return 0;
+  return lead.ir35 === pref ? 0.3 : -0.3;
 }
 
 export function scoreLead(lead: ScoringLead, profile: ScoringProfile): ScoredLead {
@@ -116,14 +148,14 @@ export function scoreLead(lead: ScoringLead, profile: ScoringProfile): ScoredLea
     recency: recency(lead),
     detail: detailScore(lead),
   };
-  const score =
-    Math.round(
-      (sub.skill * w.skill +
-        sub.rate * w.rate +
-        sub.recency * w.recency +
-        sub.detail * w.detail) *
-        10,
-    ) / 10;
+  const base =
+    sub.skill * w.skill +
+    sub.rate * w.rate +
+    sub.recency * w.recency +
+    sub.detail * w.detail;
+
+  const adjusted = base + competitionModifier(lead) + ir35Modifier(lead, profile);
+  const score = Math.round(Math.max(0, Math.min(10, adjusted)) * 10) / 10;
 
   return {
     score,

@@ -87,7 +87,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {/* ─── Sidebar ─── */}
       <aside id="rail" className={menuOpen ? 'open' : ''}>
         <div className="brand">
-          <span className="brand-name">fl<span className="brand-ai">ai</span>ir</span>
+          <span className="brand-name">Fl<span className="brand-ai">ai</span>ir</span>
         </div>
 
         <div className="rail-label">Leads</div>
@@ -99,6 +99,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </button>
         <button className={`nav-item ${isActive('/dashboard/applied') ? 'active' : ''}`} onClick={() => navTo('/dashboard/applied')}>
           <i className="ti ti-arrows-split"></i> Pipeline
+        </button>
+        <button className={`nav-item ${isActive('/dashboard/analytics') ? 'active' : ''}`} onClick={() => navTo('/dashboard/analytics')}>
+          <i className="ti ti-chart-bar"></i> Analytics
         </button>
 
         {(plan === 'max' || plan === 'team') && (
@@ -112,6 +115,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </button>
         )}
 
+        <div className="rail-sep"></div>
         <div className="rail-label">Account</div>
         <button className={`nav-item ${isActive('/dashboard/profile') ? 'active' : ''}`} onClick={() => navTo('/dashboard/profile')}>
           <i className="ti ti-adjustments"></i> Settings
@@ -153,7 +157,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <button onClick={() => setMenuOpen(true)} className="btn-icon tip" data-tip="Menu" aria-label="Open menu">
             <i className="ti ti-menu-2"></i>
           </button>
-          <span className="brand-name" style={{ color: 'var(--ink)', fontSize: 19 }}>fl<span className="brand-ai">ai</span>ir</span>
+          <span className="brand-name" style={{ color: 'var(--ink)', fontSize: 19 }}>Fl<span className="brand-ai">ai</span>ir</span>
           <div className="avatar" style={{ marginLeft: 'auto', width: 30, height: 30, fontSize: 11 }}>
             {profileInitials(profile?.full_name)}
           </div>

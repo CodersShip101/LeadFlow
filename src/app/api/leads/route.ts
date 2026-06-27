@@ -10,7 +10,7 @@ export async function GET(req: NextRequest) {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('full_name, skills, hourly_rate, subscription_status, applications_total, days_active, scoring_weights')
+    .select('full_name, skills, hourly_rate, subscription_status, applications_total, days_active, scoring_weights, ir35_preference')
     .eq('id', user.id)
     .single()
 
@@ -37,25 +37,26 @@ export async function GET(req: NextRequest) {
     skills: profile.skills ?? [],
     hourly_rate: profile.hourly_rate,
     weights: (profile.scoring_weights as ScoringWeights | null) ?? undefined,
+    ir35_preference: (profile.ir35_preference as 'inside' | 'outside' | null) ?? null,
   })
 
   const noFilters = !sourceFilter && !scoreFilter && !q
   const topMatchId = noFilters && ranked.length ? ranked[0].lead.id : null
 
+  const byId = new Map((rows as any[]).map((x) => [x.id, x]))
+
   let visible = ranked
   if (scoreFilter === '8') visible = visible.filter((r) => r.score >= 8)
   else if (scoreFilter === '7') visible = visible.filter((r) => r.score >= 7)
   if (q) {
-    visible = visible.filter(
-      (r) =>
-        (rows as any[]).find((x) => x.id === r.lead.id)?.title?.toLowerCase().includes(q) ||
-        (rows as any[]).find((x) => x.id === r.lead.id)?.description?.toLowerCase().includes(q),
-    )
+    visible = visible.filter((r) => {
+      const row = byId.get(r.lead.id)
+      return row?.title?.toLowerCase().includes(q) || row?.description?.toLowerCase().includes(q)
+    })
   }
 
   const plan = (profile.subscription_status ?? 'free') as string
   const isPaid = plan !== 'free'
-  const byId = new Map((rows as any[]).map((x) => [x.id, x]))
 
   const leads = visible.map((r) => {
     const row = byId.get(r.lead.id)

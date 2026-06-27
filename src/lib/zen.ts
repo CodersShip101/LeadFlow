@@ -1,12 +1,14 @@
 export async function processLeadWithAI(rawText: string) {
-  // Smaller input = faster extraction. 1200 chars is plenty to capture title,
-  // budget, skills and scope — the fields we extract.
-  rawText = (rawText || '').substring(0, 1200)
+  // Bigger window than the other fields need, because responsibilities and
+  // benefits usually live further down a post. Still small enough to stay fast.
+  rawText = (rawText || '').substring(0, 2200)
   const prompt = `Extract structured data from this freelance/contract job post.
 Return only valid JSON with these exact fields:
 {
   "title": "clean job title",
   "description": "cleaned 2-3 sentence description",
+  "responsibilities": ["key task or duty", "..."],
+  "benefits": ["perk or benefit", "..."],
   "budget_min": null,
   "budget_max": null,
   "skills_required": ["skill1", "skill2"],
@@ -14,17 +16,22 @@ Return only valid JSON with these exact fields:
   "client_location": "Remote, London, UK etc",
   "remote_status": "remote|hybrid|onsite",
   "client_name": "company name if mentioned, or null",
+  "ir35": "inside|outside|null",
   "quality_score": 5
 }
 
 Extraction rules:
 - Title: remove company name, location, "hiring" noise. Keep clean role title.
+- Description: cleaned 2-3 sentence overview of the role.
+- Responsibilities: 3-6 concise bullet points of what the person will actually do (tasks, duties, deliverables). Each a short phrase, not a full sentence. Empty array if none stated.
+- Benefits: perks, compensation extras, or what's offered (e.g. "Flexible hours", "Equity", "Health insurance", "Fully remote"). Short phrases. Empty array if none stated.
 - Budget: parse £ symbols. If hourly (e.g. £50/hr), set budget_min=50, budget_max=null. If range (e.g. £300-£500), set both. If yearly salary, divide by 220 for daily rate.
 - Skills: extract ALL mentioned tech stacks, tools, frameworks as individual skills.
 - Project type: classify as "contract", "ongoing", or "one-off"
 - Client location: extract the location. If "remote" or no location, set "Remote"
 - Remote status: "remote", "hybrid", or "onsite"
 - Client name: extract company or client name. If unclear, null.
+- IR35: for UK contracts, detect IR35 status. "inside" or "outside" if stated/implied, otherwise null.
 
 Quality score rules (1-10):
 - Base: 5

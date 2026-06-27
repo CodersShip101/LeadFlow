@@ -216,7 +216,9 @@ export default function LeadDetailPage() {
         )}
 
         <button className={`btn-icon ${isSaved ? 'on' : ''}`} title={isSaved ? 'Saved' : 'Save for later'} onClick={() => updateApp(isSaved ? 'remove' : 'saved')}>
-          <i className="ti ti-bookmark" />
+          <svg width="16" height="16" viewBox="0 0 24 24" fill={isSaved ? 'var(--lime-deep)' : 'none'} stroke={isSaved ? 'var(--lime-deep)' : 'var(--ink-2)'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M18 7v14l-6-4-6 4V7a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4z"/>
+          </svg>
         </button>
       </div>
 
