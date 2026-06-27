@@ -1,0 +1,47 @@
+name: Scrape leads
+
+# Free external scheduler for the lead harvester. Vercel Hobby only allows daily
+# crons, so the sub-daily tiers are driven from here instead. Each run hits a
+# secured scrape endpoint with the CRON_SECRET (set as a repo secret).
+#
+# NOTE: GitHub's scheduled runs are best-effort and can be delayed under load.
+# For tighter timing, point a service like cron-job.org at the same URLs.
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'   # fast  — Reddit, HN, Jobicy, Remote OK
+    - cron: '17 * * * *'     # medium (hourly, offset)
+    - cron: '23 */4 * * *'   # slow  — UK boards, aggregators, niche RSS
+  workflow_dispatch:
+    inputs:
+      tier:
+        description: Which tier to run (fast | medium | slow)
+        default: medium
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger scrape endpoint
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          BASE_URL: https://www.flaiir.co
+          SCHEDULE: ${{ github.event.schedule }}
+          TIER_INPUT: ${{ github.event.inputs.tier }}
+        run: |
+          set -euo pipefail
+          case "${SCHEDULE:-}" in
+            "*/15 * * * *") PATH_=/api/scrape-fast ;;
+            "17 * * * *")   PATH_=/api/scrape-leads ;;
+            "23 */4 * * *") PATH_=/api/scrape-slow ;;
+            *)
+              case "${TIER_INPUT:-medium}" in
+                fast) PATH_=/api/scrape-fast ;;
+                slow) PATH_=/api/scrape-slow ;;
+                *)    PATH_=/api/scrape-leads ;;
+              esac ;;
+          esac
+          echo "Calling $BASE_URL$PATH_"
+          curl -fsS -X GET "$BASE_URL$PATH_" \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            --max-time 300 | head -c 2000
