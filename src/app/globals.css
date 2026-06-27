@@ -436,12 +436,20 @@ textarea.input { resize: vertical; min-height: 80px; }
 
 /* ── LEAD CARD v2 ── */
 .lead-card {
-  position: relative; padding: 15px 17px; padding-left: 16px; border-radius: var(--r-lg);
-  /* Source-colour wash that fades into the card. Painted as a background layer so
-     it's clipped to the card's rounded corners (no blocky top edge). */
-  background: linear-gradient(90deg, color-mix(in srgb, var(--src-color, var(--line-2)) 22%, transparent) 0%, transparent 64px), var(--card);
+  position: relative; padding: 15px 17px; padding-left: 16px; border-radius: var(--r-lg); background: var(--card);
   border: 1.5px solid color-mix(in srgb, var(--ink-900) 12%, transparent); cursor: pointer;
-  transition: transform .18s var(--ease), box-shadow .18s, border-color .18s, background .2s;
+  transition: transform .18s var(--ease), box-shadow .18s, border-color .18s;
+}
+.lead-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 8px;
+  bottom: 8px;
+  width: 4px;
+  background: var(--src-color, var(--line-2));
+  border-radius: 3px;
+  transition: background .2s;
 }
 
 .lead-card:hover { transform: translateY(-2px); box-shadow: var(--sh-md); }
