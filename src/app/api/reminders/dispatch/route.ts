@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server'
 import { createAdminSupabase } from '@/lib/supabase-server'
 import { isAuthorizedCron } from '@/lib/cron'
 import { sendEmail } from '@/lib/email'
+import { formatBudgetGBP } from '@/lib/utils'
+import { canonSource, sourceMeta } from '@/lib/sources'
 
 export const maxDuration = 60
 
@@ -30,7 +32,7 @@ export async function GET(req: Request) {
     const leadIds = [...new Set(due.map(d => d.lead_id))]
     const userIds = [...new Set(due.map(d => d.freelancer_id))]
     const [{ data: leads }, { data: profiles }] = await Promise.all([
-      admin.from('leads').select('id, title, source_url').in('id', leadIds),
+      admin.from('leads').select('id, title, source_url, source, budget_min, budget_max, client_name').in('id', leadIds),
       admin.from('profiles').select('id, email, full_name').in('id', userIds),
     ])
     const leadMap = new Map((leads ?? []).map(l => [l.id, l]))
@@ -52,33 +54,65 @@ export async function GET(req: Request) {
 
       const first = leadMap.get(items[0].lead_id)
       const firstTitle = first?.title || 'a lead'
-      const subject = items.length === 1
-        ? `Time to follow up: ${firstTitle}`
-        : `${items.length} follow-ups due on Flaiir`
+      const n = items.length
+      const subject = n === 1 ? `Time to follow up: ${firstTitle}` : `${n} follow-ups due on Flaiir`
+      const preheader = n === 1 ? `Follow up on ${firstTitle}` : `${n} leads are ready for your next move`
+      const headline = n === 1 ? 'Time to follow up' : `${n} leads to follow up on`
+      const sub = n === 1
+        ? 'You set a reminder to come back to this lead — here it is.'
+        : 'You set reminders on these leads. They’re ready for your next move.'
+      const mono = "'SFMono-Regular',ui-monospace,'Menlo',monospace"
 
       const rows = items.map(it => {
         const lead = leadMap.get(it.lead_id)
         const title = esc(lead?.title || 'Lead')
         const link = lead?.source_url || `${base}/dashboard/applied`
-        const note = it.follow_up_note ? `<div style="font-size:13px;color:#6B7280;margin-top:3px">${esc(it.follow_up_note)}</div>` : ''
-        return `<tr><td style="padding:10px 0;border-bottom:1px solid #EEE">
-          <a href="${esc(link)}" style="font-size:15px;font-weight:600;color:#111827;text-decoration:none">${title}</a>${note}
+        const budget = lead ? formatBudgetGBP(lead.budget_min, lead.budget_max) : ''
+        const src = lead ? sourceMeta(canonSource(lead)) : null
+        const chips: string[] = []
+        if (budget) chips.push(`<span style="display:inline-block;font:700 11px ${mono};color:#3D4D08;background:#F2FAD6;padding:3px 8px;border-radius:6px;margin:0 6px 6px 0">${esc(budget)}</span>`)
+        if (lead?.client_name) chips.push(`<span style="display:inline-block;font:600 12px ${mono};color:#6B7669;margin:0 6px 6px 0">${esc(lead.client_name)}</span>`)
+        if (src) chips.push(`<span style="display:inline-block;font:700 10px ${mono};letter-spacing:.05em;color:${src.color};margin:0 0 6px 0">${esc(src.label.toUpperCase())}</span>`)
+        const note = it.follow_up_note
+          ? `<div style="font-size:13px;color:#6B7669;font-style:italic;margin-top:8px">“${esc(it.follow_up_note)}”</div>` : ''
+        return `<tr><td style="padding:6px 0">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F4F5F0;border-radius:12px">
+            <tr><td style="padding:14px 16px">
+              <div style="font-size:15px;font-weight:700;color:#15201A;line-height:1.35">${title}</div>
+              <div style="margin-top:7px">${chips.join('')}</div>${note}
+              <a href="${esc(link)}" style="display:inline-block;margin-top:10px;font-size:13px;font-weight:700;color:#7E9E0A;text-decoration:none">View listing &rarr;</a>
+            </td></tr>
+          </table>
         </td></tr>`
       }).join('')
 
-      const html = `<!DOCTYPE html><html><body style="margin:0;background:#F5F5F7;font-family:-apple-system,Segoe UI,sans-serif">
-        <table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:28px 16px">
-          <table width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:#fff;border-radius:14px;padding:28px">
-            <tr><td>
-              <div style="font-size:18px;font-weight:800;color:#111827;margin-bottom:4px">Follow-up reminder</div>
-              <div style="font-size:14px;color:#6B7280;margin-bottom:18px">${items.length === 1 ? "Here's the lead you wanted to come back to:" : `You have ${items.length} leads to follow up on:`}</div>
-              <table width="100%" cellpadding="0" cellspacing="0">${rows}</table>
-              <a href="${esc(base)}/dashboard/applied" style="display:inline-block;margin-top:22px;background:#C4F000;color:#1A1A1A;font-weight:700;font-size:14px;text-decoration:none;padding:11px 22px;border-radius:8px">Open your pipeline</a>
-            </td></tr>
-          </table>
-          <div style="font-size:11px;color:#9CA3AF;margin-top:16px">Flaiir · you set these reminders yourself</div>
-        </td></tr></table>
-      </body></html>`
+      const html = `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"></head>
+<body style="margin:0;padding:0;background:#F4F5F0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif">
+  <span style="display:none!important;max-height:0;overflow:hidden;opacity:0;color:transparent">${esc(preheader)}</span>
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F4F5F0">
+    <tr><td align="center" style="padding:32px 16px">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:540px">
+        <tr><td style="padding:0 4px 16px">
+          <span style="font-size:20px;font-weight:800;letter-spacing:-.02em;color:#15201A">Fl<span style="color:#7E9E0A">ai</span>ir</span>
+        </td></tr>
+        <tr><td style="background:#FBFBF9;border:1px solid #E7E8E1;border-radius:16px;padding:30px 28px">
+          <div style="width:46px;height:46px;background:#F2FAD6;border-radius:12px;text-align:center;font-size:22px;line-height:46px;margin-bottom:16px">&#9200;</div>
+          <div style="font:700 11px ${mono};letter-spacing:.12em;color:#9AA398;text-transform:uppercase;margin-bottom:8px">Follow-up reminder</div>
+          <div style="font-size:22px;font-weight:800;letter-spacing:-.02em;color:#15201A;margin-bottom:6px">${esc(headline)}</div>
+          <div style="font-size:14px;color:#6B7669;line-height:1.5;margin-bottom:18px">${esc(sub)}</div>
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0">${rows}</table>
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding-top:24px">
+            <a href="${esc(base)}/dashboard/applied" style="display:inline-block;background:#C4F000;color:#15201A;font-size:14px;font-weight:800;text-decoration:none;padding:13px 30px;border-radius:10px">Open your pipeline &rarr;</a>
+          </td></tr></table>
+        </td></tr>
+        <tr><td style="padding:18px 4px 0;text-align:center">
+          <div style="font:500 11.5px ${mono};color:#9AA398;letter-spacing:.03em;margin-bottom:4px">You set these reminders yourself in Flaiir</div>
+          <a href="${esc(base)}/dashboard/applied" style="font-size:11.5px;color:#9AA398;text-decoration:underline">Manage reminders</a>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body></html>`
 
       const res = await sendEmail({ to: prof.email, subject, html })
       if (res.ok) {
