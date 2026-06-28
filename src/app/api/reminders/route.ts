@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerSupabase } from '@/lib/supabase-server'
+import { createServerSupabase, createAdminSupabase } from '@/lib/supabase-server'
 import { entitlementsFor, type Tier } from '@/lib/tiers'
 
 async function gate() {
@@ -22,19 +22,21 @@ export async function POST(req: NextRequest) {
   const { lead_id, follow_up_at, follow_up_note } = await req.json().catch(() => ({}))
   if (!lead_id) return NextResponse.json({ error: 'lead_id required' }, { status: 400 })
 
-  // Ensure an application row exists for this lead (create as 'interested' if not).
-  const { data: existing } = await g.supabase
+  // Write with the admin client (scoped to this user) — same as /api/applications.
+  // RLS blocks the user-token write on applications, which silently matched 0 rows.
+  const admin = createAdminSupabase()
+  const { data: existing } = await admin
     .from('applications').select('id').eq('freelancer_id', g.user.id).eq('lead_id', lead_id).maybeSingle()
 
   // Reset the notified flag so a freshly set reminder will email again.
   if (existing) {
-    const { error } = await g.supabase
+    const { error } = await admin
       .from('applications')
       .update({ follow_up_at: follow_up_at ?? null, follow_up_note: follow_up_note ?? null, follow_up_notified_at: null })
       .eq('id', existing.id)
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   } else {
-    const { error } = await g.supabase
+    const { error } = await admin
       .from('applications')
       .insert({ freelancer_id: g.user.id, lead_id, status: 'interested', follow_up_at: follow_up_at ?? null, follow_up_note: follow_up_note ?? null, follow_up_notified_at: null })
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
