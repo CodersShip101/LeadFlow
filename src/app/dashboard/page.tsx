@@ -1165,7 +1165,7 @@ export default function DashboardPage() {
                   : <button className="btn btn-primary dp-foot-btn" disabled={applyingId === l.id || (!isPro && !l.source_url)} onClick={() => handleApply(l)}>
                       {applyingId === l.id ? <LoadingDots label="" /> : <><i className="ti ti-send" /> {!isPro && !l.source_url ? 'Source locked — upgrade' : 'Apply & track this lead'}</>}
                     </button>}
-                {!applied && <p className="dp-foot-note">{!isPro && !l.source_url ? 'Upgrade to unlock where to apply' : 'No commission · direct link · no fee'}</p>}
+                {!applied && !isPro && !l.source_url && <p className="dp-foot-note">Upgrade to unlock where to apply</p>}
               </div>
             </aside>
           )

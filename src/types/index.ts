@@ -44,6 +44,9 @@ export interface Application {
   outcome: 'won' | 'lost' | 'pending' | null;
   outcome_at: string | null;
   created_at: string;
+  follow_up_at?: string | null;
+  follow_up_note?: string | null;
+  note?: string | null;
 }
 
 export interface PricingTier {

@@ -10,7 +10,7 @@ export async function GET() {
   const admin = createAdminSupabase()
   const { data } = await admin
     .from('applications')
-    .select('id, lead_id, status, outcome, outcome_at, created_at')
+    .select('id, lead_id, status, outcome, outcome_at, created_at, follow_up_at, follow_up_note, note')
     .eq('freelancer_id', user.id)
 
   return NextResponse.json(data || [])
@@ -113,20 +113,30 @@ export async function PATCH(req: Request) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { lead_id, outcome } = await req.json()
-  if (!lead_id || !outcome) {
-    return NextResponse.json({ error: 'lead_id and outcome required' }, { status: 400 })
+  const { lead_id, outcome, note } = await req.json()
+  if (!lead_id) {
+    return NextResponse.json({ error: 'lead_id required' }, { status: 400 })
   }
 
-  const validOutcomes = ['won', 'lost', 'pending']
-  if (!validOutcomes.includes(outcome)) {
-    return NextResponse.json({ error: 'Invalid outcome' }, { status: 400 })
+  const update: Record<string, unknown> = {}
+  if (outcome !== undefined) {
+    if (!['won', 'lost', 'pending'].includes(outcome)) {
+      return NextResponse.json({ error: 'Invalid outcome' }, { status: 400 })
+    }
+    update.outcome = outcome
+    update.outcome_at = new Date().toISOString()
+  }
+  if (note !== undefined) {
+    update.note = typeof note === 'string' && note.trim() ? note.trim().slice(0, 500) : null
+  }
+  if (Object.keys(update).length === 0) {
+    return NextResponse.json({ error: 'Nothing to update' }, { status: 400 })
   }
 
   const admin = createAdminSupabase()
   const { data, error } = await admin
     .from('applications')
-    .update({ outcome, outcome_at: new Date().toISOString() })
+    .update(update)
     .eq('freelancer_id', user.id)
     .eq('lead_id', lead_id)
     .select()

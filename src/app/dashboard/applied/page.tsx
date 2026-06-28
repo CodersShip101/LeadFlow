@@ -4,23 +4,30 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-client'
 import toast from 'react-hot-toast'
-import type { Lead, Application } from '@/types'
-import { formatBudgetGBP, timeAgo } from '@/lib/utils'
+import type { Lead, Application, Profile } from '@/types'
+import { formatBudgetGBP } from '@/lib/utils'
+import { canonSource, sourceMeta, srcBadgeStyle } from '@/lib/sources'
+import { entitlementsFor, type Tier } from '@/lib/tiers'
 
-const SRC: Record<string, { name: string; cls: string; ava: string; ini: string }> = {
-  reddit: { name: 'Reddit', cls: 'sb-reddit', ava: '#FF5A3C', ini: 'R' },
-  reed:   { name: 'Reed',   cls: 'sb-reed',   ava: '#3B7BE0', ini: 'R' },
-  wwr:    { name: 'WWR',    cls: 'sb-wwr',     ava: '#E8A020', ini: 'W' },
-  rok:    { name: 'Remote OK', cls: 'sb-rok',  ava: '#9B6BE0', ini: 'O' },
+function reminderLabel(iso: string): { label: string; overdue: boolean } {
+  const t = new Date(iso).getTime()
+  const overdue = t < Date.now()
+  const days = Math.round((t - Date.now()) / 86400000)
+  let label: string
+  if (overdue) label = 'overdue'
+  else if (days === 0) label = 'today'
+  else if (days === 1) label = 'tomorrow'
+  else if (days <= 14) label = `in ${days}d`
+  else label = new Date(iso).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+  return { label, overdue }
 }
 
-function srcKey(url: string | null): string {
-  const l = (url || '').toLowerCase()
-  if (l.includes('reddit')) return 'reddit'
-  if (l.includes('reed')) return 'reed'
-  if (l.includes('weworkremotely') || l.includes('wwr')) return 'wwr'
-  return 'rok'
-}
+const REMIND_OPTS: [string, number][] = [
+  ['Later today', 3],
+  ['Tomorrow', 24],
+  ['In 3 days', 72],
+  ['Next week', 168],
+]
 
 const COLS = [
   { key: 'interested', label: 'Interested', icon: 'ti-eye',    color: 'var(--lime-deep)', tint: 'rgba(196,240,0,.05)', next: 'applied',  nextLabel: 'Mark applied' },
@@ -31,20 +38,30 @@ const COLS = [
 export default function PipelinePage() {
   const [leads, setLeads] = useState<Lead[]>([])
   const [applications, setApplications] = useState<Application[]>([])
+  const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
   const [dragId, setDragId] = useState<string | null>(null)
   const [dragCol, setDragCol] = useState<string | null>(null)
   const [overCol, setOverCol] = useState<string | null>(null)
+  const [remindOpen, setRemindOpen] = useState<string | null>(null)
+  const [noteEditId, setNoteEditId] = useState<string | null>(null)
+  const [noteDraft, setNoteDraft] = useState('')
+  const [savingNote, setSavingNote] = useState(false)
   const supabase = createClient()
   const router = useRouter()
+
+  const plan = (profile?.subscription_status ?? 'free') as Tier
+  const canRemind = entitlementsFor(plan).calendarSync
 
   useEffect(() => {
     const load = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/auth/login'); return }
+      const profRes = await supabase.from('profiles').select('*').eq('id', user.id).single()
+      setProfile(profRes.data)
       let { data: apps, error } = await supabase
         .from('applications')
-        .select('id, lead_id, status, outcome, outcome_at, created_at')
+        .select('id, lead_id, status, outcome, outcome_at, created_at, follow_up_at, follow_up_note, note')
         .eq('freelancer_id', user.id)
       if (error || !apps) {
         const res = await fetch('/api/applications')
@@ -94,6 +111,41 @@ export default function PipelinePage() {
       else toast('Moved back to interested')
     }
   }, [])
+
+  const setReminder = async (leadId: string, hours: number | null) => {
+    setRemindOpen(null)
+    const follow_up_at = hours == null ? null : new Date(Date.now() + hours * 3600000).toISOString()
+    try {
+      const res = await fetch('/api/reminders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ lead_id: leadId, follow_up_at }) })
+      if (res.ok) {
+        setApplications(prev => prev.map(a => a.lead_id === leadId ? { ...a, follow_up_at } : a))
+        toast.success(hours == null ? 'Follow-up cleared' : 'Follow-up set')
+      } else if (res.status === 403) {
+        toast.error('Follow-up reminders are a Pro feature')
+      } else {
+        const d = await res.json().catch(() => ({}))
+        toast.error(d.error || 'Could not set reminder')
+      }
+    } catch { toast.error('Network error') }
+  }
+
+  const startEditNote = (leadId: string, current: string) => { setNoteEditId(leadId); setNoteDraft(current) }
+  const saveNote = async (leadId: string) => {
+    if (savingNote) return
+    setSavingNote(true)
+    const note = noteDraft.trim()
+    try {
+      const r = await fetch('/api/applications', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ lead_id: leadId, note }) })
+      if (r.ok) {
+        setApplications(prev => prev.map(a => a.lead_id === leadId ? { ...a, note: note || null } : a))
+        setNoteEditId(null)
+        toast.success(note ? 'Note saved' : 'Note cleared')
+      } else {
+        const d = await r.json().catch(() => ({}))
+        toast.error(d.error || 'Could not save note')
+      }
+    } finally { setSavingNote(false) }
+  }
 
   const handleDragStart = (e: React.DragEvent, leadId: string, col: string) => {
     setDragId(leadId); setDragCol(col)
@@ -183,11 +235,12 @@ export default function PipelinePage() {
                       <span>Drop leads here</span>
                     </div>
                   : colLeads.map(lead => {
-                      const si = SRC[srcKey(lead.source_url)] || SRC.reddit
+                      const si = sourceMeta(canonSource(lead))
                       const budget = formatBudgetGBP(lead.budget_min, lead.budget_max)
                       const app = appMap.get(lead.id)
                       const daysSince = app ? Math.floor((Date.now() - new Date(app.created_at).getTime()) / 86400000) : 0
                       const isStale = daysSince >= 7 && col.key !== 'hired'
+                      const reminder = app?.follow_up_at ? reminderLabel(app.follow_up_at) : null
 
                       return (
                         <div key={lead.id}
@@ -200,8 +253,7 @@ export default function PipelinePage() {
 
                           {/* Card top */}
                           <div className="kc-top">
-                            <span className="src-ava" style={{ background: si.ava, width: 18, height: 18, fontSize: 9 }}>{si.ini}</span>
-                            <span className={`src-badge ${si.cls}`}>{si.name.toUpperCase()}</span>
+                            <span className="src-badge" style={srcBadgeStyle(si.color)}>{si.label.toUpperCase()}</span>
                             <span className="kc-age" style={{ color: isStale ? 'var(--coral)' : 'var(--slate-2)' }}>
                               {isStale && <i className="ti ti-alert-triangle" />}
                               {daysSince === 0 ? 'Today' : `${daysSince}d`}
@@ -211,28 +263,76 @@ export default function PipelinePage() {
                           {/* Title */}
                           <div className="kc-title">{lead.title}</div>
 
-                          {/* Budget */}
-                          {budget && (
-                            <div className="kc-budget">
-                              <i className="ti ti-currency-pound" />{budget}
-                            </div>
+                          {/* Budget + client */}
+                          <div className="kc-meta-row">
+                            {budget && <span className="kc-budget"><i className="ti ti-currency-pound" />{budget}</span>}
+                            {lead.client_name && <span className="kc-client"><i className="ti ti-building" />{lead.client_name}</span>}
+                          </div>
+
+                          {/* Follow-up chip */}
+                          {reminder && (
+                            <span className={`sv-remind-chip ${reminder.overdue ? 'overdue' : ''}`} style={{ alignSelf: 'flex-start' }}>
+                              <i className="ti ti-alarm" />Follow up {reminder.label}
+                            </span>
                           )}
 
-                          {/* Quick-advance + detail */}
-                          {col.next && (
-                            <div className="kc-actions" onClick={e => e.stopPropagation()}>
+                          {/* Note */}
+                          {noteEditId === lead.id ? (
+                            <div className="sv-note-edit" onClick={e => e.stopPropagation()}>
+                              <textarea value={noteDraft} onChange={e => setNoteDraft(e.target.value)} maxLength={500} autoFocus
+                                placeholder="Next step… e.g. sent pitch, follow up Monday" />
+                              <div className="sv-note-edit-actions">
+                                <button className="sv-note-save" disabled={savingNote} onClick={() => saveNote(lead.id)}>Save</button>
+                                <button className="sv-note-cancel" onClick={() => setNoteEditId(null)}>Cancel</button>
+                              </div>
+                            </div>
+                          ) : app?.note ? (
+                            <button className="sv-note" onClick={e => { e.stopPropagation(); startEditNote(lead.id, app.note!) }}>
+                              <i className="ti ti-note" /><span>{app.note}</span><i className="ti ti-pencil sv-note-pencil" />
+                            </button>
+                          ) : null}
+
+                          {/* Actions */}
+                          <div className="kc-actions" onClick={e => e.stopPropagation()}>
+                            {col.next && (
                               <button className="kc-advance-btn" onClick={() => updateApp(lead.id, col.next!)}>
                                 <i className={`ti ${COLS.find(c => c.key === col.next)?.icon}`} />
                                 {col.nextLabel}
                               </button>
-                            </div>
-                          )}
+                            )}
+                            {col.key === 'hired' && <div className="kc-won-badge"><i className="ti ti-trophy" /> Won</div>}
 
-                          {col.key === 'hired' && (
-                            <div className="kc-won-badge">
-                              <i className="ti ti-trophy" /> Won
+                            {/* Follow-up reminder */}
+                            <div className="sv-remind-wrap" style={{ position: 'relative' }}>
+                              <button
+                                className={`sv-icon-btn kc-icon ${reminder ? 'on' : ''} ${!canRemind ? 'locked' : ''}`}
+                                title={canRemind ? 'Set a follow-up reminder' : 'Follow-up reminders are a Pro feature'}
+                                onClick={() => {
+                                  if (!canRemind) { toast('Follow-up reminders are a Pro feature — upgrade to use them', { icon: '🔒' }); return }
+                                  setRemindOpen(remindOpen === lead.id ? null : lead.id)
+                                }}
+                              >
+                                <i className="ti ti-bell" />
+                                {!canRemind && <i className="ti ti-lock sv-lock-badge" />}
+                              </button>
+                              {canRemind && remindOpen === lead.id && (
+                                <div className="sv-remind-drop">
+                                  <div className="sv-remind-head">Remind me to follow up</div>
+                                  {REMIND_OPTS.map(([label, hours]) => (
+                                    <button key={label} onClick={() => setReminder(lead.id, hours)}>{label}</button>
+                                  ))}
+                                  {reminder && <button className="sv-remind-clear" onClick={() => setReminder(lead.id, null)}>Clear</button>}
+                                </div>
+                              )}
                             </div>
-                          )}
+
+                            {/* Note toggle */}
+                            {noteEditId !== lead.id && !app?.note && (
+                              <button className="sv-icon-btn kc-icon" title="Add a note" onClick={() => startEditNote(lead.id, '')}>
+                                <i className="ti ti-note" />
+                              </button>
+                            )}
+                          </div>
                         </div>
                       )
                     })}

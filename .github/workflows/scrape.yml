@@ -12,10 +12,11 @@ on:
     - cron: '*/15 * * * *'   # fast  — Reddit, HN, Jobicy, Remote OK
     - cron: '17 * * * *'     # medium (hourly, offset)
     - cron: '23 */4 * * *'   # slow  — UK boards, aggregators, niche RSS
+    - cron: '0 8 * * *'      # daily — email due follow-up reminders
   workflow_dispatch:
     inputs:
       tier:
-        description: Which tier to run (fast | medium | slow)
+        description: Which tier to run (fast | medium | slow | reminders)
         default: medium
 
 jobs:
@@ -34,11 +35,13 @@ jobs:
             "*/15 * * * *") PATH_=/api/scrape-fast ;;
             "17 * * * *")   PATH_=/api/scrape-leads ;;
             "23 */4 * * *") PATH_=/api/scrape-slow ;;
+            "0 8 * * *")    PATH_=/api/reminders/dispatch ;;
             *)
               case "${TIER_INPUT:-medium}" in
-                fast) PATH_=/api/scrape-fast ;;
-                slow) PATH_=/api/scrape-slow ;;
-                *)    PATH_=/api/scrape-leads ;;
+                fast)      PATH_=/api/scrape-fast ;;
+                slow)      PATH_=/api/scrape-slow ;;
+                reminders) PATH_=/api/reminders/dispatch ;;
+                *)         PATH_=/api/scrape-leads ;;
               esac ;;
           esac
           echo "Calling $BASE_URL$PATH_"
