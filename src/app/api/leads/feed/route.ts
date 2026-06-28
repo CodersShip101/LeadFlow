@@ -31,8 +31,11 @@ export async function GET() {
     let cutoff = prevScan
     let delivered = false
 
-    // Timer hit zero → deliver: advance the high-water mark to now.
-    if (now >= prevScan + intervalMs) {
+    // Deliver on a steady, clock-aligned cadence (interval boundaries from epoch)
+    // rather than "last visit + interval". This keeps the countdown tied to a real
+    // schedule, so returning after a long absence shows the time to the next slot
+    // instead of resetting to a full interval every visit.
+    if (Math.floor(now / intervalMs) > Math.floor(prevScan / intervalMs)) {
       cutoff = now
       delivered = true
       await admin
@@ -40,6 +43,9 @@ export async function GET() {
         .update({ last_scan_at: new Date(now).toISOString() })
         .eq('id', user.id)
     }
+
+    // Next aligned boundary — always strictly in the future, at most one interval away.
+    const nextScanAt = (Math.floor(now / intervalMs) + 1) * intervalMs
 
     const cutoffISO = new Date(cutoff).toISOString()
 
@@ -74,7 +80,7 @@ export async function GET() {
       plan,
       scanIntervalHours: entitlementsFor(plan).scanIntervalHours,
       lastScanAt: cutoff,
-      nextScanAt: cutoff + intervalMs,
+      nextScanAt,
       delivered,
       deliveredCount,
       waitingCount: waitingCount ?? 0,
