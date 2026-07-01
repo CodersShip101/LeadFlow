@@ -76,15 +76,22 @@ export async function POST(req: Request) {
 
   const { data: existing } = await admin
     .from('applications')
-    .select('id')
+    .select('id, outcome')
     .eq('freelancer_id', user.id)
     .eq('lead_id', lead_id)
     .maybeSingle()
 
+  // Pipeline "Won" sets status 'hired' — also record the win outcome so Analytics
+  // (which counts outcome) reflects it. Moving a won lead back clears the win.
+  const nowISO = new Date().toISOString()
+  const statusUpdate: Record<string, unknown> = { status }
+  if (status === 'hired') { statusUpdate.outcome = 'won'; statusUpdate.outcome_at = nowISO }
+  else if ((status === 'interested' || status === 'applied') && existing?.outcome === 'won') { statusUpdate.outcome = null; statusUpdate.outcome_at = null }
+
   if (existing) {
     const { data, error } = await admin
       .from('applications')
-      .update({ status })
+      .update(statusUpdate)
       .eq('id', existing.id)
       .select()
       .single()
@@ -98,9 +105,11 @@ export async function POST(req: Request) {
     .from('org_members').select('org_id').eq('user_id', user.id).maybeSingle()
   const orgId = membership?.org_id ?? null
 
+  const insertRow: Record<string, unknown> = { freelancer_id: user.id, lead_id, status, org_id: orgId }
+  if (status === 'hired') { insertRow.outcome = 'won'; insertRow.outcome_at = nowISO }
   const { data, error } = await admin
     .from('applications')
-    .insert({ freelancer_id: user.id, lead_id, status, org_id: orgId })
+    .insert(insertRow)
     .select()
     .single()
 
