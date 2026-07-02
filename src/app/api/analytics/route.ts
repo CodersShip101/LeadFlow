@@ -28,7 +28,7 @@ export async function GET() {
   // ── Applications this user has made ──
   const { data: apps } = await admin
     .from('applications')
-    .select('lead_id, status, outcome, created_at, lost_reason, won_amount')
+    .select('lead_id, status, outcome, outcome_at, created_at, lost_reason, won_amount')
     .eq('freelancer_id', user.id)
     .neq('status', 'saved')
 
@@ -85,14 +85,43 @@ export async function GET() {
     ? Math.round(budgets.reduce((s, v) => s + v, 0) / budgets.length)
     : null
 
-  // ── Revenue won: confirmed deal values, falling back to the listed budget ──
-  const revenueWon = (apps ?? [])
-    .filter(a => a.outcome === 'won')
-    .reduce((s, a) => {
-      if (a.won_amount != null) return s + Number(a.won_amount)
-      const lead = leadRows.find(l => l.id === a.lead_id)
-      return s + (lead?.budget_max ?? lead?.budget_min ?? 0)
-    }, 0)
+  // ── Money: revenue, pipeline value, deal cycle ──
+  const leadBudget = (id: string) => {
+    const lead = leadRows.find(l => l.id === id)
+    return lead?.budget_max ?? lead?.budget_min ?? 0
+  }
+  const dealValue = (a: { lead_id: string; won_amount: number | null }) =>
+    a.won_amount != null ? Number(a.won_amount) : leadBudget(a.lead_id)
+
+  const wonApps = (apps ?? []).filter(a => a.outcome === 'won')
+  const revenueWon = wonApps.reduce((s, a) => s + dealValue(a), 0)
+
+  // Revenue by calendar month, last 6 months
+  const revenueByMonth: { month: string; amount: number }[] = []
+  for (let i = 5; i >= 0; i--) {
+    const start = new Date()
+    start.setDate(1); start.setHours(0, 0, 0, 0)
+    start.setMonth(start.getMonth() - i)
+    const end = new Date(start)
+    end.setMonth(end.getMonth() + 1)
+    const amount = wonApps
+      .filter(a => a.outcome_at && new Date(a.outcome_at) >= start && new Date(a.outcome_at) < end)
+      .reduce((s, a) => s + dealValue(a), 0)
+    revenueByMonth.push({ month: start.toLocaleDateString('en-GB', { month: 'short' }), amount })
+  }
+
+  // Value sitting in open stages right now
+  const openApps = (apps ?? []).filter(a => a.status === 'interested' || a.status === 'applied' || a.status === 'in_talks')
+  const pipelineValue = openApps.reduce((s, a) => s + leadBudget(a.lead_id), 0)
+
+  // Avg days from entering the pipeline to winning
+  const cycles = wonApps
+    .filter(a => a.outcome_at)
+    .map(a => (new Date(a.outcome_at).getTime() - new Date(a.created_at).getTime()) / 86400000)
+    .filter(d => d >= 0)
+  const avgDealCycleDays = cycles.length > 0
+    ? Math.round(cycles.reduce((s, v) => s + v, 0) / cycles.length)
+    : null
 
   // ── Advanced analytics (Max plan only) ──
   let advanced = null
@@ -165,6 +194,7 @@ export async function GET() {
 
   return NextResponse.json({
     summary: { total, won, lost, winRate, avgBudget, revenueWon },
+    money: { revenueByMonth, pipelineValue, openCount: openApps.length, avgDealCycleDays },
     weeklyActivity: weeks,
     sources,
     advanced,

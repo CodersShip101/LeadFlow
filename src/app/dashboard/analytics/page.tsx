@@ -6,6 +6,12 @@ import { createClient } from '@/lib/supabase-client'
 import { sourceMeta } from '@/lib/sources'
 
 // Brand label + colour per source (groups Reddit subs; direct/unknown → neutral).
+// Compact money label: £850, £4.2k, £12k
+function moneyLabel(n: number): string {
+  if (n >= 1000) return `£${(n / 1000).toFixed(n >= 10000 ? 0 : 1).replace(/\.0$/, '')}k`
+  return `£${n}`
+}
+
 function srcInfo(s: string): { label: string; color: string } {
   const id = (s || '').toLowerCase()
   if (!id || id === 'unknown' || id === 'direct') return { label: 'Other', color: '#9AA398' }
@@ -14,6 +20,7 @@ function srcInfo(s: string): { label: string; color: string } {
 
 interface Analytics {
   summary: { total: number; won: number; lost: number; winRate: number | null; avgBudget: number | null; revenueWon?: number }
+  money?: { revenueByMonth: { month: string; amount: number }[]; pipelineValue: number; openCount: number; avgDealCycleDays: number | null }
   weeklyActivity: { week: string; count: number }[]
   sources: { source: string; count: number }[]
   advanced: null | {
@@ -98,7 +105,7 @@ export default function AnalyticsPage() {
 
   if (!data) return null
 
-  const { summary, weeklyActivity, sources, advanced } = data
+  const { summary, money, weeklyActivity, sources, advanced } = data
   const maxSource = Math.max(1, ...sources.map(s => s.count))
   const noData = summary.total === 0
   const decided = summary.won + summary.lost
@@ -138,6 +145,9 @@ export default function AnalyticsPage() {
                     <span><span className="an-dot" style={{ background: 'var(--hi)' }} />{summary.won} won</span>
                     <span><span className="an-dot" style={{ background: 'var(--coral)' }} />{summary.lost} lost</span>
                   </div>
+                  {decided < 5 && (
+                    <div className="an-hero-note">Based on {decided} decided deal{decided === 1 ? '' : 's'} — early days</div>
+                  )}
                 </>
               ) : <div className="an-hero-empty">No outcomes recorded yet</div>}
             </div>
@@ -147,6 +157,42 @@ export default function AnalyticsPage() {
               <div className="an-stat"><span className="an-stat-num">{summary.avgBudget != null ? `£${summary.avgBudget.toLocaleString('en-GB')}` : '—'}</span><span className="an-stat-lbl">Avg budget</span></div>
             </div>
           </section>
+
+          {/* MONEY — what's in play and how fast deals close */}
+          {money && (
+            <div className="an-grid-2">
+              <div className="an-panel an-mini">
+                <span className="an-mini-val">{money.pipelineValue > 0 ? `£${money.pipelineValue.toLocaleString('en-GB')}` : '—'}</span>
+                <span className="an-mini-lbl">In play</span>
+                <span className="an-mini-note">across {money.openCount} open deal{money.openCount === 1 ? '' : 's'} in your pipeline</span>
+              </div>
+              <div className="an-panel an-mini">
+                <span className="an-mini-val">{money.avgDealCycleDays != null ? `${money.avgDealCycleDays}d` : '—'}</span>
+                <span className="an-mini-lbl">Avg deal cycle</span>
+                <span className="an-mini-note">from entering the pipeline to won</span>
+              </div>
+            </div>
+          )}
+
+          {/* REVENUE — won deals by month */}
+          {money && money.revenueByMonth.some(m => m.amount > 0) && (() => {
+            const max = Math.max(1, ...money.revenueByMonth.map(m => m.amount))
+            const lastIdx = money.revenueByMonth.length - 1
+            return (
+              <section className="an-panel">
+                <div className="an-panel-head"><h3>Revenue</h3><span className="an-panel-meta">won deals · last 6 months</span></div>
+                <div className="an-vbars">
+                  {money.revenueByMonth.map((m, i) => (
+                    <div key={`${m.month}-${i}`} className="an-vbar-col" title={`${m.month}: £${m.amount.toLocaleString('en-GB')}`}>
+                      <span className="an-vbar-val">{m.amount > 0 && (m.amount === max || i === lastIdx) ? moneyLabel(m.amount) : ''}</span>
+                      <div className="an-vbar-track"><div className="an-vbar-fill" style={{ height: `${Math.round((m.amount / max) * 100)}%` }} /></div>
+                      <span className="an-vbar-lbl">{m.month}</span>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )
+          })()}
 
           {/* ACTIVITY — trend over time */}
           <section className="an-panel">
