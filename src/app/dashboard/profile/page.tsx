@@ -489,7 +489,11 @@ export default function SettingsPage() {
             <p className="st-danger-label">Sign out</p>
             <p className="st-danger-sub">You'll be returned to the home page.</p>
           </div>
-          <button className="st-danger-btn" onClick={async () => { await supabase.auth.signOut(); router.push('/') }}>
+          <button className="st-danger-btn" onClick={async () => {
+            try { await supabase.auth.signOut() } catch { /* proceed regardless */ }
+            await fetch('/auth/signout', { method: 'POST' }).catch(() => {})
+            window.location.href = '/'
+          }}>
             <i className="ti ti-logout" /> Sign out
           </button>
         </div>

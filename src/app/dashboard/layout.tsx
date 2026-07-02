@@ -79,7 +79,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }
 
   const navTo = (href: string) => { setMenuOpen(false); router.push(href) }
-  const handleLogout = async () => { await supabase.auth.signOut(); router.push('/') }
+  const handleLogout = async () => {
+    // Clear both client state and server cookies, then hard-navigate so no
+    // cached session survives (see /auth/signout for why both are needed).
+    try { await supabase.auth.signOut() } catch { /* proceed regardless */ }
+    await fetch('/auth/signout', { method: 'POST' }).catch(() => {})
+    window.location.href = '/'
+  }
 
   return (
     <SearchProvider>

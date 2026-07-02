@@ -21,8 +21,9 @@ export default function Navbar() {
   }, [supabase])
 
   const handleLogout = async () => {
-    await supabase.auth.signOut()
-    router.push('/')
+    try { await supabase.auth.signOut() } catch { /* proceed regardless */ }
+    await fetch('/auth/signout', { method: 'POST' }).catch(() => {})
+    window.location.href = '/'
   }
 
   const isLanding = pathname === '/'
