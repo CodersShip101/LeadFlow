@@ -27,6 +27,7 @@ function srcKey(url: string | null): string {
 const STAGES = [
   { key: 'interested', label: 'Interested', icon: 'ti-eye' },
   { key: 'applied',    label: 'Applied',    icon: 'ti-send' },
+  { key: 'in_talks',   label: 'In talks',   icon: 'ti-messages' },
   { key: 'hired',      label: 'Won',        icon: 'ti-trophy' },
 ]
 

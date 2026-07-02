@@ -1,12 +1,12 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-client'
 import toast from 'react-hot-toast'
 import type { Lead, Application, Profile } from '@/types'
 import { formatBudgetGBP } from '@/lib/utils'
-import { canonSource, sourceMeta, srcBadgeStyle } from '@/lib/sources'
+import { canonSource, sourceMeta } from '@/lib/sources'
 import { entitlementsFor, type Tier } from '@/lib/tiers'
 
 function reminderLabel(iso: string): { label: string; overdue: boolean } {
@@ -22,6 +22,12 @@ function reminderLabel(iso: string): { label: string; overdue: boolean } {
   return { label, overdue }
 }
 
+// Compact money label for column totals: £850, £4.2k, £12k
+function moneyShort(n: number): string {
+  if (n >= 1000) return `£${(n / 1000).toFixed(n >= 10000 ? 0 : 1).replace(/\.0$/, '')}k`
+  return `£${n}`
+}
+
 const REMIND_OPTS: [string, number][] = [
   ['Later today', 3],
   ['Tomorrow', 24],
@@ -29,11 +35,17 @@ const REMIND_OPTS: [string, number][] = [
   ['Next week', 168],
 ]
 
+// The four working columns. Lost lives in a collapsible tray under the board —
+// it's an archive, not a stage you work.
 const COLS = [
-  { key: 'interested', label: 'Interested', icon: 'ti-eye',    color: 'var(--lime-deep)', tint: 'rgba(196,240,0,.05)', next: 'applied',  nextLabel: 'Mark applied' },
-  { key: 'applied',    label: 'Applied',    icon: 'ti-send',   color: 'var(--mid)',       tint: 'rgba(216,146,10,.05)', next: 'hired',  nextLabel: 'Mark as won' },
-  { key: 'hired',      label: 'Won',        icon: 'ti-trophy', color: 'var(--hi)',        tint: 'rgba(91,160,46,.07)', next: null,      nextLabel: '' },
+  { key: 'interested', label: 'Interested', color: 'var(--slate-2)',   tint: 'rgba(107,118,105,.04)', next: 'applied',  nextLabel: 'Mark applied' },
+  { key: 'applied',    label: 'Applied',    color: 'var(--lime-deep)', tint: 'rgba(196,240,0,.05)',   next: 'in_talks', nextLabel: 'In talks' },
+  { key: 'in_talks',   label: 'In talks',   color: 'var(--mid)',       tint: 'rgba(216,146,10,.05)',  next: 'hired',    nextLabel: 'Mark as won' },
+  { key: 'hired',      label: 'Won',        color: 'var(--hi)',        tint: 'rgba(91,160,46,.07)',   next: null,       nextLabel: '' },
 ]
+
+// Closed stages: no staleness warnings, sorted newest-first.
+const CLOSED = new Set(['hired', 'lost'])
 
 export default function PipelinePage() {
   const [leads, setLeads] = useState<Lead[]>([])
@@ -44,6 +56,7 @@ export default function PipelinePage() {
   const [dragCol, setDragCol] = useState<string | null>(null)
   const [overCol, setOverCol] = useState<string | null>(null)
   const [remindOpen, setRemindOpen] = useState<string | null>(null)
+  const [lostOpen, setLostOpen] = useState(false)
   const [noteEditId, setNoteEditId] = useState<string | null>(null)
   const [noteDraft, setNoteDraft] = useState('')
   const [savingNote, setSavingNote] = useState(false)
@@ -61,7 +74,7 @@ export default function PipelinePage() {
       setProfile(profRes.data)
       let { data: apps, error } = await supabase
         .from('applications')
-        .select('id, lead_id, status, outcome, outcome_at, created_at, follow_up_at, follow_up_note, note')
+        .select('id, lead_id, status, outcome, outcome_at, created_at, stage_changed_at, lost_reason, won_amount, follow_up_at, follow_up_note, note')
         .eq('freelancer_id', user.id)
       if (error || !apps) {
         const res = await fetch('/api/applications')
@@ -85,19 +98,105 @@ export default function PipelinePage() {
   }, [applications])
 
   const grouped = useMemo(() => {
-    const g: Record<string, Lead[]> = { interested: [], applied: [], hired: [] }
+    const g: Record<string, Lead[]> = { interested: [], applied: [], in_talks: [], hired: [], lost: [] }
     leads.forEach(l => {
       const app = appMap.get(l.id)
       if (app && app.status !== 'saved' && g[app.status]) g[app.status].push(l)
     })
+    // Active columns: overdue follow-ups first, then longest-waiting.
+    // Closed columns: most recent decisions first.
+    const movedAt = (l: Lead) => {
+      const a = appMap.get(l.id)
+      return new Date(a?.stage_changed_at || a?.created_at || 0).getTime()
+    }
+    const overdueRank = (l: Lead) => {
+      const fu = appMap.get(l.id)?.follow_up_at
+      return fu && new Date(fu).getTime() < Date.now() ? 0 : 1
+    }
+    for (const key of Object.keys(g)) {
+      if (CLOSED.has(key)) g[key].sort((a, b) => movedAt(b) - movedAt(a))
+      else g[key].sort((a, b) => overdueRank(a) - overdueRank(b) || movedAt(a) - movedAt(b))
+    }
     return g
   }, [leads, appMap])
 
   const totalActive = applications.filter(a => a.status !== 'saved').length
+  const openCount = grouped.interested.length + grouped.applied.length + grouped.in_talks.length
+  const inTalksCount = grouped.in_talks.length
   const wonCount = grouped.hired.length
-  const appliedCount = grouped.applied.length
+  const lostCount = grouped.lost.length
+  const decided = wonCount + lostCount
+  const winRate = decided > 0 ? Math.round((wonCount / decided) * 100) : null
 
-  const updateApp = useCallback(async (leadId: string, status: string) => {
+  // Average days the open deals have sat in their current stage.
+  const openApps = applications.filter(a => a.status === 'interested' || a.status === 'applied' || a.status === 'in_talks')
+  const avgWaitDays = openApps.length > 0
+    ? Math.round(openApps.reduce((s, a) => s + (Date.now() - new Date(a.stage_changed_at || a.created_at).getTime()) / 86400000, 0) / openApps.length)
+    : null
+
+  // Patch outcome detail (lost reason, won amount) on an existing application.
+  const saveExtra = async (leadId: string, body: Record<string, unknown>) => {
+    const r = await fetch('/api/applications', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ lead_id: leadId, ...body }) })
+    if (r.ok) {
+      const app = await r.json()
+      setApplications(prev => prev.map(a => a.lead_id === leadId ? app : a))
+      return true
+    }
+    return false
+  }
+
+  // After a forward move, follow-up is the default, not an afterthought —
+  // one tap sets the reminder that keeps the deal alive.
+  const promptFollowUp = (leadId: string, status: string) => {
+    toast(t => (
+      <div className="fu-toast">
+        <div className="fu-toast-title">{status === 'in_talks' ? 'In talks — follow up when?' : 'Applied — follow up when?'}</div>
+        <div className="fu-toast-btns">
+          {([['Tomorrow', 24], ['3 days', 72], ['Next week', 168]] as [string, number][]).map(([label, hours]) => (
+            <button key={label} onClick={() => { toast.dismiss(t.id); setReminder(leadId, hours) }}>{label}</button>
+          ))}
+          <button className="fu-skip" onClick={() => toast.dismiss(t.id)}>Skip</button>
+        </div>
+      </div>
+    ), { duration: 10000 })
+  }
+
+  const LOST_REASONS = ['Went quiet', 'Budget too low', 'Chose someone else', 'Bad fit']
+  const promptLostReason = (leadId: string) => {
+    toast(t => (
+      <div className="fu-toast">
+        <div className="fu-toast-title">Marked as lost — why?</div>
+        <div className="fu-toast-btns">
+          {LOST_REASONS.map(reason => (
+            <button key={reason} onClick={async () => { toast.dismiss(t.id); if (await saveExtra(leadId, { lost_reason: reason })) toast('Noted') }}>{reason}</button>
+          ))}
+          <button className="fu-skip" onClick={() => toast.dismiss(t.id)}>Skip</button>
+        </div>
+      </div>
+    ), { duration: 12000 })
+  }
+
+  const promptWonAmount = (leadId: string) => {
+    const lead = leads.find(l => l.id === leadId)
+    const def = lead?.budget_max ?? lead?.budget_min ?? undefined
+    toast(t => (
+      <div className="fu-toast">
+        <div className="fu-toast-title">Won — confirm the deal value</div>
+        <div className="fu-toast-btns">
+          <input id={`won-amt-${t.id}`} className="fu-input" type="number" min="0" step="1" defaultValue={def} placeholder="£" />
+          <button onClick={async () => {
+            const el = document.getElementById(`won-amt-${t.id}`) as HTMLInputElement | null
+            const v = el && el.value !== '' ? Number(el.value) : null
+            toast.dismiss(t.id)
+            if (v != null && Number.isFinite(v) && v >= 0 && await saveExtra(leadId, { won_amount: v })) toast.success('Deal value saved')
+          }}>Save</button>
+          <button className="fu-skip" onClick={() => toast.dismiss(t.id)}>Skip</button>
+        </div>
+      </div>
+    ), { duration: 15000 })
+  }
+
+  const updateApp = async (leadId: string, status: string, opts?: { reopen?: boolean }) => {
     const res = await fetch('/api/applications', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -106,11 +205,16 @@ export default function PipelinePage() {
     if (res.ok) {
       const app = await res.json()
       setApplications(prev => [...prev.filter(a => a.lead_id !== leadId), app])
-      if (status === 'hired') toast.success('Marked as won!')
-      else if (status === 'applied') toast.success('Marked as applied')
+      if (opts?.reopen) toast.success('Reopened')
+      else if (status === 'hired') promptWonAmount(leadId)
+      else if (status === 'lost') promptLostReason(leadId)
+      else if (status === 'applied' || status === 'in_talks') {
+        if (canRemind && !app?.follow_up_at) promptFollowUp(leadId, status)
+        else toast.success(status === 'in_talks' ? 'Moved to in talks' : 'Marked as applied')
+      }
       else toast('Moved back to interested')
     }
-  }, [])
+  }
 
   const setReminder = async (leadId: string, hours: number | null) => {
     setRemindOpen(null)
@@ -188,18 +292,32 @@ export default function PipelinePage() {
         </div>
         <div className="pipe-stats">
           <div className="pipe-stat">
-            <span className="pipe-stat-v">{totalActive}</span>
-            <span className="pipe-stat-l">active</span>
+            <span className="pipe-stat-v">{openCount}</span>
+            <span className="pipe-stat-l">open</span>
           </div>
           <div className="pipe-stat-sep" />
           <div className="pipe-stat">
-            <span className="pipe-stat-v" style={{ color: 'var(--mid)' }}>{appliedCount}</span>
-            <span className="pipe-stat-l">applied</span>
+            <span className="pipe-stat-v" style={{ color: 'var(--mid)' }}>{inTalksCount}</span>
+            <span className="pipe-stat-l">in talks</span>
           </div>
           <div className="pipe-stat-sep" />
           <div className="pipe-stat">
             <span className="pipe-stat-v" style={{ color: 'var(--hi)' }}>{wonCount}</span>
             <span className="pipe-stat-l">won</span>
+          </div>
+          <div className="pipe-stat-sep" />
+          <div className="pipe-stat">
+            <span className="pipe-stat-v" style={{ color: winRate == null ? 'var(--slate-2)' : winRate >= 50 ? 'var(--hi)' : 'var(--ink)' }}>
+              {winRate == null ? '—' : `${winRate}%`}
+            </span>
+            <span className="pipe-stat-l">win rate</span>
+          </div>
+          <div className="pipe-stat-sep" />
+          <div className="pipe-stat">
+            <span className="pipe-stat-v" style={{ color: avgWaitDays != null && avgWaitDays >= 7 ? 'var(--coral)' : 'var(--ink)' }}>
+              {avgWaitDays == null ? '—' : `${avgWaitDays}d`}
+            </span>
+            <span className="pipe-stat-l">avg wait</span>
           </div>
         </div>
       </div>
@@ -208,6 +326,11 @@ export default function PipelinePage() {
       <div className="kanban">
         {COLS.map(col => {
           const colLeads = grouped[col.key] || []
+          // Won column counts confirmed deal values; open columns estimate from listed budgets.
+          const colValue = colLeads.reduce((s, l) => {
+            const won = col.key === 'hired' ? appMap.get(l.id)?.won_amount : null
+            return s + (won ?? l.budget_max ?? l.budget_min ?? 0)
+          }, 0)
           return (
             <div key={col.key} className="kan-col"
               style={{ '--col-tint': col.tint } as React.CSSProperties}
@@ -215,13 +338,12 @@ export default function PipelinePage() {
               onDragLeave={() => setOverCol(null)}
               onDrop={e => handleDrop(e, col.key)}>
 
-              {/* Column header */}
-              <div className="kan-head" style={{ borderBottom: `2px solid ${col.color}22` }}>
-                <span className="kan-head-icon" style={{ color: col.color, background: `${col.color}18` }}>
-                  <i className={`ti ${col.icon}`} />
-                </span>
+              {/* Column header — dot + label + count, no icon chips */}
+              <div className="kan-head" style={{ borderBottom: `2px solid color-mix(in srgb, ${col.color} 22%, transparent)` }}>
+                <span className="kan-dot" style={{ background: col.color }} />
                 <span className="kan-title">{col.label}</span>
-                <span className="kan-count" style={{ color: col.color, background: `${col.color}15` }}>
+                {colValue > 0 && <span className="kan-value">~{moneyShort(colValue)}</span>}
+                <span className="kan-count" style={{ color: col.color, background: `color-mix(in srgb, ${col.color} 10%, transparent)` }}>
                   {colLeads.length}
                 </span>
               </div>
@@ -231,16 +353,18 @@ export default function PipelinePage() {
                 style={{ background: col.tint }}>
                 {colLeads.length === 0
                   ? <div className="kan-empty">
-                      <i className={`ti ${col.icon}`} />
                       <span>Drop leads here</span>
                     </div>
                   : colLeads.map(lead => {
                       const si = sourceMeta(canonSource(lead))
                       const budget = formatBudgetGBP(lead.budget_min, lead.budget_max)
                       const app = appMap.get(lead.id)
-                      const daysSince = app ? Math.floor((Date.now() - new Date(app.created_at).getTime()) / 86400000) : 0
-                      const isStale = daysSince >= 7 && col.key !== 'hired'
+                      const movedISO = app?.stage_changed_at || app?.created_at
+                      const daysSince = movedISO ? Math.floor((Date.now() - new Date(movedISO).getTime()) / 86400000) : 0
+                      const isStale = daysSince >= 7 && !CLOSED.has(col.key)
                       const reminder = app?.follow_up_at ? reminderLabel(app.follow_up_at) : null
+                      const shownBudget = col.key === 'hired' && app?.won_amount != null
+                        ? `£${Number(app.won_amount).toLocaleString()}` : budget
 
                       return (
                         <div key={lead.id}
@@ -253,7 +377,7 @@ export default function PipelinePage() {
 
                           {/* Card top */}
                           <div className="kc-top">
-                            <span className="src-badge" style={srcBadgeStyle(si.color)}>{si.label.toUpperCase()}</span>
+                            <span className="kc-src"><span className="kc-src-dot" style={{ background: si.color }} />{si.label}</span>
                             <span className="kc-age" style={{ color: isStale ? 'var(--coral)' : 'var(--slate-2)' }}>
                               {isStale && <i className="ti ti-alert-triangle" />}
                               {daysSince === 0 ? 'Today' : `${daysSince}d`}
@@ -265,8 +389,8 @@ export default function PipelinePage() {
 
                           {/* Budget + client */}
                           <div className="kc-meta-row">
-                            {budget && <span className="kc-budget"><i className="ti ti-currency-pound" />{budget}</span>}
-                            {lead.client_name && <span className="kc-client"><i className="ti ti-building" />{lead.client_name}</span>}
+                            {shownBudget && <span className="kc-budget">{shownBudget}</span>}
+                            {lead.client_name && <span className="kc-client">{lead.client_name}</span>}
                           </div>
 
                           {/* Follow-up chip */}
@@ -296,11 +420,10 @@ export default function PipelinePage() {
                           <div className="kc-actions" onClick={e => e.stopPropagation()}>
                             {col.next && (
                               <button className="kc-advance-btn" onClick={() => updateApp(lead.id, col.next!)}>
-                                <i className={`ti ${COLS.find(c => c.key === col.next)?.icon}`} />
                                 {col.nextLabel}
                               </button>
                             )}
-                            {col.key === 'hired' && <div className="kc-won-badge"><i className="ti ti-trophy" /> Won</div>}
+                            {col.key === 'hired' && <div className="kc-won-badge">Won</div>}
 
                             {/* Follow-up reminder */}
                             <div className="sv-remind-wrap" style={{ position: 'relative' }}>
@@ -332,6 +455,13 @@ export default function PipelinePage() {
                                 <i className="ti ti-note" />
                               </button>
                             )}
+
+                            {/* Mark lost (active stages only) */}
+                            {!CLOSED.has(col.key) && (
+                              <button className="sv-icon-btn kc-icon kc-lost-btn" title="Mark as lost" onClick={() => updateApp(lead.id, 'lost')}>
+                                <i className="ti ti-thumb-down" />
+                              </button>
+                            )}
                           </div>
                         </div>
                       )
@@ -340,6 +470,46 @@ export default function PipelinePage() {
             </div>
           )
         })}
+      </div>
+
+      {/* ── LOST TRAY — archive below the working board, also a drop target ── */}
+      <div className={`lost-tray ${overCol === 'lost' ? 'dragover' : ''}`}
+        onDragOver={e => handleDragOver(e, 'lost')}
+        onDragLeave={() => setOverCol(null)}
+        onDrop={e => handleDrop(e, 'lost')}>
+        <button className="lost-tray-head" onClick={() => setLostOpen(o => !o)}>
+          <span className="kan-dot" style={{ background: 'var(--coral)' }} />
+          <span className="kan-title">Lost</span>
+          <span className="kan-count" style={{ color: 'var(--coral)', background: 'color-mix(in srgb, var(--coral) 10%, transparent)' }}>
+            {grouped.lost.length}
+          </span>
+          <span className="lost-tray-hint">{dragId ? 'Drop here to mark as lost' : lostOpen ? 'Hide' : 'Show'}</span>
+          <i className={`ti ti-chevron-${lostOpen ? 'up' : 'down'}`} />
+        </button>
+        {lostOpen && (
+          grouped.lost.length === 0
+            ? <div className="lost-empty">Nothing lost yet. Drag a card here when a deal falls through.</div>
+            : <div className="lost-grid">
+                {grouped.lost.map(lead => {
+                  const app = appMap.get(lead.id)
+                  const movedISO = app?.stage_changed_at || app?.created_at
+                  const days = movedISO ? Math.floor((Date.now() - new Date(movedISO).getTime()) / 86400000) : 0
+                  const si = sourceMeta(canonSource(lead))
+                  return (
+                    <div key={lead.id} className="lost-row" onClick={() => router.push(`/dashboard/lead/${lead.id}`)}>
+                      <span className="kc-src-dot" style={{ background: si.color }} />
+                      <span className="lost-row-title">{lead.title}</span>
+                      {app?.lost_reason && <span className="lost-row-reason">{app.lost_reason}</span>}
+                      <span className="lost-row-age">{days === 0 ? 'today' : `${days}d ago`}</span>
+                      <button className="kc-advance-btn lost-row-btn" title="Move back to In talks"
+                        onClick={e => { e.stopPropagation(); updateApp(lead.id, 'in_talks', { reopen: true }) }}>
+                        Reopen
+                      </button>
+                    </div>
+                  )
+                })}
+              </div>
+        )}
       </div>
     </>
   )

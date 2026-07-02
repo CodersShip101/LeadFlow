@@ -373,7 +373,7 @@ export default function DashboardPage() {
 
   const appliedSkills = useMemo(() => {
     const appliedLeads = applications
-      .filter(a => a.status === 'applied' || a.status === 'hired')
+      .filter(a => a.status === 'applied' || a.status === 'in_talks' || a.status === 'hired')
       .map(a => leads.find(l => l.id === a.lead_id))
       .filter((l): l is Lead => !!l && !!l.skills_required && l.skills_required.length > 0)
       .reverse()

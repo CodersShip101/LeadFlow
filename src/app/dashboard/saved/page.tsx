@@ -314,7 +314,7 @@ export default function SavedPage() {
           const exp = expiryInfo(lead)
           const company = lead.client_name
           const app = appMap.get(lead.id)
-          const inPipeline = app?.status === 'interested' || app?.status === 'applied' || app?.status === 'hired'
+          const inPipeline = !!app && app.status !== 'saved'
           const reminder = app?.follow_up_at ? reminderLabel(app.follow_up_at) : null
           const matchedSkills = m.skillMatch.matched.length
           const totalSkills = (lead.skills_required || []).length

@@ -40,10 +40,13 @@ export interface Application {
   id: string;
   freelancer_id: string;
   lead_id: string;
-  status: 'saved' | 'interested' | 'applied' | 'hired';
+  status: 'saved' | 'interested' | 'applied' | 'in_talks' | 'hired' | 'lost';
   outcome: 'won' | 'lost' | 'pending' | null;
   outcome_at: string | null;
   created_at: string;
+  stage_changed_at?: string | null;
+  lost_reason?: string | null;
+  won_amount?: number | null;
   follow_up_at?: string | null;
   follow_up_note?: string | null;
   note?: string | null;

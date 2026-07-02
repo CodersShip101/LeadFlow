@@ -28,7 +28,7 @@ export async function GET() {
   // ── Applications this user has made ──
   const { data: apps } = await admin
     .from('applications')
-    .select('lead_id, status, outcome, created_at')
+    .select('lead_id, status, outcome, created_at, lost_reason, won_amount')
     .eq('freelancer_id', user.id)
     .neq('status', 'saved')
 
@@ -85,6 +85,15 @@ export async function GET() {
     ? Math.round(budgets.reduce((s, v) => s + v, 0) / budgets.length)
     : null
 
+  // ── Revenue won: confirmed deal values, falling back to the listed budget ──
+  const revenueWon = (apps ?? [])
+    .filter(a => a.outcome === 'won')
+    .reduce((s, a) => {
+      if (a.won_amount != null) return s + Number(a.won_amount)
+      const lead = leadRows.find(l => l.id === a.lead_id)
+      return s + (lead?.budget_max ?? lead?.budget_min ?? 0)
+    }, 0)
+
   // ── Advanced analytics (Max plan only) ──
   let advanced = null
   if (ent.advancedAnalytics) {
@@ -92,7 +101,9 @@ export async function GET() {
     const stageCounts = {
       interested: apps?.filter(a => a.status === 'interested').length ?? 0,
       applied: apps?.filter(a => a.status === 'applied').length ?? 0,
+      in_talks: apps?.filter(a => a.status === 'in_talks').length ?? 0,
       hired: apps?.filter(a => a.status === 'hired').length ?? 0,
+      lost: apps?.filter(a => a.status === 'lost').length ?? 0,
     }
 
     // Skill coverage — how often user's skills appeared in applied leads
@@ -138,11 +149,22 @@ export async function GET() {
       ? Math.round(durations.reduce((s, v) => s + v, 0) / durations.length)
       : null
 
-    advanced = { stageCounts, skillCoverageRate, sourceWinRates, avgDaysToApply }
+    // Why deals were lost — one-tap reasons captured on the pipeline
+    const reasonCounts: Record<string, number> = {}
+    for (const a of (apps ?? [])) {
+      if (a.outcome === 'lost' && a.lost_reason) {
+        reasonCounts[a.lost_reason] = (reasonCounts[a.lost_reason] ?? 0) + 1
+      }
+    }
+    const lostReasons = Object.entries(reasonCounts)
+      .map(([reason, count]) => ({ reason, count }))
+      .sort((a, b) => b.count - a.count)
+
+    advanced = { stageCounts, skillCoverageRate, sourceWinRates, avgDaysToApply, lostReasons }
   }
 
   return NextResponse.json({
-    summary: { total, won, lost, winRate, avgBudget },
+    summary: { total, won, lost, winRate, avgBudget, revenueWon },
     weeklyActivity: weeks,
     sources,
     advanced,

@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
         .select('status, outcome')
         .eq('freelancer_id', profile.id)
 
-      const interested = applications?.filter(a => a.status === 'interested' || a.status === 'applied' || a.status === 'hired') || []
+      const interested = applications?.filter(a => a.status !== 'saved' && a.status !== 'lost') || []
       const withOutcome = applications?.filter(a => a.outcome !== null) || []
       const won = withOutcome.filter(a => a.outcome === 'won').length
       const conversionRate = withOutcome.length > 0 ? Math.round((won / withOutcome.length) * 100) : 0

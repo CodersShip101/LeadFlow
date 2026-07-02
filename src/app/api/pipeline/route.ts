@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabase } from '@/lib/supabase-server'
 
-const STAGES = ['interested', 'applied', 'won', 'lost'] as const
+const STAGES = ['interested', 'applied', 'in_talks', 'hired', 'lost'] as const
 
 export async function GET() {
   const supabase = await createServerSupabase()
@@ -10,15 +10,14 @@ export async function GET() {
 
   const { data, error } = await supabase
     .from('applications')
-    .select('id, status, outcome, outcome_at, updated_at, lead:leads(id, source, title, budget_text, posted_date)')
+    .select('id, status, outcome, outcome_at, stage_changed_at, lead:leads(id, source, title, budget_text, posted_date)')
     .eq('freelancer_id', user.id)
-    .order('updated_at', { ascending: false })
+    .order('created_at', { ascending: false })
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  const grouped: Record<string, any[]> = { interested: [], applied: [], won: [] }
+  const grouped: Record<string, any[]> = { interested: [], applied: [], in_talks: [], hired: [], lost: [] }
   for (const row of data ?? []) {
-    if (row.status === 'lost') continue
     grouped[row.status]?.push({
       applicationId: row.id,
       stage: row.status,
@@ -35,13 +34,15 @@ export async function PATCH(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { applicationId, stage, outcome } = await req.json().catch(() => ({}))
+  const { applicationId, stage } = await req.json().catch(() => ({}))
   if (!STAGES.includes(stage))
     return NextResponse.json({ error: 'invalid stage' }, { status: 400 })
 
-  const patch: Record<string, unknown> = { status: stage, updated_at: new Date().toISOString() }
-  if (outcome !== undefined) patch.outcome = outcome
-  if (stage === 'won' || stage === 'lost') patch.outcome_at = new Date().toISOString()
+  const nowISO = new Date().toISOString()
+  const patch: Record<string, unknown> = { status: stage, stage_changed_at: nowISO }
+  if (stage === 'hired') { patch.outcome = 'won'; patch.outcome_at = nowISO }
+  else if (stage === 'lost') { patch.outcome = 'lost'; patch.outcome_at = nowISO }
+  else { patch.outcome = null; patch.outcome_at = null }
 
   const { error } = await supabase
     .from('applications')
