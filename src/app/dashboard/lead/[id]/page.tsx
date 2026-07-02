@@ -86,7 +86,7 @@ export default function LeadDetailPage() {
       return
     }
     const res = await fetch('/api/applications', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ lead_id: id, status }) })
-    if (res.ok) { const app = await res.json(); setApplication(app); toast.success(status === 'hired' ? 'Marked as won!' : 'Stage updated') }
+    if (res.ok) { const app = await res.json(); setApplication(app); toast.success(status === 'hired' ? 'Marked as won!' : status === 'lost' ? 'Marked as lost' : 'Stage updated') }
   }, [id])
 
   const saveOutcome = useCallback(async (outcome: string) => {
@@ -318,7 +318,11 @@ export default function LeadDetailPage() {
               { o: 'lost',    label: "Didn't get it", icon: 'ti-x',          color: 'var(--coral)', bg: 'rgba(229,87,61,.1)' },
               { o: 'pending', label: 'Still waiting', icon: 'ti-clock',      color: 'var(--mid)', bg: 'var(--mid-bg)' },
             ].map(opt => (
-              <button key={opt.o} className="ld-outcome-btn" style={{ color: opt.color, background: opt.bg }} onClick={() => saveOutcome(opt.o)}>
+              // Won/lost go through the stage change so the pipeline board,
+              // outcome and analytics all stay in sync; 'pending' is only an
+              // outcome note, not a stage.
+              <button key={opt.o} className="ld-outcome-btn" style={{ color: opt.color, background: opt.bg }}
+                onClick={() => opt.o === 'won' ? updateApp('hired') : opt.o === 'lost' ? updateApp('lost') : saveOutcome('pending')}>
                 <i className={`ti ${opt.icon}`} /> {opt.label}
               </button>
             ))}
