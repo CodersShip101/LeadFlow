@@ -33,8 +33,9 @@ export async function POST(req: Request) {
 
   const admin = createAdminSupabase()
 
-  // Enforce application limit for free users (saved leads don't count)
-  if (status !== 'saved') {
+  // Enforce application limit for free users. Saved leads don't count, and
+  // neither do lost ones — a dead deal shouldn't eat the monthly allowance.
+  if (status !== 'saved' && status !== 'lost') {
     const { data: prof } = await admin
       .from('profiles')
       .select('subscription_status')
@@ -52,7 +53,7 @@ export async function POST(req: Request) {
         .from('applications')
         .select('*', { count: 'exact', head: true })
         .eq('freelancer_id', user.id)
-        .neq('status', 'saved')
+        .in('status', ['interested', 'applied', 'in_talks', 'hired'])
         .gte('created_at', monthStart.toISOString())
 
       // Only block if this is a NEW application (not updating an existing one)

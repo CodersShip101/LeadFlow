@@ -197,7 +197,7 @@ export default function DashboardPage() {
   const router = useRouter()
   const supabase = createClient()
 
-  const appCount = applications.filter(a => a.status !== 'saved').length
+  const appCount = applications.filter(a => a.status !== 'saved' && a.status !== 'lost').length
   const isFree = profile?.subscription_status === 'free'
   const plan = profile?.subscription_status || 'free'
   const isPro = plan === 'pro' || plan === 'max' || plan === 'team'

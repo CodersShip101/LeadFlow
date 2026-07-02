@@ -72,7 +72,7 @@ export default function BillingContent() {
       try {
         const res = await fetch('/api/applications')
         const apps: Application[] = res.ok ? await res.json() : []
-        setAppsUsed(apps.filter(a => a.status !== 'saved').length)
+        setAppsUsed(apps.filter(a => a.status !== 'saved' && a.status !== 'lost').length)
       } catch { /* ignore */ }
       setLoading(false)
     }

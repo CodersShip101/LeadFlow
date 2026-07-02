@@ -64,7 +64,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       const res = await fetch('/api/applications')
       const apps = res.ok ? await res.json() : []
-      setAppCount(apps.filter((a: any) => a.status !== 'saved').length)
+      setAppCount(apps.filter((a: any) => a.status !== 'saved' && a.status !== 'lost').length)
     }
     load()
   }, [supabase, router, pathname])
