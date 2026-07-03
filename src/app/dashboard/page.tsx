@@ -168,6 +168,7 @@ function SkeletonFeed() {
 
 export default function DashboardPage() {
   const [leads, setLeads] = useState<Lead[]>([])
+  const [feedError, setFeedError] = useState(false)
   const [nextScanAt, setNextScanAt] = useState<number | null>(null)
   const [waitingCount, setWaitingCount] = useState(0)
   const leadsCountRef = useRef(0)
@@ -235,7 +236,8 @@ export default function DashboardPage() {
     if (!opts.initial && document.hidden) return
     try {
       const fr = await fetch('/api/leads/feed')
-      if (!fr.ok) return
+      if (!fr.ok) { if (opts.initial) setFeedError(true); return }
+      setFeedError(false)
       const fd = await fr.json()
       const incoming: Lead[] = fd.leads || []
       setNextScanAt(typeof fd.nextScanAt === 'number' ? fd.nextScanAt : null)
@@ -253,7 +255,11 @@ export default function DashboardPage() {
         const lastSeen = parseInt(localStorage.getItem('lastSeen') || '0')
         if (lastSeen > 0) setNewCount(incoming.filter(l => new Date(l.posted_date).getTime() > lastSeen).length)
       }
-    } catch { /* network — keep showing what we have */ }
+    } catch {
+      // Network failure — keep showing what we have, but if we have nothing,
+      // say so honestly instead of rendering the "empty feed" state.
+      if (opts.initial) setFeedError(true)
+    }
   }, [])
 
   useEffect(() => {
@@ -920,20 +926,25 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {leads.length === 0 && (
+      {leads.length === 0 && (feedError ? (
         <div className="empty">
-          <div className="empty-icon"><i className="ti ti-radar"></i></div>
-          <h3>Your pipeline starts here</h3>
-          <p>We're scanning 25+ sources — Reddit, Hacker News, Reed, Remote OK, Remotive and more — right now. Your first scored leads usually arrive within 30 minutes, and we'll email you as soon as they do.</p>
+          <div className="empty-icon"><i className="ti ti-plug-x"></i></div>
+          <h3>Couldn&apos;t load your feed</h3>
+          <p>We couldn&apos;t reach the server just now. Your leads are safe — try again in a moment.</p>
           <div style={{ display: 'flex', gap: 10, marginTop: 18, justifyContent: 'center' }}>
-            <button onClick={async () => {
-              const res = await fetch('/api/leads/seed?force=1', { method: 'POST' })
-              if (res.ok) { router.refresh() } else { const d = await res.json(); toast.error(d.error || 'Failed to seed leads') }
-            }} className="btn btn-primary" style={{ display: 'inline-flex' }}>Generate demo leads</button>
-            <button onClick={() => router.refresh()} className="btn btn-ghost" style={{ display: 'inline-flex' }}>Check now</button>
+            <button onClick={() => window.location.reload()} className="btn btn-primary" style={{ display: 'inline-flex' }}>Retry</button>
           </div>
         </div>
-      )}
+      ) : (
+        <div className="empty">
+          <div className="empty-icon"><i className="ti ti-radar"></i></div>
+          <h3>Your feed is filling up</h3>
+          <p>We're scanning 20+ sources — Reddit, Hacker News, Reed, Remote OK, Remotive and more — right now. New leads land with every scan, usually within the hour.</p>
+          <div style={{ display: 'flex', gap: 10, marginTop: 18, justifyContent: 'center' }}>
+            <button onClick={() => window.location.reload()} className="btn btn-primary" style={{ display: 'inline-flex' }}>Check again</button>
+          </div>
+        </div>
+      ))}
 
       <div className={`feed-wrap ${selected ? 'detail-open' : ''}`}>
         <div className="feed-list">
