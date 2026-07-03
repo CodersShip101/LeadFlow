@@ -169,6 +169,7 @@ function SkeletonFeed() {
 export default function DashboardPage() {
   const [leads, setLeads] = useState<Lead[]>([])
   const [feedError, setFeedError] = useState(false)
+  const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set())
   const [nextScanAt, setNextScanAt] = useState<number | null>(null)
   const [waitingCount, setWaitingCount] = useState(0)
   const leadsCountRef = useRef(0)
@@ -270,6 +271,7 @@ export default function DashboardPage() {
       setProfile(prof)
 
       try { setViewedIds(new Set(JSON.parse(localStorage.getItem('viewedLeads') || '[]'))) } catch { /* ignore */ }
+      try { setHiddenIds(new Set(JSON.parse(localStorage.getItem('hiddenLeads') || '[]'))) } catch { /* ignore */ }
 
       const res = await fetch('/api/applications')
       const apps: Application[] = res.ok ? await res.json() : []
@@ -301,7 +303,7 @@ export default function DashboardPage() {
   }
 
   const filtered = useMemo(() => {
-    let ls = leads.slice()
+    let ls = leads.filter(l => !hiddenIds.has(l.id))
     if (search) { const q = search.toLowerCase(); ls = ls.filter(l => l.title.toLowerCase().includes(q) || (l.description || '').toLowerCase().includes(q)) }
     if (locationSearch) { const loc = locationSearch.toLowerCase(); ls = ls.filter(l => (l.client_location || '').toLowerCase().includes(loc)) }
         if (sourceFilter !== 'all') ls = ls.filter(l => canonSource(l) === sourceFilter)
@@ -330,7 +332,22 @@ export default function DashboardPage() {
       })
     }
     return ls
-  }, [leads, search, sourceFilter, scoreFilter, easyFilters, profile, viewedIds, savedIds, sortMode])
+  }, [leads, search, sourceFilter, scoreFilter, easyFilters, profile, viewedIds, savedIds, sortMode, hiddenIds])
+
+  // Triage: hide a lead from the feed (local, reversible).
+  const persistHidden = (n: Set<string>) => localStorage.setItem('hiddenLeads', JSON.stringify([...n]))
+  const hideLead = (lead: Lead) => {
+    setHiddenIds(prev => { const n = new Set(prev); n.add(lead.id); persistHidden(n); return n })
+    toast(t => (
+      <span className="toast-undo-wrap">Lead hidden
+        <button className="toast-undo" onClick={() => {
+          toast.dismiss(t.id)
+          setHiddenIds(prev => { const n = new Set(prev); n.delete(lead.id); persistHidden(n); return n })
+        }}>Undo</button>
+      </span>
+    ), { duration: 5000 })
+  }
+  const clearHidden = () => { setHiddenIds(new Set()); localStorage.removeItem('hiddenLeads') }
 
   const topScore = useMemo(() => leads.reduce((m, l) => Math.max(m, computeMatchExplanation(l, profile).score), 0), [leads, profile])
   const topId = useMemo(() => {
@@ -672,7 +689,7 @@ export default function DashboardPage() {
     const showNew = postedH <= 72 && !applied && state !== 'saved'
     const badgeLabel = showNew ? 'NEW' : state === 'viewed' ? 'VIEWED' : state === 'saved' ? 'SAVED' : 'APPLIED'
     const badgeClass = showNew || state === 'new' ? 'st-new' : state === 'viewed' ? 'st-viewed' : state === 'saved' ? 'st-saved' : 'st-applied'
-    const urgencyTag = postedH < 24 ? <span className="urgency urgency-hot"><i className="ti ti-flame" />Actively hiring</span> : postedH < 72 ? <span className="urgency urgency-warm"><i className="ti ti-bolt" />Be quick</span> : null
+    const urgencyTag = postedH < 24 ? <span className="urgency urgency-hot"><i className="ti ti-flame" />Actively hiring</span> : null
     const cleanDesc = lead.description?.replace(/https?:\/\/[^\s]+/g, '').replace(/\s+/g, ' ').trim()
 
     return (
@@ -686,10 +703,10 @@ export default function DashboardPage() {
               {isTop
                 ? <span className="crown"><i className="ti ti-crown"></i>TOP MATCH</span>
                 : <span className={`state-badge ${badgeClass}`}>{badgeLabel}</span>}
-              {lead.project_type && <span className="type-chip">{lead.project_type.charAt(0).toUpperCase() + lead.project_type.slice(1)}</span>}
-              {expLevel && <span className="exp-chip">{expLevel}</span>}
               <span className="lc-time-sep">·</span>
               <span className="lc-time">{timeAgo(lead.posted_date)}</span>
+              {lead.client_location && <><span className="lc-time-sep">·</span><span className="lc-time">{lead.client_location}</span></>}
+              {lead.ir35 && lead.ir35 !== 'unknown' && <span className="type-chip">{lead.ir35 === 'outside' ? 'Outside IR35' : 'Inside IR35'}</span>}
               {urgencyTag}
             </div>
             <div className="lc-title">
@@ -707,16 +724,7 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
-        <div className="why-inline"><SkillBar explanation={explanation} /></div>
         <p className="lc-desc">{cleanDesc}</p>
-        <div className="lc-meta">
-          <span className="rank-chip"><i className="ti ti-hash" />{idx + 1}</span>
-          {lead.client_location && <span className="meta-chip"><i className="ti ti-map-pin"></i>{lead.client_location}</span>}
-          {lead.ir35 && lead.ir35 !== 'unknown' && <span className="meta-chip"><i className="ti ti-shield"></i>{lead.ir35 === 'outside' ? 'Outside IR35' : 'Inside IR35'}</span>}
-          {typeof (lead as any).applicants === 'number' && (
-            <span className="proof"><i className="ti ti-users" style={{ color: 'var(--slate-2)' }}></i>{(lead as any).applicants} applied</span>
-          )}
-        </div>
         <div className="skills-row">{skills}</div>
         <div className="lc-actions" onClick={e => e.stopPropagation()}>
           <div className="lca-left">
@@ -735,6 +743,11 @@ export default function DashboardPage() {
             <button className="lca-icon tip" data-tip="Share" aria-label="Share" onClick={() => handleShare(lead)}>
               <i className="ti ti-share" />
             </button>
+            {!applied && !saved && (
+              <button className="lca-icon tip" data-tip="Hide" aria-label="Hide lead" onClick={() => hideLead(lead)}>
+                <i className="ti ti-eye-off" />
+              </button>
+            )}
             <div className="lca-remind-wrap">
               <button className="lca-icon tip" data-tip="Remind me" aria-label="Remind" onClick={() => setRemindOpen(remindOpen === lead.id ? null : lead.id)}>
                 <i className="ti ti-bell" />
@@ -895,6 +908,11 @@ export default function DashboardPage() {
             ))}
           </div>
         </div>
+        {hiddenIds.size > 0 && (
+          <button className="tb-hidden" onClick={clearHidden} title="Show hidden leads again">
+            {hiddenIds.size} hidden · show
+          </button>
+        )}
         <div className="tb-group">
           <span className="tb-glabel">From</span>
           <div className="src-dd-wrap">
