@@ -50,6 +50,8 @@ export default function LeadDetailPage() {
   const [followUp, setFollowUp] = useState('')
   const [reminderNote, setReminderNote] = useState('')
   const [savingReminder, setSavingReminder] = useState(false)
+  const [pitch, setPitch] = useState<string | null>(null)
+  const [clientLeads, setClientLeads] = useState<any[]>([])
   const router = useRouter()
   const supabase = createClient()
 
@@ -64,6 +66,17 @@ export default function LeadDetailPage() {
       if (leadRes.error || !leadRes.data) { toast.error('Lead not found'); router.push('/dashboard'); return }
       setLead(leadRes.data)
       setProfile(profileRes.data)
+
+      // Client intel: other posts by the same client in the lead pool.
+      if (leadRes.data.client_name) {
+        supabase.from('leads')
+          .select('id, title, budget_min, budget_max, posted_date, status')
+          .eq('client_name', leadRes.data.client_name)
+          .neq('id', leadRes.data.id)
+          .order('posted_date', { ascending: false })
+          .limit(6)
+          .then(({ data }) => setClientLeads(data || []))
+      }
       const res = await fetch('/api/applications')
       if (res.ok) {
         const apps: Application[] = await res.json()
@@ -136,6 +149,25 @@ export default function LeadDetailPage() {
   const ageH = (Date.now() - new Date(lead.posted_date).getTime()) / 3600000
   const ageLabel = ageH < 1 ? `${Math.round(ageH * 60)}m ago` : ageH < 24 ? `${Math.round(ageH)}h ago` : `${Math.round(ageH / 24)}d ago`
 
+  // Compose a personalised pitch draft from the profile and this lead's data.
+  // Deterministic (no AI call) — the user edits before sending.
+  const draftPitch = () => {
+    const matched = m.skillMatch.matched.slice(0, 4)
+    const skillLine = matched.length > 0
+      ? `I work with ${matched.join(', ')} daily, so your requirements map directly onto what I already do.`
+      : `My background in ${profile?.disciplines?.[0]?.toLowerCase() || 'freelance work'} fits what you're describing.`
+    const rateLine = profile?.hourly_rate ? `My rate is £${profile.hourly_rate}/hr. ` : ''
+    const greeting = lead.client_name ? `Hi ${lead.client_name} team,` : 'Hi,'
+    return `${greeting}
+
+I saw your post for "${lead.title}" and it's a strong match. ${skillLine}
+
+${rateLine}I can start quickly, and I'm happy to share relevant work or jump on a short call.
+
+Best,
+${profile?.full_name || ''}`.trim()
+  }
+
   return (
     <div className="ld-page">
 
@@ -204,6 +236,10 @@ export default function LeadDetailPage() {
               </button>
             : <div className="ld-act-won"><i className="ti ti-trophy" /> Marked as won</div>}
 
+        <button className="btn btn-ghost" onClick={() => setPitch(p => p === null ? draftPitch() : null)}>
+          <i className="ti ti-pencil-bolt" /> Draft pitch
+        </button>
+
         {isPro && lead.source_url && (
           <a href={lead.source_url} target="_blank" rel="noopener noreferrer" className="btn btn-ghost">
             <i className="ti ti-external-link" /> Open listing
@@ -222,6 +258,45 @@ export default function LeadDetailPage() {
           </svg>
         </button>
       </div>
+
+      {/* ── PITCH DRAFT ── */}
+      {pitch !== null && (
+        <div className="ld-card">
+          <div className="ld-verdict-label"><i className="ti ti-pencil-bolt" />Pitch draft — edit before sending</div>
+          <textarea className="ld-pitch-ta" value={pitch} onChange={e => setPitch(e.target.value)} rows={9} />
+          <div className="ld-pitch-actions">
+            <button className="btn btn-primary" onClick={async () => { await navigator.clipboard.writeText(pitch); toast.success('Pitch copied — paste it on the platform') }}>
+              <i className="ti ti-copy" /> Copy pitch
+            </button>
+            <button className="btn btn-ghost" onClick={() => setPitch(draftPitch())}>Reset draft</button>
+            <button className="btn-icon" title="Close" onClick={() => setPitch(null)}><i className="ti ti-x" /></button>
+          </div>
+        </div>
+      )}
+
+      {/* ── CLIENT INTEL ── */}
+      {lead.client_name && clientLeads.length > 0 && (() => {
+        const budgets = clientLeads.map(l => l.budget_max ?? l.budget_min).filter((b): b is number => b != null)
+        const stillOpen = clientLeads.filter(l => l.status === 'active').length
+        return (
+          <div className="ld-card">
+            <div className="ld-verdict-label"><i className="ti ti-building" />About this client</div>
+            <p className="ld-client-sum">
+              <b>{lead.client_name}</b> has {clientLeads.length + 1} posts in your lead pool
+              {budgets.length > 0 && <> · budgets £{Math.min(...budgets).toLocaleString('en-GB')}–£{Math.max(...budgets).toLocaleString('en-GB')}</>}
+              {stillOpen > 0 && <> · {stillOpen} still open</>}
+            </p>
+            <div className="ld-client-list">
+              {clientLeads.slice(0, 3).map(l => (
+                <button key={l.id} className="ld-client-row" onClick={() => router.push(`/dashboard/lead/${l.id}`)}>
+                  <span className="ld-client-title">{l.title}</span>
+                  <span className="ld-client-meta">{new Date(l.posted_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )
+      })()}
 
       {/* ── FOLLOW-UP REMINDER (Pro) ── */}
       {ent.calendarSync && (

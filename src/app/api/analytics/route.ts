@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createServerSupabase, createAdminSupabase } from '@/lib/supabase-server'
-import { ENTITLEMENTS, type Tier } from '@/lib/tiers'
+import { ENTITLEMENTS, PRICING, type Tier } from '@/lib/tiers'
 
 // CRM-style analytics: every rate/volume metric is computed inside the selected
 // window (30/90/365 days) and again for the previous equal window so the UI can
@@ -175,10 +175,45 @@ export async function GET(req: Request) {
     advanced = { stageCounts, lostReasons, skillCoverageRate }
   }
 
+  // ── ROI: revenue through Flaiir vs what the subscription costs per year ──
+  const monthlyPrice = PRICING[plan]?.monthly ?? 0
+  const revenue12m = wonAll
+    .filter(a => inWindow(a.outcome_at, new Date(now.getTime() - 365 * 86400000), now))
+    .reduce((s, a) => s + dealValue(a), 0)
+  const roi = monthlyPrice > 0 && revenue12m > 0
+    ? { revenue12m, annualCost: monthlyPrice * 12, multiple: revenue12m / (monthlyPrice * 12) }
+    : null
+
+  // ── Market rate: median day rate across recent pool leads matching the
+  //    user's skills. Budgets outside a plausible day-rate band are excluded
+  //    so salaries and project totals don't poison the median. ──
+  let market: { medianRate: number; sampleSize: number } | null = null
+  const userSkills = (profile?.skills ?? []).map((s: string) => s.toLowerCase())
+  if (userSkills.length > 0) {
+    const { data: poolLeads } = await admin
+      .from('leads')
+      .select('budget_min, budget_max, skills_required')
+      .eq('status', 'active')
+      .gte('posted_date', new Date(now.getTime() - 30 * 86400000).toISOString())
+      .limit(1000)
+    const rates = (poolLeads ?? [])
+      .filter(l => (l.skills_required ?? []).some((sk: string) => userSkills.includes(sk.toLowerCase())))
+      .map(l => l.budget_max ?? l.budget_min)
+      .filter((r): r is number => r != null && r >= 100 && r <= 2000)
+      .sort((a, b) => a - b)
+    if (rates.length >= 5) {
+      const mid = Math.floor(rates.length / 2)
+      const median = rates.length % 2 ? rates[mid] : Math.round((rates[mid - 1] + rates[mid]) / 2)
+      market = { medianRate: median, sampleSize: rates.length }
+    }
+  }
+
   return NextResponse.json({
     plan,
     range: rangeDays,
     lifetimeTotal,
+    roi,
+    market,
     summary: {
       applications: cur.applications,
       won: cur.won,

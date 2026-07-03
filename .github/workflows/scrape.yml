@@ -48,3 +48,12 @@ jobs:
           curl -fsS -X GET "$BASE_URL$PATH_" \
             -H "Authorization: Bearer $CRON_SECRET" \
             --max-time 300 | head -c 2000
+
+          # After each fast scrape, dispatch instant alerts for fresh high-score
+          # matches (Pro+ users with alerts enabled).
+          if [ "$PATH_" = "/api/scrape-fast" ]; then
+            echo "Dispatching instant alerts"
+            curl -fsS -X POST "$BASE_URL/api/alerts/dispatch" \
+              -H "Authorization: Bearer $CRON_SECRET" \
+              --max-time 120 | head -c 1000 || true
+          fi

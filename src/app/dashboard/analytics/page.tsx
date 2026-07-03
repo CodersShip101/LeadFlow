@@ -22,6 +22,8 @@ interface Analytics {
   plan: string
   range: number
   lifetimeTotal: number
+  roi: null | { revenue12m: number; annualCost: number; multiple: number }
+  market: null | { medianRate: number; sampleSize: number }
   summary: {
     applications: number; won: number; lost: number; winRate: number | null
     revenueWon: number; pipelineValue: number; openCount: number; avgDealCycleDays: number | null
@@ -198,6 +200,14 @@ export default function AnalyticsPage() {
         </div>
       </div>
 
+      {/* ── ROI — the sentence that justifies the subscription ── */}
+      {data.roi && data.roi.multiple >= 1 && (
+        <div className="an-roi">
+          <b>£{data.roi.revenue12m.toLocaleString('en-GB')}</b> won through your pipeline in the last 12 months —
+          <b> {data.roi.multiple >= 10 ? Math.round(data.roi.multiple) : data.roi.multiple.toFixed(1)}×</b> what Flaiir costs you a year.
+        </div>
+      )}
+
       {/* ── GRID ── */}
       <div className="an-grid2">
         <section className="an-panel">
@@ -307,6 +317,14 @@ export default function AnalyticsPage() {
                 )
               })}
             </div>
+          </section>
+        )}
+
+        {data.market && (
+          <section className="an-panel an-mini">
+            <span className="an-mini-val">£{data.market.medianRate.toLocaleString('en-GB')}<span className="an-mini-unit">/day</span></span>
+            <span className="an-mini-lbl">Market rate</span>
+            <span className="an-mini-note">median across {data.market.sampleSize} day-rate leads matching your skills · last 30 days</span>
           </section>
         )}
 

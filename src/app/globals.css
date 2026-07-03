@@ -2053,6 +2053,24 @@ textarea.input { resize: vertical; min-height: 80px; }
 .an-delta.down { color: var(--coral); background: rgba(229,87,61,.08); }
 .an-delta.flat { color: var(--slate-2); background: var(--paper-2); }
 
+/* ROI banner — value for money, in the user's own numbers */
+.an-roi { background: var(--lime-dim); border: 1px solid rgba(126,158,10,.25); border-radius: var(--r-lg); padding: 13px 18px; margin-bottom: 12px; font-size: 13.5px; color: #3D4D08; }
+.an-roi b { font-weight: 800; }
+
+.an-mini-unit { font-size: 14px; font-weight: 700; color: var(--slate-2); margin-left: 2px; }
+
+/* ── Lead detail: pitch draft + client intel ── */
+.ld-pitch-ta { width: 100%; margin-top: 10px; padding: 12px 14px; border: 1px solid var(--line); border-radius: var(--r-md); background: var(--paper); font-size: 13.5px; line-height: 1.6; color: var(--ink); resize: vertical; font-family: inherit; }
+.ld-pitch-ta:focus { outline: none; border-color: var(--lime-deep); }
+.ld-pitch-actions { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+.ld-client-sum { font-size: 13px; color: var(--ink-2); margin-top: 8px; line-height: 1.5; }
+.ld-client-sum b { color: var(--ink); }
+.ld-client-list { display: flex; flex-direction: column; margin-top: 8px; }
+.ld-client-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; padding: 9px 2px; background: none; border: none; border-top: 1px solid var(--line-2); cursor: pointer; text-align: left; }
+.ld-client-title { font-size: 12.5px; font-weight: 600; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ld-client-row:hover .ld-client-title { color: var(--ink); }
+.ld-client-meta { font-family: var(--font-mono); font-size: 10.5px; color: var(--slate-2); white-space: nowrap; }
+
 /* Revenue by month — single-series bars, baseline-anchored, selective labels */
 .an-vbars { display: flex; align-items: flex-end; gap: 14px; height: 150px; }
 .an-vbar-col { flex: 1; height: 100%; display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 0; }
