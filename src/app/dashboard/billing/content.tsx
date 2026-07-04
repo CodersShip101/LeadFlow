@@ -182,7 +182,7 @@ export default function BillingContent() {
     } else if (isDowngrade) {
       cta = <button className="bill-cta bill-cta-ghost" disabled={busy} onClick={() => handleUpgrade(t)}>Switch to {v.label}</button>
     } else {
-      const isWarm = featured || isTeam
+      const isWarm = featured
       cta = (
         <div className="bill-cta-stack">
           <button className={`bill-cta ${isWarm ? 'bill-cta-warm' : 'bill-cta-primary'}`} disabled={busy} onClick={() => handleUpgrade(t)}>
@@ -216,7 +216,7 @@ export default function BillingContent() {
         {cta}
         {!isCurrent && t !== 'free' && !isDowngrade && (
           <div className="bill-social-proof">
-            <i className="ti ti-users" /> Join 340+ UK freelancers on a paid plan
+            <i className="ti ti-shield-check" /> Cancel anytime &mdash; no lock-in
           </div>
         )}
       </div>
