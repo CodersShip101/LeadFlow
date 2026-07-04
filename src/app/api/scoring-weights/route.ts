@@ -64,7 +64,10 @@ export async function PUT(req: NextRequest) {
     .update({ scoring_weights: body.weights })
     .eq('id', user.id)
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error('PUT /api/scoring-weights error:', error)
+    return NextResponse.json({ error: 'Something went wrong' }, { status: 500 })
+  }
 
   return NextResponse.json({ weights: body.weights, saved: true })
 }
@@ -75,6 +78,10 @@ export async function DELETE() {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const admin = createAdminSupabase()
-  await admin.from('profiles').update({ scoring_weights: null }).eq('id', user.id)
+  const { error } = await admin.from('profiles').update({ scoring_weights: null }).eq('id', user.id)
+  if (error) {
+    console.error('DELETE /api/scoring-weights error:', error)
+    return NextResponse.json({ error: 'Something went wrong' }, { status: 500 })
+  }
   return NextResponse.json({ weights: DEFAULT_WEIGHTS, reset: true })
 }

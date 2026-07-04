@@ -22,7 +22,7 @@ export async function POST(req: Request) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { lead_id, status } = await req.json()
-  if (!lead_id || !status) {
+  if (!lead_id || typeof lead_id !== 'string' || lead_id.length > 200 || !status || typeof status !== 'string' || status.length > 50) {
     return NextResponse.json({ error: 'lead_id and status required' }, { status: 400 })
   }
 
@@ -104,7 +104,10 @@ export async function POST(req: Request) {
       .select()
       .single()
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    if (error) {
+      console.error('POST /api/applications update error:', error)
+      return NextResponse.json({ error: 'Something went wrong' }, { status: 500 })
+    }
     return NextResponse.json(data)
   }
 
@@ -122,7 +125,10 @@ export async function POST(req: Request) {
     .select()
     .single()
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error('POST /api/applications insert error:', error)
+    return NextResponse.json({ error: 'Something went wrong' }, { status: 500 })
+  }
   return NextResponse.json(data)
 }
 
@@ -132,13 +138,13 @@ export async function PATCH(req: Request) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { lead_id, outcome, note, lost_reason, won_amount } = await req.json()
-  if (!lead_id) {
+  if (!lead_id || typeof lead_id !== 'string' || lead_id.length > 200) {
     return NextResponse.json({ error: 'lead_id required' }, { status: 400 })
   }
 
   const update: Record<string, unknown> = {}
   if (outcome !== undefined) {
-    if (!['won', 'lost', 'pending'].includes(outcome)) {
+    if (typeof outcome !== 'string' || !['won', 'lost', 'pending'].includes(outcome)) {
       return NextResponse.json({ error: 'Invalid outcome' }, { status: 400 })
     }
     update.outcome = outcome
@@ -170,7 +176,10 @@ export async function PATCH(req: Request) {
     .select()
     .single()
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error('PATCH /api/applications error:', error)
+    return NextResponse.json({ error: 'Something went wrong' }, { status: 500 })
+  }
   return NextResponse.json(data)
 }
 
@@ -180,7 +189,7 @@ export async function DELETE(req: Request) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { lead_id } = await req.json()
-  if (!lead_id) {
+  if (!lead_id || typeof lead_id !== 'string' || lead_id.length > 200) {
     return NextResponse.json({ error: 'lead_id required' }, { status: 400 })
   }
 
@@ -191,6 +200,9 @@ export async function DELETE(req: Request) {
     .eq('freelancer_id', user.id)
     .eq('lead_id', lead_id)
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error('DELETE /api/applications error:', error)
+    return NextResponse.json({ error: 'Something went wrong' }, { status: 500 })
+  }
   return NextResponse.json({ success: true })
 }

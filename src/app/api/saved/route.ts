@@ -45,12 +45,17 @@ export async function POST(req: NextRequest) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { leadId } = await req.json().catch(() => ({}))
-  if (!leadId) return NextResponse.json({ error: 'leadId required' }, { status: 400 })
+  if (!leadId || typeof leadId !== 'string' || leadId.length > 200) {
+    return NextResponse.json({ error: 'leadId required' }, { status: 400 })
+  }
 
   const { error } = await supabase
     .from('saved_leads')
     .upsert({ user_id: user.id, lead_id: leadId }, { onConflict: 'user_id,lead_id' })
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error('POST /api/saved error:', error)
+    return NextResponse.json({ error: 'Something went wrong' }, { status: 500 })
+  }
   return NextResponse.json({ ok: true })
 }
 
@@ -60,6 +65,13 @@ export async function DELETE(req: NextRequest) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { leadId } = await req.json().catch(() => ({}))
-  await supabase.from('saved_leads').delete().eq('user_id', user.id).eq('lead_id', leadId)
+  if (!leadId || typeof leadId !== 'string' || leadId.length > 200) {
+    return NextResponse.json({ error: 'leadId required' }, { status: 400 })
+  }
+  const { error } = await supabase.from('saved_leads').delete().eq('user_id', user.id).eq('lead_id', leadId)
+  if (error) {
+    console.error('DELETE /api/saved error:', error)
+    return NextResponse.json({ error: 'Something went wrong' }, { status: 500 })
+  }
   return NextResponse.json({ ok: true })
 }

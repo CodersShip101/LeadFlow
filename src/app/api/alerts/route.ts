@@ -52,8 +52,8 @@ export async function PUT(req: NextRequest) {
   const prefs = {
     enabled: Boolean(body.enabled),
     minScore: Math.min(10, Math.max(1, Number(body.minScore) || 7)),
-    sources: Array.isArray(body.sources) ? body.sources.filter((s: unknown) => typeof s === 'string') : [],
-    keywords: Array.isArray(body.keywords) ? body.keywords.filter((k: unknown) => typeof k === 'string').slice(0, 10) : [],
+    sources: Array.isArray(body.sources) ? body.sources.filter((s: unknown) => typeof s === 'string' && (s as string).length <= 200) : [],
+    keywords: Array.isArray(body.keywords) ? body.keywords.filter((k: unknown) => typeof k === 'string' && (k as string).length <= 200).slice(0, 10) : [],
   }
 
   const admin = createAdminSupabase()
@@ -62,6 +62,9 @@ export async function PUT(req: NextRequest) {
     .update({ alert_preferences: prefs })
     .eq('id', user.id)
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error('PUT /api/alerts error:', error)
+    return NextResponse.json({ error: 'Something went wrong' }, { status: 500 })
+  }
   return NextResponse.json({ preferences: prefs, saved: true })
 }

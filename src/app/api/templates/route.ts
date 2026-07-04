@@ -30,7 +30,18 @@ export async function POST(req: NextRequest) {
   const c = await ctx()
   if (c.error) return c.error
   const { title, body, shared } = await req.json().catch(() => ({}))
-  if (!title?.trim()) return NextResponse.json({ error: 'Title required' }, { status: 400 })
+  if (typeof title !== 'string' || !title.trim()) {
+    return NextResponse.json({ error: 'Title required' }, { status: 400 })
+  }
+  if (title.length > 200) {
+    return NextResponse.json({ error: 'Title too long (max 200)' }, { status: 400 })
+  }
+  if (body !== undefined && typeof body !== 'string') {
+    return NextResponse.json({ error: 'Body must be a string' }, { status: 400 })
+  }
+  if (typeof body === 'string' && body.length > 5000) {
+    return NextResponse.json({ error: 'Body too long (max 5000)' }, { status: 400 })
+  }
 
   let orgId: string | null = null
   if (shared) {
@@ -43,7 +54,10 @@ export async function POST(req: NextRequest) {
     .insert({ owner_id: c.user.id, org_id: orgId, title: title.trim(), body: body ?? '' })
     .select('id, title, body, org_id, owner_id, updated_at')
     .single()
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error('POST /api/templates error:', error)
+    return NextResponse.json({ error: 'Something went wrong' }, { status: 500 })
+  }
   return NextResponse.json({ template: data })
 }
 
@@ -51,12 +65,29 @@ export async function PUT(req: NextRequest) {
   const c = await ctx()
   if (c.error) return c.error
   const { id, title, body } = await req.json().catch(() => ({}))
-  if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 })
+  if (!id || typeof id !== 'string' || id.length > 200) {
+    return NextResponse.json({ error: 'id required' }, { status: 400 })
+  }
+  if (title !== undefined && typeof title !== 'string') {
+    return NextResponse.json({ error: 'Title must be a string' }, { status: 400 })
+  }
+  if (typeof title === 'string' && title.length > 200) {
+    return NextResponse.json({ error: 'Title too long (max 200)' }, { status: 400 })
+  }
+  if (body !== undefined && typeof body !== 'string') {
+    return NextResponse.json({ error: 'Body must be a string' }, { status: 400 })
+  }
+  if (typeof body === 'string' && body.length > 5000) {
+    return NextResponse.json({ error: 'Body too long (max 5000)' }, { status: 400 })
+  }
   const { error } = await c.supabase
     .from('templates')
     .update({ title: title?.trim(), body: body ?? '', updated_at: new Date().toISOString() })
     .eq('id', id)
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error('PUT /api/templates error:', error)
+    return NextResponse.json({ error: 'Something went wrong' }, { status: 500 })
+  }
   return NextResponse.json({ ok: true })
 }
 
@@ -64,8 +95,13 @@ export async function DELETE(req: NextRequest) {
   const c = await ctx()
   if (c.error) return c.error
   const { id } = await req.json().catch(() => ({}))
-  if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 })
+  if (!id || typeof id !== 'string' || id.length > 200) {
+    return NextResponse.json({ error: 'id required' }, { status: 400 })
+  }
   const { error } = await c.supabase.from('templates').delete().eq('id', id)
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error('DELETE /api/templates error:', error)
+    return NextResponse.json({ error: 'Something went wrong' }, { status: 500 })
+  }
   return NextResponse.json({ ok: true })
 }
