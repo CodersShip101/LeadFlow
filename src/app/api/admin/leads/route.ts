@@ -1,8 +1,13 @@
 import { NextResponse } from 'next/server'
-import { createAdminSupabase } from '@/lib/supabase-server'
+import { createServerSupabase, createAdminSupabase } from '@/lib/supabase-server'
 
 export async function GET() {
   try {
+    const serverSupabase = await createServerSupabase()
+    const { data: { user } } = await serverSupabase.auth.getUser()
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    /* TODO: verify admin gate */
+
     const supabase = await createAdminSupabase()
     const { data, error } = await supabase
       .from('leads')
@@ -20,7 +25,18 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
+    const serverSupabase = await createServerSupabase()
+    const { data: { user } } = await serverSupabase.auth.getUser()
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    /* TODO: verify admin gate */
+
     const body = await req.json()
+    if (typeof body.title !== 'string' || !body.title.trim()) {
+      return NextResponse.json({ error: 'Title is required' }, { status: 400 })
+    }
+    if (body.description !== undefined && typeof body.description !== 'string') {
+      return NextResponse.json({ error: 'Invalid description format' }, { status: 400 })
+    }
 
     const supabase = await createAdminSupabase()
     const { data, error } = await supabase
@@ -49,7 +65,15 @@ export async function POST(req: Request) {
 
 export async function DELETE(req: Request) {
   try {
+    const serverSupabase = await createServerSupabase()
+    const { data: { user } } = await serverSupabase.auth.getUser()
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    /* TODO: verify admin gate */
+
     const { id } = await req.json()
+    if (typeof id !== 'string' || !id || id.length > 200) {
+      return NextResponse.json({ error: 'Invalid lead ID' }, { status: 400 })
+    }
 
     const supabase = await createAdminSupabase()
     const { error } = await supabase.from('leads').delete().eq('id', id)

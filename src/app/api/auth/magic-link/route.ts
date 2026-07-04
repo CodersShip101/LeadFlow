@@ -9,8 +9,11 @@ const lastSent = new Map<string, number>()
 export async function POST(request: Request) {
   try {
     const { email } = await request.json()
-    if (!email) {
+    if (typeof email !== 'string' || !email.trim()) {
       return NextResponse.json({ error: 'Email is required' }, { status: 400 })
+    }
+    if (email.length > 320 || !email.includes('@')) {
+      return NextResponse.json({ error: 'Invalid email format' }, { status: 400 })
     }
 
     const key = String(email).toLowerCase().trim()
@@ -49,7 +52,8 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true })
   } catch (e) {
-    return NextResponse.json({ error: e instanceof Error ? e.message : 'Unknown error' }, { status: 500 })
+    console.error('Magic link error:', e)
+    return NextResponse.json({ error: 'Something went wrong' }, { status: 500 })
   }
 }
 
