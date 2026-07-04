@@ -251,7 +251,7 @@ export default function SavedPage() {
         <div className="sv-header-left">
           <p className="sv-sub">
             <span className="sv-count">{leads.length}</span> saved
-            {hotLeads.length > 0 && <span className="sv-hot-badge"><i className="ti ti-flame" />{hotLeads.length} posted recently</span>}
+            {hotLeads.length > 0 && <span className="sv-hot-badge"><span style={{display:'inline-block',width:6,height:6,borderRadius:'50%',background:'var(--coral)',flexShrink:0}} />{hotLeads.length} posted recently</span>}
           </p>
         </div>
         <button className="btn btn-ghost sv-feed-btn" onClick={() => router.push('/dashboard')}>
@@ -321,8 +321,6 @@ export default function SavedPage() {
 
           return (
             <div key={lead.id} className="sv-card" onClick={() => router.push(`/dashboard/lead/${lead.id}`)}>
-              <div className="sv-score-bar" style={{ background: scoreColor(sc) }} />
-
               <div className="sv-card-inner">
                 {/* Top row */}
                 <div className="sv-card-top">
@@ -330,7 +328,7 @@ export default function SavedPage() {
                   {company && <span className="sv-company"><i className="ti ti-building" />{company}</span>}
                   {exp
                     ? <span className={`sv-expiry ${exp.tone}`}><i className="ti ti-clock-exclamation" />{exp.label}</span>
-                    : urg && <span className={`sv-urg ${urg.hot ? 'hot' : ''}`}>{urg.hot && <i className="ti ti-flame" />}{urg.label}</span>}
+                    : urg && <span className={`sv-urg ${urg.hot ? 'hot' : ''}`}>{urg.hot && <span style={{display:'inline-block',width:6,height:6,borderRadius:'50%',background:'var(--coral)',flexShrink:0}} />}{urg.label}</span>}
                   <span className="sv-score-chip" style={{ color: scoreColor(sc), borderColor: `${scoreColor(sc)}33` }}>{sc}</span>
                 </div>
 
@@ -341,7 +339,7 @@ export default function SavedPage() {
                 <div className="sv-card-meta">
                   {budget && <span className="sv-budget"><i className="ti ti-currency-pound" />{budget}</span>}
                   {lead.client_location && <span className="sv-meta-chip"><i className="ti ti-map-pin" />{lead.client_location}</span>}
-                  {totalSkills > 0 && (
+                  {matchedSkills > 0 && (
                     <span className="sv-meta-chip" style={{ color: matchedSkills === totalSkills ? 'var(--hi)' : matchedSkills > 0 ? 'var(--mid)' : 'var(--slate)' }}>
                       <i className="ti ti-code" />{matchedSkills}/{totalSkills} skills
                     </span>
