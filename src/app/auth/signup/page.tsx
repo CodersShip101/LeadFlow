@@ -162,17 +162,11 @@ export default function SignupPage() {
             </div>
           </div>
 
-          {/* Social proof */}
+          {/* Value statement (honest — no fabricated user counts) */}
           <div className="auth-social-proof" style={{ paddingTop: 12 }}>
-            <div className="auth-avatar-stack" aria-hidden="true">
-              <div className="avatar" style={{ background: 'var(--lime)' }}>JK</div>
-              <div className="avatar" style={{ background: 'var(--amber)' }}>SM</div>
-              <div className="avatar" style={{ background: '#7fb6e6' }}>AR</div>
-              <div className="avatar" style={{ background: '#c4a3ec' }}>PL</div>
-            </div>
             <div className="auth-proof-text">
-              <strong>340+ UK freelancers</strong>
-              Finding better work, faster
+              <strong>Every lead scored to your skills</strong>
+              New matches surfaced as often as every hour
             </div>
           </div>
         </div>
