@@ -30,26 +30,38 @@ export async function GET() {
 }
 
 export async function PATCH(req: NextRequest) {
-  const supabase = await createServerSupabase()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  try {
+    const supabase = await createServerSupabase()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { applicationId, stage } = await req.json().catch(() => ({}))
-  if (!STAGES.includes(stage))
-    return NextResponse.json({ error: 'invalid stage' }, { status: 400 })
+    const { applicationId, stage } = await req.json().catch(() => ({}))
+    if (!applicationId || typeof applicationId !== 'string' || applicationId.length > 200)
+      return NextResponse.json({ error: 'Invalid applicationId' }, { status: 400 })
+    if (typeof stage !== 'string' || stage.length > 200)
+      return NextResponse.json({ error: 'invalid stage' }, { status: 400 })
+    if (!STAGES.includes(stage as (typeof STAGES)[number]))
+      return NextResponse.json({ error: 'invalid stage' }, { status: 400 })
 
-  const nowISO = new Date().toISOString()
-  const patch: Record<string, unknown> = { status: stage, stage_changed_at: nowISO }
-  if (stage === 'hired') { patch.outcome = 'won'; patch.outcome_at = nowISO }
-  else if (stage === 'lost') { patch.outcome = 'lost'; patch.outcome_at = nowISO }
-  else { patch.outcome = null; patch.outcome_at = null }
+    const nowISO = new Date().toISOString()
+    const patch: Record<string, unknown> = { status: stage, stage_changed_at: nowISO }
+    if (stage === 'hired') { patch.outcome = 'won'; patch.outcome_at = nowISO }
+    else if (stage === 'lost') { patch.outcome = 'lost'; patch.outcome_at = nowISO }
+    else { patch.outcome = null; patch.outcome_at = null }
 
-  const { error } = await supabase
-    .from('applications')
-    .update(patch)
-    .eq('id', applicationId)
-    .eq('freelancer_id', user.id)
+    const { error } = await supabase
+      .from('applications')
+      .update(patch)
+      .eq('id', applicationId)
+      .eq('freelancer_id', user.id)
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json({ ok: true })
+    if (error) {
+      console.error(error)
+      return NextResponse.json({ error: 'Something went wrong' }, { status: 500 })
+    }
+    return NextResponse.json({ ok: true })
+  } catch (e) {
+    console.error(e)
+    return NextResponse.json({ error: 'Something went wrong' }, { status: 500 })
+  }
 }

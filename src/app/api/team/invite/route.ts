@@ -3,45 +3,51 @@ import { createServerSupabase } from '@/lib/supabase-server'
 import { sendEmail } from '@/lib/email'
 
 export async function POST(req: NextRequest) {
-  const supabase = await createServerSupabase()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  try {
+    const supabase = await createServerSupabase()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { data: orgRows } = await supabase.rpc('user_org', { p_user: user.id })
-  const org = orgRows?.[0]
-  if (!org || org.role !== 'admin') return NextResponse.json({ error: 'admin only' }, { status: 403 })
+    const { data: orgRows } = await supabase.rpc('user_org', { p_user: user.id })
+    const org = orgRows?.[0]
+    if (!org || org.role !== 'admin') return NextResponse.json({ error: 'admin only' }, { status: 403 })
 
-  const { email, role = 'member' } = await req.json().catch(() => ({}))
-  if (!email || !/^[^@]+@[^@]+\.[^@]+$/.test(email))
-    return NextResponse.json({ error: 'valid email required' }, { status: 400 })
+    const { email, role = 'member' } = await req.json().catch(() => ({}))
+    if (typeof email !== 'string' || email.length > 320 || !email.includes('@'))
+      return NextResponse.json({ error: 'valid email required' }, { status: 400 })
+    if (typeof role !== 'string' || role.length > 200)
+      return NextResponse.json({ error: 'Invalid role' }, { status: 400 })
 
-  const [{ count: memberCount }, { count: inviteCount }] = await Promise.all([
-    supabase.from('org_members').select('*', { count: 'exact', head: true }).eq('org_id', org.org_id),
-    supabase.from('org_invites').select('*', { count: 'exact', head: true }).eq('org_id', org.org_id).is('accepted_at', null),
-  ])
-  if ((memberCount ?? 0) + (inviteCount ?? 0) >= org.seats) {
-    return NextResponse.json(
-      { error: 'no_seats', message: 'All seats are in use. Add seats to invite more teammates.' },
-      { status: 402 },
-    )
-  }
+    const [{ count: memberCount }, { count: inviteCount }] = await Promise.all([
+      supabase.from('org_members').select('*', { count: 'exact', head: true }).eq('org_id', org.org_id),
+      supabase.from('org_invites').select('*', { count: 'exact', head: true }).eq('org_id', org.org_id).is('accepted_at', null),
+    ])
+    if ((memberCount ?? 0) + (inviteCount ?? 0) >= org.seats) {
+      return NextResponse.json(
+        { error: 'no_seats', message: 'All seats are in use. Add seats to invite more teammates.' },
+        { status: 402 },
+      )
+    }
 
-  const { data: invite, error } = await supabase
-    .from('org_invites')
-    .upsert(
-      { org_id: org.org_id, email: email.toLowerCase(), role, invited_by: user.id },
-      { onConflict: 'org_id,email' },
-    )
-    .select('token')
-    .single()
+    const { data: invite, error } = await supabase
+      .from('org_invites')
+      .upsert(
+        { org_id: org.org_id, email: email.toLowerCase(), role, invited_by: user.id },
+        { onConflict: 'org_id,email' },
+      )
+      .select('token')
+      .single()
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    if (error) {
+      console.error(error)
+      return NextResponse.json({ error: 'Something went wrong' }, { status: 500 })
+    }
 
-  const origin = req.headers.get('origin') ?? process.env.NEXT_PUBLIC_SITE_URL!
-  const acceptUrl = `${origin}/api/team/accept?token=${invite!.token}`
+    const origin = req.headers.get('origin') ?? process.env.NEXT_PUBLIC_SITE_URL!
+    const acceptUrl = `${origin}/api/team/accept?token=${invite!.token}`
 
-  // Email the invitee the accept link.
-  const html = `<!DOCTYPE html><html><body style="font-family:-apple-system,sans-serif;background:#F5F5F7;margin:0;padding:24px">
+    // Email the invitee the accept link.
+    const html = `<!DOCTYPE html><html><body style="font-family:-apple-system,sans-serif;background:#F5F5F7;margin:0;padding:24px">
     <table width="480" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:12px;border:1px solid #E5E7EB;margin:0 auto">
       <tr><td style="padding:28px 28px 8px">
         <h1 style="font-size:18px;font-weight:700;margin:0;color:#111827">You've been invited to a team on Flaiir</h1>
@@ -54,11 +60,15 @@ export async function POST(req: NextRequest) {
     </table>
   </body></html>`
 
-  const sent = await sendEmail({
-    to: email.toLowerCase(),
-    subject: "You've been invited to a Flaiir team",
-    html,
-  })
+    const sent = await sendEmail({
+      to: email.toLowerCase(),
+      subject: "You've been invited to a Flaiir team",
+      html,
+    })
 
-  return NextResponse.json({ ok: true, acceptUrl, emailed: sent.ok })
+    return NextResponse.json({ ok: true, acceptUrl, emailed: sent.ok })
+  } catch (e) {
+    console.error(e)
+    return NextResponse.json({ error: 'Something went wrong' }, { status: 500 })
+  }
 }

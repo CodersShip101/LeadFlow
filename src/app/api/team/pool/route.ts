@@ -44,40 +44,51 @@ export async function GET() {
 }
 
 export async function PATCH(req: NextRequest) {
-  const c = await membership()
-  if (c.error) return c.error
-  const { applicationId, assignTo } = await req.json().catch(() => ({}))
-  if (!applicationId) return NextResponse.json({ error: 'applicationId required' }, { status: 400 })
+  try {
+    const c = await membership()
+    if (c.error) return c.error
+    const { applicationId, assignTo } = await req.json().catch(() => ({}))
+    if (!applicationId || typeof applicationId !== 'string' || applicationId.length > 200)
+      return NextResponse.json({ error: 'Invalid applicationId' }, { status: 400 })
+    if (assignTo !== undefined && assignTo !== null && (typeof assignTo !== 'string' || assignTo.length > 200))
+      return NextResponse.json({ error: 'Invalid assignTo' }, { status: 400 })
 
-  // assignTo must be a member of the same org (or null to unassign).
-  if (assignTo) {
-    const { data: ok } = await c.admin
-      .from('org_members').select('user_id').eq('org_id', c.orgId).eq('user_id', assignTo).maybeSingle()
-    if (!ok) return NextResponse.json({ error: 'Not a team member' }, { status: 400 })
+    // assignTo must be a member of the same org (or null to unassign).
+    if (assignTo) {
+      const { data: ok } = await c.admin
+        .from('org_members').select('user_id').eq('org_id', c.orgId).eq('user_id', assignTo).maybeSingle()
+      if (!ok) return NextResponse.json({ error: 'Not a team member' }, { status: 400 })
+    }
+
+    const { error } = await c.admin
+      .from('applications')
+      .update({ assigned_to: assignTo ?? null })
+      .eq('id', applicationId)
+      .eq('org_id', c.orgId)
+    if (error) {
+      console.error(error)
+      return NextResponse.json({ error: 'Something went wrong' }, { status: 500 })
+    }
+
+    // Notify the assignee (Slack channel + email) — non-blocking.
+    if (assignTo) {
+      const [{ data: org }, { data: assignee }, { data: app }] = await Promise.all([
+        c.admin.from('organizations').select('slack_webhook_url').eq('id', c.orgId).single(),
+        c.admin.from('profiles').select('full_name, email').eq('id', assignTo).single(),
+        c.admin.from('applications').select('lead:leads(title)').eq('id', applicationId).single(),
+      ])
+      const title = (app?.lead as { title?: string } | null)?.title ?? 'a lead'
+      const who = assignee?.full_name ?? 'a teammate'
+      notifySlack(org?.slack_webhook_url, `:dart: *${who}* was assigned a lead: *${title}*`)
+      notifyEmail(
+        assignee?.email,
+        `You've been assigned a lead: ${title}`,
+        `<p>Hi ${who},</p><p>You've been assigned <strong>${title}</strong> in your team's Flaiir pipeline.</p><p><a href="${process.env.NEXT_PUBLIC_SITE_URL ?? ''}/dashboard/applied">Open your pipeline</a></p>`,
+      )
+    }
+    return NextResponse.json({ ok: true })
+  } catch (e) {
+    console.error(e)
+    return NextResponse.json({ error: 'Something went wrong' }, { status: 500 })
   }
-
-  const { error } = await c.admin
-    .from('applications')
-    .update({ assigned_to: assignTo ?? null })
-    .eq('id', applicationId)
-    .eq('org_id', c.orgId)
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-
-  // Notify the assignee (Slack channel + email) — non-blocking.
-  if (assignTo) {
-    const [{ data: org }, { data: assignee }, { data: app }] = await Promise.all([
-      c.admin.from('organizations').select('slack_webhook_url').eq('id', c.orgId).single(),
-      c.admin.from('profiles').select('full_name, email').eq('id', assignTo).single(),
-      c.admin.from('applications').select('lead:leads(title)').eq('id', applicationId).single(),
-    ])
-    const title = (app?.lead as { title?: string } | null)?.title ?? 'a lead'
-    const who = assignee?.full_name ?? 'a teammate'
-    notifySlack(org?.slack_webhook_url, `:dart: *${who}* was assigned a lead: *${title}*`)
-    notifyEmail(
-      assignee?.email,
-      `You've been assigned a lead: ${title}`,
-      `<p>Hi ${who},</p><p>You've been assigned <strong>${title}</strong> in your team's Flaiir pipeline.</p><p><a href="${process.env.NEXT_PUBLIC_SITE_URL ?? ''}/dashboard/applied">Open your pipeline</a></p>`,
-    )
-  }
-  return NextResponse.json({ ok: true })
 }
