@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerSupabase, createAdminSupabase } from '@/lib/supabase-server'
+import { createServerSupabase, createAdminSupabase, fullNamesByUserId } from '@/lib/supabase-server'
 import { notifySlack, notifyEmail } from '@/lib/notify'
 
 // Shared team lead pool — every application tagged to the caller's org, with
@@ -29,15 +29,16 @@ export async function GET() {
   // Names for assignee + owner
   const { data: members } = await c.admin
     .from('org_members')
-    .select('user_id, role, profile:profiles(full_name)')
+    .select('user_id, role')
     .eq('org_id', c.orgId)
+  const names = await fullNamesByUserId(c.admin, (members ?? []).map(m => m.user_id as string))
 
   return NextResponse.json({
     myRole: c.role,
     members: (members ?? []).map(m => ({
       user_id: m.user_id,
       role: m.role,
-      name: (m.profile as { full_name?: string } | null)?.full_name ?? 'Teammate',
+      name: names.get(m.user_id as string) ?? 'Teammate',
     })),
     leads: apps ?? [],
   })

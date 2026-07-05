@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createServerSupabase, createAdminSupabase } from '@/lib/supabase-server'
+import { createServerSupabase, createAdminSupabase, fullNamesByUserId } from '@/lib/supabase-server'
 
 // Team analytics + win-rate leaderboard for the caller's org.
 export async function GET() {
@@ -14,9 +14,10 @@ export async function GET() {
   const orgId = m.org_id as string
 
   const [{ data: members }, { data: apps }] = await Promise.all([
-    admin.from('org_members').select('user_id, role, profile:profiles(full_name)').eq('org_id', orgId),
+    admin.from('org_members').select('user_id, role').eq('org_id', orgId),
     admin.from('applications').select('freelancer_id, status, outcome').eq('org_id', orgId),
   ])
+  const names = await fullNamesByUserId(admin, (members ?? []).map(m => m.user_id as string))
 
   const byUser = new Map<string, { total: number; applied: number; won: number; lost: number }>()
   for (const a of (apps ?? [])) {
@@ -34,7 +35,7 @@ export async function GET() {
     const decided = s.won + s.lost
     return {
       user_id: mem.user_id,
-      name: (mem.profile as { full_name?: string } | null)?.full_name ?? 'Teammate',
+      name: names.get(mem.user_id as string) ?? 'Teammate',
       role: mem.role,
       applied: s.applied,
       won: s.won,

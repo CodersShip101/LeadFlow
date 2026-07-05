@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerSupabase } from '@/lib/supabase-server'
+import { createServerSupabase, createAdminSupabase, fullNamesByUserId } from '@/lib/supabase-server'
 
 export async function GET() {
   const supabase = await createServerSupabase()
@@ -12,7 +12,7 @@ export async function GET() {
 
   const { data: members } = await supabase
     .from('org_members')
-    .select('user_id, role, created_at, profile:profiles(full_name)')
+    .select('user_id, role, created_at')
     .eq('org_id', org.org_id)
 
   const { data: invites } = await supabase
@@ -21,10 +21,17 @@ export async function GET() {
     .eq('org_id', org.org_id)
     .is('accepted_at', null)
 
+  // Resolve names via the admin client (co-members' names aren't sensitive
+  // within a verified org, and the user client's RLS can hide other profiles).
+  const names = await fullNamesByUserId(createAdminSupabase(), (members ?? []).map(m => m.user_id as string))
+
   return NextResponse.json({
     org: { id: org.org_id, plan: org.plan, seats: org.seats, myRole: org.role },
     seatsUsed: members?.length ?? 0,
-    members: members ?? [],
+    members: (members ?? []).map(m => ({
+      ...m,
+      profile: { full_name: names.get(m.user_id as string) ?? null },
+    })),
     pendingInvites: invites ?? [],
   })
 }

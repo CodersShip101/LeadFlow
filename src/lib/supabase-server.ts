@@ -34,6 +34,22 @@ export function createAdminSupabase() {
   )
 }
 
+type AnySupabase =
+  | Awaited<ReturnType<typeof createServerSupabase>>
+  | ReturnType<typeof createAdminSupabase>
+
+// Look up display names for a set of user ids.
+// PostgREST can't embed profiles into org_members (no FK relationship is
+// registered), so we resolve names in a second query and merge in JS.
+export async function fullNamesByUserId(
+  client: AnySupabase,
+  ids: string[],
+): Promise<Map<string, string | null>> {
+  if (ids.length === 0) return new Map()
+  const { data } = await client.from('profiles').select('id, full_name').in('id', ids)
+  return new Map((data ?? []).map((p) => [p.id as string, (p.full_name as string | null) ?? null]))
+}
+
 export async function requireUser() {
   const supabase = await createServerSupabase()
   const { data: { user } } = await supabase.auth.getUser()
