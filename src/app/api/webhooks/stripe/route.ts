@@ -5,16 +5,28 @@ import { createAdminSupabase } from '@/lib/supabase-server'
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
 export async function POST(req: NextRequest) {
+  const secret = process.env.STRIPE_WEBHOOK_SECRET
+  if (!secret) {
+    console.error('STRIPE_WEBHOOK_SECRET is not configured')
+    return NextResponse.json({ error: 'Webhook not configured' }, { status: 500 })
+  }
+
   const body = await req.text()
-  const sig = req.headers.get('stripe-signature')!
+  const sig = req.headers.get('stripe-signature')
+  if (!sig) return NextResponse.json({ error: 'Missing signature' }, { status: 400 })
+
   let event: Stripe.Event
   try {
-    event = stripe.webhooks.constructEvent(body, sig, process.env.STRIPE_WEBHOOK_SECRET!)
+    event = stripe.webhooks.constructEvent(body, sig, secret)
   } catch (err) {
-    return NextResponse.json({ error: `bad signature: ${err}` }, { status: 400 })
+    // Never echo the signature-verification error back to the caller.
+    console.error('Stripe webhook signature verification failed:', err)
+    return NextResponse.json({ error: 'Invalid signature' }, { status: 400 })
   }
 
   const admin = createAdminSupabase()
+
+  try {
 
   const setProfilePlan = async (customerId: string, plan: 'free' | 'pro' | 'max') => {
     await admin.from('profiles').update({ subscription_status: plan }).eq('stripe_customer_id', customerId)
@@ -104,6 +116,11 @@ export async function POST(req: NextRequest) {
       await setProfilePlan(customerId, 'free')
       break
     }
+  }
+  } catch (err) {
+    // A handler error → 500 so Stripe retries the (idempotent) event. Never leak.
+    console.error(`Stripe webhook handler failed for event ${event.id} (${event.type}):`, err)
+    return NextResponse.json({ error: 'Handler error' }, { status: 500 })
   }
 
   return NextResponse.json({ received: true })
