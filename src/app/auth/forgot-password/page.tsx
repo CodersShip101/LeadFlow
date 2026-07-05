@@ -39,16 +39,6 @@ export default function ForgotPasswordPage() {
               <h2 className="panel-heading">We&apos;ve sent the link.<br />One click and you&apos;re back.</h2>
               <p className="panel-sub">The reset link expires in 1 hour. If you don&apos;t see it, check your spam folder or try again.</p>
             </div>
-            <div className="auth-testimonial">
-              <p>Best decision I made for my freelance business. The quality of leads is unmatched.</p>
-              <div className="auth-testimonial-author">
-                <div className="auth-author-av" aria-hidden="true">SM</div>
-                <div className="auth-author-info">
-                  <div className="auth-author-name">Sarah M.</div>
-                  <div className="auth-author-role">Freelance Copywriter · Manchester</div>
-                </div>
-              </div>
-            </div>
           </div>
         </aside>
         <main className="panel-right">
@@ -87,26 +77,6 @@ export default function ForgotPasswordPage() {
             <div className="panel-eyebrow">Forgot your password?</div>
             <h2 className="panel-heading">No problem.<br />We&apos;ll get you back in.</h2>
             <p className="panel-sub">Enter the email you use for Flaiir and we&apos;ll send a reset link. Takes 10 seconds.</p>
-            <div className="auth-stats-row">
-              <div className="auth-stat-item">
-                <span className="auth-stat-num"><span>2,400+</span></span>
-                <span className="auth-stat-label">Active freelancers</span>
-              </div>
-              <div className="auth-stat-item">
-                <span className="auth-stat-num"><span>98%</span></span>
-                <span className="auth-stat-label">Reset success rate</span>
-              </div>
-            </div>
-          </div>
-          <div className="auth-testimonial">
-            <p>Had a mini panic when I couldn&apos;t log in, but the reset took less than a minute. Solid experience.</p>
-            <div className="auth-testimonial-author">
-              <div className="auth-author-av" aria-hidden="true">TP</div>
-              <div className="auth-author-info">
-                <div className="auth-author-name">Tom P.</div>
-                <div className="auth-author-role">Freelance Developer · Bristol</div>
-              </div>
-            </div>
           </div>
         </div>
       </aside>

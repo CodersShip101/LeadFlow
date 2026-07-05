@@ -39,22 +39,6 @@ export default function LoginPage() {
             <div className="panel-eyebrow">Your feed is live</div>
             <h2 className="panel-heading">New leads matched<br />to your skills and rate.</h2>
             <p className="panel-sub">While you&apos;ve been away, we&apos;ve been scanning and scoring. Log back in to see what&apos;s matched.</p>
-            <div className="auth-stats-row">
-              <div className="auth-stat-item">
-                <span className="auth-stat-num" aria-label="47 new leads today"><span>47</span></span>
-                <span className="auth-stat-label">New leads today</span>
-              </div>
-              <div className="auth-stat-item">
-                <span className="auth-stat-num"><span>9.1</span></span>
-                <span className="auth-stat-label">Top score today</span>
-              </div>
-            </div>
-            <div className="auth-ticker">
-              <div className="auth-ticker-text">
-                Feed updated <strong>8 minutes ago</strong> — 12 new leads since your last visit
-              </div>
-              <span className="auth-ticker-dot" aria-hidden="true"></span>
-            </div>
             <div className="auth-sources-section">
               <div className="auth-sources-label">We scan from</div>
               <div className="auth-source-pills">
@@ -62,16 +46,6 @@ export default function LoginPage() {
                 <span className="auth-source-pill"><i className="ti ti-briefcase" aria-hidden="true"></i> Reed.co.uk</span>
                 <span className="auth-source-pill"><i className="ti ti-world" aria-hidden="true"></i> We Work Remotely</span>
                 <span className="auth-source-pill"><i className="ti ti-device-laptop" aria-hidden="true"></i> Remote OK</span>
-              </div>
-            </div>
-          </div>
-          <div className="auth-testimonial">
-            <p>Landed a £380/day Fintech contract through a Reddit lead I&apos;d never have found manually. Flaiir sent it before anyone else saw it.</p>
-            <div className="auth-testimonial-author">
-              <div className="auth-author-av" aria-hidden="true">JK</div>
-              <div className="auth-author-info">
-                <div className="auth-author-name">James K.</div>
-                <div className="auth-author-role">Freelance UX Designer · London</div>
               </div>
             </div>
           </div>
