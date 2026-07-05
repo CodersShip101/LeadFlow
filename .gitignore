@@ -51,3 +51,8 @@ next-env.d.ts
 supabase/.temp/
 e2e/*.png
 .agents/reference/
+
+node_modules/
+.next/
+test-results/
+playwright-report/
