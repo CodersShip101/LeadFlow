@@ -10,7 +10,7 @@ real taste of the product but hit a clear wall that motivates upgrading. Two
 composed limits:
 
 1. **Daily drops** — new leads are released only at 5 fixed times each day.
-2. **Weekly cap** — a free user receives at most 10 leads per week.
+2. **Weekly cap** — a free user receives at most 50 leads per week.
 
 This is a refinement of the delivery engine that already exists in
 `src/app/api/leads/feed/route.ts`, not a new subsystem. Paid tiers are
@@ -21,7 +21,7 @@ unchanged.
 - **Drop schedule (free):** 5 fixed UTC slots — **00:00, 05:00, 10:00, 15:00,
   20:00** — repeating at the same clock time every day. Replaces the current
   5h-from-epoch interval, which drifts ~1h/day because 24 isn't divisible by 5.
-- **Weekly cap (free):** **10 leads/week**, reset **Mondays 00:00 UTC**. Single
+- **Weekly cap (free):** **50 leads/week**, reset **Mondays 00:00 UTC**. Single
   tunable constant.
 - **Paid tiers:** untouched. Starter every 2h, Pro/Team every 1h, no weekly cap.
 - **Applications cap:** unchanged (5/month for free). Separate limit.
@@ -103,7 +103,7 @@ Extend `Entitlements`:
 Values:
 
 - free: `deliveryMode: 'slots'`, `dropSlotsUTC: [0,5,10,15,20]`,
-  `weeklyLeadCap: 10`. Keep `scanIntervalHours` for backward-compat display but
+  `weeklyLeadCap: 50`. Keep `scanIntervalHours` for backward-compat display but
   it's no longer the free delivery driver.
 - pro/max/team/enterprise: `deliveryMode: 'interval'`, `dropSlotsUTC: []`,
   `weeklyLeadCap: null` (existing `scanIntervalHours` unchanged).
@@ -124,10 +124,10 @@ Existing fields unchanged. For paid users the weekly fields are null/absent.
 Free-user status line has three states:
 
 1. **Leads available (just dropped / within quota):** existing feed, plus a
-   subtle "N of 10 leads this week" meter.
-2. **Between drops, quota remaining:** "Next drop 15:00 UTC · X waiting · N of 10
+   subtle "N of 50 leads this week" meter.
+2. **Between drops, quota remaining:** "Next drop 15:00 UTC · X waiting · N of 50
    this week" + an "Upgrade to see them now" nudge.
-3. **Weekly cap reached:** distinct locked panel — "You've reached this week's 10
+3. **Weekly cap reached:** distinct locked panel — "You've reached this week's 50
    leads. Resets Monday · or upgrade for unlimited leads" + countdown to Monday.
    Daily-drop countdown hidden. Already-delivered leads remain visible above it.
 
