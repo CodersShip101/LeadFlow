@@ -74,6 +74,14 @@ export default function TemplatesPage() {
     navigator.clipboard?.writeText(t.body).then(() => toast.success('Copied to clipboard')).catch(() => toast.error('Copy failed'))
   }
 
+  const relTime = (iso: string) => {
+    const days = (Date.now() - new Date(iso).getTime()) / 86400000
+    if (days < 1) return 'today'
+    if (days < 2) return 'yesterday'
+    if (days < 30) return `${Math.floor(days)}d ago`
+    return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+  }
+
   if (loading) return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '50vh', gap: 10, color: 'var(--slate)' }}>
       <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--lime)', animation: 'pulse 1.2s ease-in-out infinite' }} />
@@ -118,10 +126,13 @@ export default function TemplatesPage() {
                   {t.org_id && <span className="tpl-shared"><i className="ti ti-users" /> Team</span>}
                 </div>
                 <p className="tpl-card-body">{t.body || <span style={{ color: 'var(--slate-2)' }}>Empty</span>}</p>
-                <div className="tpl-card-actions">
-                  <button className="pill" onClick={() => copy(t)}><i className="ti ti-copy" /> Copy</button>
-                  {mine && <button className="pill" onClick={() => openEdit(t)}><i className="ti ti-pencil" /> Edit</button>}
-                  {mine && <button className="pill tm-remove" onClick={() => remove(t.id)}><i className="ti ti-trash" /></button>}
+                <div className="tpl-card-foot">
+                  <span className="tpl-card-meta">Updated {relTime(t.updated_at)}</span>
+                  <div className="tpl-card-actions">
+                    <button className="pill" onClick={() => copy(t)}><i className="ti ti-copy" /> Copy</button>
+                    {mine && <button className="pill tpl-secondary" onClick={() => openEdit(t)}><i className="ti ti-pencil" /> Edit</button>}
+                    {mine && <button className="pill tm-remove tpl-secondary tip" data-tip="Delete template" aria-label="Delete template" onClick={() => remove(t.id)}><i className="ti ti-trash" /></button>}
+                  </div>
                 </div>
               </div>
             )

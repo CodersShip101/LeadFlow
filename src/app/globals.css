@@ -2229,7 +2229,7 @@ button:disabled { cursor: default; opacity: .85; }
 
 /* ───────── Team leaderboard ───────── */
 .tm-board { display: flex; flex-direction: column; }
-.tm-board-head, .tm-board-row { display: grid; grid-template-columns: 36px 1fr 70px 60px 80px; align-items: center; gap: 8px; padding: 10px 8px; }
+.tm-board-head, .tm-board-row { display: grid; grid-template-columns: 36px 1fr 70px 60px 104px; align-items: center; gap: 8px; padding: 10px 8px; }
 .tm-board-head { font-family: var(--font-mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--slate-2); border-bottom: 1px solid var(--line); }
 .tm-board-head span:nth-child(n+3), .tm-board-row span:nth-child(n+3) { text-align: right; }
 .tm-board-row { border-bottom: 1px solid var(--line-2); font-size: 14px; color: var(--ink-2); }
@@ -2239,3 +2239,28 @@ button:disabled { cursor: default; opacity: .85; }
 .tm-board-row.lead .tm-rank { color: var(--lime-deep); }
 .tm-board-name { font-weight: 600; color: var(--ink); display: flex; align-items: center; gap: 8px; }
 .tm-board-rate { font-family: var(--font-mono); font-weight: 700; color: var(--hi); }
+/* Win-rate as a mini bar + number (data drives the form) */
+.tm-rate-wrap { display: inline-flex; align-items: center; gap: 8px; justify-content: flex-end; width: 100%; }
+.tm-rate-bar { width: 40px; height: 5px; border-radius: 3px; background: var(--line); overflow: hidden; flex-shrink: 0; }
+.tm-rate-fill { display: block; height: 100%; background: var(--hi); border-radius: 3px; }
+.tm-rate-num { min-width: 38px; text-align: right; }
+.tm-rate-num.dim { color: var(--slate-2); }
+
+/* ───────── Team — seat meter, role tags, progressive-disclosure actions ───────── */
+.tm-seats { display: flex; flex-direction: column; gap: 7px; }
+.tm-seats-bar { display: flex; gap: 4px; }
+.tm-seat-pip { width: 24px; height: 6px; border-radius: 3px; background: var(--line); }
+.tm-seat-pip.on { background: var(--lime-deep); }
+.tm-seat-pip.pending { background: repeating-linear-gradient(45deg, var(--lime-deep) 0 2px, transparent 2px 5px); opacity: .55; }
+.tm-role-tag { display: inline-flex; align-items: center; width: fit-content; font-size: 11px; font-weight: 600; text-transform: capitalize; color: var(--slate); background: var(--paper-2); border: 1px solid var(--line); padding: 1px 8px; border-radius: var(--r-pill); }
+.tm-role-tag.admin { color: var(--lime-ink); background: var(--lime-dim); border-color: #DDEFA8; }
+.tm-row-actions { opacity: 0; transition: opacity .12s ease; }
+.tm-row:hover .tm-row-actions, .tm-row:focus-within .tm-row-actions { opacity: 1; }
+@media (hover: none) { .tm-row-actions { opacity: 1; } }
+
+/* Templates — footer meta + progressive-disclosure of secondary actions */
+.tpl-card-foot { display: flex; flex-direction: column; gap: 9px; }
+.tpl-card-meta { font-family: var(--font-mono); font-size: 11px; color: var(--slate-2); white-space: nowrap; }
+.tpl-secondary { opacity: 0; transition: opacity .12s ease; }
+.tpl-card:hover .tpl-secondary, .tpl-card:focus-within .tpl-secondary { opacity: 1; }
+@media (hover: none) { .tpl-secondary { opacity: 1; } }

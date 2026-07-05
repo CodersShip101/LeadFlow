@@ -155,7 +155,12 @@ function TeamContent() {
   return (
     <>
       <div className="tm-header">
-        <div>
+        <div className="tm-seats">
+          <div className="tm-seats-bar" role="img" aria-label={`${seatsUsed} of ${org.seats} seats used`}>
+            {Array.from({ length: org.seats }).map((_, i) => (
+              <span key={i} className={`tm-seat-pip ${i < seatsUsed ? 'on' : i < seatsUsed + pendingInvites.length ? 'pending' : ''}`} />
+            ))}
+          </div>
           <p className="tm-sub">{seatsUsed} of {org.seats} seats used{pendingInvites.length > 0 ? ` · ${pendingInvites.length} pending` : ''}</p>
         </div>
         <span className={`tm-role-chip ${isAdmin ? 'admin' : ''}`}>
@@ -181,7 +186,14 @@ function TeamContent() {
                 <span className="tm-board-name">{r.name}{r.role === 'admin' && <span className="tm-you">admin</span>}</span>
                 <span>{r.applied}</span>
                 <span>{r.won}</span>
-                <span className="tm-board-rate">{r.winRate !== null ? `${r.winRate}%` : '—'}</span>
+                <span className="tm-board-rate">
+                  {r.winRate !== null ? (
+                    <span className="tm-rate-wrap">
+                      <span className="tm-rate-bar"><span className="tm-rate-fill" style={{ width: `${r.winRate}%` }} /></span>
+                      <span className="tm-rate-num">{r.winRate}%</span>
+                    </span>
+                  ) : <span className="tm-rate-num dim">—</span>}
+                </span>
               </div>
             ))}
           </div>
@@ -220,14 +232,14 @@ function TeamContent() {
                 <span className="tm-avatar">{name.slice(0, 1).toUpperCase()}</span>
                 <div className="tm-row-info">
                   <span className="tm-row-name">{name}{isMe && <span className="tm-you">you</span>}</span>
-                  <span className="tm-row-role">{m.role}</span>
+                  <span className={`tm-role-tag ${m.role === 'admin' ? 'admin' : ''}`}>{m.role}</span>
                 </div>
                 {isAdmin && !isMe && (
                   <div className="tm-row-actions">
                     <button className="pill" onClick={() => changeRole(m.user_id, m.role === 'admin' ? 'member' : 'admin')}>
                       Make {m.role === 'admin' ? 'member' : 'admin'}
                     </button>
-                    <button className="pill tm-remove" onClick={() => removeMember(m.user_id)} title="Remove"><i className="ti ti-trash" /></button>
+                    <button className="pill tm-remove tip" data-tip="Remove from team" aria-label="Remove from team" onClick={() => removeMember(m.user_id)}><i className="ti ti-trash" /></button>
                   </div>
                 )}
               </div>
