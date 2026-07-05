@@ -172,29 +172,29 @@ export default function AnalyticsPage() {
       {/* ── KPI STRIP ── */}
       <div className="an-kpis2">
         <div className="an-kpi2">
-          <span className="an-kpi2-lbl">Applications</span>
+          <span className="an-kpi2-lbl tip" data-tip="Leads you moved into your pipeline in this period">Applications</span>
           <span className="an-kpi2-val">{summary.applications}</span>
           <DeltaChip cur={summary.applications} prev={prev.applications} kind="pct" />
         </div>
         <div className="an-kpi2">
-          <span className="an-kpi2-lbl">Win rate</span>
+          <span className="an-kpi2-lbl tip" data-tip="Won ÷ decided deals (won + lost) in this period">Win rate</span>
           <span className="an-kpi2-val">{summary.winRate != null ? `${summary.winRate}%` : '—'}</span>
           {decided > 0 && decided < 5
             ? <span className="an-kpi2-note">{decided} decided deal{decided === 1 ? '' : 's'}</span>
             : <DeltaChip cur={summary.winRate} prev={prev.winRate} kind="pts" />}
         </div>
         <div className="an-kpi2">
-          <span className="an-kpi2-lbl">Revenue won</span>
+          <span className="an-kpi2-lbl tip" data-tip="Confirmed value of deals you won in this period">Revenue won</span>
           <span className="an-kpi2-val">{summary.revenueWon > 0 ? moneyLabel(summary.revenueWon) : '—'}</span>
           <DeltaChip cur={summary.revenueWon} prev={prev.revenueWon} kind="pct" />
         </div>
         <div className="an-kpi2">
-          <span className="an-kpi2-lbl">In play</span>
+          <span className="an-kpi2-lbl tip" data-tip="Total listed budget across your open (not yet won/lost) deals right now">In play</span>
           <span className="an-kpi2-val">{summary.pipelineValue > 0 ? moneyLabel(summary.pipelineValue) : '—'}</span>
           <span className="an-kpi2-note">{summary.openCount} open deal{summary.openCount === 1 ? '' : 's'}</span>
         </div>
         <div className="an-kpi2">
-          <span className="an-kpi2-lbl">Deal cycle</span>
+          <span className="an-kpi2-lbl tip" data-tip="Average days from entering the pipeline to marking a deal won">Deal cycle</span>
           <span className="an-kpi2-val">{summary.avgDealCycleDays != null ? `${summary.avgDealCycleDays}d` : '—'}</span>
           <span className="an-kpi2-note">entry → won</span>
         </div>

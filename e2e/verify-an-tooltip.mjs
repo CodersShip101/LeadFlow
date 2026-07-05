@@ -1,0 +1,20 @@
+import { readFileSync } from 'fs'
+import { chromium } from '@playwright/test'
+const env = readFileSync('.env.local', 'utf8')
+const get = k => env.match(new RegExp(`${k}=(.+)`))[1].trim()
+const browser = await chromium.launch()
+const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } })
+await page.goto('http://localhost:3000/auth/login')
+await page.fill('#email', get('TEST_USER_EMAIL'))
+await page.fill('#password', get('TEST_USER_PASSWORD'))
+await page.click('button[type=submit]')
+await page.waitForURL('**/dashboard**', { timeout: 30000 })
+await page.goto('http://localhost:3000/dashboard/analytics')
+await page.waitForTimeout(3000)
+// hover the "Win rate" KPI label to reveal its tooltip
+const lbl = page.locator('.an-kpi2-lbl', { hasText: 'Win rate' })
+await lbl.hover()
+await page.waitForTimeout(500)
+await page.screenshot({ path: 'e2e/an-tooltip.png' })
+console.log('done — tooltip labels present:', await page.locator('.an-kpi2-lbl.tip').count())
+await browser.close()
