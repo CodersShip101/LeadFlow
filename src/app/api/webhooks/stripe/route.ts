@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { createAdminSupabase } from '@/lib/supabase-server'
+import { disbandOrg } from '@/lib/team-plan'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
@@ -91,7 +92,13 @@ export async function POST(req: NextRequest) {
         .maybeSingle()
 
       if (org) {
-        await admin.from('organizations').update({ seats: qty }).eq('id', org.id)
+        // A team sub going inactive (canceled/unpaid) disbands the org and
+        // reverts every member; while active, just keep the seat count in sync.
+        if (!active) {
+          await disbandOrg(admin, org.id)
+        } else {
+          await admin.from('organizations').update({ seats: qty }).eq('id', org.id)
+        }
       } else {
         // Prefer the tier we stamped on the subscription at checkout; fall back
         // to the price nickname only if it's missing.
@@ -113,7 +120,16 @@ export async function POST(req: NextRequest) {
         x => x.id !== sub.id && (x.status === 'active' || x.status === 'trialing'),
       )
       if (stillActive) break
-      await setProfilePlan(customerId, 'free')
+
+      // If this customer owns a team org, disband it (revert every member);
+      // otherwise it's an individual subscription — drop them to free.
+      const { data: org } = await admin
+        .from('organizations').select('id').eq('stripe_customer_id', customerId).maybeSingle()
+      if (org) {
+        await disbandOrg(admin, org.id)
+      } else {
+        await setProfilePlan(customerId, 'free')
+      }
       break
     }
   }

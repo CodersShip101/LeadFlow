@@ -13,7 +13,19 @@ interface PoolLead {
   lead: { id: string; title: string; client_location: string | null } | null
 }
 interface LeaderRow { user_id: string; name: string; role: string; applied: number; won: number; winRate: number | null }
-interface TeamStats { summary: { members: number; totalApplied: number; totalWon: number; teamWinRate: number | null }; leaderboard: LeaderRow[] }
+type Stage = 'saved' | 'interested' | 'applied' | 'in_talks' | 'hired' | 'lost'
+interface TeamStats {
+  summary: {
+    members: number; totalApplied: number; totalWon: number; teamWinRate: number | null
+    poolSize?: number; activeInPipeline?: number; avgAppliedPerMember?: number
+  }
+  pipeline?: Record<Stage, number>
+  leaderboard: LeaderRow[]
+}
+
+const STAGE_LABEL: Record<Stage, string> = {
+  saved: 'Saved', interested: 'Interested', applied: 'Applied', in_talks: 'In talks', hired: 'Won', lost: 'Lost',
+}
 interface TeamData {
   org: { id: string; plan: string; seats: number; myRole: string } | null
   seatsUsed: number
@@ -129,6 +141,41 @@ function TeamContent() {
     else toast.error('Could not remove member')
   }
 
+  const cancelInvite = async (inviteEmail: string) => {
+    const res = await fetch('/api/team/invite', {
+      method: 'DELETE', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: inviteEmail }),
+    })
+    if (res.ok) { toast.success('Invite cancelled'); load() }
+    else toast.error('Could not cancel invite')
+  }
+
+  const leaveTeam = async () => {
+    if (!myId) return
+    if (!confirm('Leave this team? You’ll lose access to the shared pool, pipeline and templates.')) return
+    const res = await fetch('/api/team/members', {
+      method: 'DELETE', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId: myId }),
+    })
+    const d = await res.json().catch(() => ({}))
+    if (res.ok) { toast.success('You left the team'); router.push('/dashboard') }
+    else toast.error(d.error === 'cannot remove the only admin' ? 'Assign another admin before leaving' : 'Could not leave team')
+  }
+
+  const [addingSeats, setAddingSeats] = useState(false)
+  const addSeats = async (nextSeats: number) => {
+    setAddingSeats(true)
+    try {
+      const res = await fetch('/api/team/seats', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ seats: nextSeats }),
+      })
+      const d = await res.json().catch(() => ({}))
+      if (res.ok) { toast.success(`Seats updated to ${d.seats}`); load() }
+      else toast.error(d.message || d.error || 'Could not update seats')
+    } finally { setAddingSeats(false) }
+  }
+
   if (loading) return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '50vh', gap: 10, color: 'var(--slate)' }}>
       <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--lime)', animation: 'pulse 1.2s ease-in-out infinite' }} />
@@ -163,9 +210,19 @@ function TeamContent() {
           </div>
           <p className="tm-sub">{seatsUsed} of {org.seats} seats used{pendingInvites.length > 0 ? ` · ${pendingInvites.length} pending` : ''}</p>
         </div>
-        <span className={`tm-role-chip ${isAdmin ? 'admin' : ''}`}>
-          <i className={`ti ${isAdmin ? 'ti-shield-check' : 'ti-user'}`} /> You&apos;re {isAdmin ? 'an admin' : 'a member'}
-        </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+          {isAdmin && (
+            <div className="tm-seatctl" role="group" aria-label="Add or remove seats">
+              <button className="pill" aria-label="Remove a seat" disabled={addingSeats || org.seats <= seatsUsed + pendingInvites.length} onClick={() => addSeats(org.seats - 1)}>&minus;</button>
+              <span className="tm-seatctl-n">{org.seats} seats</span>
+              <button className="pill" aria-label="Add a seat" disabled={addingSeats || org.seats >= 200} onClick={() => addSeats(org.seats + 1)}>+</button>
+            </div>
+          )}
+          <span className={`tm-role-chip ${isAdmin ? 'admin' : ''}`}>
+            <i className={`ti ${isAdmin ? 'ti-shield-check' : 'ti-user'}`} /> You&apos;re {isAdmin ? 'an admin' : 'a member'}
+          </span>
+          <button className="pill tm-leave" onClick={leaveTeam}><i className="ti ti-logout" /> Leave team</button>
+        </div>
       </div>
 
       {/* Team performance */}
@@ -177,7 +234,37 @@ function TeamContent() {
             <div className="an-kpi"><span className="an-kpi-ico"><i className="ti ti-send" /></span><span className="an-kpi-val">{stats.summary.totalApplied}</span><span className="an-kpi-lbl">Applications</span></div>
             <div className="an-kpi"><span className="an-kpi-ico" style={{ background: 'var(--lime-dim)', color: 'var(--lime-ink)' }}><i className="ti ti-trophy" /></span><span className="an-kpi-val">{stats.summary.totalWon}</span><span className="an-kpi-lbl">Won</span></div>
             <div className="an-kpi"><span className="an-kpi-ico" style={{ background: 'var(--hi-bg)', color: 'var(--hi)' }}><i className="ti ti-percentage" /></span><span className="an-kpi-val">{stats.summary.teamWinRate !== null ? `${stats.summary.teamWinRate}%` : '—'}</span><span className="an-kpi-lbl">Team win rate</span></div>
+            <div className="an-kpi"><span className="an-kpi-ico"><i className="ti ti-briefcase" /></span><span className="an-kpi-val">{stats.summary.poolSize ?? 0}</span><span className="an-kpi-lbl">Leads tracked</span></div>
+            <div className="an-kpi"><span className="an-kpi-ico"><i className="ti ti-flame" /></span><span className="an-kpi-val">{stats.summary.activeInPipeline ?? 0}</span><span className="an-kpi-lbl">Active in pipeline</span></div>
+            <div className="an-kpi"><span className="an-kpi-ico"><i className="ti ti-user-check" /></span><span className="an-kpi-val">{stats.summary.avgAppliedPerMember ?? 0}</span><span className="an-kpi-lbl">Avg / member</span></div>
           </div>
+
+          {/* Pipeline breakdown across the team. Structural styling is inline so
+              it doesn't depend on CSS load order/caching. */}
+          {stats.pipeline && (() => {
+            const stages: Stage[] = ['saved', 'interested', 'applied', 'in_talks', 'hired', 'lost']
+            const max = Math.max(1, ...stages.map(s => stats.pipeline![s]))
+            const total = stages.reduce((n, s) => n + stats.pipeline![s], 0)
+            if (total === 0) return null
+            const fillColor = (s: Stage) =>
+              s === 'hired' ? 'var(--hi)' : s === 'lost' ? 'var(--coral)' : s === 'saved' ? 'var(--slate-2)' : 'var(--lime-deep)'
+            return (
+              <div style={{ marginTop: 18, paddingTop: 16, borderTop: '1px solid var(--line)' }}>
+                <h4 style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--slate)', textTransform: 'uppercase', letterSpacing: '.04em', marginBottom: 12 }}>Pipeline breakdown</h4>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
+                  {stages.map(s => (
+                    <div key={s} style={{ display: 'grid', gridTemplateColumns: '84px 1fr 34px', alignItems: 'center', gap: 10 }}>
+                      <span style={{ fontSize: 12.5, color: 'var(--ink-2)' }}>{STAGE_LABEL[s]}</span>
+                      <span style={{ height: 8, borderRadius: 4, background: 'var(--paper-2)', overflow: 'hidden' }}>
+                        <span style={{ display: 'block', height: '100%', borderRadius: 4, width: `${(stats.pipeline![s] / max) * 100}%`, background: fillColor(s) }} />
+                      </span>
+                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--slate)', textAlign: 'right' }}>{stats.pipeline![s]}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )
+          })()}
           <div className="tm-board">
             <div className="tm-board-head"><span>#</span><span>Member</span><span>Applied</span><span>Won</span><span>Win rate</span></div>
             {stats.leaderboard.map((r, i) => (
@@ -260,6 +347,11 @@ function TeamContent() {
                   <span className="tm-row-name">{inv.email}</span>
                   <span className="tm-row-role">invited as {inv.role} · awaiting acceptance</span>
                 </div>
+                {isAdmin && (
+                  <div className="tm-row-actions">
+                    <button className="pill tm-remove tip" data-tip="Cancel invite" aria-label="Cancel invite" onClick={() => cancelInvite(inv.email)}><i className="ti ti-x" /></button>
+                  </div>
+                )}
               </div>
             ))}
           </div>

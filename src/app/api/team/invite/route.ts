@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerSupabase } from '@/lib/supabase-server'
+import { createServerSupabase, createAdminSupabase } from '@/lib/supabase-server'
 import { sendEmail } from '@/lib/email'
 
 export async function POST(req: NextRequest) {
@@ -17,6 +17,21 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'valid email required' }, { status: 400 })
     if (typeof role !== 'string' || role.length > 200)
       return NextResponse.json({ error: 'Invalid role' }, { status: 400 })
+
+    // Reject inviting someone who's already on the team. Resolve the email to a
+    // user via the admin client (RLS hides other users' profiles), then check
+    // membership.
+    const admin = createAdminSupabase()
+    const { data: existingProfile } = await admin
+      .from('profiles').select('id').eq('email', email.toLowerCase()).maybeSingle()
+    if (existingProfile) {
+      const { data: alreadyMember } = await admin
+        .from('org_members').select('user_id')
+        .eq('org_id', org.org_id).eq('user_id', existingProfile.id).maybeSingle()
+      if (alreadyMember) {
+        return NextResponse.json({ error: 'already_member', message: 'They’re already on your team.' }, { status: 409 })
+      }
+    }
 
     const [{ count: memberCount }, { count: inviteCount }] = await Promise.all([
       supabase.from('org_members').select('*', { count: 'exact', head: true }).eq('org_id', org.org_id),
@@ -67,6 +82,40 @@ export async function POST(req: NextRequest) {
     })
 
     return NextResponse.json({ ok: true, acceptUrl, emailed: sent.ok })
+  } catch (e) {
+    console.error(e)
+    return NextResponse.json({ error: 'Something went wrong' }, { status: 500 })
+  }
+}
+
+// Cancel (revoke) a pending invite before it's accepted. Admin only.
+export async function DELETE(req: NextRequest) {
+  try {
+    const supabase = await createServerSupabase()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    const { data: orgRows } = await supabase.rpc('user_org', { p_user: user.id })
+    const org = orgRows?.[0]
+    if (!org || org.role !== 'admin') return NextResponse.json({ error: 'admin only' }, { status: 403 })
+
+    const { email } = await req.json().catch(() => ({}))
+    if (typeof email !== 'string' || !email.includes('@'))
+      return NextResponse.json({ error: 'valid email required' }, { status: 400 })
+
+    // Only unaccepted invites can be cancelled; an accepted one is a real member now.
+    const { error } = await supabase
+      .from('org_invites')
+      .delete()
+      .eq('org_id', org.org_id)
+      .eq('email', email.toLowerCase())
+      .is('accepted_at', null)
+
+    if (error) {
+      console.error(error)
+      return NextResponse.json({ error: 'Something went wrong' }, { status: 500 })
+    }
+    return NextResponse.json({ ok: true })
   } catch (e) {
     console.error(e)
     return NextResponse.json({ error: 'Something went wrong' }, { status: 500 })

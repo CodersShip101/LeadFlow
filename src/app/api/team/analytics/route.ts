@@ -48,8 +48,31 @@ export async function GET() {
   const decidedAll = leaderboard.reduce((n, x) => n + x.won, 0) + (apps ?? []).filter(a => a.outcome === 'lost').length
   const teamWinRate = decidedAll > 0 ? Math.round((totalWon / decidedAll) * 100) : null
 
+  // Pipeline breakdown across the whole org (how work is distributed by stage).
+  const STAGES = ['saved', 'interested', 'applied', 'in_talks', 'hired', 'lost'] as const
+  const pipeline = Object.fromEntries(STAGES.map(s => [s, 0])) as Record<(typeof STAGES)[number], number>
+  for (const a of (apps ?? [])) {
+    const s = a.status as (typeof STAGES)[number]
+    if (s in pipeline) pipeline[s]++
+  }
+
+  const memberCount = leaderboard.length
+  const poolSize = (apps ?? []).length
+  // Active = anything still live in the pipeline (not lost, not a passive save).
+  const activeInPipeline = pipeline.interested + pipeline.applied + pipeline.in_talks + pipeline.hired
+  const avgAppliedPerMember = memberCount > 0 ? Math.round((totalApplied / memberCount) * 10) / 10 : 0
+
   return NextResponse.json({
-    summary: { members: leaderboard.length, totalApplied, totalWon, teamWinRate },
+    summary: {
+      members: memberCount,
+      totalApplied,
+      totalWon,
+      teamWinRate,
+      poolSize,
+      activeInPipeline,
+      avgAppliedPerMember,
+    },
+    pipeline,
     leaderboard,
   })
 }

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabase, createAdminSupabase, fullNamesByUserId } from '@/lib/supabase-server'
+import { restorePriorPlan } from '@/lib/team-plan'
 
 export async function GET() {
   const supabase = await createServerSupabase()
@@ -60,10 +61,15 @@ export async function DELETE(req: NextRequest) {
 
   const { data: orgRows } = await supabase.rpc('user_org', { p_user: user.id })
   const org = orgRows?.[0]
-  if (!org || org.role !== 'admin') return NextResponse.json({ error: 'admin only' }, { status: 403 })
+  if (!org) return NextResponse.json({ error: 'Not on a team' }, { status: 403 })
 
   const { userId } = await req.json().catch(() => ({}))
-  if (userId === user.id) {
+  const isSelf = userId === user.id
+  // Admins can remove anyone; a member may only remove (leave) themselves.
+  if (!isSelf && org.role !== 'admin') return NextResponse.json({ error: 'admin only' }, { status: 403 })
+
+  // The last admin can't leave/be-removed — the org would be left ownerless.
+  if (isSelf && org.role === 'admin') {
     const { count } = await supabase
       .from('org_members')
       .select('*', { count: 'exact', head: true })
@@ -74,5 +80,13 @@ export async function DELETE(req: NextRequest) {
 
   const { error } = await supabase.from('org_members').delete().eq('org_id', org.org_id).eq('user_id', userId)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json({ ok: true })
+
+  // Cancel the removed/departed user's team access. Joining set their profile
+  // to 'team' (see /api/team/accept); leaving must revert it or they'd keep
+  // team features with no org. Restores the plan they had before joining
+  // (falls back to 'free'). Uses the admin client because RLS blocks writing
+  // another user's row.
+  await restorePriorPlan(createAdminSupabase(), userId)
+
+  return NextResponse.json({ ok: true, left: isSelf })
 }

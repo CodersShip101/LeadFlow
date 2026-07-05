@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabase } from '@/lib/supabase-server'
+import { rememberPriorPlan, joinTeamPlan } from '@/lib/team-plan'
 
 export async function POST(req: NextRequest) {
   try {
@@ -19,8 +20,10 @@ export async function POST(req: NextRequest) {
     }
     if (data?.error) return NextResponse.json({ error: data.error }, { status: 400 })
 
-    // Joining a team unlocks team features for the member.
-    await supabase.from('profiles').update({ subscription_status: 'team' }).eq('id', user.id)
+    // Stash their current individual plan so leaving can restore it, then put
+    // them on 'team' so the UI unlocks team features.
+    await rememberPriorPlan(supabase, user.id)
+    await joinTeamPlan(supabase, user.id)
 
     return NextResponse.json({ ok: true, orgId: data.org_id })
   } catch (e) {
@@ -46,6 +49,7 @@ export async function GET(req: NextRequest) {
   if (error || data?.error) {
     return NextResponse.redirect(new URL('/dashboard/team?invite=error', base))
   }
-  await supabase.from('profiles').update({ subscription_status: 'team' }).eq('id', user.id)
+  await rememberPriorPlan(supabase, user.id)
+  await joinTeamPlan(supabase, user.id)
   return NextResponse.redirect(new URL('/dashboard/team?invite=accepted', base))
 }
