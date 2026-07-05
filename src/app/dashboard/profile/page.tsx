@@ -60,6 +60,11 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false)
   const [dirty, setDirty] = useState(false)
 
+  // GDPR account actions
+  const [confirmingDelete, setConfirmingDelete] = useState(false)
+  const [deleteText, setDeleteText] = useState('')
+  const [deleting, setDeleting] = useState(false)
+
   // Scoring weights
   const [weights, setWeights] = useState<Weights>(DEFAULT_WEIGHTS)
   const [weightsDirty, setWeightsDirty] = useState(false)
@@ -481,9 +486,56 @@ export default function SettingsPage() {
         <i className="ti ti-check" /> {saving ? 'Saving…' : 'Save changes'}
       </button>
 
+      {/* ── DATA & PRIVACY ── */}
+      <div className="st-danger" style={{ marginBottom: 14 }}>
+        <div className="st-danger-head">Your data</div>
+        <div className="st-danger-row">
+          <div>
+            <p className="st-danger-label">Export my data</p>
+            <p className="st-danger-sub">Download everything Flaiir holds on you as a JSON file.</p>
+          </div>
+          <button className="st-danger-btn" onClick={() => { window.location.href = '/api/account/export' }}>
+            <i className="ti ti-download" /> Export
+          </button>
+        </div>
+        <div className="st-danger-row">
+          <div>
+            <p className="st-danger-label">Delete my account</p>
+            <p className="st-danger-sub">Permanently erases your profile, pipeline, saved leads and templates. This cannot be undone.</p>
+          </div>
+          {!confirmingDelete ? (
+            <button className="st-danger-btn" onClick={() => setConfirmingDelete(true)}>
+              <i className="ti ti-trash" /> Delete account
+            </button>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'flex-end' }}>
+              <input
+                className="input" placeholder='Type DELETE to confirm' value={deleteText}
+                onChange={e => setDeleteText(e.target.value)} style={{ maxWidth: 220 }}
+              />
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button className="st-danger-btn" style={{ borderColor: 'var(--coral)', color: 'var(--coral)' }}
+                  disabled={deleteText !== 'DELETE' || deleting}
+                  onClick={async () => {
+                    setDeleting(true)
+                    try {
+                      const r = await fetch('/api/account', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ confirm: 'DELETE' }) })
+                      if (r.ok) { try { await supabase.auth.signOut() } catch { /* ignore */ } window.location.href = '/' }
+                      else { const d = await r.json().catch(() => ({})); toast.error(d.error || 'Could not delete account'); setDeleting(false) }
+                    } catch { toast.error('Network error'); setDeleting(false) }
+                  }}>
+                  {deleting ? 'Deleting…' : 'Permanently delete'}
+                </button>
+                <button className="st-danger-btn" onClick={() => { setConfirmingDelete(false); setDeleteText('') }}>Cancel</button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
       {/* ── DANGER ZONE ── */}
       <div className="st-danger">
-        <div className="st-danger-head">Danger zone</div>
+        <div className="st-danger-head">Session</div>
         <div className="st-danger-row">
           <div>
             <p className="st-danger-label">Sign out</p>
