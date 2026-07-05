@@ -32,6 +32,10 @@ export async function GET() {
     const now = Date.now()
 
     // Delivery mark + next-drop time depend on the tier's delivery mode.
+    // `prevISO` is the raw stored mark at full DB precision (used as the window
+    // lower bound so a boundary lead is never dropped or re-released); `prevScan`
+    // (ms) is only for the boundary comparison, which is hour-aligned.
+    const prevISO = profile?.last_scan_at ?? new Date(now).toISOString()
     const prevScan = profile?.last_scan_at ? new Date(profile.last_scan_at).getTime() : now
     const slotMark = ent.deliveryMode === 'slots'
       ? currentSlotMark(now, ent.dropSlotsUTC)
@@ -51,15 +55,35 @@ export async function GET() {
       weekCount = 0
     }
 
+    // The delivery mark as an exact timestamp string (canonical, used for all DB
+    // comparisons and persisted verbatim) plus a ms value for the response.
+    // Default = the existing mark, i.e. no delivery this call.
+    let cutoffISO = prevISO
     let cutoff = prevScan
     let delivered = false
     let deliveredCount = 0
 
-    if (boundaryCrossed) {
-      const allowed = cap == null ? Infinity : Math.max(0, cap - weekCount)
+    if (boundaryCrossed && cap == null) {
+      // Paid tiers: unchanged behaviour — deliver everything up to the real poll time.
+      cutoffISO = new Date(now).toISOString()
+      cutoff = now
+      const { count } = await admin
+        .from('leads')
+        .select('id', { count: 'exact', head: true })
+        .eq('status', 'active')
+        .gt('created_at', prevISO)
+        .lte('created_at', cutoffISO)
+      deliveredCount = count ?? 0
+      delivered = deliveredCount > 0
+      await admin
+        .from('profiles')
+        .update({ last_scan_at: cutoffISO })
+        .eq('id', user.id)
+    } else if (boundaryCrossed) {
+      // Free tier: windowed drop, capped at the remaining weekly quota.
+      const allowed = Math.max(0, (cap as number) - weekCount)
+      const slotISO = new Date(slotMark).toISOString()
       if (allowed > 0) {
-        const prevISO = new Date(prevScan).toISOString()
-        const slotISO = new Date(slotMark).toISOString()
         const { count: candidateCount } = await admin
           .from('leads')
           .select('id', { count: 'exact', head: true })
@@ -68,35 +92,51 @@ export async function GET() {
           .lte('created_at', slotISO)
         const cc = candidateCount ?? 0
         if (cc <= allowed) {
-          deliveredCount = cc
+          cutoffISO = slotISO
           cutoff = slotMark
+          deliveredCount = cc
         } else {
-          deliveredCount = allowed as number
-          // created_at of the `allowed`-th newest candidate becomes the new mark,
-          // so exactly `allowed` leads fall <= cutoff; older ones wait.
+          // Release the OLDEST `allowed` candidates (FIFO) — the only selection
+          // consistent with a scalar high-water mark, where the feed shows every
+          // lead with created_at <= mark. The `allowed`-th oldest candidate's
+          // exact created_at becomes the new mark; newer candidates wait. The raw
+          // timestamp string is threaded end-to-end so sub-millisecond precision
+          // is never lost (which would drop the boundary lead or re-release it).
           const { data: nth } = await admin
             .from('leads')
             .select('created_at')
             .eq('status', 'active')
             .gt('created_at', prevISO)
             .lte('created_at', slotISO)
-            .order('created_at', { ascending: false })
-            .range((allowed as number) - 1, (allowed as number) - 1)
+            .order('created_at', { ascending: true })
+            .range(allowed - 1, allowed - 1)
             .single()
-          cutoff = nth?.created_at ? new Date(nth.created_at).getTime() : prevScan
+          cutoffISO = nth?.created_at ?? prevISO
+          cutoff = new Date(cutoffISO).getTime()
+          // Ties on the exact cutoff timestamp can pull in a few extra; count what
+          // actually falls in the window so weekCount matches what the feed shows
+          // (bounded over-delivery, never the whole backlog).
+          const { count: releasedInWindow } = await admin
+            .from('leads')
+            .select('id', { count: 'exact', head: true })
+            .eq('status', 'active')
+            .gt('created_at', prevISO)
+            .lte('created_at', cutoffISO)
+          deliveredCount = releasedInWindow ?? allowed
         }
         delivered = deliveredCount > 0
         weekCount += deliveredCount
         await admin
           .from('profiles')
           .update({
-            last_scan_at: new Date(cutoff).toISOString(),
+            last_scan_at: cutoffISO,
             leads_week_count: weekCount,
             leads_week_anchor: weekAnchorMs ? new Date(weekAnchorMs).toISOString() : null,
           })
           .eq('id', user.id)
-      } else if (cap != null) {
-        // Cap reached this week — persist the week roll if it happened, no release.
+      } else {
+        // Weekly cap reached — release nothing, but persist a week roll if one
+        // just happened.
         await admin
           .from('profiles')
           .update({
@@ -113,7 +153,6 @@ export async function GET() {
         .eq('id', user.id)
     }
 
-    const cutoffISO = new Date(cutoff).toISOString()
     const { data: leads } = await admin
       .from('leads')
       .select('*')
@@ -128,7 +167,7 @@ export async function GET() {
       .gt('created_at', cutoffISO)
 
     const weeklyRemaining = cap == null ? null : Math.max(0, cap - weekCount)
-    const capReached = cap == null ? false : weeklyRemaining === 0
+    const capReached = cap == null ? null : weeklyRemaining === 0
     const weekResetAt = cap == null || weekAnchorMs == null ? null : weekAnchorMs + 7 * 86400000
 
     return NextResponse.json({

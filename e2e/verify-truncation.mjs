@@ -55,13 +55,28 @@ try {
   await browser.close()
 
   const { data: after } = await admin.from('profiles').select('leads_week_count, last_scan_at').eq('id', prof.id).single()
-  console.log('deliveredCount:', j.deliveredCount, '(expect 5)')
+  const prevScanMs = slotMark - 2 * HOUR
+  const cutoffStr = after.last_scan_at // raw stored mark, full DB precision
+  const cutoffMs = new Date(cutoffStr).getTime()
+  // THE discriminating check: how many leads actually fall in the released window
+  // (prevScan, cutoff]. The old (descending) bug advanced the mark to the newest
+  // candidate, releasing the WHOLE backlog while still reporting deliveredCount=5.
+  // Compare against the raw stored mark string (not a ms-truncated copy) so the
+  // boundary lead isn't spuriously excluded.
+  const { count: actualReleased } = await admin.from('leads')
+    .select('id', { count: 'exact', head: true })
+    .eq('status', 'active')
+    .gt('created_at', new Date(prevScanMs).toISOString())
+    .lte('created_at', cutoffStr)
+  console.log('deliveredCount (reported):', j.deliveredCount, '(expect 5)')
+  console.log('ACTUAL leads released in window:', actualReleased, '(expect 5 — old bug would show a large backlog)')
   console.log('weeklyRemaining:', j.weeklyRemaining, '(expect 0)')
   console.log('capReached:', j.capReached, '(expect true)')
   console.log('weekCount after:', after.leads_week_count, '(expect 50)')
   console.log('mark advanced into window:', new Date(after.last_scan_at).toISOString(), '(expect <= slotMark, > slotMark-2h)')
-  const pass = j.deliveredCount === 5 && j.weeklyRemaining === 0 && j.capReached === true && after.leads_week_count === 50
-    && new Date(after.last_scan_at).getTime() <= slotMark && new Date(after.last_scan_at).getTime() > slotMark - 2 * HOUR
+  const pass = j.deliveredCount === 5 && actualReleased === 5 && j.weeklyRemaining === 0 && j.capReached === true
+    && after.leads_week_count === 50
+    && cutoffMs <= slotMark && cutoffMs > prevScanMs
   console.log(pass ? 'TRUNCATION PASS ✅' : 'TRUNCATION FAIL ❌')
 } finally {
   await cleanup()
