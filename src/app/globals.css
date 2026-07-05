@@ -2258,9 +2258,42 @@ button:disabled { cursor: default; opacity: .85; }
 .tm-row:hover .tm-row-actions, .tm-row:focus-within .tm-row-actions { opacity: 1; }
 @media (hover: none) { .tm-row-actions { opacity: 1; } }
 
+/* Seat stepper (header) + leave-team button */
+.tm-seatctl { display: inline-flex; align-items: center; gap: 4px; }
+.tm-seatctl .pill { padding: 6px 11px; font-weight: 700; line-height: 1; }
+.tm-seatctl-n { font-size: 12.5px; font-weight: 600; color: var(--ink); min-width: 62px; text-align: center; }
+.tm-leave { color: var(--slate); display: inline-flex; align-items: center; gap: 6px; }
+.tm-leave:hover { color: var(--coral); border-color: rgba(255,107,94,.3); background: rgba(255,107,94,.08); }
+
+/* Team pipeline breakdown */
+.tm-pipe { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line); }
+.tm-pipe-title { font-size: 12.5px; font-weight: 700; color: var(--slate); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 12px; }
+.tm-pipe-bars { display: flex; flex-direction: column; gap: 9px; }
+.tm-pipe-row { display: grid; grid-template-columns: 84px 1fr 34px; align-items: center; gap: 10px; }
+.tm-pipe-lbl { font-size: 12.5px; color: var(--ink-2); }
+.tm-pipe-track { height: 8px; border-radius: 4px; background: var(--paper-2); overflow: hidden; }
+.tm-pipe-fill { display: block; height: 100%; border-radius: 4px; background: var(--lime-deep); }
+.tm-pipe-row.hired .tm-pipe-fill { background: var(--hi); }
+.tm-pipe-row.lost .tm-pipe-fill { background: var(--coral); }
+.tm-pipe-row.saved .tm-pipe-fill { background: var(--slate-2); }
+.tm-pipe-num { font-family: var(--font-mono); font-size: 12px; color: var(--slate); text-align: right; }
+
 /* Templates — footer meta + progressive-disclosure of secondary actions */
 .tpl-card-foot { display: flex; flex-direction: column; gap: 9px; }
 .tpl-card-meta { font-family: var(--font-mono); font-size: 11px; color: var(--slate-2); white-space: nowrap; }
 .tpl-secondary { opacity: 0; transition: opacity .12s ease; }
 .tpl-card:hover .tpl-secondary, .tpl-card:focus-within .tpl-secondary { opacity: 1; }
 @media (hover: none) { .tpl-secondary { opacity: 1; } }
+
+/* Free-plan weekly lead meter (RefreshBar) */
+.rb-week { display: inline-flex; align-items: center; gap: 8px; }
+.rb-week-bar { width: 46px; height: 5px; border-radius: 3px; background: var(--line); overflow: hidden; }
+.rb-week-fill { display: block; height: 100%; background: var(--lime-deep); border-radius: 3px; }
+.rb-week-num { font-family: var(--font-mono); font-size: 11px; color: var(--slate); }
+
+/* Weekly cap-reached panel */
+.cap-panel { display: flex; align-items: center; gap: 14px; padding: 16px 18px; margin-bottom: 16px; background: var(--card); border: 1px solid var(--line); border-radius: var(--r-lg); }
+.cap-panel > .ti { font-size: 22px; color: var(--lime-deep); flex-shrink: 0; }
+.cap-panel-txt { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+.cap-panel-txt b { font-size: 14px; color: var(--ink); }
+.cap-panel-txt span { font-size: 12.5px; color: var(--slate); }

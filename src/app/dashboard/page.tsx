@@ -172,6 +172,10 @@ export default function DashboardPage() {
   const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set())
   const [nextScanAt, setNextScanAt] = useState<number | null>(null)
   const [waitingCount, setWaitingCount] = useState(0)
+  const [weeklyLeadCap, setWeeklyLeadCap] = useState<number | null>(null)
+  const [weeklyRemaining, setWeeklyRemaining] = useState<number | null>(null)
+  const [weekResetAt, setWeekResetAt] = useState<number | null>(null)
+  const [capReached, setCapReached] = useState(false)
   const leadsCountRef = useRef(0)
   const [profile, setProfile] = useState<Profile | null>(null)
   const { query: search, setQuery: setSearch } = useSearch()
@@ -243,6 +247,10 @@ export default function DashboardPage() {
       const incoming: Lead[] = fd.leads || []
       setNextScanAt(typeof fd.nextScanAt === 'number' ? fd.nextScanAt : null)
       setWaitingCount(fd.waitingCount ?? 0)
+      setWeeklyLeadCap(typeof fd.weeklyLeadCap === 'number' ? fd.weeklyLeadCap : null)
+      setWeeklyRemaining(typeof fd.weeklyRemaining === 'number' ? fd.weeklyRemaining : null)
+      setWeekResetAt(typeof fd.weekResetAt === 'number' ? fd.weekResetAt : null)
+      setCapReached(!!fd.capReached)
 
       const changed = incoming.length !== leadsCountRef.current || fd.delivered
       if (opts.initial || changed) {
@@ -792,7 +800,7 @@ export default function DashboardPage() {
         <div className="feed-header-left">
           <h2 className="feed-title" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             {greetMap[seg]}
-            <RefreshBar nextScanAt={nextScanAt} waitingCount={waitingCount} newCount={newCount} onScanReady={() => syncFeed()} />
+            <RefreshBar nextScanAt={nextScanAt} waitingCount={waitingCount} newCount={newCount} weeklyLeadCap={weeklyLeadCap} weeklyRemaining={weeklyRemaining} onScanReady={() => syncFeed()} />
           </h2>
           <p className="feed-sub" dangerouslySetInnerHTML={{ __html: subMap[seg] }} />
         </div>
@@ -973,6 +981,19 @@ export default function DashboardPage() {
           </div>
         </div>
       ))}
+
+      {capReached && (
+        <div className="cap-panel">
+          <i className="ti ti-lock" aria-hidden="true" />
+          <div className="cap-panel-txt">
+            <b>You&apos;ve reached this week&apos;s {weeklyLeadCap} leads.</b>
+            <span>{weekResetAt ? `New leads unlock ${new Date(weekResetAt).toLocaleDateString('en-GB', { weekday: 'long' })} · ` : ''}or upgrade for unlimited leads.</span>
+          </div>
+          <button className="btn btn-primary" onClick={() => router.push('/dashboard/billing')}>
+            <i className="ti ti-bolt" /> Upgrade
+          </button>
+        </div>
+      )}
 
       <div className={`feed-wrap ${selected ? 'detail-open' : ''}`}>
         <div className="feed-list">

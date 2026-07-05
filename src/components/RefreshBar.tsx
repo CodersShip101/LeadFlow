@@ -11,6 +11,10 @@ type Props = {
   newCount?: number
   /** Called when the countdown reaches zero so the feed can deliver the batch. */
   onScanReady?: () => void
+  /** Free-plan weekly cap (null for paid). */
+  weeklyLeadCap?: number | null
+  /** Leads left this week (null for paid). */
+  weeklyRemaining?: number | null
 }
 
 function formatCountdown(ms: number): string {
@@ -23,7 +27,7 @@ function formatCountdown(ms: number): string {
   return `${s}s`
 }
 
-export default function RefreshBar({ nextScanAt, waitingCount = 0, newCount = 0, onScanReady }: Props) {
+export default function RefreshBar({ nextScanAt, waitingCount = 0, newCount = 0, weeklyLeadCap = null, weeklyRemaining = null, onScanReady }: Props) {
   const [now, setNow] = useState(Date.now())
   const mounted = useRef(true)
   // Guards against firing onScanReady repeatedly for the same scan window.
@@ -68,6 +72,14 @@ export default function RefreshBar({ nextScanAt, waitingCount = 0, newCount = 0,
             : <>Next scan <strong>{formatCountdown(remaining!)}</strong></>
         }
       </span>
+      {weeklyLeadCap != null && weeklyRemaining != null && (
+        <span className="rb-week tip" data-tip={`${weeklyLeadCap - weeklyRemaining} of ${weeklyLeadCap} leads used this week`}>
+          <span className="rb-week-bar">
+            <span className="rb-week-fill" style={{ width: `${Math.min(100, ((weeklyLeadCap - weeklyRemaining) / weeklyLeadCap) * 100)}%` }} />
+          </span>
+          <span className="rb-week-num">{weeklyRemaining}/{weeklyLeadCap} left</span>
+        </span>
+      )}
     </span>
   )
 }
