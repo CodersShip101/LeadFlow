@@ -6,7 +6,12 @@ export async function GET() {
     const serverSupabase = await createServerSupabase()
     const { data: { user } } = await serverSupabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    /* TODO: verify admin gate */
+    // Admin gate: only the configured admin email may hit these endpoints
+    // (the /admin page enforces the same check client-side — this makes it real).
+    const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL
+    if (!adminEmail || user.email !== adminEmail) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
 
     const supabase = await createAdminSupabase()
     const { data, error } = await supabase
@@ -28,7 +33,12 @@ export async function POST(req: Request) {
     const serverSupabase = await createServerSupabase()
     const { data: { user } } = await serverSupabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    /* TODO: verify admin gate */
+    // Admin gate: only the configured admin email may hit these endpoints
+    // (the /admin page enforces the same check client-side — this makes it real).
+    const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL
+    if (!adminEmail || user.email !== adminEmail) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
 
     const body = await req.json()
     if (typeof body.title !== 'string' || !body.title.trim()) {
@@ -68,7 +78,12 @@ export async function DELETE(req: Request) {
     const serverSupabase = await createServerSupabase()
     const { data: { user } } = await serverSupabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    /* TODO: verify admin gate */
+    // Admin gate: only the configured admin email may hit these endpoints
+    // (the /admin page enforces the same check client-side — this makes it real).
+    const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL
+    if (!adminEmail || user.email !== adminEmail) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
 
     const { id } = await req.json()
     if (typeof id !== 'string' || !id || id.length > 200) {
