@@ -22,6 +22,9 @@ export type Entitlements = {
   applicationsPerMonth: number | 'unlimited'
   seats: number | 'custom'
   scanIntervalHours: number
+  deliveryMode: 'slots' | 'interval'
+  dropSlotsUTC: number[]
+  weeklyLeadCap: number | null
   manualRefresh: boolean
   sourceLinks: boolean
   emailDigest: boolean
@@ -48,6 +51,9 @@ export const ENTITLEMENTS: Record<Tier, Entitlements> = {
     applicationsPerMonth: 5,
     seats: 1,
     scanIntervalHours: 5,
+    deliveryMode: 'slots',
+    dropSlotsUTC: [0, 5, 10, 15, 20],
+    weeklyLeadCap: 50,
     manualRefresh: false,
     sourceLinks: false,
     emailDigest: false,
@@ -72,6 +78,9 @@ export const ENTITLEMENTS: Record<Tier, Entitlements> = {
     applicationsPerMonth: 'unlimited',
     seats: 1,
     scanIntervalHours: 2,
+    deliveryMode: 'interval',
+    dropSlotsUTC: [],
+    weeklyLeadCap: null,
     manualRefresh: false,
     sourceLinks: true,
     emailDigest: true,
@@ -96,6 +105,9 @@ export const ENTITLEMENTS: Record<Tier, Entitlements> = {
     applicationsPerMonth: 'unlimited',
     seats: 1,
     scanIntervalHours: 1,
+    deliveryMode: 'interval',
+    dropSlotsUTC: [],
+    weeklyLeadCap: null,
     manualRefresh: true,
     sourceLinks: true,
     emailDigest: true,
@@ -120,6 +132,9 @@ export const ENTITLEMENTS: Record<Tier, Entitlements> = {
     applicationsPerMonth: 'unlimited',
     seats: 1,
     scanIntervalHours: 1,
+    deliveryMode: 'interval',
+    dropSlotsUTC: [],
+    weeklyLeadCap: null,
     manualRefresh: true,
     sourceLinks: true,
     emailDigest: true,
@@ -144,6 +159,9 @@ export const ENTITLEMENTS: Record<Tier, Entitlements> = {
     applicationsPerMonth: 'unlimited',
     seats: 'custom',
     scanIntervalHours: 1,
+    deliveryMode: 'interval',
+    dropSlotsUTC: [],
+    weeklyLeadCap: null,
     manualRefresh: true,
     sourceLinks: true,
     emailDigest: true,
