@@ -661,9 +661,12 @@ export default function DashboardPage() {
     power: `Welcome back, ${firstName}`,
   }
 
+  // Real scan cadence from the user's tier — not a hardcoded "5h" (paid tiers scan faster).
+  const scanHrs = ent.scanIntervalHours
+  const scanLabel = scanHrs <= 1 ? 'hourly' : `every ${scanHrs}h`
   const subMap: Record<string, string> = {
-    new: `Here's your ranked feed — updated every 5h`,
-    returning: newCount ? `<b>${newCount} new leads</b> since your last visit` : `Here's your ranked feed — updated every 5h`,
+    new: `Here's your ranked feed — updated ${scanLabel}`,
+    returning: newCount ? `<b>${newCount} new leads</b> since your last visit` : `Here's your ranked feed — updated ${scanLabel}`,
     power: `<b>${newCount} new leads</b> today, <b>${appCount}</b> applied this month`,
   }
 
@@ -686,9 +689,16 @@ export default function DashboardPage() {
     const budget = formatBudgetGBP(lead.budget_min, lead.budget_max)
     const postedH = (Date.now() - new Date(lead.posted_date).getTime()) / 3600000
     const expLevel = deriveExperienceLevel(lead.title)
-    const showNew = postedH <= 72 && !applied && state !== 'saved'
-    const badgeLabel = showNew ? 'NEW' : state === 'viewed' ? 'VIEWED' : state === 'saved' ? 'SAVED' : 'APPLIED'
-    const badgeClass = showNew || state === 'new' ? 'st-new' : state === 'viewed' ? 'st-viewed' : state === 'saved' ? 'st-saved' : 'st-applied'
+    const showNew = postedH <= 72 && !applied && !saved
+    // State badge = what the user did (saved/viewed) or freshness (new).
+    // Applied is shown by the separate "✓ Applied" chip, so no badge here.
+    // An old, untouched lead gets NO badge (never a false "APPLIED").
+    const badge =
+      (saved || state === 'saved') ? { label: 'SAVED', cls: 'st-saved' } :
+      applied ? null :
+      showNew ? { label: 'NEW', cls: 'st-new' } :
+      state === 'viewed' ? { label: 'VIEWED', cls: 'st-viewed' } :
+      null
     const urgencyTag = postedH < 24 ? <span className="urgency urgency-hot"><i className="ti ti-flame" />Actively hiring</span> : null
     const cleanDesc = lead.description?.replace(/https?:\/\/[^\s]+/g, '').replace(/\s+/g, ' ').trim()
 
@@ -702,7 +712,7 @@ export default function DashboardPage() {
               <span className="src-badge" style={srcBadgeStyle(si.color)}>{si.label.toUpperCase()}</span>
               {isTop
                 ? <span className="crown"><i className="ti ti-crown"></i>TOP MATCH</span>
-                : <span className={`state-badge ${badgeClass}`}>{badgeLabel}</span>}
+                : badge && <span className={`state-badge ${badge.cls}`}>{badge.label}</span>}
               <span className="lc-time-sep">·</span>
               <span className="lc-time">{timeAgo(lead.posted_date)}</span>
               {lead.client_location && <><span className="lc-time-sep">·</span><span className="lc-time">{lead.client_location}</span></>}

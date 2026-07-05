@@ -39,6 +39,46 @@ function scoreColor(v: number) {
   return 'var(--slate)'
 }
 
+function SkeletonLead() {
+  return (
+    <div className="ld-page">
+      <div className="skel" style={{ width: 56, height: 18, borderRadius: 5, marginBottom: 14 }} />
+      <div className="skel-card">
+        <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
+          <div className="skel" style={{ width: 70, height: 22, borderRadius: 99 }} />
+          <div className="skel" style={{ width: 52, height: 22, borderRadius: 99 }} />
+        </div>
+        <div className="skel" style={{ height: 26, borderRadius: 6, marginBottom: 14, width: '65%' }} />
+        <div style={{ display: 'flex', gap: 12, marginBottom: 18 }}>
+          <div className="skel" style={{ width: 90, height: 18, borderRadius: 5 }} />
+          <div className="skel" style={{ width: 130, height: 18, borderRadius: 5 }} />
+          <div className="skel" style={{ width: 70, height: 18, borderRadius: 5 }} />
+        </div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          {[0, 1, 2, 3].map(i => <div key={i} className="skel" style={{ width: 36, height: 36, borderRadius: 99 }} />)}
+        </div>
+      </div>
+      <div className="skel-card">
+        <div style={{ display: 'flex', gap: 8 }}>
+          <div className="skel" style={{ width: 130, height: 34, borderRadius: 6 }} />
+          <div className="skel" style={{ width: 100, height: 34, borderRadius: 6 }} />
+        </div>
+      </div>
+      <div className="skel-card">
+        <div className="skel" style={{ height: 16, width: '30%', borderRadius: 5, marginBottom: 12 }} />
+        <div className="skel" style={{ height: 13, borderRadius: 5, marginBottom: 8, width: '100%' }} />
+        <div className="skel" style={{ height: 13, borderRadius: 5, marginBottom: 8, width: '80%' }} />
+        <div className="skel" style={{ height: 13, borderRadius: 5, width: '55%' }} />
+      </div>
+      <div className="skel-card">
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+          {[55, 65, 45, 75, 50].map((w, i) => <div key={i} className="skel" style={{ width: w, height: 24, borderRadius: 99 }} />)}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function LeadDetailPage() {
   const { id } = useParams<{ id: string }>()
   const [lead, setLead] = useState<Lead | null>(null)
@@ -57,37 +97,42 @@ export default function LeadDetailPage() {
 
   useEffect(() => {
     const load = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) { router.push('/auth/login'); return }
-      const [leadRes, profileRes] = await Promise.all([
-        supabase.from('leads').select('*').eq('id', id).single(),
-        supabase.from('profiles').select('*').eq('id', user.id).single(),
-      ])
-      if (leadRes.error || !leadRes.data) { toast.error('Lead not found'); router.push('/dashboard'); return }
-      setLead(leadRes.data)
-      setProfile(profileRes.data)
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) { router.push('/auth/login'); return }
+        const [leadRes, profileRes] = await Promise.all([
+          supabase.from('leads').select('*').eq('id', id).single(),
+          supabase.from('profiles').select('*').eq('id', user.id).single(),
+        ])
+        if (leadRes.error || !leadRes.data) { toast.error('Lead not found'); router.push('/dashboard'); return }
+        setLead(leadRes.data)
+        setProfile(profileRes.data)
 
-      // Client intel: other posts by the same client in the lead pool.
-      if (leadRes.data.client_name) {
-        supabase.from('leads')
-          .select('id, title, budget_min, budget_max, posted_date, status')
-          .eq('client_name', leadRes.data.client_name)
-          .neq('id', leadRes.data.id)
-          .order('posted_date', { ascending: false })
-          .limit(6)
-          .then(({ data }) => setClientLeads(data || []))
+        // Client intel: other posts by the same client in the lead pool.
+        if (leadRes.data.client_name) {
+          supabase.from('leads')
+            .select('id, title, budget_min, budget_max, posted_date, status')
+            .eq('client_name', leadRes.data.client_name)
+            .neq('id', leadRes.data.id)
+            .order('posted_date', { ascending: false })
+            .limit(6)
+            .then(({ data }) => setClientLeads(data || []))
+        }
+        const res = await fetch('/api/applications')
+        if (res.ok) {
+          const apps: Application[] = await res.json()
+          const mine = apps.find(a => a.lead_id === id) || null
+          setApplication(mine)
+          const fu = (mine as { follow_up_at?: string } | null)?.follow_up_at
+          if (fu) setFollowUp(new Date(fu).toISOString().slice(0, 16))
+          const fn = (mine as { follow_up_note?: string } | null)?.follow_up_note
+          if (fn) setReminderNote(fn)
+        }
+      } catch {
+        toast.error('Something went wrong')
+      } finally {
+        setLoading(false)
       }
-      const res = await fetch('/api/applications')
-      if (res.ok) {
-        const apps: Application[] = await res.json()
-        const mine = apps.find(a => a.lead_id === id) || null
-        setApplication(mine)
-        const fu = (mine as { follow_up_at?: string } | null)?.follow_up_at
-        if (fu) setFollowUp(new Date(fu).toISOString().slice(0, 16))
-        const fn = (mine as { follow_up_note?: string } | null)?.follow_up_note
-        if (fn) setReminderNote(fn)
-      }
-      setLoading(false)
     }
     load()
   }, [id, supabase, router])
@@ -123,14 +168,20 @@ export default function LeadDetailPage() {
     } finally { setSavingReminder(false) }
   }, [id, followUp, reminderNote])
 
-  if (loading) return (
-    <div className="ld-loading">
-      <div className="ld-loading-dot" />
-      <span>Loading lead&hellip;</span>
+  if (loading) return <SkeletonLead />
+
+  if (!lead) return (
+    <div className="ld-page">
+      <div className="ld-card" style={{ textAlign: 'center', padding: '40px 20px' }}>
+        <i className="ti ti-alert-circle" style={{ fontSize: 20, color: 'var(--slate)' }} />
+        <p style={{ marginTop: 10, color: 'var(--ink)', fontWeight: 600 }}>Lead not found</p>
+        <p style={{ color: 'var(--slate)', fontSize: 13, marginTop: 4 }}>This lead may have been removed or the link is incorrect.</p>
+        <button className="btn btn-primary" style={{ marginTop: 18 }} onClick={() => router.push('/dashboard')}>
+          <i className="ti ti-arrow-left" /> Back to feed
+        </button>
+      </div>
     </div>
   )
-
-  if (!lead) return null
 
   const isPro = profile?.subscription_status !== 'free'
   const ent = entitlementsFor((profile?.subscription_status ?? 'free') as Tier)
@@ -308,7 +359,7 @@ ${profile?.full_name || ''}`.trim()
           </div>
           <div className="ld-reminder-actions">
             <button className="btn btn-primary" onClick={saveReminder} disabled={savingReminder}>
-              <i className="ti ti-calendar-plus" /> {followUp ? 'Set reminder' : 'Clear reminder'}
+              <i className="ti ti-calendar-plus" /> Save
             </button>
             <a className="ld-cal-link" href="/dashboard/profile#calendar">Sync to your calendar</a>
           </div>
@@ -345,7 +396,7 @@ ${profile?.full_name || ''}`.trim()
             </span>
           </div>
           <div className="ld-skills">
-            {m.skillMatch.matched.map(s => <span key={s} className="skill match"><i className="ti ti-check" />{s}</span>)}
+            {m.skillMatch.matched.map(s => <span key={s} className="skill match">{s}</span>)}
             {m.skillMatch.missing.map(s => <span key={s} className="skill">{s}</span>)}
           </div>
         </div>

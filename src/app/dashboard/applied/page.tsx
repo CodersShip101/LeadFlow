@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { Fragment, useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-client'
 import toast from 'react-hot-toast'
@@ -47,11 +47,67 @@ const COLS = [
 // Closed stages: no staleness warnings, sorted newest-first.
 const CLOSED = new Set(['hired', 'lost'])
 
+function SkeletonKanban() {
+  return (
+    <>
+      <div className="pipe-header">
+        <div className="pipe-header-left">
+          <div className="skel" style={{ width: 220, height: 16, borderRadius: 5 }} />
+        </div>
+        <div className="pipe-stats">
+          {[0, 1, 2, 3, 4].map(i => (
+            <Fragment key={i}>
+              {i > 0 && <div className="pipe-stat-sep" />}
+              <div className="pipe-stat">
+                <div className="skel" style={{ width: 30, height: 22, borderRadius: 5, margin: '0 auto 4px' }} />
+                <div className="skel" style={{ width: 42, height: 11, borderRadius: 4, margin: '0 auto' }} />
+              </div>
+            </Fragment>
+          ))}
+        </div>
+      </div>
+      <div className="kanban">
+        {COLS.map(col => (
+          <div key={col.key} className="kan-col">
+            <div className="kan-head" style={{ borderBottom: `2px solid color-mix(in srgb, ${col.color} 22%, transparent)` }}>
+              <span className="kan-dot" style={{ background: col.color }} />
+              <div className="skel" style={{ width: 60, height: 14, borderRadius: 5 }} />
+              <div className="skel" style={{ width: 28, height: 19, borderRadius: 99, marginLeft: 'auto' }} />
+            </div>
+            <div className="kan-body" style={{ background: col.tint }}>
+              {[0, 1, 2].map(i => (
+                <div key={i} className="skel-card" style={{ borderLeft: `3px solid ${col.color}` }}>
+                  <div className="skel" style={{ width: '40%', height: 12, borderRadius: 5, marginBottom: 10 }} />
+                  <div className="skel" style={{ width: '85%', height: 14, borderRadius: 5, marginBottom: 10 }} />
+                  <div className="skel" style={{ width: '55%', height: 12, borderRadius: 5 }} />
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </>
+  )
+}
+
+function ErrorState() {
+  return (
+    <div className="empty">
+      <h3>Could not load pipeline</h3>
+      <p>Check your connection and try again.</p>
+      <button className="btn btn-primary" style={{ display: 'inline-flex' }} onClick={() => window.location.reload()}>
+        Retry
+      </button>
+    </div>
+  )
+}
+
 export default function PipelinePage() {
   const [leads, setLeads] = useState<Lead[]>([])
   const [applications, setApplications] = useState<Application[]>([])
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
   const [dragId, setDragId] = useState<string | null>(null)
   const [dragCol, setDragCol] = useState<string | null>(null)
   const [overCol, setOverCol] = useState<string | null>(null)
@@ -68,25 +124,30 @@ export default function PipelinePage() {
 
   useEffect(() => {
     const load = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) { router.push('/auth/login'); return }
-      const profRes = await supabase.from('profiles').select('*').eq('id', user.id).single()
-      setProfile(profRes.data)
-      let { data: apps, error } = await supabase
-        .from('applications')
-        .select('id, lead_id, status, outcome, outcome_at, created_at, stage_changed_at, lost_reason, won_amount, follow_up_at, follow_up_note, note')
-        .eq('freelancer_id', user.id)
-      if (error || !apps) {
-        const res = await fetch('/api/applications')
-        if (res.ok) apps = await res.json()
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) { router.push('/auth/login'); return }
+        const profRes = await supabase.from('profiles').select('*').eq('id', user.id).single()
+        setProfile(profRes.data)
+        let { data: apps, error } = await supabase
+          .from('applications')
+          .select('id, lead_id, status, outcome, outcome_at, created_at, stage_changed_at, lost_reason, won_amount, follow_up_at, follow_up_note, note')
+          .eq('freelancer_id', user.id)
+        if (error || !apps) {
+          const res = await fetch('/api/applications')
+          if (res.ok) apps = await res.json()
+        }
+        setApplications((apps || []) as Application[])
+        const activeIds = (apps || []).filter(a => a.status !== 'saved').map(a => a.lead_id)
+        if (activeIds.length > 0) {
+          const { data } = await supabase.from('leads').select('*').in('id', activeIds).eq('status', 'active')
+          setLeads(data || [])
+        }
+      } catch {
+        setError(true)
+      } finally {
+        setLoading(false)
       }
-      setApplications((apps || []) as Application[])
-      const activeIds = (apps || []).filter(a => a.status !== 'saved').map(a => a.lead_id)
-      if (activeIds.length > 0) {
-        const { data } = await supabase.from('leads').select('*').in('id', activeIds).eq('status', 'active')
-        setLeads(data || [])
-      }
-      setLoading(false)
     }
     load()
   }, [supabase, router])
@@ -268,8 +329,8 @@ export default function PipelinePage() {
     setDragId(null); setDragCol(null)
   }
 
-  if (loading) return null
-
+  if (loading) return <SkeletonKanban />
+  if (error) return <ErrorState />
   if (totalActive === 0) {
     return (
       <div className="empty">
@@ -288,36 +349,36 @@ export default function PipelinePage() {
       {/* ── HEADER ── */}
       <div className="pipe-header">
         <div className="pipe-header-left">
-          <p className="pipe-sub">Drag cards to advance stages, or use the quick-action buttons.</p>
+          <p className="pipe-sub">Drag cards between stages.</p>
         </div>
         <div className="pipe-stats">
           <div className="pipe-stat">
             <span className="pipe-stat-v">{openCount}</span>
-            <span className="pipe-stat-l">open</span>
+            <span className="pipe-stat-l tip" data-tip="Deals in interested, applied or in-talks — not yet won or lost">open</span>
           </div>
           <div className="pipe-stat-sep" />
           <div className="pipe-stat">
             <span className="pipe-stat-v" style={{ color: 'var(--mid)' }}>{inTalksCount}</span>
-            <span className="pipe-stat-l">in talks</span>
+            <span className="pipe-stat-l tip" data-tip="Deals where a conversation with the client is underway">in talks</span>
           </div>
           <div className="pipe-stat-sep" />
           <div className="pipe-stat">
             <span className="pipe-stat-v" style={{ color: 'var(--hi)' }}>{wonCount}</span>
-            <span className="pipe-stat-l">won</span>
+            <span className="pipe-stat-l tip" data-tip="Deals you marked as won">won</span>
           </div>
           <div className="pipe-stat-sep" />
           <div className="pipe-stat">
             <span className="pipe-stat-v" style={{ color: winRate == null ? 'var(--slate-2)' : winRate >= 50 ? 'var(--hi)' : 'var(--ink)' }}>
               {winRate == null ? '—' : `${winRate}%`}
             </span>
-            <span className="pipe-stat-l">win rate</span>
+            <span className="pipe-stat-l tip" data-tip="Won ÷ decided deals (won + lost)">win rate</span>
           </div>
           <div className="pipe-stat-sep" />
           <div className="pipe-stat">
             <span className="pipe-stat-v" style={{ color: avgWaitDays != null && avgWaitDays >= 7 ? 'var(--coral)' : 'var(--ink)' }}>
               {avgWaitDays == null ? '—' : `${avgWaitDays}d`}
             </span>
-            <span className="pipe-stat-l">avg wait</span>
+            <span className="pipe-stat-l tip" data-tip="Average days your open deals have sat in their current stage">avg wait</span>
           </div>
         </div>
       </div>
@@ -396,7 +457,7 @@ export default function PipelinePage() {
                           {/* Follow-up chip */}
                           {reminder && (
                             <span className={`sv-remind-chip ${reminder.overdue ? 'overdue' : ''}`} style={{ alignSelf: 'flex-start' }}>
-                              <i className="ti ti-alarm" />Follow up {reminder.label}
+                              Follow up {reminder.label}
                             </span>
                           )}
 

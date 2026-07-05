@@ -36,8 +36,8 @@ export default function LoginPage() {
             <span className="auth-logo-name">fl<span className="brand-ai">ai</span>ir</span>
           </div>
           <div className="panel-hero">
-            <div className="panel-eyebrow">Your lead feed is waiting</div>
-            <h2 className="panel-heading">New work matched<br />to you as often as every hour.</h2>
+            <div className="panel-eyebrow">Your feed is live</div>
+            <h2 className="panel-heading">New leads matched<br />to your skills and rate.</h2>
             <p className="panel-sub">While you&apos;ve been away, we&apos;ve been scanning and scoring. Log back in to see what&apos;s matched.</p>
             <div className="auth-stats-row">
               <div className="auth-stat-item">
@@ -48,20 +48,15 @@ export default function LoginPage() {
                 <span className="auth-stat-num"><span>9.1</span></span>
                 <span className="auth-stat-label">Top score today</span>
               </div>
-              <div className="auth-stat-item">
-                <span className="auth-stat-num"><span>4</span></span>
-                <span className="auth-stat-label">Sources scanned</span>
-              </div>
             </div>
             <div className="auth-ticker">
-              <span className="radar-mini" aria-hidden="true"></span>
               <div className="auth-ticker-text">
                 Feed updated <strong>8 minutes ago</strong> — 12 new leads since your last visit
               </div>
               <span className="auth-ticker-dot" aria-hidden="true"></span>
             </div>
             <div className="auth-sources-section">
-              <div className="auth-sources-label">Scanning now from</div>
+              <div className="auth-sources-label">We scan from</div>
               <div className="auth-source-pills">
                 <span className="auth-source-pill"><i className="ti ti-brand-reddit" aria-hidden="true"></i> Reddit</span>
                 <span className="auth-source-pill"><i className="ti ti-briefcase" aria-hidden="true"></i> Reed.co.uk</span>

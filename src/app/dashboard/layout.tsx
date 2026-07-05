@@ -37,6 +37,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     '/dashboard/team': 'Team',
     '/dashboard/analytics': 'Analytics',
     '/dashboard/lead': 'Lead',
+    '/dashboard/calendar': 'Calendar',
+    '/dashboard/messages': 'Messages',
   }
   // Match the most specific (longest) path so sub-pages don't fall back to "Feed".
   const pageTitle = Object.entries(pageTitles)
