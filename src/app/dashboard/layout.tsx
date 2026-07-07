@@ -171,7 +171,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 <span className="acct-name">{profile?.full_name || 'Your account'}</span>
                 <span className="acct-plan">{plan === 'free' ? 'Free plan' : `${plan.charAt(0).toUpperCase()}${plan.slice(1)} plan`}</span>
               </span>
-              <i className={`ti ${acctOpen ? 'ti-chevron-down' : 'ti-chevron-up'} acct-chev`} />
+              <i className={`ti ${acctOpen ? 'ti-chevron-up' : 'ti-chevron-down'} acct-chev`} />
             </button>
           </div>
         </div>
