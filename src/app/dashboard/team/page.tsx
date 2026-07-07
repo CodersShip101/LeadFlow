@@ -49,6 +49,7 @@ function TeamContent() {
   const [slackUrl, setSlackUrl] = useState('')
   const [savingSlack, setSavingSlack] = useState(false)
   const [showAllBoard, setShowAllBoard] = useState(false)
+  const [tab, setTab] = useState<'overview' | 'members' | 'pool' | 'settings'>('overview')
 
   const loadPool = useCallback(async () => {
     try {
@@ -202,6 +203,7 @@ function TeamContent() {
 
   return (
     <>
+      {/* One calm header: seat usage (the page's key number) + your role. */}
       <div className="tm-header">
         <div className="tm-seats">
           <div className="tm-seats-bar" role="img" aria-label={`${seatsUsed} of ${org.seats} seats used`}>
@@ -211,37 +213,31 @@ function TeamContent() {
           </div>
           <p className="tm-sub">{seatsUsed} of {org.seats} seats used{pendingInvites.length > 0 ? ` · ${pendingInvites.length} pending` : ''}</p>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-          {isAdmin && (
-            <div className="tm-seatctl" role="group" aria-label="Add or remove seats">
-              <button className="pill" aria-label="Remove a seat" disabled={addingSeats || org.seats <= seatsUsed + pendingInvites.length} onClick={() => addSeats(org.seats - 1)}>&minus;</button>
-              <span className="tm-seatctl-n">{org.seats} seats</span>
-              <button className="pill" aria-label="Add a seat" disabled={addingSeats || org.seats >= 200} onClick={() => addSeats(org.seats + 1)}>+</button>
-            </div>
-          )}
-          <span className={`tm-role-chip ${isAdmin ? 'admin' : ''}`}>
-            <i className={`ti ${isAdmin ? 'ti-shield-check' : 'ti-user'}`} /> You&apos;re {isAdmin ? 'an admin' : 'a member'}
-          </span>
-          <button className="pill tm-leave" onClick={leaveTeam}><i className="ti ti-logout" /> Leave team</button>
-        </div>
+        <span className={`tm-role-chip ${isAdmin ? 'admin' : ''}`}>
+          <i className={`ti ${isAdmin ? 'ti-shield-check' : 'ti-user'}`} /> You&apos;re {isAdmin ? 'an admin' : 'a member'}
+        </span>
       </div>
 
-      {/* Team performance */}
-      {stats && (
-        <div className="tm-card">
-          <h3 className="tm-card-title">Team performance</h3>
-          <div className="an-kpis" style={{ marginBottom: 18 }}>
-            <div className="an-kpi"><span className="an-kpi-ico"><i className="ti ti-users" /></span><span className="an-kpi-val">{stats.summary.members}</span><span className="an-kpi-lbl">Members</span></div>
+      {/* Underline tabs — supplemental in-page navigation, one job per tab. */}
+      <div className="tm-tabs" role="tablist">
+        {([['overview', 'Overview'], ['members', 'Members'], ['pool', 'Lead pool'], ['settings', 'Settings']] as const).map(([id, label]) => (
+          <button key={id} role="tab" aria-selected={tab === id} className={`tm-tab ${tab === id ? 'on' : ''}`} onClick={() => setTab(id)}>
+            {label}
+            {id === 'members' && pendingInvites.length > 0 && <span className="tm-tab-badge">{pendingInvites.length}</span>}
+          </button>
+        ))}
+      </div>
+
+      {/* ── OVERVIEW: the few numbers that matter, then how work is going ── */}
+      {tab === 'overview' && stats && (
+        <section className="tm-section">
+          <div className="an-kpis" style={{ marginBottom: 26 }}>
             <div className="an-kpi"><span className="an-kpi-ico"><i className="ti ti-send" /></span><span className="an-kpi-val">{stats.summary.totalApplied}</span><span className="an-kpi-lbl">Applications</span></div>
             <div className="an-kpi"><span className="an-kpi-ico" style={{ background: 'var(--lime-dim)', color: 'var(--lime-ink)' }}><i className="ti ti-trophy" /></span><span className="an-kpi-val">{stats.summary.totalWon}</span><span className="an-kpi-lbl">Won</span></div>
             <div className="an-kpi"><span className="an-kpi-ico" style={{ background: 'var(--hi-bg)', color: 'var(--hi)' }}><i className="ti ti-percentage" /></span><span className="an-kpi-val">{stats.summary.teamWinRate !== null ? `${stats.summary.teamWinRate}%` : '—'}</span><span className="an-kpi-lbl">Team win rate</span></div>
-            <div className="an-kpi"><span className="an-kpi-ico"><i className="ti ti-briefcase" /></span><span className="an-kpi-val">{stats.summary.poolSize ?? 0}</span><span className="an-kpi-lbl">Leads tracked</span></div>
             <div className="an-kpi"><span className="an-kpi-ico"><i className="ti ti-flame" /></span><span className="an-kpi-val">{stats.summary.activeInPipeline ?? 0}</span><span className="an-kpi-lbl">Active in pipeline</span></div>
-            <div className="an-kpi"><span className="an-kpi-ico"><i className="ti ti-user-check" /></span><span className="an-kpi-val">{stats.summary.avgAppliedPerMember ?? 0}</span><span className="an-kpi-lbl">Avg / member</span></div>
           </div>
 
-          {/* Pipeline breakdown across the team. Structural styling is inline so
-              it doesn't depend on CSS load order/caching. */}
           {stats.pipeline && (() => {
             const stages: Stage[] = ['saved', 'interested', 'applied', 'in_talks', 'hired', 'lost']
             const max = Math.max(1, ...stages.map(s => stats.pipeline![s]))
@@ -250,8 +246,8 @@ function TeamContent() {
             const fillColor = (s: Stage) =>
               s === 'hired' ? 'var(--hi)' : s === 'lost' ? 'var(--coral)' : s === 'saved' ? 'var(--slate-2)' : 'var(--lime-deep)'
             return (
-              <div style={{ marginTop: 18, paddingTop: 16, borderTop: '1px solid var(--line)' }}>
-                <h4 style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--slate)', textTransform: 'uppercase', letterSpacing: '.04em', marginBottom: 12 }}>Pipeline breakdown</h4>
+              <div style={{ marginBottom: 26 }}>
+                <h4 className="tm-section-label">Pipeline</h4>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
                   {stages.map(s => (
                     <div key={s} style={{ display: 'grid', gridTemplateColumns: '84px 1fr 34px', alignItems: 'center', gap: 10 }}>
@@ -266,6 +262,8 @@ function TeamContent() {
               </div>
             )
           })()}
+
+          <h4 className="tm-section-label">Leaderboard</h4>
           <div className="tm-board">
             <div className="tm-board-head"><span>#</span><span>Member</span><span>Applied</span><span>Won</span><span>Win rate</span></div>
             {(showAllBoard ? stats.leaderboard : stats.leaderboard.slice(0, 5)).map((r, i) => (
@@ -291,64 +289,61 @@ function TeamContent() {
               <i className={`ti ${showAllBoard ? 'ti-chevron-up' : 'ti-chevron-down'}`} />
             </button>
           )}
+        </section>
+      )}
+      {tab === 'overview' && !stats && (
+        <div className="empty">
+          <div className="empty-icon"><i className="ti ti-chart-bar" /></div>
+          <h3>No activity yet</h3>
+          <p>Once your team starts tracking and applying to leads, performance shows up here.</p>
         </div>
       )}
 
-      {/* Invite */}
-      {isAdmin && (
-        <div className="tm-card">
-          <h3 className="tm-card-title">Invite a teammate</h3>
-          <form className="tm-invite" onSubmit={invite}>
-            <input type="email" className="auth-input" placeholder="teammate@email.com" value={email} onChange={e => setEmail(e.target.value)} required />
-            <select className="tm-select" value={role} onChange={e => setRole(e.target.value as 'member' | 'admin')}>
-              <option value="member">Member</option>
-              <option value="admin">Admin</option>
-            </select>
-            <button className="btn btn-primary" disabled={inviting || seatsLeft <= 0}>
-              {inviting ? <LoadingDots label="Inviting" /> : <><i className="ti ti-send" /> Invite</>}
-            </button>
-          </form>
-          {seatsLeft <= 0
-            ? <p className="tm-note warn"><i className="ti ti-alert-triangle" /> All seats are in use. Add seats in billing to invite more.</p>
-            : <p className="tm-note">{seatsLeft} seat{seatsLeft === 1 ? '' : 's'} available · the invite link is copied to your clipboard when you send it.</p>}
-        </div>
-      )}
+      {/* ── MEMBERS: everyone on the team, invites, and seats ── */}
+      {tab === 'members' && (
+        <section className="tm-section">
+          {isAdmin && (
+            <>
+              <form className="tm-invite" onSubmit={invite}>
+                <input type="email" className="auth-input" placeholder="teammate@email.com" value={email} onChange={e => setEmail(e.target.value)} required />
+                <select className="tm-select" value={role} onChange={e => setRole(e.target.value as 'member' | 'admin')} aria-label="Invite as">
+                  <option value="member">Member</option>
+                  <option value="admin">Admin</option>
+                </select>
+                <button className="btn btn-primary" disabled={inviting || seatsLeft <= 0}>
+                  {inviting ? <LoadingDots label="Inviting" /> : <><i className="ti ti-send" /> Invite</>}
+                </button>
+              </form>
+              {seatsLeft <= 0
+                ? <p className="tm-note warn"><i className="ti ti-alert-triangle" /> All seats are in use — add a seat below to invite more.</p>
+                : <p className="tm-note">{seatsLeft} seat{seatsLeft === 1 ? '' : 's'} available · the invite link is copied to your clipboard when you send it.</p>}
+            </>
+          )}
 
-      {/* Members */}
-      <div className="tm-card">
-        <h3 className="tm-card-title">Members</h3>
-        <div className="tm-list">
-          {members.map(m => {
-            const name = m.profile?.full_name || 'Teammate'
-            const isMe = m.user_id === myId
-            return (
-              <div key={m.user_id} className="tm-row">
-                <span className="tm-avatar">{name.slice(0, 1).toUpperCase()}</span>
-                <div className="tm-row-info">
-                  <span className="tm-row-name">{name}{isMe && <span className="tm-you">you</span>}</span>
-                  <span className={`tm-role-tag ${m.role === 'admin' ? 'admin' : ''}`}>{m.role}</span>
-                </div>
-                {isAdmin && !isMe && (
-                  <div className="tm-row-actions">
-                    <button className="pill" onClick={() => changeRole(m.user_id, m.role === 'admin' ? 'member' : 'admin')}>
-                      Make {m.role === 'admin' ? 'member' : 'admin'}
-                    </button>
-                    <button className="pill tm-remove tip" data-tip="Remove from team" aria-label="Remove from team" onClick={() => removeMember(m.user_id)}><i className="ti ti-trash" /></button>
+          <div className="tm-list" style={{ marginTop: isAdmin ? 22 : 0 }}>
+            {members.map(m => {
+              const name = m.profile?.full_name || 'Teammate'
+              const isMe = m.user_id === myId
+              return (
+                <div key={m.user_id} className="tm-row">
+                  <span className="tm-avatar">{name.slice(0, 1).toUpperCase()}</span>
+                  <div className="tm-row-info">
+                    <span className="tm-row-name">{name}{isMe && <span className="tm-you">you</span>}</span>
+                    <span className={`tm-role-tag ${m.role === 'admin' ? 'admin' : ''}`}>{m.role}</span>
                   </div>
-                )}
-              </div>
-            )
-          })}
-        </div>
-      </div>
-
-      {/* Pending invites */}
-      {pendingInvites.length > 0 && (
-        <div className="tm-card">
-          <h3 className="tm-card-title">Pending invites</h3>
-          <div className="tm-list">
+                  {isAdmin && !isMe && (
+                    <div className="tm-row-actions">
+                      <button className="pill" onClick={() => changeRole(m.user_id, m.role === 'admin' ? 'member' : 'admin')}>
+                        Make {m.role === 'admin' ? 'member' : 'admin'}
+                      </button>
+                      <button className="pill tm-remove tip" data-tip="Remove from team" aria-label="Remove from team" onClick={() => removeMember(m.user_id)}><i className="ti ti-trash" /></button>
+                    </div>
+                  )}
+                </div>
+              )
+            })}
             {pendingInvites.map(inv => (
-              <div key={inv.email} className="tm-row">
+              <div key={inv.email} className="tm-row pending-row">
                 <span className="tm-avatar pending"><i className="ti ti-mail" /></span>
                 <div className="tm-row-info">
                   <span className="tm-row-name">{inv.email}</span>
@@ -362,48 +357,78 @@ function TeamContent() {
               </div>
             ))}
           </div>
-        </div>
-      )}
 
-      {/* Slack notifications (admin) */}
-      {isAdmin && (
-        <div className="tm-card">
-          <h3 className="tm-card-title">Slack notifications {slackConfigured && <span className="tpl-shared"><i className="ti ti-check" /> Connected</span>}</h3>
-          <p className="tm-note" style={{ marginTop: 0, marginBottom: 12 }}>
-            Get a message in Slack when a lead is assigned. Create an <a href="https://api.slack.com/messaging/webhooks" target="_blank" rel="noopener noreferrer" className="auth-cta-link">incoming webhook</a> and paste its URL.
-          </p>
-          <div className="tm-invite">
-            <input type="url" className="auth-input" placeholder="https://hooks.slack.com/services/…" value={slackUrl} onChange={e => setSlackUrl(e.target.value)} />
-            <button className="btn btn-primary" onClick={saveSlack} disabled={savingSlack}>
-              {savingSlack ? <LoadingDots label="Saving" /> : slackConfigured && !slackUrl ? <><i className="ti ti-x" /> Disconnect</> : <><i className="ti ti-brand-slack" /> Connect</>}
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Shared lead pool */}
-      <div className="tm-card">
-        <h3 className="tm-card-title">Shared lead pool</h3>
-        {!pool || pool.leads.length === 0 ? (
-          <p className="tm-note">Leads your team tracks appear here. Track a lead from the feed to add it to the pool.</p>
-        ) : (
-          <div className="tm-list">
-            {pool.leads.map(l => (
-              <div key={l.id} className="tm-row">
-                <span className="tm-avatar pending"><i className="ti ti-briefcase" /></span>
-                <div className="tm-row-info">
-                  <span className="tm-row-name">{l.lead?.title ?? 'Lead'}</span>
-                  <span className="tm-row-role">{l.status}{l.lead?.client_location ? ` · ${l.lead.client_location}` : ''}</span>
-                </div>
-                <select className="tm-select" value={l.assigned_to ?? ''} onChange={e => assign(l.id, e.target.value)}>
-                  <option value="">Unassigned</option>
-                  {pool.members.map(m => <option key={m.user_id} value={m.user_id}>{m.name}</option>)}
-                </select>
+          {isAdmin && (
+            <div className="tm-seats-foot">
+              <span className="tm-note" style={{ margin: 0 }}>Need more room? Seats are billed on your Team plan.</span>
+              <div className="tm-seatctl" role="group" aria-label="Add or remove seats">
+                <button className="pill" aria-label="Remove a seat" disabled={addingSeats || org.seats <= seatsUsed + pendingInvites.length} onClick={() => addSeats(org.seats - 1)}>&minus;</button>
+                <span className="tm-seatctl-n">{org.seats} seats</span>
+                <button className="pill" aria-label="Add a seat" disabled={addingSeats || org.seats >= 200} onClick={() => addSeats(org.seats + 1)}>+</button>
               </div>
-            ))}
+            </div>
+          )}
+        </section>
+      )}
+
+      {/* ── LEAD POOL: what the team is tracking, and who owns what ── */}
+      {tab === 'pool' && (
+        <section className="tm-section">
+          {!pool || pool.leads.length === 0 ? (
+            <div className="empty">
+              <div className="empty-icon"><i className="ti ti-briefcase" /></div>
+              <h3>No shared leads yet</h3>
+              <p>Track a lead from the feed and it lands here for the whole team to see and assign.</p>
+              <button className="btn btn-primary" style={{ display: 'inline-flex' }} onClick={() => router.push('/dashboard')}>
+                <i className="ti ti-layout-grid" /> Open the feed
+              </button>
+            </div>
+          ) : (
+            <div className="tm-list">
+              {pool.leads.map(l => (
+                <div key={l.id} className="tm-row">
+                  <span className="tm-avatar pending"><i className="ti ti-briefcase" /></span>
+                  <div className="tm-row-info">
+                    <span className="tm-row-name">{l.lead?.title ?? 'Lead'}</span>
+                    <span className="tm-row-role">{l.status}{l.lead?.client_location ? ` · ${l.lead.client_location}` : ''}</span>
+                  </div>
+                  <select className="tm-select" value={l.assigned_to ?? ''} onChange={e => assign(l.id, e.target.value)} aria-label="Assign to">
+                    <option value="">Unassigned</option>
+                    {pool.members.map(m => <option key={m.user_id} value={m.user_id}>{m.name}</option>)}
+                  </select>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+      )}
+
+      {/* ── SETTINGS: integrations + the rare, careful actions ── */}
+      {tab === 'settings' && (
+        <section className="tm-section">
+          {isAdmin && (
+            <div style={{ marginBottom: 30 }}>
+              <h4 className="tm-section-label">Slack notifications {slackConfigured && <span className="tpl-shared"><i className="ti ti-check" /> Connected</span>}</h4>
+              <p className="tm-note" style={{ marginTop: 0, marginBottom: 12 }}>
+                Get a message in Slack when a lead is assigned. Create an <a href="https://api.slack.com/messaging/webhooks" target="_blank" rel="noopener noreferrer" className="auth-cta-link">incoming webhook</a> and paste its URL.
+              </p>
+              <div className="tm-invite">
+                <input type="url" className="auth-input" placeholder="https://hooks.slack.com/services/…" value={slackUrl} onChange={e => setSlackUrl(e.target.value)} />
+                <button className="btn btn-primary" onClick={saveSlack} disabled={savingSlack}>
+                  {savingSlack ? <LoadingDots label="Saving" /> : slackConfigured && !slackUrl ? <><i className="ti ti-x" /> Disconnect</> : <><i className="ti ti-brand-slack" /> Connect</>}
+                </button>
+              </div>
+            </div>
+          )}
+          <div>
+            <h4 className="tm-section-label">Leave team</h4>
+            <p className="tm-note" style={{ marginTop: 0, marginBottom: 12 }}>
+              You&apos;ll lose access to the shared pool and pipeline, and your plan reverts to what you had before joining.
+            </p>
+            <button className="pill tm-leave" onClick={leaveTeam}><i className="ti ti-logout" /> Leave team</button>
           </div>
-        )}
-      </div>
+        </section>
+      )}
     </>
   )
 }
