@@ -382,12 +382,10 @@ export default function DashboardPage() {
     fresh: leads.filter(l => isFresh(l.posted_date, 6)).length,
   }), [leads])
 
-  const FREE_LIMIT = 6
-
   const whatSuggestions = useMemo(() => {
     if (!search || search.length < 1) return []
     const q = search.toLowerCase()
-    const pool = isFree ? leads.slice(0, FREE_LIMIT) : leads
+    const pool = leads
     const groups = new Map<string, number>()
     const seen = new Set<string>()
     pool.forEach(l => {
@@ -403,7 +401,7 @@ export default function DashboardPage() {
     const matching = Array.from(groups.entries(), ([title, n]) => ({ title, n }))
     matching.sort((a, b) => b.n - a.n)
     return matching.slice(0, 6)
-  }, [leads, search, isFree])
+  }, [leads, search])
 
   const appliedSkills = useMemo(() => {
     const appliedLeads = applications
@@ -417,11 +415,10 @@ export default function DashboardPage() {
   }, [applications, leads])
 
   const allLocations = useMemo(() => {
-    const pool = isFree ? leads.slice(0, FREE_LIMIT) : leads
     const locs = new Set<string>()
-    pool.forEach(l => { if (l.client_location) locs.add(l.client_location) })
+    leads.forEach(l => { if (l.client_location) locs.add(l.client_location) })
     return [...locs].sort()
-  }, [leads, isFree])
+  }, [leads])
 
   const locSuggestions = useMemo(() => {
     if (!locationSearch) return allLocations.slice(0, 8)
@@ -555,8 +552,10 @@ export default function DashboardPage() {
   }
 
   const handleApply = async (lead: Lead) => {
-    if (isFree && appCount >= FREE_LIMIT) {
-      showLimit()
+    // Client-side gate mirrors the server's real entitlement (5/month on free).
+    const appLimit = ent.applicationsPerMonth
+    if (isFree && typeof appLimit === 'number' && appCount >= appLimit) {
+      showLimit(appLimit)
       return
     }
     if (applyingId) return
@@ -612,7 +611,7 @@ export default function DashboardPage() {
     }
   }
 
-  const showLimit = () => {
+  const showLimit = (limit: number) => {
     const el = document.getElementById('page-inner')
     if (!el) return
     const div = document.createElement('div')
@@ -622,8 +621,8 @@ export default function DashboardPage() {
     div.innerHTML = `
       <div style="background:var(--card);border-radius:var(--r-xl);padding:32px;max-width:400px;text-align:center;box-shadow:var(--sh-lg)">
         <div class="empty-icon" style="margin-bottom:16px"><i class="ti ti-bolt"></i></div>
-        <h3 class="display" style="font-size:20px;margin-bottom:8px">You've used all ${FREE_LIMIT} free applications</h3>
-        <p style="color:var(--slate);font-size:14px;line-height:1.55;margin-bottom:22px">Upgrade to <b style="color:var(--ink)">Starter (£15/mo)</b> for unlimited applications and direct source links — or go <b style="color:var(--ink)">Pro</b> for analytics and adjustable scoring.</p>
+        <h3 class="display" style="font-size:20px;margin-bottom:8px">You've used all ${limit} free applications</h3>
+        <p style="color:var(--slate);font-size:14px;line-height:1.55;margin-bottom:22px">Upgrade to <b style="color:var(--ink)">Pro</b> for unlimited applications with no weekly lead cap — or go <b style="color:var(--ink)">Max</b> for analytics and adjustable scoring.</p>
         <button class="btn btn-warm" style="width:100%;margin-bottom:9px" onclick="this.closest('#limitModal').remove();window.location.href='/dashboard/billing'">See plans</button>
         <button class="btn btn-ghost" style="width:100%" onclick="this.closest('#limitModal').remove()">Maybe later</button>
       </div>`
@@ -682,7 +681,6 @@ export default function DashboardPage() {
   }
 
   const leadCards = filtered.map((lead, idx) => {
-    const isLocked = isFree && idx >= FREE_LIMIT
     const explanation = computeMatchExplanation(lead, profile)
     const sc = explanation.score
     const si = sourceMeta(canonSource(lead))
@@ -714,7 +712,7 @@ export default function DashboardPage() {
     const cleanDesc = lead.description?.replace(/https?:\/\/[^\s]+/g, '').replace(/\s+/g, ' ').trim()
 
     return (
-      <article key={lead.id} onClick={isLocked ? undefined : () => selectLead(lead)} tabIndex={isLocked ? -1 : undefined}
+      <article key={lead.id} onClick={() => selectLead(lead)}
         className={`lead-card ${selected?.id === lead.id ? 'sel' : ''} ${isTop ? 'top-match' : ''} ${state === 'new' ? 'is-new' : ''} ${state === 'viewed' ? 'viewed' : ''} ${applied ? 'applied' : ''}`}
         style={{ '--src-color': si.color } as React.CSSProperties}>
         <div className="lc-bar">
@@ -998,67 +996,7 @@ export default function DashboardPage() {
 
       <div className={`feed-wrap ${selected ? 'detail-open' : ''}`}>
         <div className="feed-list">
-          {isFree && filtered.length > FREE_LIMIT
-            ? <>
-                {leadCards.slice(0, FREE_LIMIT)}
-                <div className="free-gate">
-                  <div className="free-gate-blur" aria-hidden="true">
-                    {[
-                      { ava: '#FF6B3D', ini: 'R', cls: 'sb-reddit', src: 'REDDIT', sc: 9.4, title: 'Senior Product Designer — Fintech', why: 'Strong match — high budget, clear scope', desc: 'Looking for a product designer to own end-to-end flows for our payments app. Figma, prototyping and a sharp eye for detail.', budget: '£450–550/day', loc: 'Remote · UK', skills: ['Figma', 'UI/UX', 'Prototyping'] },
-                      { ava: '#6EA8D4', ini: 'W', cls: 'sb-wwr', src: 'WWR', sc: 9.1, title: 'Full-Stack Engineer — AI Startup', why: 'Great fit — your stack, strong budget', desc: 'Series-A AI startup hiring a contract full-stack engineer. React/Node, ships fast, async-first remote team.', budget: '£600/day', loc: 'Remote', skills: ['React', 'Node', 'TypeScript'] },
-                      { ava: '#B08ADB', ini: 'R', cls: 'sb-reed', src: 'REED', sc: 8.8, title: 'Brand Strategist — DTC Skincare', why: 'Solid match — budget meets your rate', desc: 'Fast-growing skincare brand needs a strategist to shape positioning and voice ahead of a major launch.', budget: '£3,200/mo', loc: 'Hybrid · London', skills: ['Branding', 'Strategy', 'Copy'] },
-                      { ava: '#5EC49E', ini: 'R', cls: 'sb-rok', src: 'REMOTE OK', sc: 9.2, title: 'Motion Designer — Ad Agency', why: 'Excellent match — premium day rate', desc: 'Award-winning agency needs a motion designer for a 6-week campaign sprint. After Effects, bold creative direction.', budget: '£400/day', loc: 'Remote', skills: ['After Effects', 'Motion', 'Cinema 4D'] },
-                      { ava: '#FF6B3D', ini: 'R', cls: 'sb-reddit', src: 'REDDIT', sc: 8.6, title: 'Webflow Developer — SaaS Marketing', why: 'Strong fit — clear brief, fast start', desc: 'Build and maintain a marketing site for a B2B SaaS. Webflow, light JS, CMS collections. Ongoing retainer available.', budget: '£55–70k', loc: 'Remote · EU', skills: ['Webflow', 'JavaScript', 'CMS'] },
-                      { ava: '#6EA8D4', ini: 'W', cls: 'sb-wwr', src: 'WWR', sc: 9.0, title: 'Content Designer — Health Tech', why: 'Great match — values your niche', desc: 'Health-tech scale-up needs a content designer to craft in-product copy and design systems documentation.', budget: '£380/day', loc: 'Remote · UK', skills: ['UX Writing', 'Figma', 'Docs'] },
-                    ].map((f, i) => (
-                      <div key={`fg-${i}`} className="lead-card fg-preview-card" style={{ '--src-color': f.ava } as React.CSSProperties}>
-                        <div className="lc-bar">
-                          <div className="lc-bar-inner">
-                            <div className="lc-bar-top">
-                              <span className={`src-badge ${f.cls}`}>{f.src}</span>
-                              <span className="state-badge st-new">NEW</span>
-                              <span className="lc-time">2h ago</span>
-                            </div>
-                            <div className="lc-title">
-                              <span className="tt">{f.title}</span>
-                              <div className="lc-title-right">
-                                <span className="lc-budget-inline"><i className="ti ti-currency-pound" />{f.budget}</span>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="why-inline"><i className="ti ti-sparkles" /><span>{f.why}</span></div>
-                        <div className="lc-meta">
-                          <span className="rank-chip"><i className="ti ti-hash" />{i + 1}</span>
-                          <span className="meta-chip"><i className="ti ti-map-pin" />{f.loc}</span>
-                        </div>
-                        <div className="skills-row">
-                          {f.skills.map(s => <span key={s} className="skill">{s}</span>)}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="free-gate-cta">
-                    <div className="free-gate-panel">
-                      <span className="fg-pro"><i className="ti ti-sparkles" /> PRO</span>
-                      <span className="fg-lock"><i className="ti ti-crown" /></span>
-                      <div className="fg-stat">
-                        <span className="fg-stat-num">{filtered.length - FREE_LIMIT}</span>
-                        <span className="fg-stat-lbl">more leads scored for you</span>
-                      </div>
-                      {(() => {
-                        const hi = filtered.slice(FREE_LIMIT).filter(l => computeMatchExplanation(l, profile).score >= 8).length
-                        return hi > 0
-                          ? <p className="fg-sub">including <strong>{hi} scoring 8+</strong> — your strongest matches, ready to apply.</p>
-                          : <p className="fg-sub">Unlock your full feed to see every match — with direct apply links and no daily limits.</p>
-                      })()}
-                      <button className="fg-btn" onClick={() => router.push('/dashboard/billing')}>Unlock all leads</button>
-                      <span className="fg-hint">From £15/mo · cancel any time</span>
-                    </div>
-                  </div>
-                </div>
-              </>
-            : leadCards}
+          {leadCards}
         </div>
 
         {selected && (() => {
