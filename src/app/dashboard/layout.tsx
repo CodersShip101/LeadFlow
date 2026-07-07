@@ -58,12 +58,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         return
       }
 
-      const lastSeen = parseInt(localStorage.getItem('lastSeen') || '0')
-      if (lastSeen > 0) {
-        const { count } = await supabase.from('leads').select('id', { count: 'exact', head: true }).eq('status', 'active').gte('posted_date', new Date(lastSeen).toISOString())
-        setNewCount(count || 0)
-      }
-      localStorage.setItem('lastSeen', String(Date.now()))
+      // "New today" = posted since local midnight — stable across reloads
+      // (the old since-last-visit counter reset to 0 the moment you reloaded).
+      const midnight = new Date(); midnight.setHours(0, 0, 0, 0)
+      const { count } = await supabase.from('leads').select('id', { count: 'exact', head: true }).eq('status', 'active').gte('posted_date', midnight.toISOString())
+      setNewCount(count || 0)
 
       const res = await fetch('/api/applications')
       const apps = res.ok ? await res.json() : []

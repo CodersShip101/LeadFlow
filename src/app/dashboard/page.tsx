@@ -260,11 +260,13 @@ export default function DashboardPage() {
         setLeads(incoming)
       }
 
-      if (fd.delivered && fd.deliveredCount > 0) {
-        setNewCount(c => (opts.initial ? fd.deliveredCount : c + fd.deliveredCount))
+      if (fd.delivered && fd.deliveredCount > 0 && !opts.initial) {
+        setNewCount(c => c + fd.deliveredCount)
       } else if (opts.initial) {
-        const lastSeen = parseInt(localStorage.getItem('lastSeen') || '0')
-        if (lastSeen > 0) setNewCount(incoming.filter(l => new Date(l.posted_date).getTime() > lastSeen).length)
+        // "New today" = posted since local midnight — stable across reloads
+        // (the old since-last-visit counter reset to 0 on every reload).
+        const midnight = new Date(); midnight.setHours(0, 0, 0, 0)
+        setNewCount(incoming.filter(l => new Date(l.posted_date).getTime() >= midnight.getTime()).length)
       }
     } catch {
       // Network failure — keep showing what we have, but if we have nothing,
@@ -290,7 +292,6 @@ export default function DashboardPage() {
 
       await syncFeed({ initial: true })
       setLoading(false)
-      localStorage.setItem('lastSeen', Date.now().toString())
     }
     load()
   }, [supabase, router, syncFeed])
@@ -676,8 +677,8 @@ export default function DashboardPage() {
   const scanLabel = scanHrs <= 1 ? 'hourly' : `every ${scanHrs}h`
   const subMap: Record<string, string> = {
     new: `Here's your ranked feed — updated ${scanLabel}`,
-    returning: newCount ? `<b>${newCount} new leads</b> since your last visit` : `Here's your ranked feed — updated ${scanLabel}`,
-    power: `<b>${newCount} new leads</b> today, <b>${appCount}</b> applied this month`,
+    returning: newCount ? `<b>${newCount} new lead${newCount === 1 ? '' : 's'}</b> today` : `Here's your ranked feed — updated ${scanLabel}`,
+    power: `<b>${newCount} new lead${newCount === 1 ? '' : 's'}</b> today, <b>${appCount}</b> applied this month`,
   }
 
   const leadCards = filtered.map((lead, idx) => {
