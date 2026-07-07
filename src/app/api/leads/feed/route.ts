@@ -153,12 +153,18 @@ export async function GET() {
         .eq('id', user.id)
     }
 
-    const { data: leads } = await admin
+    // Free tier: only ever show the 12 most recent delivered leads — a rolling
+    // window where older leads drop off as newer ones arrive (seeded with 6 at
+    // signup). Paid tiers see the full delivered set.
+    const FREE_FEED_CAP = 12
+    let leadsQuery = admin
       .from('leads')
       .select('*')
       .eq('status', 'active')
       .lte('created_at', cutoffISO)
       .order('posted_date', { ascending: false })
+    if (cap != null) leadsQuery = leadsQuery.limit(FREE_FEED_CAP)
+    const { data: leads } = await leadsQuery
 
     const { count: waitingCount } = await admin
       .from('leads')
