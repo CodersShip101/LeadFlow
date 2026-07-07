@@ -32,7 +32,8 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// Invite emails link here (GET). Handle the token, then redirect into the app.
+// Legacy/old invite links land here (GET). Do NOT auto-accept — route to the
+// confirmation page so the invitee chooses to join or decline.
 export async function GET(req: NextRequest) {
   const token = req.nextUrl.searchParams.get('token')
   const base = req.nextUrl.origin
@@ -40,16 +41,9 @@ export async function GET(req: NextRequest) {
 
   const supabase = await createServerSupabase()
   const { data: { user } } = await supabase.auth.getUser()
-  // Not logged in → send to login, preserving the invite to accept after auth.
+  // Not logged in → send to login, preserving the invite for after auth.
   if (!user) {
     return NextResponse.redirect(new URL(`/auth/login?next=/dashboard/team/join?token=${token}`, base))
   }
-
-  const { data, error } = await supabase.rpc('accept_invite', { p_token: token })
-  if (error || data?.error) {
-    return NextResponse.redirect(new URL('/dashboard/team?invite=error', base))
-  }
-  await rememberPriorPlan(supabase, user.id)
-  await joinTeamPlan(supabase, user.id)
-  return NextResponse.redirect(new URL('/dashboard/team?invite=accepted', base))
+  return NextResponse.redirect(new URL(`/dashboard/team/join?token=${token}`, base))
 }

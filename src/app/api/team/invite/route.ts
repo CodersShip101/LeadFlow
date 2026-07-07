@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
     }
 
     const origin = req.headers.get('origin') ?? process.env.NEXT_PUBLIC_SITE_URL!
-    const acceptUrl = `${origin}/api/team/accept?token=${invite!.token}`
+    const acceptUrl = `${origin}/dashboard/team/join?token=${invite!.token}`
 
     // Email the invitee the accept link.
     const html = `<!DOCTYPE html><html><body style="font-family:-apple-system,sans-serif;background:#F5F5F7;margin:0;padding:24px">
