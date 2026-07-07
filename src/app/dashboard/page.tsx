@@ -760,24 +760,22 @@ export default function DashboardPage() {
             <button className={`lca-icon tip${saved ? ' on' : ''}`} data-tip={saved ? 'Saved' : 'Save'} aria-label="Save" onClick={e => { e.stopPropagation(); toggleSave(lead) }}>
               <i className="ti ti-bookmark" />
             </button>
-            <button className="lca-icon tip" data-tip="Share" aria-label="Share" onClick={() => handleShare(lead)}>
-              <i className="ti ti-share" />
-            </button>
-            {!applied && !saved && (
-              <button className="lca-icon tip" data-tip="Hide" aria-label="Hide lead" onClick={() => hideLead(lead)}>
-                <i className="ti ti-eye-off" />
-              </button>
-            )}
+            {/* Secondary actions live in one kebab menu — keeps the card calm. */}
             <div className="lca-remind-wrap">
-              <button className="lca-icon tip" data-tip="Remind me" aria-label="Remind" onClick={() => setRemindOpen(remindOpen === lead.id ? null : lead.id)}>
-                <i className="ti ti-bell" />
+              <button className="lca-icon tip" data-tip="More" aria-label="More actions" onClick={() => setRemindOpen(remindOpen === lead.id ? null : lead.id)}>
+                <i className="ti ti-dots" />
               </button>
               {remindOpen === lead.id && (
-                <div className="lca-remind-drop">
-                  <button onClick={() => handleRemind(lead, 3)}>Later today</button>
-                  <button onClick={() => handleRemind(lead, 24)}>Tomorrow</button>
-                  <button onClick={() => handleRemind(lead, 72)}>In 3 days</button>
-                  <button onClick={() => handleRemind(lead, 168)}>Next week</button>
+                <div className="lca-menu">
+                  <button onClick={() => { setRemindOpen(null); handleShare(lead) }}><i className="ti ti-share" /> Share</button>
+                  {!applied && !saved && (
+                    <button onClick={() => { setRemindOpen(null); hideLead(lead) }}><i className="ti ti-eye-off" /> Hide lead</button>
+                  )}
+                  <div className="lca-menu-label">Remind me</div>
+                  <button onClick={() => handleRemind(lead, 3)}><i className="ti ti-bell" /> Later today</button>
+                  <button onClick={() => handleRemind(lead, 24)}><i className="ti ti-bell" /> Tomorrow</button>
+                  <button onClick={() => handleRemind(lead, 72)}><i className="ti ti-bell" /> In 3 days</button>
+                  <button onClick={() => handleRemind(lead, 168)}><i className="ti ti-bell" /> Next week</button>
                 </div>
               )}
             </div>

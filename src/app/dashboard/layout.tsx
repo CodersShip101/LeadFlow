@@ -16,6 +16,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [newCount, setNewCount] = useState(0)
   const [appCount, setAppCount] = useState(0)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [acctOpen, setAcctOpen] = useState(false)
   const router = useRouter()
   const pathname = usePathname() || ''
   const supabase = createClient()
@@ -71,7 +72,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     load()
   }, [supabase, router, pathname])
 
-  useEffect(() => { setMenuOpen(false) }, [pathname])
+  useEffect(() => { setMenuOpen(false); setAcctOpen(false) }, [pathname])
 
   if (isOnboarding) return <>{children}</>
 
@@ -123,19 +124,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </button>
         )}
 
-        <div className="rail-sep"></div>
-        <div className="rail-label">Account</div>
-        <button className={`nav-item ${isActive('/dashboard/profile') ? 'active' : ''}`} onClick={() => navTo('/dashboard/profile')}>
-          <i className="ti ti-adjustments"></i> Settings
-        </button>
-        <button className={`nav-item ${isActive('/dashboard/billing') ? 'active' : ''}`} onClick={() => navTo('/dashboard/billing')}>
-          <i className="ti ti-sparkles"></i> Plan
-        </button>
-
         <div className="rail-spacer"></div>
 
         <div className="rail-foot">
-          {isFree ? (
+          {isFree && (
             <div className="usage-mini">
               <div className="um-top">
                 <span className="um-label">Applications</span>
@@ -148,12 +140,41 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 <i className="ti ti-bolt"></i> Upgrade
               </button>
             </div>
-          ) : (
-            <button className="nav-item" onClick={() => navTo('/dashboard/billing')}>
-              <i className="ti ti-sparkles"></i> Manage plan
-            </button>
           )}
-          <button className="nav-item" onClick={handleLogout}><i className="ti ti-logout"></i> Sign out</button>
+
+          {/* Account card — settings/plan/sign-out live in its popover, not the rail. */}
+          <div className="acct-wrap">
+            {acctOpen && (
+              <>
+                <div className="acct-backdrop" onClick={() => setAcctOpen(false)} />
+                <div className="acct-pop" role="menu">
+                  <button className="acct-pop-item" onClick={() => navTo('/dashboard/profile')}>
+                    <i className="ti ti-adjustments" /> Settings
+                  </button>
+                  <button className="acct-pop-item" onClick={() => navTo('/dashboard/billing')}>
+                    <i className="ti ti-sparkles" /> Plan &amp; billing
+                  </button>
+                  <div className="acct-pop-sep" />
+                  <button className="acct-pop-item danger" onClick={handleLogout}>
+                    <i className="ti ti-logout" /> Sign out
+                  </button>
+                </div>
+              </>
+            )}
+            <button
+              className={`acct-card ${acctOpen ? 'open' : ''}`}
+              onClick={() => setAcctOpen(v => !v)}
+              aria-haspopup="menu"
+              aria-expanded={acctOpen}
+            >
+              <span className="acct-avatar">{profileInitials(profile?.full_name)}</span>
+              <span className="acct-meta">
+                <span className="acct-name">{profile?.full_name || 'Your account'}</span>
+                <span className="acct-plan">{plan === 'free' ? 'Free plan' : `${plan.charAt(0).toUpperCase()}${plan.slice(1)} plan`}</span>
+              </span>
+              <i className={`ti ${acctOpen ? 'ti-chevron-down' : 'ti-chevron-up'} acct-chev`} />
+            </button>
+          </div>
         </div>
       </aside>
       <div className={`overlay ${menuOpen ? 'show' : ''}`} onClick={() => setMenuOpen(false)} />
@@ -175,9 +196,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <header className="topbar">
           <div>
             <h1>{pageTitle}</h1>
-          </div>
-          <div className="tb-right">
-            <div className="avatar">{profileInitials(profile?.full_name)}</div>
           </div>
         </header>
 
