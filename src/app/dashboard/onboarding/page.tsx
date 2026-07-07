@@ -40,7 +40,10 @@ export default function OnboardingPage() {
   const [tz, setTz] = useState('')
   const [ir35, setIr35] = useState('')
   const [saving, setSaving] = useState(false)
+  const [researching, setResearching] = useState(false)
   const [instantLeads, setInstantLeads] = useState<Lead[]>([])
+  const [matchCount, setMatchCount] = useState(0)
+  const [scannedCount, setScannedCount] = useState(0)
   const router = useRouter()
   const supabase = createClient()
 
@@ -105,37 +108,91 @@ export default function OnboardingPage() {
     })
     if (!res.ok) { const j = await res.json(); toast.error(j.error || 'Failed to save'); setSaving(false); return }
 
-    // Instant win: pull active leads and score them against the new profile
+    // Show the "researching" animation while we actually score leads — with a
+    // minimum duration so the work reads as real, not instant/fake.
+    setSaving(false)
+    setResearching(true)
+    const startedAt = Date.now()
+
     const { data: leadsData } = await supabase
       .from('leads').select('*').eq('status', 'active')
-      .order('posted_date', { ascending: false }).limit(60)
+      .order('posted_date', { ascending: false }).limit(200)
     const prof = tempProfile()
-    const ranked = (leadsData || [])
+    const scored = (leadsData || [])
       .map(l => ({ l, score: computeMatchExplanation(l, prof).score }))
       .sort((a, b) => b.score - a.score)
-      .slice(0, 5)
-      .map(x => x.l)
-    setInstantLeads(ranked)
-    setSaving(false)
+    // A "match" is a genuinely relevant lead (score >= 6 on the 0–10 scale) —
+    // an honest count, not a hardcoded number.
+    const strong = scored.filter(x => x.score >= 6)
+    setScannedCount(leadsData?.length ?? 0)
+    setMatchCount(strong.length)
+    setInstantLeads((strong.length ? strong : scored).slice(0, 6).map(x => x.l))
+
+    // Hold the animation for at least 2.4s of "research".
+    const elapsed = Date.now() - startedAt
+    await new Promise(r => setTimeout(r, Math.max(0, 2400 - elapsed)))
+    setResearching(false)
     setDone(true)
+  }
+
+  // ── Researching screen (shows the matching is real work) ─────
+  if (researching) {
+    const steps = [
+      { icon: 'ti-world-search', txt: 'Scanning 20+ lead sources' },
+      { icon: 'ti-adjustments-bolt', txt: 'Scoring every lead against your skills & rate' },
+      { icon: 'ti-arrows-sort', txt: 'Ranking your strongest matches' },
+    ]
+    return (
+      <div className="ob-wrap">
+        <div className="ob-card ob-research">
+          <div className="ob-radar" aria-hidden="true">
+            <span /><span /><span />
+            <i className="ti ti-radar-2" />
+          </div>
+          <h1 className="ob-title">Matching you to live leads…</h1>
+          <p className="ob-sub">Give us a moment — we&apos;re scoring real openings against the profile you just built.</p>
+          <ul className="ob-research-steps">
+            {steps.map((s, i) => (
+              <li key={i} style={{ animationDelay: `${i * 700}ms` }}>
+                <span className="ob-rs-ic"><i className={`ti ${s.icon}`} /></span>
+                {s.txt}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    )
   }
 
   // ── Instant-win screen ──────────────────────────────────────
   if (done) {
     const prof = tempProfile()
+    const first = fullName.split(' ')[0]
     return (
       <div className="ob-wrap">
         <div className="ob-confetti" aria-hidden="true">
           {Array.from({ length: 28 }).map((_, i) => <span key={i} style={{ '--i': i } as React.CSSProperties} />)}
         </div>
         <div className="ob-card ob-win">
-          <div className="ob-win-badge"><i className="ti ti-sparkles" /></div>
-          <h1 className="ob-title">You&apos;re all set, {fullName.split(' ')[0]}</h1>
-          <p className="ob-sub">
-            {instantLeads.length > 0
-              ? <>We already found <strong>{instantLeads.length} leads</strong> matched to your profile.</>
-              : <>Your profile is live — we&apos;re scanning 4 sources and your first leads land within 30 minutes.</>}
-          </p>
+          {matchCount > 0 ? (
+            <>
+              <div className="ob-win-stat">
+                <span className="ob-win-num">{matchCount}</span>
+                <span className="ob-win-num-lbl">strong {matchCount === 1 ? 'match' : 'matches'} found</span>
+              </div>
+              <h1 className="ob-title">Welcome, {first} — your feed is ready</h1>
+              <p className="ob-sub">
+                We scored <strong>{scannedCount}</strong> live openings against your profile.
+                Here are your top {Math.min(instantLeads.length, 6)}.
+              </p>
+            </>
+          ) : (
+            <>
+              <div className="ob-win-badge"><i className="ti ti-radar-2" /></div>
+              <h1 className="ob-title">You&apos;re all set, {first}</h1>
+              <p className="ob-sub">Your profile is live. We scan for fresh leads around the clock — your first matches will appear in your feed shortly.</p>
+            </>
+          )}
 
           {instantLeads.length > 0 && (
             <div className="ob-leads">
@@ -144,11 +201,9 @@ export default function OnboardingPage() {
                 const match = computeMatchExplanation(lead, prof)
                 return (
                   <div key={lead.id} className="ob-lead" style={{ animationDelay: `${i * 90}ms` }}>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded" style={{ background: src.bg, color: src.color }}>{src.label}</span>
-                      </div>
-                      <div className="text-[13px] font-semibold leading-snug line-clamp-1" style={{ color: 'var(--ink-900)' }}>{lead.title}</div>
+                    <div className="ob-lead-main">
+                      <span className="ob-lead-src" style={{ background: src.bg, color: src.color }}>{src.label}</span>
+                      <span className="ob-lead-title">{lead.title}</span>
                     </div>
                     <ScoreBadge match={match} size="sm" />
                   </div>
@@ -157,8 +212,8 @@ export default function OnboardingPage() {
             </div>
           )}
 
-          <button className="btn-p btn-full" style={{ marginTop: 20 }} onClick={() => router.push('/dashboard')}>
-            Go to my feed <i className="ti ti-arrow-right" />
+          <button className="btn-p btn-full" style={{ marginTop: 22 }} onClick={() => router.push('/dashboard')}>
+            {matchCount > 0 ? 'See all my leads' : 'Go to my feed'} <i className="ti ti-arrow-right" />
           </button>
         </div>
       </div>
