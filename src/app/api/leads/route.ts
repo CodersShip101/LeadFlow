@@ -56,7 +56,6 @@ export async function GET(req: NextRequest) {
   }
 
   const plan = (profile.subscription_status ?? 'free') as string
-  const isPaid = plan !== 'free'
 
   const leads = visible.map((r) => {
     const row = byId.get(r.lead.id)
@@ -76,8 +75,8 @@ export async function GET(req: NextRequest) {
       sub: r.sub,
       why: r.why,
       skillDetail: r.skillDetail,
-      sourceUrl: isPaid ? row.source_url : null,
-      sourceLocked: !isPaid,
+      sourceUrl: row.source_url ?? null,
+      sourceLocked: false,
       isTopMatch: row.id === topMatchId,
     }
   })

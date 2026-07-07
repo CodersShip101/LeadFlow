@@ -34,8 +34,6 @@ export async function GET(
       hourly_rate: profile?.hourly_rate ?? null,
     })
 
-    const isPaid = (profile?.subscription_status ?? 'free') !== 'free'
-
     return NextResponse.json({
       id: row.id,
       source: row.source,
@@ -52,8 +50,8 @@ export async function GET(
       sub: scored.sub,
       why: scored.why,
       skillDetail: scored.skillDetail,
-      sourceUrl: isPaid ? row.source_url : null,
-      sourceLocked: !isPaid,
+      sourceUrl: row.source_url ?? null,
+      sourceLocked: false,
     })
   } catch (e) {
     console.error('Lead fetch error:', e)

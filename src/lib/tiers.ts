@@ -55,7 +55,7 @@ export const ENTITLEMENTS: Record<Tier, Entitlements> = {
     dropSlotsUTC: [0, 5, 10, 15, 20],
     weeklyLeadCap: 50,
     manualRefresh: false,
-    sourceLinks: false,
+    sourceLinks: true,
     emailDigest: false,
     basicAnalytics: false,
     advancedAnalytics: false,
@@ -229,16 +229,16 @@ export function planFeatures(tier: Tier): PlanFeature[] {
     case 'free':
       return [
         { txt: 'Scored lead feed (all sources)' },
+        { txt: 'Direct source links to apply' },
+        { txt: `${ENTITLEMENTS.free.weeklyLeadCap} new leads a week` },
         { txt: `${appLimit} applications / month` },
         { txt: 'Pipeline tracking' },
-        { txt: 'Source links hidden', muted: true },
-        { txt: 'No analytics', muted: true },
       ]
     case 'pro':
       return [
         { txt: 'Everything in Free' },
+        { txt: 'Unlimited leads — no weekly cap' },
         { txt: 'Unlimited applications' },
-        { txt: 'Direct source links' },
         { txt: 'Daily email digest' },
         { txt: 'Custom lead alerts' },
         { txt: 'Basic analytics' },

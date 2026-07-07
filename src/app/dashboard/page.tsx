@@ -206,8 +206,10 @@ export default function DashboardPage() {
   const appCount = applications.filter(a => a.status !== 'saved' && a.status !== 'lost').length
   const isFree = profile?.subscription_status === 'free'
   const plan = profile?.subscription_status || 'free'
-  const isPro = plan === 'pro' || plan === 'max' || plan === 'team'
   const ent = entitlementsFor(plan as Tier)
+  // Source links are available to every tier (free included) — a lead you can't
+  // open is useless. Gated on the entitlement, not the paid check.
+  const showLinks = ent.sourceLinks
   const [exporting, setExporting] = useState(false)
 
   const handleExport = async () => {
@@ -1107,7 +1109,7 @@ export default function DashboardPage() {
                       <path d="M18 7v14l-6-4-6 4V7a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4z"/>
                     </svg>
                   </button>
-                  {l.source_url && isPro && (
+                  {l.source_url && showLinks && (
                     <button className="dp-icon-btn" title={panelCopied ? 'Copied!' : 'Copy link'}
                       onClick={async () => { await navigator.clipboard.writeText(l.source_url!); setPanelCopied(true); setTimeout(() => setPanelCopied(false), 2000) }}>
                       <i className={`ti ${panelCopied ? 'ti-check' : 'ti-copy'}`} />
@@ -1206,13 +1208,13 @@ export default function DashboardPage() {
                 </div>
 
                 {/* 6. SOURCE */}
-                {isPro
-                  ? <a className="btn btn-ghost" style={{ width: '100%' }} href={l.source_url || '#'} target="_blank" rel="noopener noreferrer">
+                {l.source_url
+                  ? <a className="btn btn-ghost" style={{ width: '100%' }} href={l.source_url} target="_blank" rel="noopener noreferrer">
                       <i className="ti ti-external-link" /> Open original listing
                     </a>
                   : <div className="lock-card" style={{ margin: 0 }}>
-                      <div className="lk-icon"><i className="ti ti-lock" /></div>
-                      <div><h4>Source hidden on Free</h4><p>Upgrade to see where to apply.</p></div>
+                      <div className="lk-icon"><i className="ti ti-help" /></div>
+                      <div><h4>No direct link</h4><p>This source doesn&apos;t expose a public URL.</p></div>
                     </div>}
               </div>
 
@@ -1222,10 +1224,9 @@ export default function DashboardPage() {
                   ? <button className="applied-tag applied-tag-btn" style={{ width: '100%', justifyContent: 'center', padding: '12px 0' }} onClick={() => router.push('/dashboard/applied')}>
                       <i className="ti ti-circle-check" /> View in pipeline
                     </button>
-                  : <button className="btn btn-primary dp-foot-btn" disabled={applyingId === l.id || (!isPro && !l.source_url)} onClick={() => handleApply(l)}>
-                      {applyingId === l.id ? <LoadingDots label="" /> : <><i className="ti ti-send" /> {!isPro && !l.source_url ? 'Source locked — upgrade' : 'Apply & track this lead'}</>}
+                  : <button className="btn btn-primary dp-foot-btn" disabled={applyingId === l.id} onClick={() => handleApply(l)}>
+                      {applyingId === l.id ? <LoadingDots label="" /> : <><i className="ti ti-send" /> Apply &amp; track this lead</>}
                     </button>}
-                {!applied && !isPro && !l.source_url && <p className="dp-foot-note">Upgrade to unlock where to apply</p>}
               </div>
             </aside>
           )

@@ -183,8 +183,9 @@ export default function LeadDetailPage() {
     </div>
   )
 
-  const isPro = profile?.subscription_status !== 'free'
   const ent = entitlementsFor((profile?.subscription_status ?? 'free') as Tier)
+  // Source links available to every tier (free included).
+  const showLinks = ent.sourceLinks
   const si = SRC[srcKey(lead.source_url)]
   const m = computeMatchExplanation(lead, profile)
   const sc = m.score
@@ -291,13 +292,13 @@ ${profile?.full_name || ''}`.trim()
           <i className="ti ti-pencil-bolt" /> Draft pitch
         </button>
 
-        {isPro && lead.source_url && (
+        {showLinks && lead.source_url && (
           <a href={lead.source_url} target="_blank" rel="noopener noreferrer" className="btn btn-ghost">
             <i className="ti ti-external-link" /> Open listing
           </a>
         )}
 
-        {isPro && lead.source_url && (
+        {showLinks && lead.source_url && (
           <button className="btn-icon" title={copied ? 'Copied!' : 'Copy link'} onClick={async () => { await navigator.clipboard.writeText(lead.source_url!); setCopied(true); setTimeout(() => setCopied(false), 2000) }}>
             <i className={`ti ${copied ? 'ti-check' : 'ti-copy'}`} />
           </button>
@@ -415,22 +416,19 @@ ${profile?.full_name || ''}`.trim()
         </div>
       )}
 
-      {/* ── SOURCE — TIER GATED ── */}
+      {/* ── SOURCE ── */}
       <div className="ld-card">
         <div className="ld-section-label"><i className="ti ti-link" />Source</div>
-        {isPro
-          ? <a href={lead.source_url || '#'} target="_blank" rel="noopener noreferrer" className="btn btn-ghost" style={{ width: '100%' }}>
+        {lead.source_url
+          ? <a href={lead.source_url} target="_blank" rel="noopener noreferrer" className="btn btn-ghost" style={{ width: '100%' }}>
               <i className="ti ti-external-link" /> Open original listing on {si.name}
             </a>
           : <div className="ld-lock-row">
-              <div className="ld-lock-icon"><i className="ti ti-lock" /></div>
+              <div className="ld-lock-icon"><i className="ti ti-help" /></div>
               <div>
-                <p className="ld-lock-head">Source hidden on Free</p>
-                <p className="ld-lock-sub">Upgrade to see where to apply — from £15/mo.</p>
+                <p className="ld-lock-head">No direct link</p>
+                <p className="ld-lock-sub">This source doesn&apos;t expose a public URL to apply.</p>
               </div>
-              <button className="btn btn-primary" onClick={() => router.push('/dashboard/billing')} style={{ flexShrink: 0 }}>
-                Upgrade
-              </button>
             </div>}
       </div>
 
