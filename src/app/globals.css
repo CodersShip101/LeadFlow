@@ -111,6 +111,32 @@ button { font-family: inherit; cursor: pointer; }
 }
 .section-head p { font-size: 1.08rem; color: var(--slate-500); line-height: 1.65; }
 
+/* ── Landing: flat editorial sections (no card grids) ── */
+/* Who it's for — role rows: big display name left, copy right, thin rules */
+.aud-rows { max-width: 900px; margin: 0 auto; }
+.aud-row { display: grid; grid-template-columns: minmax(220px, 5fr) 7fr; gap: 20px 48px; align-items: start; padding: 34px 0; border-top: 1px solid var(--line, #E7E9E3); }
+.aud-row:last-child { border-bottom: 1px solid var(--line, #E7E9E3); }
+.aud-role h3 { font-size: clamp(1.5rem, 3vw, 2rem); letter-spacing: -.03em; line-height: 1.1; margin-bottom: 8px; }
+.aud-hint { font-family: var(--font-mono); font-size: .74rem; letter-spacing: .05em; color: var(--lime-ink, #5E8F00); text-transform: uppercase; }
+.aud-text { font-size: 1rem; color: var(--slate-500); line-height: 1.7; max-width: 46ch; padding-top: 6px; }
+@media (max-width: 720px) { .aud-row { grid-template-columns: 1fr; gap: 10px; padding: 26px 0; } .aud-text { padding-top: 0; } }
+
+/* Problem — numbered flat trio, no cards */
+.prob-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 56px; max-width: 1020px; margin: 0 auto; }
+.prob-item { position: relative; }
+.prob-num { font-family: var(--font-mono); font-size: .8rem; font-weight: 700; color: var(--slate-400); letter-spacing: .08em; display: block; margin-bottom: 14px; }
+.prob-item h3 { font-size: 1.22rem; margin-bottom: 10px; letter-spacing: -.02em; }
+.prob-item p { font-size: .95rem; color: var(--slate-500); line-height: 1.68; }
+@media (max-width: 860px) { .prob-list { grid-template-columns: 1fr; gap: 34px; max-width: 560px; } }
+
+/* Features — flat two-column list, small inline icons */
+.feat-list { display: grid; grid-template-columns: 1fr 1fr; gap: 40px 64px; max-width: 980px; margin: 0 auto; }
+.feat-item { display: flex; align-items: flex-start; gap: 16px; }
+.feat-item > .ti { font-size: 21px; color: var(--lime-deep); flex-shrink: 0; margin-top: 3px; }
+.feat-item h3 { font-size: 1.05rem; margin-bottom: 6px; letter-spacing: -.015em; }
+.feat-item p { font-size: .92rem; color: var(--slate-500); line-height: 1.65; }
+@media (max-width: 720px) { .feat-list { grid-template-columns: 1fr; gap: 30px; max-width: 560px; } }
+
 /* ── BUTTONS ── */
 .btn-p, .btn-amber, .btn-ghost, .btn-line {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;

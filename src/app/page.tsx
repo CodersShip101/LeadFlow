@@ -486,16 +486,18 @@ export default function HomePage() {
               <h2 id="test-h-top">Built for how freelancers actually work</h2>
               <p>Whatever you do, the job is the same: spend less time hunting and more time billing. Here&apos;s how Flaiir fits each discipline.</p>
             </div>
-            <div className="grid-3">
+            <div className="aud-rows sr">
               {[
-                { icon: 'ti-palette', role: 'Designers', text: 'Filter to design contracts that match your tools and day rate, so you stop scrolling past roles that were never a fit.' },
-                { icon: 'ti-code', role: 'Developers', text: 'See remote and contract dev work scored against your stack — and apply on the original platform while the post is still fresh.' },
-                { icon: 'ti-pencil', role: 'Writers & marketers', text: 'Budgets shown upfront mean you never burn a call discovering the rate doesn\'t work. Chase only the leads worth your time.' },
-              ].map((t, i) => (
-                <article key={t.role} className={`card sr ${i === 0 ? 'sr-d1' : i === 1 ? 'sr-d2' : 'sr-d3'}`} style={{ padding: 30 }}>
-                  <div className="icon-box" style={{ background: 'rgba(196,240,0,.16)' }}><i className={`ti ${t.icon}`} style={{ fontSize: 23, color: 'var(--lime-deep)' }} aria-hidden="true"></i></div>
-                  <h3 className="display" style={{ fontSize: '1.12rem', marginBottom: 8 }}>{t.role}</h3>
-                  <p style={{ fontSize: '.92rem', color: 'var(--slate-500)', lineHeight: 1.65 }}>{t.text}</p>
+                { role: 'Designers', hint: 'Figma · brand · product', text: 'Filter to design contracts that match your tools and day rate, so you stop scrolling past roles that were never a fit.' },
+                { role: 'Developers', hint: 'remote · contract · your stack', text: 'See remote and contract dev work scored against your stack — and apply on the original platform while the post is still fresh.' },
+                { role: 'Writers & marketers', hint: 'budgets shown upfront', text: 'You never burn a call discovering the rate doesn\'t work. Chase only the leads worth your time.' },
+              ].map(t => (
+                <article key={t.role} className="aud-row">
+                  <div className="aud-role">
+                    <h3 className="display">{t.role}</h3>
+                    <span className="aud-hint">{t.hint}</span>
+                  </div>
+                  <p className="aud-text">{t.text}</p>
                 </article>
               ))}
             </div>
@@ -510,22 +512,18 @@ export default function HomePage() {
               <h2 id="problem-h">Job boards waste your time</h2>
               <p>Endless listings, hidden budgets, and proposals that go nowhere. The work worth having is buried under hours of searching.</p>
             </div>
-            <div className="grid-3">
-              <article className="card sr sr-d1" style={{ padding: '34px 30px' }}>
-                <div className="icon-box" style={{ background: 'rgba(255,107,94,.1)' }}><i className="ti ti-clock-x" style={{ fontSize: 23, color: 'var(--coral)' }} aria-hidden="true"></i></div>
-                <h3 className="display" style={{ fontSize: '1.18rem', marginBottom: 10 }}>Hours of searching</h3>
-                <p style={{ fontSize: '.94rem', color: 'var(--slate-500)', lineHeight: 1.65 }}>Filtering noise, applying blind, refreshing tabs. Time that should be billed, spent looking for work.</p>
-              </article>
-              <article className="card sr sr-d2" style={{ padding: '34px 30px' }}>
-                <div className="icon-box" style={{ background: 'rgba(255,176,32,.12)' }}><i className="ti ti-eye-off" style={{ fontSize: 23, color: 'var(--amber)' }} aria-hidden="true"></i></div>
-                <h3 className="display" style={{ fontSize: '1.18rem', marginBottom: 10 }}>Hidden budgets</h3>
-                <p style={{ fontSize: '.94rem', color: 'var(--slate-500)', lineHeight: 1.65 }}>No rate, no scope, no reply. You pitch, you call, you wait — and hear nothing back.</p>
-              </article>
-              <article className="card sr sr-d3" style={{ padding: '34px 30px' }}>
-                <div className="icon-box" style={{ background: 'rgba(196,240,0,.16)' }}><i className="ti ti-wave-saw-tool" style={{ fontSize: 23, color: 'var(--lime-deep)' }} aria-hidden="true"></i></div>
-                <h3 className="display" style={{ fontSize: '1.18rem', marginBottom: 10 }}>Feast or famine</h3>
-                <p style={{ fontSize: '.94rem', color: 'var(--slate-500)', lineHeight: 1.65 }}>Land a project, stop looking, go dark. The cycle breaks when good leads arrive on schedule.</p>
-              </article>
+            <div className="prob-list sr">
+              {[
+                { n: '01', title: 'Hours of searching', text: 'Filtering noise, applying blind, refreshing tabs. Time that should be billed, spent looking for work.' },
+                { n: '02', title: 'Hidden budgets', text: 'No rate, no scope, no reply. You pitch, you call, you wait — and hear nothing back.' },
+                { n: '03', title: 'Feast or famine', text: 'Land a project, stop looking, go dark. The cycle breaks when good leads arrive on schedule.' },
+              ].map(p => (
+                <article key={p.n} className="prob-item">
+                  <span className="prob-num" aria-hidden="true">{p.n}</span>
+                  <h3 className="display">{p.title}</h3>
+                  <p>{p.text}</p>
+                </article>
+              ))}
             </div>
           </div>
         </section>
@@ -597,7 +595,7 @@ export default function HomePage() {
               <h2 id="feat-h">Everything you need, nothing you don&apos;t</h2>
               <p>Built for working freelancers, not procurement teams or recruiters.</p>
             </div>
-            <div className="grid-3">
+            <div className="feat-list sr">
               {[
                 { icon: 'ti-brain', title: 'AI quality scoring', desc: 'Every lead ranked 1–10 so you focus on the best ones first. Stop guessing which are worth applying to.' },
                 { icon: 'ti-clock-bolt', title: 'Delivered as often as every hour', desc: 'Fresh matches throughout the day. You reply while the client is still reading applications.' },
@@ -605,11 +603,13 @@ export default function HomePage() {
                 { icon: 'ti-currency-pound', title: 'Budgets upfront', desc: 'Real numbers before you pitch. Never burn a call discovering the rate doesn\'t work.' },
                 { icon: 'ti-link', title: 'Direct links, no commission', desc: 'Apply on the original platform. We never sit between you and the client or take a cut of your work.' },
                 { icon: 'ti-route', title: 'Pipeline tracking', desc: 'Follow each lead from interested to won. Never lose the thread on a live opportunity.' },
-              ].map((f, i) => (
-                <article key={f.title} className={`card sr ${i < 3 ? 'sr-d1' : i < 5 ? 'sr-d2' : 'sr-d3'}`} style={{ padding: 30 }}>
-                  <div className="icon-box" style={{ background: 'rgba(196,240,0,.16)' }}><i className={`ti ${f.icon}`} style={{ fontSize: 23, color: 'var(--lime-deep)' }} aria-hidden="true"></i></div>
-                  <h3 className="display" style={{ fontSize: '1.12rem', marginBottom: 8 }}>{f.title}</h3>
-                  <p style={{ fontSize: '.9rem', color: 'var(--slate-500)', lineHeight: 1.62 }}>{f.desc}</p>
+              ].map(f => (
+                <article key={f.title} className="feat-item">
+                  <i className={`ti ${f.icon}`} aria-hidden="true"></i>
+                  <div>
+                    <h3 className="display">{f.title}</h3>
+                    <p>{f.desc}</p>
+                  </div>
                 </article>
               ))}
             </div>
