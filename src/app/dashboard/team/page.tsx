@@ -48,6 +48,7 @@ function TeamContent() {
   const [slackConfigured, setSlackConfigured] = useState(false)
   const [slackUrl, setSlackUrl] = useState('')
   const [savingSlack, setSavingSlack] = useState(false)
+  const [showAllBoard, setShowAllBoard] = useState(false)
 
   const loadPool = useCallback(async () => {
     try {
@@ -267,7 +268,7 @@ function TeamContent() {
           })()}
           <div className="tm-board">
             <div className="tm-board-head"><span>#</span><span>Member</span><span>Applied</span><span>Won</span><span>Win rate</span></div>
-            {stats.leaderboard.map((r, i) => (
+            {(showAllBoard ? stats.leaderboard : stats.leaderboard.slice(0, 5)).map((r, i) => (
               <div key={r.user_id} className={`tm-board-row ${i === 0 && r.won > 0 ? 'lead' : ''}`}>
                 <span className="tm-rank">{i === 0 && r.won > 0 ? <i className="ti ti-crown" /> : i + 1}</span>
                 <span className="tm-board-name">{r.name}{r.role === 'admin' && <span className="tm-you">admin</span>}</span>
@@ -284,6 +285,12 @@ function TeamContent() {
               </div>
             ))}
           </div>
+          {stats.leaderboard.length > 5 && (
+            <button className="tm-board-more" onClick={() => setShowAllBoard(v => !v)}>
+              {showAllBoard ? 'Show top 5' : `Show all ${stats.leaderboard.length}`}
+              <i className={`ti ${showAllBoard ? 'ti-chevron-up' : 'ti-chevron-down'}`} />
+            </button>
+          )}
         </div>
       )}
 

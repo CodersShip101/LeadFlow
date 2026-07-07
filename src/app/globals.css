@@ -2268,6 +2268,8 @@ button:disabled { cursor: default; opacity: .85; }
 .tm-rate-fill { display: block; height: 100%; background: var(--hi); border-radius: 3px; }
 .tm-rate-num { min-width: 38px; text-align: right; }
 .tm-rate-num.dim { color: var(--slate-2); }
+.tm-board-more { display: inline-flex; align-items: center; gap: 5px; margin-top: 10px; padding: 6px 12px; font-size: 12.5px; font-weight: 600; color: var(--slate); background: none; border: none; cursor: pointer; border-radius: var(--r-sm); transition: color .12s; }
+.tm-board-more:hover { color: var(--ink); }
 
 /* ───────── Team — seat meter, role tags, progressive-disclosure actions ───────── */
 .tm-seats { display: flex; flex-direction: column; gap: 7px; }
