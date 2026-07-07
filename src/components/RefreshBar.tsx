@@ -15,6 +15,9 @@ type Props = {
   weeklyLeadCap?: number | null
   /** Leads left this week (null for paid). */
   weeklyRemaining?: number | null
+  /** True when the weekly cap is exhausted (free only). Hides the daily
+   * countdown, since no drop will deliver until the weekly reset. */
+  capReached?: boolean | null
 }
 
 function formatCountdown(ms: number): string {
@@ -27,7 +30,7 @@ function formatCountdown(ms: number): string {
   return `${s}s`
 }
 
-export default function RefreshBar({ nextScanAt, waitingCount = 0, newCount = 0, weeklyLeadCap = null, weeklyRemaining = null, onScanReady }: Props) {
+export default function RefreshBar({ nextScanAt, waitingCount = 0, newCount = 0, weeklyLeadCap = null, weeklyRemaining = null, capReached = null, onScanReady }: Props) {
   const [now, setNow] = useState(Date.now())
   const mounted = useRef(true)
   // Guards against firing onScanReady repeatedly for the same scan window.
@@ -63,19 +66,23 @@ export default function RefreshBar({ nextScanAt, waitingCount = 0, newCount = 0,
           <i className="ti ti-sparkles" />{newCount} new
         </span>
       )}
-      <span className={`rb-status ${nextScanAt == null ? 'pending' : ready ? 'pending' : 'live'}`}>
-        <span className="rb-dot" />
-        {nextScanAt == null
-          ? 'Loading feed'
-          : ready
-            ? (waitingCount > 0 ? <>Delivering <strong>{waitingCount}</strong>…</> : <>Scanning…</>)
-            : <>Next scan <strong>{formatCountdown(remaining!)}</strong></>
-        }
-      </span>
+      {/* Daily countdown — hidden once the weekly cap is hit, since no drop will
+          deliver until the weekly reset (the cap panel carries that message). */}
+      {!capReached && (
+        <span className={`rb-status ${nextScanAt == null ? 'pending' : ready ? 'pending' : 'live'}`}>
+          <span className="rb-dot" />
+          {nextScanAt == null
+            ? 'Loading feed'
+            : ready
+              ? (waitingCount > 0 ? <>Delivering <strong>{waitingCount}</strong>…</> : <>Scanning…</>)
+              : <>Next scan <strong>{formatCountdown(remaining!)}</strong></>
+          }
+        </span>
+      )}
       {weeklyLeadCap != null && weeklyRemaining != null && (
         <span className="rb-week tip" data-tip={`${weeklyLeadCap - weeklyRemaining} of ${weeklyLeadCap} leads used this week`}>
           <span className="rb-week-bar">
-            <span className="rb-week-fill" style={{ width: `${Math.min(100, ((weeklyLeadCap - weeklyRemaining) / weeklyLeadCap) * 100)}%` }} />
+            <span className="rb-week-fill" style={{ width: `${Math.max(0, Math.min(100, ((weeklyLeadCap - weeklyRemaining) / weeklyLeadCap) * 100))}%` }} />
           </span>
           <span className="rb-week-num">{weeklyRemaining}/{weeklyLeadCap} left</span>
         </span>
