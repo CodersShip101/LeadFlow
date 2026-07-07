@@ -7,8 +7,6 @@ type Props = {
   nextScanAt: number | null
   /** Leads ingested but held back until the next scan. */
   waitingCount?: number
-  /** Leads just delivered (for the "X new" badge). */
-  newCount?: number
   /** Called when the countdown reaches zero so the feed can deliver the batch. */
   onScanReady?: () => void
   /** Free-plan weekly cap (null for paid). */
@@ -30,7 +28,7 @@ function formatCountdown(ms: number): string {
   return `${s}s`
 }
 
-export default function RefreshBar({ nextScanAt, waitingCount = 0, newCount = 0, weeklyLeadCap = null, weeklyRemaining = null, capReached = null, onScanReady }: Props) {
+export default function RefreshBar({ nextScanAt, waitingCount = 0, weeklyLeadCap = null, weeklyRemaining = null, capReached = null, onScanReady }: Props) {
   const [now, setNow] = useState(Date.now())
   const mounted = useRef(true)
   // Guards against firing onScanReady repeatedly for the same scan window.
@@ -61,11 +59,8 @@ export default function RefreshBar({ nextScanAt, waitingCount = 0, newCount = 0,
 
   return (
     <span className="rb-inline">
-      {newCount > 0 && (
-        <span className="rb-badge-sm">
-          <i className="ti ti-sparkles" />{newCount} new
-        </span>
-      )}
+      {/* No "N new" badge here — the greeting subtitle already says it; one
+          number, one place. */}
       {/* Daily countdown — hidden once the weekly cap is hit, since no drop will
           deliver until the weekly reset (the cap panel carries that message). */}
       {!capReached && (

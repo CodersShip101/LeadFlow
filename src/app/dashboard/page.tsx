@@ -799,7 +799,7 @@ export default function DashboardPage() {
         <div className="feed-header-left">
           <h2 className="feed-title" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             {greetMap[seg]}
-            <RefreshBar nextScanAt={nextScanAt} waitingCount={waitingCount} newCount={newCount} weeklyLeadCap={weeklyLeadCap} weeklyRemaining={weeklyRemaining} capReached={capReached} onScanReady={() => syncFeed()} />
+            <RefreshBar nextScanAt={nextScanAt} waitingCount={waitingCount} weeklyLeadCap={weeklyLeadCap} weeklyRemaining={weeklyRemaining} capReached={capReached} onScanReady={() => syncFeed()} />
           </h2>
           <p className="feed-sub" dangerouslySetInnerHTML={{ __html: subMap[seg] }} />
         </div>
