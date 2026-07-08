@@ -334,7 +334,10 @@ textarea.input { resize: vertical; min-height: 80px; }
 
 /* page scroll area */
 .page{flex:1;overflow-y:auto;min-height:0}
-.page-inner{max-width:1180px;margin:0 auto;padding:24px}
+.page-inner{max-width:1320px;margin:0 auto;padding:24px}
+/* Feed header: greeting left, live status right */
+.fh-spread{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.fh-status{display:flex;align-items:center;padding-top:8px}
 
 /* ---- Profile banner ---- */
 .profile-banner{display:flex;align-items:center;gap:12px;background:var(--mid-bg);border:1px solid #F0D9A0;border-radius:var(--r-md);padding:12px 16px;margin-bottom:20px}
@@ -418,7 +421,12 @@ textarea.input { resize: vertical; min-height: 80px; }
 .loc-input-wrap .ti { font-size: 15px; color: var(--slate); flex-shrink: 0; }
 .loc-input-wrap input { border: none; outline: none; background: none; font-size: 14.5px; color: var(--ink); font-family: inherit; width: 100%; }
 
-@media (max-width: 640px) { .search-loc-row { flex-direction: column; } }
+/* Stacked on mobile: both pills identical height/width so they read as one control set */
+@media (max-width: 640px) {
+  .search-loc-row { flex-direction: column; gap: 10px; }
+  .search-loc-row .tb-search, .search-loc-row .loc-toggle { height: 48px; flex: none; width: 100%; }
+  .loc-toggle-wrap { width: 100%; flex: none; }
+}
 
 /* ── TOOLBAR v2: labelled groups, segmented sort, unified chips ── */
 .toolbar{display:flex;align-items:center;gap:20px;row-gap:12px;margin-bottom:20px;overflow:visible;flex-wrap:wrap;padding-bottom:2px;}
