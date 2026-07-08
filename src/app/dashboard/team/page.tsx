@@ -228,42 +228,52 @@ function TeamContent() {
         ))}
       </div>
 
-      {/* ── OVERVIEW: the few numbers that matter, then how work is going ── */}
-      {tab === 'overview' && stats && (
+      {/* ── OVERVIEW: two columns — the work on the left, the read on the right ── */}
+      {tab === 'overview' && stats && (() => {
+        const s = stats.summary
+        const pipeline = stats.pipeline
+        const stages: Stage[] = ['saved', 'interested', 'applied', 'in_talks', 'hired', 'lost']
+        const pipelineTotal = pipeline ? stages.reduce((n, st) => n + pipeline[st], 0) : 0
+        const stageColor: Record<Stage, string> = {
+          saved: 'var(--slate-2)', interested: '#D7E8A8', applied: 'var(--lime-deep)',
+          in_talks: 'var(--amber, #E0A82E)', hired: 'var(--hi)', lost: 'var(--coral)',
+        }
+        // Honest, computed highlights — each one says what to do next.
+        const topCloser = stats.leaderboard.find(r => r.won > 0)
+        const mostActive = [...stats.leaderboard].sort((a, b) => b.applied - a.applied)[0]
+        const unassigned = pool ? pool.leads.filter(l => !l.assigned_to).length : 0
+        const decidedLost = pipeline?.lost ?? 0
+        // Win-rate donut geometry (r=44 → circumference ≈ 276.5)
+        const C = 2 * Math.PI * 44
+        return (
         <section className="tm-section">
-          <div className="an-kpis" style={{ marginBottom: 26 }}>
-            <div className="an-kpi"><span className="an-kpi-ico"><i className="ti ti-send" /></span><span className="an-kpi-val">{stats.summary.totalApplied}</span><span className="an-kpi-lbl">Applications</span></div>
-            <div className="an-kpi"><span className="an-kpi-ico" style={{ background: 'var(--lime-dim)', color: 'var(--lime-ink)' }}><i className="ti ti-trophy" /></span><span className="an-kpi-val">{stats.summary.totalWon}</span><span className="an-kpi-lbl">Won</span></div>
-            <div className="an-kpi"><span className="an-kpi-ico" style={{ background: 'var(--hi-bg)', color: 'var(--hi)' }}><i className="ti ti-percentage" /></span><span className="an-kpi-val">{stats.summary.teamWinRate !== null ? `${stats.summary.teamWinRate}%` : '—'}</span><span className="an-kpi-lbl">Team win rate</span></div>
-            <div className="an-kpi"><span className="an-kpi-ico"><i className="ti ti-flame" /></span><span className="an-kpi-val">{stats.summary.activeInPipeline ?? 0}</span><span className="an-kpi-lbl">Active in pipeline</span></div>
-          </div>
-
-          {stats.pipeline && (() => {
-            const stages: Stage[] = ['saved', 'interested', 'applied', 'in_talks', 'hired', 'lost']
-            const max = Math.max(1, ...stages.map(s => stats.pipeline![s]))
-            const total = stages.reduce((n, s) => n + stats.pipeline![s], 0)
-            if (total === 0) return null
-            const fillColor = (s: Stage) =>
-              s === 'hired' ? 'var(--hi)' : s === 'lost' ? 'var(--coral)' : s === 'saved' ? 'var(--slate-2)' : 'var(--lime-deep)'
-            return (
-              <div style={{ marginBottom: 26 }}>
-                <h4 className="tm-section-label">Pipeline</h4>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
-                  {stages.map(s => (
-                    <div key={s} style={{ display: 'grid', gridTemplateColumns: '84px 1fr 34px', alignItems: 'center', gap: 10 }}>
-                      <span style={{ fontSize: 12.5, color: 'var(--ink-2)' }}>{STAGE_LABEL[s]}</span>
-                      <span style={{ height: 8, borderRadius: 4, background: 'var(--paper-2)', overflow: 'hidden' }}>
-                        <span style={{ display: 'block', height: '100%', borderRadius: 4, width: `${(stats.pipeline![s] / max) * 100}%`, background: fillColor(s) }} />
-                      </span>
-                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--slate)', textAlign: 'right' }}>{stats.pipeline![s]}</span>
-                    </div>
-                  ))}
-                </div>
+          <div className="tmov">
+            <div className="tmov-main">
+              {/* Flat numbers — no tiles */}
+              <div className="tmov-nums">
+                <div className="tmov-num"><span className="v">{s.totalApplied}</span><span className="l">applications</span></div>
+                <div className="tmov-num"><span className="v" style={{ color: 'var(--lime-ink)' }}>{s.totalWon}</span><span className="l">won</span></div>
+                <div className="tmov-num"><span className="v">{s.activeInPipeline ?? 0}</span><span className="l">active in pipeline</span></div>
               </div>
-            )
-          })()}
 
-          <h4 className="tm-section-label">Leaderboard</h4>
+              {pipeline && pipelineTotal > 0 && (
+                <div style={{ marginBottom: 30 }}>
+                  <h4 className="tm-section-label">Pipeline · {pipelineTotal} leads</h4>
+                  <div className="tmov-stack" role="img" aria-label="Pipeline distribution">
+                    {stages.filter(st => pipeline[st] > 0).map(st => (
+                      <span key={st} className="tip" data-tip={`${STAGE_LABEL[st]}: ${pipeline[st]}`}
+                        style={{ width: `${(pipeline[st] / pipelineTotal) * 100}%`, background: stageColor[st] }} />
+                    ))}
+                  </div>
+                  <div className="tmov-legend">
+                    {stages.filter(st => pipeline[st] > 0).map(st => (
+                      <span key={st} className="tmov-leg"><span className="d" style={{ background: stageColor[st] }} />{STAGE_LABEL[st]} <b>{pipeline[st]}</b></span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <h4 className="tm-section-label">Leaderboard</h4>
           <div className="tm-board">
             <div className="tm-board-head"><span>#</span><span>Member</span><span>Applied</span><span>Won</span><span>Win rate</span></div>
             {(showAllBoard ? stats.leaderboard : stats.leaderboard.slice(0, 5)).map((r, i) => (
@@ -289,8 +299,62 @@ function TeamContent() {
               <i className={`ti ${showAllBoard ? 'ti-chevron-up' : 'ti-chevron-down'}`} />
             </button>
           )}
+            </div>
+
+            {/* Right column — the read: win rate + what to do next */}
+            <aside className="tmov-side">
+              <div className="tmov-donut-wrap">
+                <svg className="tmov-donut" viewBox="0 0 110 110" role="img" aria-label={`Team win rate ${s.teamWinRate ?? 0}%`}>
+                  <circle cx="55" cy="55" r="44" fill="none" stroke="var(--paper-2)" strokeWidth="11" />
+                  {s.teamWinRate !== null && (
+                    <circle cx="55" cy="55" r="44" fill="none" stroke="var(--lime-deep)" strokeWidth="11"
+                      strokeLinecap="round" strokeDasharray={`${(s.teamWinRate / 100) * C} ${C}`}
+                      transform="rotate(-90 55 55)" />
+                  )}
+                </svg>
+                <div className="tmov-donut-center">
+                  <span className="v">{s.teamWinRate !== null ? `${s.teamWinRate}%` : '—'}</span>
+                  <span className="l">win rate</span>
+                </div>
+              </div>
+              <p className="tmov-donut-cap">
+                {s.teamWinRate !== null
+                  ? <>{s.totalWon} won · {decidedLost} lost so far</>
+                  : <>Appears after your first won or lost lead</>}
+              </p>
+
+              <h4 className="tm-section-label" style={{ marginTop: 26 }}>Highlights</h4>
+              <div className="tmov-his">
+                {topCloser && (
+                  <div className="tmov-hi">
+                    <i className="ti ti-crown" style={{ color: 'var(--lime-ink)' }} />
+                    <div><b>{topCloser.name}</b> is your top closer — {topCloser.won} won{topCloser.winRate !== null ? ` at ${topCloser.winRate}%` : ''}.</div>
+                  </div>
+                )}
+                {mostActive && mostActive.applied > 0 && (
+                  <div className="tmov-hi">
+                    <i className="ti ti-send" />
+                    <div><b>{mostActive.name}</b> is most active — {mostActive.applied} applications.</div>
+                  </div>
+                )}
+                {unassigned > 0 && (
+                  <div className="tmov-hi">
+                    <i className="ti ti-user-question" style={{ color: 'var(--amber, #B98A19)' }} />
+                    <div>
+                      <b>{unassigned}</b> pool lead{unassigned === 1 ? '' : 's'} unassigned.{' '}
+                      <button className="tmov-hi-link" onClick={() => setTab('pool')}>Assign owners</button>
+                    </div>
+                  </div>
+                )}
+                {!topCloser && (!mostActive || mostActive.applied === 0) && unassigned === 0 && (
+                  <p className="tm-note" style={{ margin: 0 }}>Nothing to flag yet — highlights appear as your team applies and wins.</p>
+                )}
+              </div>
+            </aside>
+          </div>
         </section>
-      )}
+        )
+      })()}
       {tab === 'overview' && !stats && (
         <div className="empty">
           <div className="empty-icon"><i className="ti ti-chart-bar" /></div>
