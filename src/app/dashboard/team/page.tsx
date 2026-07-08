@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useState, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase-client'
+import { PRICING } from '@/lib/tiers'
 import LoadingDots from '@/components/LoadingDots'
 import toast from 'react-hot-toast'
 
@@ -166,6 +167,14 @@ function TeamContent() {
 
   const [addingSeats, setAddingSeats] = useState(false)
   const addSeats = async (nextSeats: number) => {
+    // Adding a seat = buying another Team membership on the subscription.
+    // Make that explicit (billed now, prorated) before touching Stripe.
+    if (data?.org && nextSeats > data.org.seats) {
+      const ok = window.confirm(
+        `Add a seat? Each seat is another Team membership at £${PRICING.team.monthly}/mo — you'll be charged a prorated amount now and £${PRICING.team.monthly}/mo per seat from your next invoice.`,
+      )
+      if (!ok) return
+    }
     setAddingSeats(true)
     try {
       const res = await fetch('/api/team/seats', {
@@ -424,7 +433,7 @@ function TeamContent() {
 
           {isAdmin && (
             <div className="tm-seats-foot">
-              <span className="tm-note" style={{ margin: 0 }}>Need more room? Seats are billed on your Team plan.</span>
+              <span className="tm-note" style={{ margin: 0 }}>Each seat is another Team membership — £{PRICING.team.monthly}/mo per seat, billed on your subscription.</span>
               <div className="tm-seatctl" role="group" aria-label="Add or remove seats">
                 <button className="pill" aria-label="Remove a seat" disabled={addingSeats || org.seats <= seatsUsed + pendingInvites.length} onClick={() => addSeats(org.seats - 1)}>&minus;</button>
                 <span className="tm-seatctl-n">{org.seats} seats</span>

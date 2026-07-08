@@ -2371,6 +2371,9 @@ button:disabled { cursor: default; opacity: .85; }
 .tm-role-tag.admin { color: var(--lime-ink); background: var(--lime-dim); border-color: #DDEFA8; }
 .tm-row-actions { opacity: 0; transition: opacity .12s ease; }
 .tm-row:hover .tm-row-actions, .tm-row:focus-within .tm-row-actions { opacity: 1; }
+/* Pending invites: cancel X always visible — an un-actioned invite is a live
+   decision, not a secondary action. */
+.tm-row.pending-row .tm-row-actions { opacity: 1; }
 @media (hover: none) { .tm-row-actions { opacity: 1; } }
 
 /* Seat stepper (header) + leave-team button */
