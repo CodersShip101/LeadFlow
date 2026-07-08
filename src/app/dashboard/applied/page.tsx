@@ -8,6 +8,7 @@ import type { Lead, Application, Profile } from '@/types'
 import { formatBudgetGBP } from '@/lib/utils'
 import { canonSource, sourceMeta } from '@/lib/sources'
 import { entitlementsFor, type Tier } from '@/lib/tiers'
+import Dropdown from '@/components/Dropdown'
 
 function reminderLabel(iso: string): { label: string; overdue: boolean } {
   const t = new Date(iso).getTime()
@@ -165,6 +166,22 @@ export default function PipelinePage() {
     }
     load()
   }, [supabase, router])
+
+  // Export the pipeline as CSV (client-side; nothing leaves the browser).
+  const exportCsv = () => {
+    const esc = (v: unknown) => `"${String(v ?? '').replace(/"/g, '""')}"`
+    const rows = applications.filter(a => a.status !== 'saved').map(a => {
+      const lead = leads.find(l => l.id === a.lead_id)
+      return [lead?.title ?? '', a.status, a.outcome ?? '', a.won_amount ?? '',
+        lead?.client_location ?? '', formatBudgetGBP(lead?.budget_min ?? null, lead?.budget_max ?? null) ?? '',
+        a.created_at?.slice(0, 10) ?? '', a.note ?? ''].map(esc).join(',')
+    })
+    const csv = ['Title,Stage,Outcome,Won amount,Location,Budget,Added,Note', ...rows].join('\n')
+    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }))
+    const link = Object.assign(document.createElement('a'), { href: url, download: `flaiir-pipeline-${new Date().toISOString().slice(0, 10)}.csv` })
+    link.click(); URL.revokeObjectURL(url)
+    toast.success('Pipeline exported')
+  }
 
   // Remove from pipeline entirely (delete the application row).
   const removeApp = async (leadId: string) => {
@@ -388,8 +405,11 @@ export default function PipelinePage() {
     <>
       {/* ── HEADER ── */}
       <div className="pipe-header">
-        <div className="pipe-header-left">
+        <div className="pipe-header-left" style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
           <p className="pipe-sub">Drag cards between stages.</p>
+          <button className="pill tip" data-tip="Download your pipeline as CSV" onClick={exportCsv}>
+            <i className="ti ti-download" /> Export
+          </button>
         </div>
         <div className="pipe-stats">
           <div className="pipe-stat">
@@ -572,16 +592,18 @@ export default function PipelinePage() {
 
                           {/* Assign to a teammate (team plan) */}
                           {mates.length > 0 && app?.id && (
-                            <select
-                              className="tm-select kc-assign"
-                              value={assignees[app.id] ?? ''}
-                              onClick={e => e.stopPropagation()}
-                              onChange={e => { e.stopPropagation(); assignTo(app.id, e.target.value) }}
-                              aria-label="Assign to teammate"
-                            >
-                              <option value="">Unassigned</option>
-                              {mates.map(m => <option key={m.user_id} value={m.user_id}>{m.name}</option>)}
-                            </select>
+                            <div className="kc-assign-wrap" onClick={e => e.stopPropagation()}>
+                              <Dropdown
+                                compact up
+                                ariaLabel="Assign to teammate"
+                                value={assignees[app.id] ?? ''}
+                                onChange={v => assignTo(app.id, v)}
+                                options={[
+                                  { value: '', label: 'Unassigned', icon: 'ti-user-question' },
+                                  ...mates.map(m => ({ value: m.user_id, label: m.name, icon: 'ti-user' })),
+                                ]}
+                              />
+                            </div>
                           )}
                         </div>
                       )

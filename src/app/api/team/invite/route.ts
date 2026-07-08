@@ -61,15 +61,27 @@ export async function POST(req: NextRequest) {
     const origin = req.headers.get('origin') ?? process.env.NEXT_PUBLIC_SITE_URL!
     const acceptUrl = `${origin}/dashboard/team/join?token=${invite!.token}`
 
-    // Email the invitee the accept link.
+    // Email the invitee the accept link, with what joining actually gets them.
     const html = `<!DOCTYPE html><html><body style="font-family:-apple-system,sans-serif;background:#F5F5F7;margin:0;padding:24px">
     <table width="480" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:12px;border:1px solid #E5E7EB;margin:0 auto">
+      <tr><td style="background:#111827;padding:20px 28px;border-radius:12px 12px 0 0">
+        <span style="font-size:20px;font-weight:800;letter-spacing:-0.5px;color:#fff">fl<span style="color:#C4F000">ai</span>ir</span>
+      </td></tr>
       <tr><td style="padding:28px 28px 8px">
         <h1 style="font-size:18px;font-weight:700;margin:0;color:#111827">You've been invited to a team on Flaiir</h1>
-        <p style="font-size:14px;color:#6B7280;margin:10px 0 0;line-height:1.5">Join your team's shared lead pool, pipeline and templates. Click below to accept (you'll sign in or create an account with this email).</p>
+        <p style="font-size:14px;color:#6B7280;margin:10px 0 0;line-height:1.55">Flaiir finds and scores freelance leads against your skills and rate. As part of a team you get the full Team plan, on your team's seat:</p>
       </td></tr>
-      <tr><td style="padding:22px 28px 28px">
+      <tr><td style="padding:16px 28px 4px">
+        <table cellpadding="0" cellspacing="0" style="font-size:13.5px;color:#374151;line-height:1.5">
+          <tr><td style="padding:6px 10px 6px 0;color:#5E8F00;font-weight:700">&#10003;</td><td style="padding:6px 0"><b>Shared lead pool</b> — see and claim the leads your team tracks, with clear owners</td></tr>
+          <tr><td style="padding:6px 10px 6px 0;color:#5E8F00;font-weight:700">&#10003;</td><td style="padding:6px 0"><b>Team pipeline &amp; analytics</b> — one board from interested to won, win rates per member</td></tr>
+          <tr><td style="padding:6px 10px 6px 0;color:#5E8F00;font-weight:700">&#10003;</td><td style="padding:6px 0"><b>Unlimited applications</b> — no weekly lead cap, hourly scans, direct source links</td></tr>
+          <tr><td style="padding:6px 10px 6px 0;color:#5E8F00;font-weight:700">&#10003;</td><td style="padding:6px 0"><b>Shared pitch templates</b> — reuse what already wins work for your team</td></tr>
+        </table>
+      </td></tr>
+      <tr><td style="padding:20px 28px 28px">
         <a href="${acceptUrl}" style="background:#111827;color:#C4F000;padding:12px 24px;border-radius:8px;font-weight:600;font-size:14px;text-decoration:none;display:inline-block">Accept invitation</a>
+        <p style="font-size:12px;color:#9CA3AF;margin:12px 0 0;line-height:1.5">You'll sign in or create an account with this email address. Joining is your choice — the link opens a page where you confirm first.</p>
       </td></tr>
       <tr><td style="padding:0 28px 24px;font-size:11px;color:#9CA3AF;word-break:break-all">Or paste this link: ${acceptUrl}</td></tr>
     </table>

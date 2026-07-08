@@ -21,6 +21,7 @@ export default function TemplatesPage() {
   const [body, setBody] = useState('')
   const [shared, setShared] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [query, setQuery] = useState('')
 
   const load = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser()
@@ -106,7 +107,15 @@ export default function TemplatesPage() {
         <div>
           <p className="tm-sub">Save your best pitches and reuse them when you apply.</p>
         </div>
-        <button className="btn btn-primary" onClick={openNew}>New template</button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          {list.length > 3 && (
+            <div className="tb-search" style={{ width: 220, height: 40 }}>
+              <i className="ti ti-search" />
+              <input placeholder="Search templates…" value={query} onChange={e => setQuery(e.target.value)} />
+            </div>
+          )}
+          <button className="btn btn-primary" onClick={openNew}>New template</button>
+        </div>
       </div>
 
       {list.length === 0 ? (
@@ -117,7 +126,7 @@ export default function TemplatesPage() {
         </div>
       ) : (
         <div className="tpl-grid">
-          {list.map(t => {
+          {list.filter(t => !query || t.title.toLowerCase().includes(query.toLowerCase()) || (t.body ?? '').toLowerCase().includes(query.toLowerCase())).map(t => {
             const mine = t.owner_id === myId
             return (
               <div key={t.id} className="tpl-card">

@@ -403,18 +403,36 @@ ${profile?.full_name || ''}`.trim()
         </div>
       )}
 
-      {/* ── DESCRIPTION ── */}
-      {lead.description && (
-        <div className="ld-card">
-          <div className="ld-section-label"><i className="ti ti-align-left" />Brief</div>
-          <p className="ld-desc">{showFull || !descLong ? lead.description : `${lead.description.slice(0, 400)}…`}</p>
-          {descLong && (
-            <button className="ld-read-more" onClick={() => setShowFull(v => !v)}>
-              {showFull ? 'Show less' : 'Read full brief'} <i className={`ti ${showFull ? 'ti-chevron-up' : 'ti-chevron-down'}`} />
-            </button>
-          )}
-        </div>
-      )}
+      {/* ── DESCRIPTION — cleaned + paragraphed, not the raw scrape ── */}
+      {lead.description && (() => {
+        const cleaned = lead.description
+          .replace(/https?:\/\/[^\s]+/g, '')          // scraped URLs add noise; the source link lives below
+          .replace(/&amp;/g, '&').replace(/&nbsp;/g, ' ')
+          .replace(/[ \t]+/g, ' ')
+          .trim()
+        const shown = showFull || !descLong ? cleaned : `${cleaned.slice(0, 400)}…`
+        // Paragraphs on blank lines; single newlines become soft breaks.
+        const paras = shown.split(/\n{2,}/).map(p => p.trim()).filter(Boolean)
+        return (
+          <div className="ld-card">
+            <div className="ld-section-label"><i className="ti ti-align-left" />Brief</div>
+            <div className="ld-desc">
+              {paras.map((p, i) => (
+                <p key={i}>
+                  {p.split('\n').map((line, j, arr) => (
+                    <span key={j}>{line.trim()}{j < arr.length - 1 && <br />}</span>
+                  ))}
+                </p>
+              ))}
+            </div>
+            {descLong && (
+              <button className="ld-read-more" onClick={() => setShowFull(v => !v)}>
+                {showFull ? 'Show less' : 'Read full brief'} <i className={`ti ${showFull ? 'ti-chevron-up' : 'ti-chevron-down'}`} />
+              </button>
+            )}
+          </div>
+        )
+      })()}
 
       {/* ── SOURCE ── */}
       <div className="ld-card">

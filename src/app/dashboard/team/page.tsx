@@ -4,6 +4,7 @@ import { Suspense, useEffect, useState, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase-client'
 import { PRICING } from '@/lib/tiers'
+import Dropdown from '@/components/Dropdown'
 import LoadingDots from '@/components/LoadingDots'
 import toast from 'react-hot-toast'
 
@@ -142,6 +143,18 @@ function TeamContent() {
     })
     if (res.ok) { toast.success('Member removed'); load() }
     else toast.error('Could not remove member')
+  }
+
+  const resendInvite = async (inviteEmail: string, inviteRole: string) => {
+    const res = await fetch('/api/team/invite', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: inviteEmail, role: inviteRole }),
+    })
+    const d = await res.json().catch(() => ({}))
+    if (res.ok) {
+      if (d.acceptUrl) navigator.clipboard?.writeText(d.acceptUrl).catch(() => {})
+      toast.success(d.emailed ? 'Invite re-sent' : 'Invite link copied — share it with them')
+    } else toast.error(d.message || d.error || 'Could not resend')
   }
 
   const cancelInvite = async (inviteEmail: string) => {
@@ -379,10 +392,15 @@ function TeamContent() {
             <>
               <form className="tm-invite" onSubmit={invite}>
                 <input type="email" className="auth-input" placeholder="teammate@email.com" value={email} onChange={e => setEmail(e.target.value)} required />
-                <select className="tm-select" value={role} onChange={e => setRole(e.target.value as 'member' | 'admin')} aria-label="Invite as">
-                  <option value="member">Member</option>
-                  <option value="admin">Admin</option>
-                </select>
+                <Dropdown
+                  ariaLabel="Invite as"
+                  value={role}
+                  onChange={v => setRole(v as 'member' | 'admin')}
+                  options={[
+                    { value: 'member', label: 'Member', icon: 'ti-user', hint: 'Shared pool, pipeline, templates' },
+                    { value: 'admin', label: 'Admin', icon: 'ti-shield-check', hint: 'Also invites, removes, manages seats' },
+                  ]}
+                />
                 <button className="btn btn-primary" disabled={inviting || seatsLeft <= 0}>
                   {inviting ? <LoadingDots label="Inviting" /> : <><i className="ti ti-send" /> Invite</>}
                 </button>
@@ -424,6 +442,7 @@ function TeamContent() {
                 </div>
                 {isAdmin && (
                   <div className="tm-row-actions">
+                    <button className="pill tip" data-tip="Resend invite email" aria-label="Resend invite" onClick={() => resendInvite(inv.email, inv.role)}><i className="ti ti-mail-forward" /></button>
                     <button className="pill tm-remove tip" data-tip="Cancel invite" aria-label="Cancel invite" onClick={() => cancelInvite(inv.email)}><i className="ti ti-x" /></button>
                   </div>
                 )}
@@ -465,10 +484,15 @@ function TeamContent() {
                     <span className="tm-row-name">{l.lead?.title ?? 'Lead'}</span>
                     <span className="tm-row-role">{l.status}{l.lead?.client_location ? ` · ${l.lead.client_location}` : ''}</span>
                   </div>
-                  <select className="tm-select" value={l.assigned_to ?? ''} onChange={e => assign(l.id, e.target.value)} aria-label="Assign to">
-                    <option value="">Unassigned</option>
-                    {pool.members.map(m => <option key={m.user_id} value={m.user_id}>{m.name}</option>)}
-                  </select>
+                  <Dropdown
+                    ariaLabel="Assign to"
+                    value={l.assigned_to ?? ''}
+                    onChange={v => assign(l.id, v)}
+                    options={[
+                      { value: '', label: 'Unassigned', icon: 'ti-user-question' },
+                      ...pool.members.map(m => ({ value: m.user_id, label: m.name, icon: 'ti-user' })),
+                    ]}
+                  />
                 </div>
               ))}
             </div>
