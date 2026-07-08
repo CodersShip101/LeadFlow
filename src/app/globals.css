@@ -882,6 +882,7 @@ textarea.input { resize: vertical; min-height: 80px; }
 .kan-card .sv-remind-chip { margin-bottom: 10px; }
 .kan-card .sv-note, .kan-card .sv-note-edit { margin-bottom: 10px; }
 .kc-actions { display: flex; align-items: center; gap: 6px; padding-top: 10px; border-top: 1px solid var(--line-2); }
+.kc-assign { height: 32px; font-size: 12px; margin-top: 8px; width: 100%; background-position: right 9px center; padding: 0 28px 0 10px; }
 .kc-actions .kc-advance-btn { width: auto; flex: 1; }
 .kc-icon { width: 30px; height: 30px; font-size: 14px; flex-shrink: 0; }
 .kan-card .kc-won-badge { flex: 1; }

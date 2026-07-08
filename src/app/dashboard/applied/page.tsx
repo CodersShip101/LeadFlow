@@ -116,6 +116,9 @@ export default function PipelinePage() {
   const [noteEditId, setNoteEditId] = useState<string | null>(null)
   const [noteDraft, setNoteDraft] = useState('')
   const [savingNote, setSavingNote] = useState(false)
+  // Team assignment (team plan only): org members + applicationId -> assignee.
+  const [mates, setMates] = useState<{ user_id: string; name: string }[]>([])
+  const [assignees, setAssignees] = useState<Record<string, string | null>>({})
   const supabase = createClient()
   const router = useRouter()
 
@@ -143,6 +146,17 @@ export default function PipelinePage() {
           const { data } = await supabase.from('leads').select('*').in('id', activeIds).eq('status', 'active')
           setLeads(data || [])
         }
+        // Team plan: load org members + current assignments for the assign control.
+        if (profRes.data?.subscription_status === 'team') {
+          const poolRes = await fetch('/api/team/pool')
+          if (poolRes.ok) {
+            const pool = await poolRes.json()
+            setMates(pool.members ?? [])
+            const map: Record<string, string | null> = {}
+            for (const l of pool.leads ?? []) map[l.id] = l.assigned_to ?? null
+            setAssignees(map)
+          }
+        }
       } catch {
         setError(true)
       } finally {
@@ -151,6 +165,32 @@ export default function PipelinePage() {
     }
     load()
   }, [supabase, router])
+
+  // Remove from pipeline entirely (delete the application row).
+  const removeApp = async (leadId: string) => {
+    if (!window.confirm('Remove this lead from your pipeline? Its notes and stage history go with it.')) return
+    const res = await fetch('/api/applications', {
+      method: 'DELETE', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ lead_id: leadId }),
+    })
+    if (res.ok) {
+      setApplications(prev => prev.filter(a => a.lead_id !== leadId))
+      setLeads(prev => prev.filter(l => l.id !== leadId))
+      toast.success('Removed from pipeline')
+    } else toast.error('Could not remove')
+  }
+
+  // Assign an application to a teammate (team plan).
+  const assignTo = async (applicationId: string, userId: string) => {
+    const res = await fetch('/api/team/pool', {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ applicationId, assignTo: userId || null }),
+    })
+    if (res.ok) {
+      setAssignees(prev => ({ ...prev, [applicationId]: userId || null }))
+      toast.success(userId ? 'Assigned' : 'Unassigned')
+    } else toast.error('Could not assign')
+  }
 
   const appMap = useMemo(() => {
     const m = new Map<string, Application>()
@@ -523,7 +563,26 @@ export default function PipelinePage() {
                                 <i className="ti ti-thumb-down" />
                               </button>
                             )}
+
+                            {/* Remove from pipeline */}
+                            <button className="sv-icon-btn kc-icon kc-lost-btn" title="Remove from pipeline" onClick={() => removeApp(lead.id)}>
+                              <i className="ti ti-trash" />
+                            </button>
                           </div>
+
+                          {/* Assign to a teammate (team plan) */}
+                          {mates.length > 0 && app?.id && (
+                            <select
+                              className="tm-select kc-assign"
+                              value={assignees[app.id] ?? ''}
+                              onClick={e => e.stopPropagation()}
+                              onChange={e => { e.stopPropagation(); assignTo(app.id, e.target.value) }}
+                              aria-label="Assign to teammate"
+                            >
+                              <option value="">Unassigned</option>
+                              {mates.map(m => <option key={m.user_id} value={m.user_id}>{m.name}</option>)}
+                            </select>
+                          )}
                         </div>
                       )
                     })}
