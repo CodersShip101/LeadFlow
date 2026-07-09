@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabase, createAdminSupabase } from '@/lib/supabase-server'
 import { sendEmail } from '@/lib/email'
 
+// Per-(org,email) cooldown so an admin can't spam an address by hammering the
+// resend button. Module-level map persists across requests on a warm instance.
+const INVITE_COOLDOWN_MS = 60_000
+const lastInviteSent = new Map<string, number>()
+
 export async function POST(req: NextRequest) {
   try {
     const supabase = await createServerSupabase()
@@ -33,16 +38,39 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const [{ count: memberCount }, { count: inviteCount }] = await Promise.all([
-      supabase.from('org_members').select('*', { count: 'exact', head: true }).eq('org_id', org.org_id),
-      supabase.from('org_invites').select('*', { count: 'exact', head: true }).eq('org_id', org.org_id).is('accepted_at', null),
-    ])
-    if ((memberCount ?? 0) + (inviteCount ?? 0) >= org.seats) {
+    // Is this a resend of an existing pending invite (same email)? A resend
+    // reuses the seat it already holds, so it must NOT be blocked by the
+    // seat-full check that counts it.
+    const { data: existingInvite } = await admin
+      .from('org_invites').select('email')
+      .eq('org_id', org.org_id).eq('email', email.toLowerCase()).is('accepted_at', null).maybeSingle()
+    const isResend = !!existingInvite
+
+    if (!isResend) {
+      const [{ count: memberCount }, { count: inviteCount }] = await Promise.all([
+        supabase.from('org_members').select('*', { count: 'exact', head: true }).eq('org_id', org.org_id),
+        supabase.from('org_invites').select('*', { count: 'exact', head: true }).eq('org_id', org.org_id).is('accepted_at', null),
+      ])
+      if ((memberCount ?? 0) + (inviteCount ?? 0) >= org.seats) {
+        return NextResponse.json(
+          { error: 'no_seats', message: 'All seats are in use. Add seats to invite more teammates.' },
+          { status: 402 },
+        )
+      }
+    }
+
+    // Cooldown: throttle repeated emails to the same address (e.g. resend spam).
+    const cooldownKey = `${org.org_id}:${email.toLowerCase()}`
+    const nowMs = Date.now()
+    const prevSent = lastInviteSent.get(cooldownKey)
+    if (prevSent && nowMs - prevSent < INVITE_COOLDOWN_MS) {
+      const wait = Math.ceil((INVITE_COOLDOWN_MS - (nowMs - prevSent)) / 1000)
       return NextResponse.json(
-        { error: 'no_seats', message: 'All seats are in use. Add seats to invite more teammates.' },
-        { status: 402 },
+        { error: 'cooldown', message: `Please wait ${wait}s before emailing ${email} again.`, retryAfter: wait },
+        { status: 429 },
       )
     }
+    lastInviteSent.set(cooldownKey, nowMs)
 
     const { data: invite, error } = await supabase
       .from('org_invites')

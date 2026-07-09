@@ -15,6 +15,11 @@ interface PoolLead {
   lead: { id: string; title: string; client_location: string | null } | null
 }
 interface LeaderRow { user_id: string; name: string; role: string; applied: number; won: number; winRate: number | null }
+interface SeatPreview {
+  seats?: number; currentSeats?: number; currency?: string; unitMinor?: number
+  estimateMinor?: number; isCredit?: boolean; recurringDeltaMinor?: number
+  nextRenewal?: number | null; isTrialing?: boolean; error?: string
+}
 type Stage = 'saved' | 'interested' | 'applied' | 'in_talks' | 'hired' | 'lost'
 interface TeamStats {
   summary: {
@@ -178,16 +183,32 @@ function TeamContent() {
     else toast.error(d.error === 'cannot remove the only admin' ? 'Assign another admin before leaving' : 'Could not leave team')
   }
 
+  // Seat-change modal: open with a target count, preview the prorated cost,
+  // then confirm. `seatTarget` !== null means the modal is open.
+  const [seatTarget, setSeatTarget] = useState<number | null>(null)
+  const [seatPreview, setSeatPreview] = useState<SeatPreview | null>(null)
+  const [seatLoading, setSeatLoading] = useState(false)
   const [addingSeats, setAddingSeats] = useState(false)
+  // Local, uncommitted seat target for the stepper (null = in sync with org).
+  const [pendingSeats, setPendingSeats] = useState<number | null>(null)
+
+  const openSeatChange = async (target: number) => {
+    setSeatTarget(target)
+    setSeatPreview(null)
+    setSeatLoading(true)
+    try {
+      const res = await fetch('/api/team/seats/preview', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ seats: target }),
+      })
+      const d = await res.json().catch(() => ({}))
+      if (res.ok) setSeatPreview(d)
+      else setSeatPreview({ error: d.error || 'preview_failed' })
+    } catch { setSeatPreview({ error: 'preview_failed' }) }
+    finally { setSeatLoading(false) }
+  }
+
   const addSeats = async (nextSeats: number) => {
-    // Adding a seat = buying another Team membership on the subscription.
-    // Make that explicit (billed now, prorated) before touching Stripe.
-    if (data?.org && nextSeats > data.org.seats) {
-      const ok = window.confirm(
-        `Add a seat? Each seat is another Team membership at £${PRICING.team.monthly}/mo — you'll be charged a prorated amount now and £${PRICING.team.monthly}/mo per seat from your next invoice.`,
-      )
-      if (!ok) return
-    }
     setAddingSeats(true)
     try {
       const res = await fetch('/api/team/seats', {
@@ -195,7 +216,7 @@ function TeamContent() {
         body: JSON.stringify({ seats: nextSeats }),
       })
       const d = await res.json().catch(() => ({}))
-      if (res.ok) { toast.success(`Seats updated to ${d.seats}`); load() }
+      if (res.ok) { toast.success(`Seats updated to ${d.seats}`); setSeatTarget(null); setPendingSeats(null); load() }
       else toast.error(d.message || d.error || 'Could not update seats')
     } finally { setAddingSeats(false) }
   }
@@ -450,16 +471,36 @@ function TeamContent() {
             ))}
           </div>
 
-          {isAdmin && (
-            <div className="tm-seats-foot">
-              <span className="tm-note" style={{ margin: 0 }}>Each seat is another Team membership — £{PRICING.team.monthly}/mo per seat, billed on your subscription.</span>
-              <div className="tm-seatctl" role="group" aria-label="Add or remove seats">
-                <button className="pill" aria-label="Remove a seat" disabled={addingSeats || org.seats <= seatsUsed + pendingInvites.length} onClick={() => addSeats(org.seats - 1)}>&minus;</button>
-                <span className="tm-seatctl-n">{org.seats} seats</span>
-                <button className="pill" aria-label="Add a seat" disabled={addingSeats || org.seats >= 200} onClick={() => addSeats(org.seats + 1)}>+</button>
+          {isAdmin && (() => {
+            // Adjust the target locally with the stepper; nothing hits Stripe
+            // until "Update" is confirmed — so 3→2→3 nets to zero, no charge.
+            const target = pendingSeats ?? org.seats
+            const floor = seatsUsed + pendingInvites.length
+            const changed = target !== org.seats
+            const perSeat = PRICING.team.monthly ?? 39
+            return (
+              <div className="tm-seats-foot">
+                <span className="tm-note" style={{ margin: 0 }}>
+                  Currently <b>{org.seats} seat{org.seats === 1 ? '' : 's'}</b> · £{org.seats * perSeat}/mo. Each seat is £{perSeat}/mo.
+                </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                  <div className="tm-seatctl" role="group" aria-label="Adjust seats">
+                    <button className="pill" aria-label="Remove a seat" disabled={addingSeats || target <= floor} onClick={() => setPendingSeats(Math.max(floor, target - 1))}>&minus;</button>
+                    <span className="tm-seatctl-n">{target} seat{target === 1 ? '' : 's'}</span>
+                    <button className="pill" aria-label="Add a seat" disabled={addingSeats || target >= 200} onClick={() => setPendingSeats(Math.min(200, target + 1))}>+</button>
+                  </div>
+                  {changed && (
+                    <>
+                      <button className="btn btn-primary" onClick={() => openSeatChange(target)}>
+                        Update{target > org.seats ? ` (+${target - org.seats})` : ` (−${org.seats - target})`}
+                      </button>
+                      <button className="pill" onClick={() => setPendingSeats(null)}>Reset</button>
+                    </>
+                  )}
+                </div>
               </div>
-            </div>
-          )}
+            )
+          })()}
         </section>
       )}
 
@@ -526,6 +567,59 @@ function TeamContent() {
           </div>
         </section>
       )}
+
+      {/* ── SEAT-CHANGE MODAL — preview the prorated cost before committing ── */}
+      {seatTarget !== null && org && (() => {
+        const increase = seatTarget > org.seats
+        const cur = (seatPreview?.currency || 'gbp').toUpperCase()
+        const money = (minor: number) => new Intl.NumberFormat('en-GB', { style: 'currency', currency: cur }).format(Math.abs(minor) / 100)
+        const perSeat = seatPreview?.unitMinor ?? (PRICING.team.monthly ?? 39) * 100
+        const newMonthly = seatTarget * perSeat
+        const renewalDate = seatPreview?.nextRenewal ? new Date(seatPreview.nextRenewal * 1000).toLocaleDateString('en-GB', { day: 'numeric', month: 'long' }) : null
+        return (
+          <div className="tm-modal-back" onClick={() => !addingSeats && setSeatTarget(null)}>
+            <div className="tm-modal" onClick={e => e.stopPropagation()}>
+              <h3 className="tm-modal-title">{increase ? 'Add a seat' : 'Remove a seat'}</h3>
+              <div className="tm-modal-seats">
+                <span>{org.seats}</span>
+                <i className="ti ti-arrow-right" />
+                <span className="to">{seatTarget}</span>
+                <span className="tm-modal-seats-lbl">seats</span>
+              </div>
+
+              {seatLoading ? (
+                <p className="tm-note" style={{ margin: '14px 0' }}><LoadingDots label="Checking your billing" /></p>
+              ) : seatPreview?.error === 'no_subscription' ? (
+                <p className="tm-note" style={{ margin: '14px 0' }}>
+                  Seats are managed once your Team subscription is active. Each seat is {money(perSeat)}/mo.
+                </p>
+              ) : seatPreview?.error ? (
+                <p className="tm-note warn" style={{ margin: '14px 0' }}>
+                  Couldn&apos;t estimate the cost — you can still continue; Stripe will charge the exact prorated amount.
+                </p>
+              ) : seatPreview ? (
+                <ul className="tm-modal-lines">
+                  {seatPreview.isTrialing ? (
+                    <li><i className="ti ti-gift" /> You&apos;re in your free trial — no charge now. Billing starts {renewalDate ? `on ${renewalDate}` : 'when the trial ends'}.</li>
+                  ) : increase ? (
+                    <li><i className="ti ti-credit-card" /> <b>{money(seatPreview.estimateMinor ?? 0)}</b> charged now — prorated for the rest of this billing period.</li>
+                  ) : (
+                    <li><i className="ti ti-arrow-back-up" /> <b>{money(seatPreview.estimateMinor ?? 0)}</b> credit applied to your next invoice for the unused time.</li>
+                  )}
+                  <li><i className="ti ti-calendar-repeat" /> Your bill {increase ? 'rises' : 'falls'} to <b>{money(newMonthly)}/mo</b>{renewalDate ? `, from ${renewalDate}` : ''} ({money(perSeat)}/seat).</li>
+                </ul>
+              ) : null}
+
+              <div className="tm-modal-actions">
+                <button className="btn btn-ghost" onClick={() => setSeatTarget(null)} disabled={addingSeats}>Cancel</button>
+                <button className="btn btn-primary" onClick={() => addSeats(seatTarget)} disabled={addingSeats || seatLoading}>
+                  {addingSeats ? <LoadingDots label="Updating" /> : increase ? 'Add seat' : 'Remove seat'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )
+      })()}
     </>
   )
 }
