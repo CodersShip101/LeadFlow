@@ -399,6 +399,11 @@ textarea.input { resize: vertical; min-height: 80px; }
   .stat-row{grid-template-columns:1fr 1fr}
   .feed-wrap.detail-open{grid-template-columns:1fr}
   .detail-panel{position:fixed;inset:0;z-index:70;border-radius:0;max-height:100vh}
+  /* Control bars that can't wrap on very narrow phones scroll inside their own
+     box instead of being clipped — nothing is ever cut off. */
+  .toolbar{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .pipe-stats{overflow-x:auto;max-width:100%;-webkit-overflow-scrolling:touch}
+  .pipe-stats::-webkit-scrollbar{display:none}
 }
 
 /* ── SEARCH + LOCATION ROW (merged) ── */
