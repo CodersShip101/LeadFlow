@@ -16,6 +16,7 @@ interface PoolLead {
 }
 interface LeaderRow { user_id: string; name: string; role: string; applied: number; won: number; winRate: number | null }
 interface SeatEvent { id: string; actor: string; from: number; to: number; created_at: string }
+interface CostPoint { label: string; seats: number; cost: number }
 interface SeatPreview {
   seats?: number; currentSeats?: number; currency?: string; unitMinor?: number
   estimateMinor?: number; isCredit?: boolean; recurringDeltaMinor?: number
@@ -68,16 +69,19 @@ function TeamContent() {
   const [showAllBoard, setShowAllBoard] = useState(false)
   const [tab, setTab] = useState<'overview' | 'members' | 'pool' | 'settings'>('overview')
   const [seatHistory, setSeatHistory] = useState<SeatEvent[]>([])
+  const [seatCost, setSeatCost] = useState<{ months: CostPoint[]; perSeat: number; changed: boolean } | null>(null)
 
   const loadPool = useCallback(async () => {
     try {
-      const [poolRes, statsRes, notifRes, histRes] = await Promise.all([
-        fetch('/api/team/pool'), fetch('/api/team/analytics'), fetch('/api/team/notifications'), fetch('/api/team/seats/history'),
+      const [poolRes, statsRes, notifRes, histRes, costRes] = await Promise.all([
+        fetch('/api/team/pool'), fetch('/api/team/analytics'), fetch('/api/team/notifications'),
+        fetch('/api/team/seats/history'), fetch('/api/team/seats/analytics'),
       ])
       if (poolRes.ok) setPool(await poolRes.json())
       if (statsRes.ok) setStats(await statsRes.json())
       if (notifRes.ok) { const d = await notifRes.json(); setSlackConfigured(d.configured) }
       if (histRes.ok) { const d = await histRes.json(); setSeatHistory(d.events ?? []) }
+      if (costRes.ok) { const d = await costRes.json(); setSeatCost(d.months?.length ? d : null) }
     } catch { /* ignore */ }
   }, [])
 
@@ -494,8 +498,35 @@ function TeamContent() {
             const changed = target !== org.seats
             const perSeat = PRICING.team.monthly ?? 39
             const unused = org.seats - floor
+            // Seat usage composition + pressure (at-a-glance).
+            const used = seatsUsed
+            const reserved = pendingInvites.length
+            const free = Math.max(0, org.seats - used - reserved)
+            const pressure = org.seats > 0 ? Math.round(((used + reserved) / org.seats) * 100) : 0
+            const band = pressure >= 90 ? { l: 'High pressure', c: 'var(--coral)' } : pressure >= 60 ? { l: 'Moderate', c: 'var(--amber, #C98A19)' } : { l: 'Comfortable', c: 'var(--lime-ink)' }
+            const seg = [
+              { k: 'used', label: 'Used', n: used, color: 'var(--lime-deep)' },
+              { k: 'reserved', label: 'Reserved', n: reserved, color: 'var(--amber, #E0A82E)' },
+              { k: 'free', label: 'Free', n: free, color: 'var(--paper-2)' },
+            ].filter(s => s.n > 0)
             return (
               <>
+                {/* Seat usage: composition bar + pressure headline */}
+                <div className="tm-usage">
+                  <div className="tm-usage-head">
+                    <h4 className="tm-section-label" style={{ margin: 0 }}>Seat usage</h4>
+                    <span className="tm-usage-pressure" style={{ color: band.c }}>{pressure}% · {band.l}</span>
+                  </div>
+                  <div className="tmov-stack" role="img" aria-label={`${used} used, ${reserved} reserved, ${free} free of ${org.seats} seats`}>
+                    {seg.map(s => <span key={s.k} className="tip" data-tip={`${s.label}: ${s.n}`} style={{ width: `${(s.n / org.seats) * 100}%`, background: s.color }} />)}
+                  </div>
+                  <div className="tmov-legend">
+                    <span className="tmov-leg"><span className="d" style={{ background: 'var(--lime-deep)' }} />Used <b>{used}</b></span>
+                    <span className="tmov-leg"><span className="d" style={{ background: 'var(--amber, #E0A82E)' }} />Reserved by invites <b>{reserved}</b></span>
+                    <span className="tmov-leg"><span className="d" style={{ background: 'var(--paper-2)', border: '1px solid var(--line)' }} />Free <b>{free}</b></span>
+                  </div>
+                </div>
+
                 <div className="tm-seats-foot">
                   <div style={{ margin: 0 }}>
                     <span className="tm-note" style={{ margin: 0 }}>
@@ -547,6 +578,24 @@ function TeamContent() {
                     </ul>
                   </div>
                 )}
+
+                {/* Cost over time — monthly seat cost from history */}
+                {seatCost && seatCost.changed && (() => {
+                  const max = Math.max(...seatCost.months.map(m => m.cost), 1)
+                  return (
+                    <div className="tm-cost-chart">
+                      <h4 className="tm-section-label" style={{ marginTop: 22 }}>Seat cost · last 6 months</h4>
+                      <div className="tm-cost-bars" role="img" aria-label="Monthly seat cost">
+                        {seatCost.months.map((m, i) => (
+                          <div key={i} className="tm-cost-col tip" data-tip={`${m.label}: ${m.seats} seat${m.seats === 1 ? '' : 's'} · £${m.cost}/mo`}>
+                            <span className="tm-cost-bar" style={{ height: `${Math.max(6, (m.cost / max) * 100)}%` }} />
+                            <span className="tm-cost-x">{m.label}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )
+                })()}
               </>
             )
           })()}
