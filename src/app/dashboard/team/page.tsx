@@ -15,6 +15,7 @@ interface PoolLead {
   lead: { id: string; title: string; client_location: string | null } | null
 }
 interface LeaderRow { user_id: string; name: string; role: string; applied: number; won: number; winRate: number | null }
+interface SeatEvent { id: string; actor: string; from: number; to: number; created_at: string }
 interface SeatPreview {
   seats?: number; currentSeats?: number; currency?: string; unitMinor?: number
   estimateMinor?: number; isCredit?: boolean; recurringDeltaMinor?: number
@@ -32,6 +33,15 @@ interface TeamStats {
 
 const STAGE_LABEL: Record<Stage, string> = {
   saved: 'Saved', interested: 'Interested', applied: 'Applied', in_talks: 'In talks', hired: 'Won', lost: 'Lost',
+}
+
+function relTime(iso: string): string {
+  const s = Math.floor((Date.now() - new Date(iso).getTime()) / 1000)
+  if (s < 60) return 'just now'
+  const m = Math.floor(s / 60); if (m < 60) return `${m}m ago`
+  const h = Math.floor(m / 60); if (h < 24) return `${h}h ago`
+  const d = Math.floor(h / 24); if (d < 30) return `${d}d ago`
+  return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
 }
 interface TeamData {
   org: { id: string; plan: string; seats: number; myRole: string } | null
@@ -57,15 +67,17 @@ function TeamContent() {
   const [savingSlack, setSavingSlack] = useState(false)
   const [showAllBoard, setShowAllBoard] = useState(false)
   const [tab, setTab] = useState<'overview' | 'members' | 'pool' | 'settings'>('overview')
+  const [seatHistory, setSeatHistory] = useState<SeatEvent[]>([])
 
   const loadPool = useCallback(async () => {
     try {
-      const [poolRes, statsRes, notifRes] = await Promise.all([
-        fetch('/api/team/pool'), fetch('/api/team/analytics'), fetch('/api/team/notifications'),
+      const [poolRes, statsRes, notifRes, histRes] = await Promise.all([
+        fetch('/api/team/pool'), fetch('/api/team/analytics'), fetch('/api/team/notifications'), fetch('/api/team/seats/history'),
       ])
       if (poolRes.ok) setPool(await poolRes.json())
       if (statsRes.ok) setStats(await statsRes.json())
       if (notifRes.ok) { const d = await notifRes.json(); setSlackConfigured(d.configured) }
+      if (histRes.ok) { const d = await histRes.json(); setSeatHistory(d.events ?? []) }
     } catch { /* ignore */ }
   }, [])
 
@@ -216,7 +228,7 @@ function TeamContent() {
         body: JSON.stringify({ seats: nextSeats }),
       })
       const d = await res.json().catch(() => ({}))
-      if (res.ok) { toast.success(`Seats updated to ${d.seats}`); setSeatTarget(null); setPendingSeats(null); load() }
+      if (res.ok) { toast.success(`Seats updated to ${d.seats}`); setSeatTarget(null); setPendingSeats(null); load(); loadPool() }
       else toast.error(d.message || d.error || 'Could not update seats')
     } finally { setAddingSeats(false) }
   }
@@ -459,7 +471,7 @@ function TeamContent() {
                 <span className="tm-avatar pending"><i className="ti ti-mail" /></span>
                 <div className="tm-row-info">
                   <span className="tm-row-name">{inv.email}</span>
-                  <span className="tm-row-role">invited as {inv.role} · awaiting acceptance</span>
+                  <span className="tm-row-role">invited as {inv.role} · awaiting acceptance · reserves 1 seat</span>
                 </div>
                 {isAdmin && (
                   <div className="tm-row-actions">
@@ -478,27 +490,63 @@ function TeamContent() {
             const floor = seatsUsed + pendingInvites.length
             const changed = target !== org.seats
             const perSeat = PRICING.team.monthly ?? 39
+            const unused = org.seats - floor
             return (
-              <div className="tm-seats-foot">
-                <span className="tm-note" style={{ margin: 0 }}>
-                  Currently <b>{org.seats} seat{org.seats === 1 ? '' : 's'}</b> · £{org.seats * perSeat}/mo. Each seat is £{perSeat}/mo.
-                </span>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-                  <div className="tm-seatctl" role="group" aria-label="Adjust seats">
-                    <button className="pill" aria-label="Remove a seat" disabled={addingSeats || target <= floor} onClick={() => setPendingSeats(Math.max(floor, target - 1))}>&minus;</button>
-                    <span className="tm-seatctl-n">{target} seat{target === 1 ? '' : 's'}</span>
-                    <button className="pill" aria-label="Add a seat" disabled={addingSeats || target >= 200} onClick={() => setPendingSeats(Math.min(200, target + 1))}>+</button>
+              <>
+                <div className="tm-seats-foot">
+                  <div style={{ margin: 0 }}>
+                    <span className="tm-note" style={{ margin: 0 }}>
+                      Currently <b>{org.seats} seat{org.seats === 1 ? '' : 's'}</b> · £{org.seats * perSeat}/mo. Each seat is £{perSeat}/mo.
+                    </span>
+                    {/* Over/under-use nudge */}
+                    {unused <= 0
+                      ? <span className="tm-seat-hint warn"><i className="ti ti-alert-triangle" /> All seats in use — add one to invite more.</span>
+                      : unused >= 2
+                        ? <span className="tm-seat-hint"><i className="ti ti-bulb" /> {unused} seats unused — you could reduce to save £{unused * perSeat}/mo.</span>
+                        : null}
                   </div>
-                  {changed && (
-                    <>
-                      <button className="btn btn-primary" onClick={() => openSeatChange(target)}>
-                        Update{target > org.seats ? ` (+${target - org.seats})` : ` (−${org.seats - target})`}
-                      </button>
-                      <button className="pill" onClick={() => setPendingSeats(null)}>Reset</button>
-                    </>
-                  )}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                    {/* Arrow keys adjust the target when the stepper is focused. */}
+                    <div className="tm-seatctl" role="group" aria-label="Adjust seats" tabIndex={0}
+                      onKeyDown={e => {
+                        if (e.key === 'ArrowUp' || e.key === 'ArrowRight') { e.preventDefault(); setPendingSeats(Math.min(200, target + 1)) }
+                        if (e.key === 'ArrowDown' || e.key === 'ArrowLeft') { e.preventDefault(); setPendingSeats(Math.max(floor, target - 1)) }
+                      }}>
+                      <button className="pill tip" data-tip={`Removes £${perSeat}/mo`} aria-label="Remove a seat" disabled={addingSeats || target <= floor} onClick={() => setPendingSeats(Math.max(floor, target - 1))}>&minus;</button>
+                      <span className="tm-seatctl-n">{target} seat{target === 1 ? '' : 's'}{changed && <span className="tm-seat-delta">{target > org.seats ? `+${target - org.seats}` : `−${org.seats - target}`}</span>}</span>
+                      <button className="pill tip" data-tip={`Adds £${perSeat}/mo`} aria-label="Add a seat" disabled={addingSeats || target >= 200} onClick={() => setPendingSeats(Math.min(200, target + 1))}>+</button>
+                    </div>
+                    {changed && (
+                      <>
+                        <button className="btn btn-primary" onClick={() => openSeatChange(target)}>Review &amp; update</button>
+                        <button className="pill" onClick={() => setPendingSeats(null)}>Reset</button>
+                      </>
+                    )}
+                  </div>
                 </div>
-              </div>
+
+                {/* Seat change history timeline */}
+                {seatHistory.length > 0 && (
+                  <div className="tm-seat-hist">
+                    <h4 className="tm-section-label" style={{ marginTop: 22 }}>Recent seat changes</h4>
+                    <ul className="tm-hist-list">
+                      {seatHistory.map(ev => {
+                        const up = ev.to > ev.from
+                        return (
+                          <li key={ev.id}>
+                            <span className={`tm-hist-ico ${up ? 'up' : 'down'}`}><i className={`ti ${up ? 'ti-arrow-up' : 'ti-arrow-down'}`} /></span>
+                            <span className="tm-hist-txt">
+                              <b>{ev.actor}</b> {up ? 'increased' : 'reduced'} seats {ev.from} → {ev.to}
+                              <span className="tm-hist-cost">{up ? '+' : '−'}£{Math.abs(ev.to - ev.from) * perSeat}/mo</span>
+                            </span>
+                            <span className="tm-hist-when">{relTime(ev.created_at)}</span>
+                          </li>
+                        )
+                      })}
+                    </ul>
+                  </div>
+                )}
+              </>
             )
           })()}
         </section>

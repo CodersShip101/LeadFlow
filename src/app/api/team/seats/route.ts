@@ -52,16 +52,27 @@ export async function POST(req: NextRequest) {
 
     // Update the (single) subscription item's quantity.
     const sub = await stripe.subscriptions.retrieve(subId)
-    const itemId = sub.items.data[0]?.id
-    if (!itemId) return NextResponse.json({ error: 'no_subscription_item' }, { status: 400 })
+    const item = sub.items.data[0]
+    if (!item?.id) return NextResponse.json({ error: 'no_subscription_item' }, { status: 400 })
+    const fromSeats = item.quantity ?? sub.items.data.reduce((n, i) => n + (i.quantity ?? 0), 0)
 
     await stripe.subscriptions.update(subId, {
-      items: [{ id: itemId, quantity: target }],
+      items: [{ id: item.id, quantity: target }],
       proration_behavior: 'create_prorations',
     })
 
     // Reflect immediately (the webhook will also sync).
     await admin.from('organizations').update({ seats: target }).eq('id', org.org_id)
+
+    // Log the change for the seat-history timeline. Best-effort: if the table
+    // isn't there yet (migration not applied) this must not fail the change.
+    if (fromSeats !== target) {
+      try {
+        await admin.from('seat_events').insert({
+          org_id: org.org_id, actor_id: user.id, from_seats: fromSeats, to_seats: target,
+        })
+      } catch { /* history table optional */ }
+    }
 
     return NextResponse.json({ ok: true, seats: target })
   } catch (e) {
