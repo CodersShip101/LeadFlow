@@ -2343,6 +2343,10 @@ button:disabled { cursor: default; opacity: .85; }
 .tm-hist-txt b { color: var(--ink); }
 .tm-hist-cost { font-family: var(--font-mono); font-size: 11.5px; color: var(--slate); margin-left: 8px; }
 .tm-hist-when { font-size: 11.5px; color: var(--slate-2); white-space: nowrap; flex-shrink: 0; }
+/* Invite status badge on pending rows */
+.tm-invite-badge { display: inline-flex; align-items: center; gap: 4px; margin-left: 9px; font-family: var(--font-mono); font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .03em; padding: 2px 7px; border-radius: var(--r-pill); vertical-align: middle; }
+.tm-invite-badge.sent { background: var(--hi-bg, rgba(90,160,90,.12)); color: var(--hi, #4e9a51); }
+.tm-invite-badge .ti { font-size: 12px; }
 
 /* Team overview — two-column read */
 .tmov { display: grid; grid-template-columns: 1fr 300px; gap: 44px; align-items: start; }

@@ -470,7 +470,10 @@ function TeamContent() {
               <div key={inv.email} className="tm-row pending-row">
                 <span className="tm-avatar pending"><i className="ti ti-mail" /></span>
                 <div className="tm-row-info">
-                  <span className="tm-row-name">{inv.email}</span>
+                  <span className="tm-row-name">
+                    {inv.email}
+                    <span className="tm-invite-badge sent"><i className="ti ti-mail-check" /> Email sent</span>
+                  </span>
                   <span className="tm-row-role">invited as {inv.role} · awaiting acceptance · reserves 1 seat</span>
                 </div>
                 {isAdmin && (
@@ -498,12 +501,10 @@ function TeamContent() {
                     <span className="tm-note" style={{ margin: 0 }}>
                       Currently <b>{org.seats} seat{org.seats === 1 ? '' : 's'}</b> · £{org.seats * perSeat}/mo. Each seat is £{perSeat}/mo.
                     </span>
-                    {/* Over/under-use nudge */}
-                    {unused <= 0
-                      ? <span className="tm-seat-hint warn"><i className="ti ti-alert-triangle" /> All seats in use — add one to invite more.</span>
-                      : unused >= 2
-                        ? <span className="tm-seat-hint"><i className="ti ti-bulb" /> {unused} seats unused — you could reduce to save £{unused * perSeat}/mo.</span>
-                        : null}
+                    {/* Only the actionable over-use warning (no under-use nagging). */}
+                    {unused <= 0 && (
+                      <span className="tm-seat-hint warn"><i className="ti ti-alert-triangle" /> All seats in use — add one to invite more.</span>
+                    )}
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
                     {/* Arrow keys adjust the target when the stepper is focused. */}
