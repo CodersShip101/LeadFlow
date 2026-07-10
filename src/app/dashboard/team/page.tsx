@@ -9,7 +9,7 @@ import LoadingDots from '@/components/LoadingDots'
 import toast from 'react-hot-toast'
 
 interface Member { user_id: string; role: string; created_at: string; profile: { full_name: string | null } | null }
-interface Invite { email: string; role: string; created_at: string }
+interface Invite { email: string; role: string; created_at: string; token?: string }
 interface PoolLead {
   id: string; status: string; assigned_to: string | null
   lead: { id: string; title: string; client_location: string | null } | null
@@ -137,8 +137,7 @@ function TeamContent() {
       })
       const d = await res.json()
       if (res.ok) {
-        if (d.acceptUrl) navigator.clipboard?.writeText(d.acceptUrl).catch(() => {})
-        toast.success(d.emailed ? 'Invite emailed' : 'Invite link copied — share it with them')
+        toast.success(d.emailed ? `Invitation emailed to ${email}` : 'Invite created — use "Copy link" to share it')
         setEmail('')
         load()
       } else {
@@ -173,9 +172,15 @@ function TeamContent() {
     })
     const d = await res.json().catch(() => ({}))
     if (res.ok) {
-      if (d.acceptUrl) navigator.clipboard?.writeText(d.acceptUrl).catch(() => {})
-      toast.success(d.emailed ? 'Invite re-sent' : 'Invite link copied — share it with them')
+      toast.success(d.emailed ? `Invitation re-sent to ${inviteEmail}` : 'Invite refreshed — use "Copy link" to share it')
     } else toast.error(d.message || d.error || 'Could not resend')
+  }
+
+  const copyInviteLink = async (token?: string) => {
+    if (!token) { toast.error('Link unavailable — try resending'); return }
+    const url = `${window.location.origin}/dashboard/team/join?token=${token}`
+    try { await navigator.clipboard.writeText(url); toast.success('Invite link copied') }
+    catch { toast.error('Could not copy') }
   }
 
   const cancelInvite = async (inviteEmail: string) => {
@@ -444,7 +449,7 @@ function TeamContent() {
               </form>
               {seatsLeft <= 0
                 ? <p className="tm-note warn"><i className="ti ti-alert-triangle" /> All seats are in use — add a seat below to invite more.</p>
-                : <p className="tm-note">{seatsLeft} seat{seatsLeft === 1 ? '' : 's'} available · the invite link is copied to your clipboard when you send it.</p>}
+                : <p className="tm-note">{seatsLeft} seat{seatsLeft === 1 ? '' : 's'} available · we email the invite, and you can copy the link to share it yourself.</p>}
             </>
           )}
 
@@ -482,6 +487,7 @@ function TeamContent() {
                 </div>
                 {isAdmin && (
                   <div className="tm-row-actions">
+                    <button className="pill tip" data-tip="Copy invite link" aria-label="Copy invite link" onClick={() => copyInviteLink(inv.token)}><i className="ti ti-link" /></button>
                     <button className="pill tip" data-tip="Resend invite email" aria-label="Resend invite" onClick={() => resendInvite(inv.email, inv.role)}><i className="ti ti-mail-forward" /></button>
                     <button className="pill tm-remove tip" data-tip="Cancel invite" aria-label="Cancel invite" onClick={() => cancelInvite(inv.email)}><i className="ti ti-x" /></button>
                   </div>
@@ -509,14 +515,44 @@ function TeamContent() {
               { k: 'reserved', label: 'Reserved', n: reserved, color: 'var(--amber, #E0A82E)' },
               { k: 'free', label: 'Free', n: free, color: 'var(--paper-2)' },
             ].filter(s => s.n > 0)
+            const efficiency = org.seats > 0 ? Math.round((used / org.seats) * 100) : 0
             return (
-              <>
-                {/* Seat usage: composition bar + pressure headline */}
-                <div className="tm-usage">
-                  <div className="tm-usage-head">
-                    <h4 className="tm-section-label" style={{ margin: 0 }}>Seat usage</h4>
-                    <span className="tm-usage-pressure" style={{ color: band.c }}>{pressure}% · {band.l}</span>
+              <section className="seatpanel">
+                {/* Header: title + the live seat control */}
+                <div className="seatpanel-head">
+                  <div>
+                    <h3 className="seatpanel-title">Seat management</h3>
+                    <p className="seatpanel-sub">{org.seats} seat{org.seats === 1 ? '' : 's'} at £{perSeat}/mo each · billed on your subscription</p>
                   </div>
+                  <div className="seatpanel-controls">
+                    <div className="tm-seatctl" role="group" aria-label="Adjust seats" tabIndex={0}
+                      onKeyDown={e => {
+                        if (e.key === 'ArrowUp' || e.key === 'ArrowRight') { e.preventDefault(); setPendingSeats(Math.min(200, target + 1)) }
+                        if (e.key === 'ArrowDown' || e.key === 'ArrowLeft') { e.preventDefault(); setPendingSeats(Math.max(floor, target - 1)) }
+                      }}>
+                      <button className="pill tip" data-tip={`Removes £${perSeat}/mo`} aria-label="Remove a seat" disabled={addingSeats || target <= floor} onClick={() => setPendingSeats(Math.max(floor, target - 1))}>&minus;</button>
+                      <span className="tm-seatctl-n">{target}{changed && <span className="tm-seat-delta">{target > org.seats ? `+${target - org.seats}` : `−${org.seats - target}`}</span>}</span>
+                      <button className="pill tip" data-tip={`Adds £${perSeat}/mo`} aria-label="Add a seat" disabled={addingSeats || target >= 200} onClick={() => setPendingSeats(Math.min(200, target + 1))}>+</button>
+                    </div>
+                    {changed
+                      ? <>
+                          <button className="btn btn-primary btn-sm" onClick={() => openSeatChange(target)}>Review &amp; update</button>
+                          <button className="btn btn-ghost btn-sm" onClick={() => setPendingSeats(null)}>Reset</button>
+                        </>
+                      : <span className="seatpanel-hint">Adjust seats</span>}
+                  </div>
+                </div>
+
+                {/* KPI strip */}
+                <div className="seat-kpis">
+                  <div className="seat-kpi"><span className="v">{org.seats}</span><span className="l">Paid seats</span></div>
+                  <div className="seat-kpi"><span className="v">£{org.seats * perSeat}<small>/mo</small></span><span className="l">Current cost</span></div>
+                  <div className="seat-kpi"><span className="v">{efficiency}%</span><span className="l tip" data-tip="Members occupying a seat ÷ paid seats">Seat efficiency</span></div>
+                  <div className="seat-kpi"><span className="v" style={{ color: band.c }}>{band.l}</span><span className="l">{pressure}% capacity</span></div>
+                </div>
+
+                {/* Usage composition bar */}
+                <div className="seat-usage">
                   <div className="tmov-stack" role="img" aria-label={`${used} used, ${reserved} reserved, ${free} free of ${org.seats} seats`}>
                     {seg.map(s => <span key={s.k} className="tip" data-tip={`${s.label}: ${s.n}`} style={{ width: `${(s.n / org.seats) * 100}%`, background: s.color }} />)}
                   </div>
@@ -525,78 +561,48 @@ function TeamContent() {
                     <span className="tmov-leg"><span className="d" style={{ background: 'var(--amber, #E0A82E)' }} />Reserved by invites <b>{reserved}</b></span>
                     <span className="tmov-leg"><span className="d" style={{ background: 'var(--paper-2)', border: '1px solid var(--line)' }} />Free <b>{free}</b></span>
                   </div>
+                  {unused <= 0 && <p className="tm-seat-hint warn" style={{ marginTop: 10 }}><i className="ti ti-alert-triangle" /> All seats in use — add one to invite more.</p>}
                 </div>
 
-                <div className="tm-seats-foot">
-                  <div style={{ margin: 0 }}>
-                    <span className="tm-note" style={{ margin: 0 }}>
-                      Currently <b>{org.seats} seat{org.seats === 1 ? '' : 's'}</b> · £{org.seats * perSeat}/mo. Each seat is £{perSeat}/mo.
-                    </span>
-                    {/* Only the actionable over-use warning (no under-use nagging). */}
-                    {unused <= 0 && (
-                      <span className="tm-seat-hint warn"><i className="ti ti-alert-triangle" /> All seats in use — add one to invite more.</span>
+                {/* History + cost, two columns on wide screens */}
+                {(seatHistory.length > 0 || (seatCost && seatCost.changed)) && (
+                  <div className="seat-analytics-row">
+                    {seatHistory.length > 0 && (
+                      <div className="seat-analytics-col">
+                        <h4 className="tm-section-label">Recent changes</h4>
+                        <ul className="tm-hist-list">
+                          {seatHistory.slice(0, 5).map(ev => {
+                            const up = ev.to > ev.from
+                            return (
+                              <li key={ev.id}>
+                                <span className={`tm-hist-ico ${up ? 'up' : 'down'}`}><i className={`ti ${up ? 'ti-arrow-up' : 'ti-arrow-down'}`} /></span>
+                                <span className="tm-hist-txt"><b>{ev.actor}</b> {up ? 'added' : 'removed'} {Math.abs(ev.to - ev.from)} · {ev.from}→{ev.to}<span className="tm-hist-cost">{up ? '+' : '−'}£{Math.abs(ev.to - ev.from) * perSeat}</span></span>
+                                <span className="tm-hist-when">{relTime(ev.created_at)}</span>
+                              </li>
+                            )
+                          })}
+                        </ul>
+                      </div>
                     )}
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-                    {/* Arrow keys adjust the target when the stepper is focused. */}
-                    <div className="tm-seatctl" role="group" aria-label="Adjust seats" tabIndex={0}
-                      onKeyDown={e => {
-                        if (e.key === 'ArrowUp' || e.key === 'ArrowRight') { e.preventDefault(); setPendingSeats(Math.min(200, target + 1)) }
-                        if (e.key === 'ArrowDown' || e.key === 'ArrowLeft') { e.preventDefault(); setPendingSeats(Math.max(floor, target - 1)) }
-                      }}>
-                      <button className="pill tip" data-tip={`Removes £${perSeat}/mo`} aria-label="Remove a seat" disabled={addingSeats || target <= floor} onClick={() => setPendingSeats(Math.max(floor, target - 1))}>&minus;</button>
-                      <span className="tm-seatctl-n">{target} seat{target === 1 ? '' : 's'}{changed && <span className="tm-seat-delta">{target > org.seats ? `+${target - org.seats}` : `−${org.seats - target}`}</span>}</span>
-                      <button className="pill tip" data-tip={`Adds £${perSeat}/mo`} aria-label="Add a seat" disabled={addingSeats || target >= 200} onClick={() => setPendingSeats(Math.min(200, target + 1))}>+</button>
-                    </div>
-                    {changed && (
-                      <>
-                        <button className="btn btn-primary" onClick={() => openSeatChange(target)}>Review &amp; update</button>
-                        <button className="pill" onClick={() => setPendingSeats(null)}>Reset</button>
-                      </>
-                    )}
-                  </div>
-                </div>
-
-                {/* Seat change history timeline */}
-                {seatHistory.length > 0 && (
-                  <div className="tm-seat-hist">
-                    <h4 className="tm-section-label" style={{ marginTop: 22 }}>Recent seat changes</h4>
-                    <ul className="tm-hist-list">
-                      {seatHistory.map(ev => {
-                        const up = ev.to > ev.from
-                        return (
-                          <li key={ev.id}>
-                            <span className={`tm-hist-ico ${up ? 'up' : 'down'}`}><i className={`ti ${up ? 'ti-arrow-up' : 'ti-arrow-down'}`} /></span>
-                            <span className="tm-hist-txt">
-                              <b>{ev.actor}</b> {up ? 'increased' : 'reduced'} seats {ev.from} → {ev.to}
-                              <span className="tm-hist-cost">{up ? '+' : '−'}£{Math.abs(ev.to - ev.from) * perSeat}/mo</span>
-                            </span>
-                            <span className="tm-hist-when">{relTime(ev.created_at)}</span>
-                          </li>
-                        )
-                      })}
-                    </ul>
+                    {seatCost && seatCost.changed && (() => {
+                      const max = Math.max(...seatCost.months.map(m => m.cost), 1)
+                      return (
+                        <div className="seat-analytics-col">
+                          <h4 className="tm-section-label">Cost · last 6 months</h4>
+                          <div className="tm-cost-bars" role="img" aria-label="Monthly seat cost">
+                            {seatCost.months.map((m, i) => (
+                              <div key={i} className="tm-cost-col tip" data-tip={`${m.label}: ${m.seats} seat${m.seats === 1 ? '' : 's'} · £${m.cost}/mo`}>
+                                <span className="tm-cost-bar" style={{ height: `${Math.max(6, (m.cost / max) * 100)}%` }} />
+                                <span className="tm-cost-x">{m.label}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )
+                    })()}
                   </div>
                 )}
-
-                {/* Cost over time — monthly seat cost from history */}
-                {seatCost && seatCost.changed && (() => {
-                  const max = Math.max(...seatCost.months.map(m => m.cost), 1)
-                  return (
-                    <div className="tm-cost-chart">
-                      <h4 className="tm-section-label" style={{ marginTop: 22 }}>Seat cost · last 6 months</h4>
-                      <div className="tm-cost-bars" role="img" aria-label="Monthly seat cost">
-                        {seatCost.months.map((m, i) => (
-                          <div key={i} className="tm-cost-col tip" data-tip={`${m.label}: ${m.seats} seat${m.seats === 1 ? '' : 's'} · £${m.cost}/mo`}>
-                            <span className="tm-cost-bar" style={{ height: `${Math.max(6, (m.cost / max) * 100)}%` }} />
-                            <span className="tm-cost-x">{m.label}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )
-                })()}
-              </>
+              </section>
             )
           })()}
         </section>

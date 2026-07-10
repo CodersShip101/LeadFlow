@@ -16,15 +16,18 @@ export async function GET() {
     .select('user_id, role, created_at')
     .eq('org_id', org.org_id)
 
-  const { data: invites } = await supabase
+  // Read invites via the admin client: the caller is a verified org admin
+  // (user_org above), and the user client's RLS could hide invites for emails
+  // that don't yet have an account — which is exactly when the admin needs to
+  // see the pending row. Also expose the token so the UI can offer a copy link.
+  const admin = createAdminSupabase()
+  const { data: invites } = await admin
     .from('org_invites')
-    .select('email, role, accepted_at, created_at')
+    .select('email, role, accepted_at, created_at, token')
     .eq('org_id', org.org_id)
     .is('accepted_at', null)
 
-  // Resolve names via the admin client (co-members' names aren't sensitive
-  // within a verified org, and the user client's RLS can hide other profiles).
-  const names = await fullNamesByUserId(createAdminSupabase(), (members ?? []).map(m => m.user_id as string))
+  const names = await fullNamesByUserId(admin, (members ?? []).map(m => m.user_id as string))
 
   return NextResponse.json({
     org: { id: org.org_id, plan: org.plan, seats: org.seats, myRole: org.role },

@@ -2348,16 +2348,36 @@ button:disabled { cursor: default; opacity: .85; }
 .tm-invite-badge.sent { background: var(--hi-bg, rgba(90,160,90,.12)); color: var(--hi, #4e9a51); }
 .tm-invite-badge .ti { font-size: 12px; }
 
-/* Seat usage: composition bar + pressure */
-.tm-usage { margin: 22px 0 4px; padding-top: 16px; border-top: 1px solid var(--line); }
-.tm-usage-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
-.tm-usage-pressure { font-family: var(--font-mono); font-size: 12px; font-weight: 700; }
-/* reuse .tmov-stack / .tmov-legend from the overview */
+/* ── Seat management console panel ── */
+.seatpanel { margin-top: 26px; padding: 22px 24px; background: var(--card); border: 1px solid var(--line); border-radius: var(--r-lg); }
+.seatpanel-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.seatpanel-title { font-family: var(--font-display); font-size: 16px; font-weight: 700; color: var(--ink); letter-spacing: -.01em; }
+.seatpanel-sub { font-size: 12.5px; color: var(--slate); margin-top: 3px; }
+.seatpanel-controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.seatpanel-hint { font-size: 11px; color: var(--slate-2); }
+
+/* KPI strip */
+.seat-kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--r-md); overflow: hidden; margin: 20px 0; }
+.seat-kpi { background: var(--card); padding: 14px 16px; display: flex; flex-direction: column; gap: 3px; }
+.seat-kpi .v { font-family: var(--font-display); font-size: 1.5rem; font-weight: 800; letter-spacing: -.03em; line-height: 1.05; color: var(--ink); }
+.seat-kpi .v small { font-family: var(--font-body); font-size: .72rem; font-weight: 500; color: var(--slate-2); letter-spacing: 0; margin-left: 1px; }
+.seat-kpi .l { font-size: 11.5px; color: var(--slate); font-weight: 500; }
+@media (max-width: 720px) { .seat-kpis { grid-template-columns: 1fr 1fr; } }
+
+.seat-usage { margin-bottom: 4px; }
+.seat-usage .tmov-stack { height: 12px; border-radius: 6px; }
+
+/* History + cost, two columns */
+.seat-analytics-row { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin-top: 22px; padding-top: 20px; border-top: 1px solid var(--line); }
+@media (max-width: 760px) { .seat-analytics-row { grid-template-columns: 1fr; gap: 22px; } }
+.seat-analytics-col { min-width: 0; }
+.seat-analytics-col .tm-hist-list li { padding: 8px 0; font-size: 12.5px; }
+.seat-analytics-col .tm-hist-cost { margin-left: 6px; }
 
 /* Seat cost over time — single-hue monthly bars */
-.tm-cost-bars { display: flex; align-items: flex-end; gap: 10px; height: 96px; padding-top: 4px; }
+.tm-cost-bars { display: flex; align-items: flex-end; gap: 8px; height: 90px; padding-top: 4px; }
 .tm-cost-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: 6px; cursor: default; }
-.tm-cost-bar { width: 100%; max-width: 46px; background: var(--lime-deep); border-radius: 4px 4px 2px 2px; transition: opacity .12s; }
+.tm-cost-bar { width: 100%; max-width: 40px; background: var(--lime-deep); border-radius: 4px 4px 2px 2px; transition: opacity .12s; min-height: 3px; }
 .tm-cost-col:hover .tm-cost-bar { opacity: .8; }
 .tm-cost-x { font-family: var(--font-mono); font-size: 10.5px; color: var(--slate); }
 
